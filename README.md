@@ -3,7 +3,7 @@
 ## 📗 Table of Contents
 
 - [Blog app 📝 ](#blog-app--)
-    - [- Tech Stack ](#--tech-stack-)
+    - [Tech Stack ](#--tech-stack-)
     - [Key Features ](#key-features-)
   - [💻 Getting Started ](#-getting-started-)
     - [Prerequisites ](#prerequisites-)
