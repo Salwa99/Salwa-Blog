@@ -3,7 +3,7 @@
 ## 📗 Table of Contents
 
 - [Blog app 📝 ](#blog-app--)
-    - [- Tech Stack ](#--tech-stack-)
+    - [Tech Stack ](#--tech-stack-)
     - [Key Features ](#key-features-)
   - [💻 Getting Started ](#-getting-started-)
     - [Prerequisites ](#prerequisites-)
@@ -23,7 +23,7 @@
 
 # Blog app 📝 <a name="about-project"></a>
 
->**Blog app: is a fully functional rails application showcasing a list of posts and enabling reader interaction through comments and post liking will be developed as a classic example of a blog website, known as "The Blog app"**.<a name="built-with"></a>
+>**Blog app: is a fully functional rails application showcasing a list of posts and enabling reader interaction through comments and post liking will be developed as a classic example of a blog website**.<a name="built-with"></a>
 
 ### - Tech Stack <a name="tech-stack"></a>
 
