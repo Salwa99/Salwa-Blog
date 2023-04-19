@@ -23,7 +23,7 @@ default: &default
 
 development:
   <<: *default
-  database: myDB
+  database: blogdb
 
   # The specified database role being used to connect to postgres.
   # To create additional roles in postgres see `$ createuser --help`.
@@ -32,7 +32,7 @@ development:
   username: salwa
 
   # The password associated with the postgres role (username).
-  password: salwa
+  password: 123
 
   # Connect on a TCP socket. Omitted by default since the client uses a
   # domain socket that doesn't need configuration. Windows does not have
@@ -57,7 +57,7 @@ development:
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: myDB
+  database: blogdb
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -81,6 +81,6 @@ test:
 #
 production:
   <<: *default
-  database: myDB
+  database: blogdb
   username: salwa
-  password: <%= ENV["salwa"] %>
+  password: <%= ENV["123"] %>
