@@ -3,7 +3,7 @@
 ## 📗 Table of Contents
 
 - [Blog app 📝 ](#blog-app--)
-    - [Tech Stack ](#--tech-stack-)
+    - [- Tech Stack ](#--tech-stack-)
     - [Key Features ](#key-features-)
   - [💻 Getting Started ](#-getting-started-)
     - [Prerequisites ](#prerequisites-)
@@ -142,7 +142,7 @@ To run tests, run the following command:
 
 Contributions, issues, and feature requests are welcome!
 
-Feel free to check the [issues page](../../../issues).
+Feel free to check the [issues page](../../issues/)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
