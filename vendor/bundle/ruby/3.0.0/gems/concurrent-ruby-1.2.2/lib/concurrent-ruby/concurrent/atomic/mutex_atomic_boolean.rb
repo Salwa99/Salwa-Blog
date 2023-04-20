@@ -1,7 +1,6 @@
 require 'concurrent/synchronization/safe_initialization'
 
 module Concurrent
-
   # @!macro atomic_boolean
   # @!visibility private
   # @!macro internal_implementation_note

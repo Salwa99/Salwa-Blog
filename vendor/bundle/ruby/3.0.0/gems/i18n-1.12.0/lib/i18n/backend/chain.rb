@@ -68,6 +68,7 @@ module I18n
           end
 
           return namespace if namespace
+
           throw(:exception, I18n::MissingTranslation.new(locale, key, options))
         end
 
@@ -87,39 +88,41 @@ module I18n
         end
 
         protected
-          def init_translations
-            backends.each do |backend|
-              backend.send(:init_translations)
-            end
-          end
 
-          def translations
-            backends.reverse.each_with_object({}) do |backend, memo|
-              partial_translations = backend.instance_eval do
-                init_translations unless initialized?
-                translations
-              end
-              Utils.deep_merge!(memo, partial_translations) { |_, a, b| b || a }
-            end
+        def init_translations
+          backends.each do |backend|
+            backend.send(:init_translations)
           end
+        end
 
-          def namespace_lookup?(result, options)
-            result.is_a?(Hash) && !options.has_key?(:count)
+        def translations
+          backends.reverse.each_with_object({}) do |backend, memo|
+            partial_translations = backend.instance_eval do
+              init_translations unless initialized?
+              translations
+            end
+            Utils.deep_merge!(memo, partial_translations) { |_, a, b| b || a }
           end
+        end
+
+        def namespace_lookup?(result, options)
+          result.is_a?(Hash) && !options.has_key?(:count)
+        end
 
         private
-          # This is approximately what gets used in ActiveSupport.
-          # However since we are not guaranteed to run in an ActiveSupport context
-          # it is wise to have our own copy. We underscore it
-          # to not pollute the namespace of the including class.
-          def _deep_merge(hash, other_hash)
-            copy = hash.dup
-            other_hash.each_pair do |k,v|
-              value_from_other = hash[k]
-              copy[k] = value_from_other.is_a?(Hash) && v.is_a?(Hash) ? _deep_merge(value_from_other, v) : v
-            end
-            copy
+
+        # This is approximately what gets used in ActiveSupport.
+        # However since we are not guaranteed to run in an ActiveSupport context
+        # it is wise to have our own copy. We underscore it
+        # to not pollute the namespace of the including class.
+        def _deep_merge(hash, other_hash)
+          copy = hash.dup
+          other_hash.each_pair do |k, v|
+            value_from_other = hash[k]
+            copy[k] = value_from_other.is_a?(Hash) && v.is_a?(Hash) ? _deep_merge(value_from_other, v) : v
           end
+          copy
+        end
       end
 
       include Implementation

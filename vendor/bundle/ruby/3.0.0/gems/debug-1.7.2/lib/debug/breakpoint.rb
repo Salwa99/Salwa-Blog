@@ -71,9 +71,9 @@ module DEBUGGER__
 
     def to_s
       s = ''.dup
-      s << " if: #{@cond}"        if defined?(@cond) && @cond
+      s << " if: #{@cond}" if defined?(@cond) && @cond
       s << " pre: #{@command[1]}" if defined?(@command) && @command && @command[1]
-      s << " do: #{@command[2]}"  if defined?(@command) && @command && @command[2]
+      s << " do: #{@command[2]}" if defined?(@command) && @command && @command[2]
       s
     end
 
@@ -105,7 +105,7 @@ module DEBUGGER__
 
   if RUBY_VERSION.to_f <= 2.7
     # workaround for https://bugs.ruby-lang.org/issues/17302
-    TracePoint.new(:line){}.enable{}
+    TracePoint.new(:line) {}.enable {}
   end
 
   class ISeqBreakpoint < Breakpoint
@@ -141,7 +141,8 @@ module DEBUGGER__
       nbp
     end
 
-    def initialize path, line, cond: nil, oneshot: false, hook_call: true, command: nil, skip_activate: false, skip_src: false
+    def initialize path, line, cond: nil, oneshot: false, hook_call: true, command: nil, skip_activate: false,
+                   skip_src: false
       @line = line
       @oneshot = oneshot
       @hook_call = hook_call
@@ -179,7 +180,6 @@ module DEBUGGER__
       else
         @tp.enable(target: @iseq)
       end
-
     rescue ArgumentError
       puts @iseq.disasm # for debug
       raise
@@ -254,14 +254,14 @@ module DEBUGGER__
         lines = line_events.keys.sort
 
         if !lines.empty? && lines.last >= line
-          nline = lines.bsearch{|l| line <= l}
+          nline = lines.bsearch { |l| line <= l }
           events = line_events[nline]
 
           next if events == [:RUBY_EVENT_B_CALL]
 
           if @hook_call &&
-            events.include?(:RUBY_EVENT_CALL) &&
-            self.line == iseq.first_lineno
+             events.include?(:RUBY_EVENT_CALL) &&
+             self.line == iseq.first_lineno
             nline = iseq.first_lineno
           end
 
@@ -311,7 +311,7 @@ module DEBUGGER__
     end
 
     def setup
-      @tp = TracePoint.new(:raise){|tp|
+      @tp = TracePoint.new(:raise) { |tp|
         exc = tp.raised_exception
         next if SystemExit === exc
         next if skip_path?(tp.path)
@@ -319,7 +319,7 @@ module DEBUGGER__
         next if !safe_eval(tp.binding, @cond) if @cond
         should_suspend = false
 
-        exc.class.ancestors.each{|cls|
+        exc.class.ancestors.each { |cls|
           if @pat === cls.name
             should_suspend = true
             @last_exc = exc
@@ -347,7 +347,7 @@ module DEBUGGER__
     end
 
     def setup
-      @tp = TracePoint.new(:line){|tp|
+      @tp = TracePoint.new(:line) { |tp|
         next if SESSION.in_subsession? # TODO: Ractor support
         next if ThreadClient.current.management?
         next if skip_path?(tp.path)
@@ -408,7 +408,7 @@ module DEBUGGER__
     end
 
     def setup
-      @tp = TracePoint.new(:line, :return, :b_return){|tp|
+      @tp = TracePoint.new(:line, :return, :b_return) { |tp|
         watch_eval(tp)
       }
     end
@@ -443,7 +443,7 @@ module DEBUGGER__
     end
 
     def setup
-      @tp = TracePoint.new(:call){|tp|
+      @tp = TracePoint.new(:call) { |tp|
         next if !safe_eval(tp.binding, @cond) if @cond
         next if @cond_class && !tp.self.kind_of?(@cond_class)
 
@@ -456,6 +456,7 @@ module DEBUGGER__
 
     def eval_class_name
       return @klass if @klass
+
       @klass = @klass_eval_binding.eval(@sig_klass_name)
       @klass_eval_binding = nil
       @klass
@@ -479,7 +480,7 @@ module DEBUGGER__
     if RUBY_VERSION.to_f <= 2.6
       def override klass
         sig_method_name = @sig_method_name
-        klass.prepend Module.new{
+        klass.prepend Module.new {
           define_method(sig_method_name) do |*args, &block|
             super(*args, &block)
           end
@@ -488,7 +489,7 @@ module DEBUGGER__
     else
       def override klass
         sig_method_name = @sig_method_name
-        klass.prepend Module.new{
+        klass.prepend Module.new {
           define_method(sig_method_name) do |*args, **kw, &block|
             super(*args, **kw, &block)
           end
@@ -514,9 +515,9 @@ module DEBUGGER__
           rescue TypeError
           end
         end
-
       rescue ArgumentError
         raise if retried
+
         retried = true
 
         # maybe C method

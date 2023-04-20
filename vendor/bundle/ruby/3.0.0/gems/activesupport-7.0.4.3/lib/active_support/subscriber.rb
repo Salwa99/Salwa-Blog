@@ -31,9 +31,9 @@ module ActiveSupport
     class << self
       # Attach the subscriber to a namespace.
       def attach_to(namespace, subscriber = new, notifier = ActiveSupport::Notifications, inherit_all: false)
-        @namespace  = namespace
+        @namespace = namespace
         @subscriber = subscriber
-        @notifier   = notifier
+        @notifier = notifier
         @inherit_all = inherit_all
 
         subscribers << subscriber
@@ -46,9 +46,9 @@ module ActiveSupport
 
       # Detach the subscriber from a namespace.
       def detach_from(namespace, notifier = ActiveSupport::Notifications)
-        @namespace  = namespace
+        @namespace = namespace
         @subscriber = find_attached_subscriber
-        @notifier   = notifier
+        @notifier = notifier
 
         return unless subscriber
 
@@ -78,56 +78,57 @@ module ActiveSupport
       end
 
       private
-        attr_reader :subscriber, :notifier, :namespace
 
-        def add_event_subscriber(event) # :doc:
-          return if invalid_event?(event)
+      attr_reader :subscriber, :notifier, :namespace
 
-          pattern = prepare_pattern(event)
+      def add_event_subscriber(event) # :doc:
+        return if invalid_event?(event)
 
-          # Don't add multiple subscribers (e.g. if methods are redefined).
-          return if pattern_subscribed?(pattern)
+        pattern = prepare_pattern(event)
 
-          subscriber.patterns[pattern] = notifier.subscribe(pattern, subscriber)
-        end
+        # Don't add multiple subscribers (e.g. if methods are redefined).
+        return if pattern_subscribed?(pattern)
 
-        def remove_event_subscriber(event) # :doc:
-          return if invalid_event?(event)
+        subscriber.patterns[pattern] = notifier.subscribe(pattern, subscriber)
+      end
 
-          pattern = prepare_pattern(event)
+      def remove_event_subscriber(event) # :doc:
+        return if invalid_event?(event)
 
-          return unless pattern_subscribed?(pattern)
+        pattern = prepare_pattern(event)
 
-          notifier.unsubscribe(subscriber.patterns[pattern])
-          subscriber.patterns.delete(pattern)
-        end
+        return unless pattern_subscribed?(pattern)
 
-        def find_attached_subscriber
-          subscribers.find { |attached_subscriber| attached_subscriber.instance_of?(self) }
-        end
+        notifier.unsubscribe(subscriber.patterns[pattern])
+        subscriber.patterns.delete(pattern)
+      end
 
-        def invalid_event?(event)
-          %i{ start finish }.include?(event.to_sym)
-        end
+      def find_attached_subscriber
+        subscribers.find { |attached_subscriber| attached_subscriber.instance_of?(self) }
+      end
 
-        def prepare_pattern(event)
-          "#{event}.#{namespace}"
-        end
+      def invalid_event?(event)
+        %i{start finish}.include?(event.to_sym)
+      end
 
-        def pattern_subscribed?(pattern)
-          subscriber.patterns.key?(pattern)
-        end
+      def prepare_pattern(event)
+        "#{event}.#{namespace}"
+      end
 
-        def fetch_public_methods(subscriber, inherit_all)
-          subscriber.public_methods(inherit_all) - Subscriber.public_instance_methods(true)
-        end
+      def pattern_subscribed?(pattern)
+        subscriber.patterns.key?(pattern)
+      end
+
+      def fetch_public_methods(subscriber, inherit_all)
+        subscriber.public_methods(inherit_all) - Subscriber.public_instance_methods(true)
+      end
     end
 
     attr_reader :patterns # :nodoc:
 
     def initialize
       @queue_key = [self.class.name, object_id].join "-"
-      @patterns  = {}
+      @patterns = {}
       super
     end
 
@@ -155,9 +156,10 @@ module ActiveSupport
     end
 
     private
-      def event_stack
-        registry = ActiveSupport::IsolatedExecutionState[:active_support_subscriber_queue_registry] ||= {}
-        registry[@queue_key] ||= []
-      end
+
+    def event_stack
+      registry = ActiveSupport::IsolatedExecutionState[:active_support_subscriber_queue_registry] ||= {}
+      registry[@queue_key] ||= []
+    end
   end
 end

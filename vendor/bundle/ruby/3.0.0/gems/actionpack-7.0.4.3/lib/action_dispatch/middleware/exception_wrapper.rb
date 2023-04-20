@@ -6,29 +6,29 @@ require "rack/utils"
 module ActionDispatch
   class ExceptionWrapper
     cattr_accessor :rescue_responses, default: Hash.new(:internal_server_error).merge!(
-      "ActionController::RoutingError"                     => :not_found,
-      "AbstractController::ActionNotFound"                 => :not_found,
-      "ActionController::MethodNotAllowed"                 => :method_not_allowed,
-      "ActionController::UnknownHttpMethod"                => :method_not_allowed,
-      "ActionController::NotImplemented"                   => :not_implemented,
-      "ActionController::UnknownFormat"                    => :not_acceptable,
+      "ActionController::RoutingError" => :not_found,
+      "AbstractController::ActionNotFound" => :not_found,
+      "ActionController::MethodNotAllowed" => :method_not_allowed,
+      "ActionController::UnknownHttpMethod" => :method_not_allowed,
+      "ActionController::NotImplemented" => :not_implemented,
+      "ActionController::UnknownFormat" => :not_acceptable,
       "ActionDispatch::Http::MimeNegotiation::InvalidType" => :not_acceptable,
-      "ActionController::MissingExactTemplate"             => :not_acceptable,
-      "ActionController::InvalidAuthenticityToken"         => :unprocessable_entity,
-      "ActionController::InvalidCrossOriginRequest"        => :unprocessable_entity,
-      "ActionDispatch::Http::Parameters::ParseError"       => :bad_request,
-      "ActionController::BadRequest"                       => :bad_request,
-      "ActionController::ParameterMissing"                 => :bad_request,
-      "Rack::QueryParser::ParameterTypeError"              => :bad_request,
-      "Rack::QueryParser::InvalidParameterError"           => :bad_request
+      "ActionController::MissingExactTemplate" => :not_acceptable,
+      "ActionController::InvalidAuthenticityToken" => :unprocessable_entity,
+      "ActionController::InvalidCrossOriginRequest" => :unprocessable_entity,
+      "ActionDispatch::Http::Parameters::ParseError" => :bad_request,
+      "ActionController::BadRequest" => :bad_request,
+      "ActionController::ParameterMissing" => :bad_request,
+      "Rack::QueryParser::ParameterTypeError" => :bad_request,
+      "Rack::QueryParser::InvalidParameterError" => :bad_request
     )
 
     cattr_accessor :rescue_templates, default: Hash.new("diagnostics").merge!(
-      "ActionView::MissingTemplate"            => "missing_template",
-      "ActionController::RoutingError"         => "routing_error",
-      "AbstractController::ActionNotFound"     => "unknown_action",
-      "ActiveRecord::StatementInvalid"         => "invalid_statement",
-      "ActionView::Template::Error"            => "template_error",
+      "ActionView::MissingTemplate" => "missing_template",
+      "ActionController::RoutingError" => "routing_error",
+      "AbstractController::ActionNotFound" => "unknown_action",
+      "ActiveRecord::StatementInvalid" => "invalid_statement",
+      "ActionView::Template::Error" => "template_error",
       "ActionController::MissingExactTemplate" => "missing_exact_template",
     )
 
@@ -146,51 +146,53 @@ module ActionDispatch
     end
 
     private
-      def backtrace
-        Array(@exception.backtrace)
+
+    def backtrace
+      Array(@exception.backtrace)
+    end
+
+    def causes_for(exception)
+      return enum_for(__method__, exception) unless block_given?
+
+      yield exception while exception = exception.cause
+    end
+
+    def wrapped_causes_for(exception, backtrace_cleaner)
+      causes_for(exception).map { |cause| self.class.new(backtrace_cleaner, cause) }
+    end
+
+    def clean_backtrace(*args)
+      if backtrace_cleaner
+        backtrace_cleaner.clean(backtrace, *args)
+      else
+        backtrace
       end
+    end
 
-      def causes_for(exception)
-        return enum_for(__method__, exception) unless block_given?
+    def source_fragment(path, line)
+      return unless Rails.respond_to?(:root) && Rails.root
 
-        yield exception while exception = exception.cause
-      end
-
-      def wrapped_causes_for(exception, backtrace_cleaner)
-        causes_for(exception).map { |cause| self.class.new(backtrace_cleaner, cause) }
-      end
-
-      def clean_backtrace(*args)
-        if backtrace_cleaner
-          backtrace_cleaner.clean(backtrace, *args)
-        else
-          backtrace
+      full_path = Rails.root.join(path)
+      if File.exist?(full_path)
+        File.open(full_path, "r") do |file|
+          start = [line - 3, 0].max
+          lines = file.each_line.drop(start).take(6)
+          Hash[*(start + 1..(lines.count + start)).zip(lines).flatten]
         end
       end
+    end
 
-      def source_fragment(path, line)
-        return unless Rails.respond_to?(:root) && Rails.root
-        full_path = Rails.root.join(path)
-        if File.exist?(full_path)
-          File.open(full_path, "r") do |file|
-            start = [line - 3, 0].max
-            lines = file.each_line.drop(start).take(6)
-            Hash[*(start + 1..(lines.count + start)).zip(lines).flatten]
-          end
-        end
-      end
+    def extract_file_and_line_number(trace)
+      # Split by the first colon followed by some digits, which works for both
+      # Windows and Unix path styles.
+      file, line = trace.match(/^(.+?):(\d+).*$/, &:captures) || trace
+      [file, line.to_i]
+    end
 
-      def extract_file_and_line_number(trace)
-        # Split by the first colon followed by some digits, which works for both
-        # Windows and Unix path styles.
-        file, line = trace.match(/^(.+?):(\d+).*$/, &:captures) || trace
-        [file, line.to_i]
-      end
-
-      def expand_backtrace
-        @exception.backtrace.unshift(
-          @exception.to_s.split("\n")
-        ).flatten!
-      end
+    def expand_backtrace
+      @exception.backtrace.unshift(
+        @exception.to_s.split("\n")
+      ).flatten!
+    end
   end
 end

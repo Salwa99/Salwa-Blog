@@ -37,17 +37,18 @@ module ActiveRecord
       end
 
       private
-        def try_to_decrypt_with_each(encrypted_text, keys:)
-          keys.each.with_index do |key, index|
-            return cipher_for(key).decrypt(encrypted_text)
-          rescue ActiveRecord::Encryption::Errors::Decryption
-            raise if index == keys.length - 1
-          end
-        end
 
-        def cipher_for(secret, deterministic: false)
-          Aes256Gcm.new(secret, deterministic: deterministic)
+      def try_to_decrypt_with_each(encrypted_text, keys:)
+        keys.each.with_index do |key, index|
+          return cipher_for(key).decrypt(encrypted_text)
+        rescue ActiveRecord::Encryption::Errors::Decryption
+          raise if index == keys.length - 1
         end
+      end
+
+      def cipher_for(secret, deterministic: false)
+        Aes256Gcm.new(secret, deterministic: deterministic)
+      end
     end
   end
 end

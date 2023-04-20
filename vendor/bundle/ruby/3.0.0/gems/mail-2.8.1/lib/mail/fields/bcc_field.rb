@@ -1,5 +1,6 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/fields/common_address_field'
 
 module Mail
@@ -28,7 +29,7 @@ module Mail
   #  mail[:bcc].decoded   #=> 'Mikel Lindsaar <mikel@test.lindsaar.net>, ada@test.lindsaar.net'
   #  mail[:bcc].addresses #=> ['mikel@test.lindsaar.net', 'ada@test.lindsaar.net']
   #  mail[:bcc].formatted #=> ['Mikel Lindsaar <mikel@test.lindsaar.net>', 'ada@test.lindsaar.net']
-  class BccField < CommonAddressField #:nodoc:
+  class BccField < CommonAddressField # :nodoc:
     NAME = 'Bcc'
 
     attr_accessor :include_in_headers

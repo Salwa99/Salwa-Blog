@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   irb/lib/tracer.rb -
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -19,12 +20,10 @@ rescue LoadError
 end
 
 module IRB
-
   # initialize tracing function
   def IRB.initialize_tracer
     Tracer.verbose = false
-    Tracer.add_filter {
-      |event, file, line, id, binding, *rests|
+    Tracer.add_filter { |event, file, line, id, binding, *rests|
       /^#{Regexp.quote(@CONF[:IRB_LIB_PATH])}/ !~ file and
         File::basename(file) != "irb.rb"
     }
@@ -43,14 +42,13 @@ module IRB
     # See +lib/tracer.rb+ for more information.
     def use_tracer=(opt)
       if opt
-        Tracer.set_get_line_procs(@irb_path) {
-          |line_no, *rests|
+        Tracer.set_get_line_procs(@irb_path) { |line_no, *rests,|
           @io.line(line_no)
         }
       elsif !opt && @use_tracer
         Tracer.off
       end
-      @use_tracer=opt
+      @use_tracer = opt
     end
   end
 

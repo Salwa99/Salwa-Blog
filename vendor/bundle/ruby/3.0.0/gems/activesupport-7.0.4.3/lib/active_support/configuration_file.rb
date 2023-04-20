@@ -32,20 +32,21 @@ module ActiveSupport
     end
 
     private
-      def read(content_path)
-        require "yaml"
-        require "erb"
 
-        File.read(content_path).tap do |content|
-          if content.include?("\u00A0")
-            warn "#{content_path} contains invisible non-breaking spaces, you may want to remove those"
-          end
+    def read(content_path)
+      require "yaml"
+      require "erb"
+
+      File.read(content_path).tap do |content|
+        if content.include?("\u00A0")
+          warn "#{content_path} contains invisible non-breaking spaces, you may want to remove those"
         end
       end
+    end
 
-      def render(context)
-        erb = ERB.new(@content).tap { |e| e.filename = @content_path }
-        context ? erb.result(context) : erb.result
-      end
+    def render(context)
+      erb = ERB.new(@content).tap { |e| e.filename = @content_path }
+      context ? erb.result(context) : erb.result
+    end
   end
 end

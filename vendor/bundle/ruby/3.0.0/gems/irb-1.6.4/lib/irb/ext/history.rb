@@ -1,13 +1,12 @@
 # frozen_string_literal: false
+
 #
 #   history.rb -
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
 #
 
 module IRB # :nodoc:
-
   class Context
-
     NOPRINTING_IVARS.push "@eval_history_values"
 
     # See #set_last_value
@@ -29,6 +28,7 @@ module IRB # :nodoc:
     # #eval_history= was called with non-nil value (directly or via
     # setting <code>IRB.conf[:EVAL_HISTORY]</code> in <code>.irbrc</code>).
     attr_reader :eval_history
+
     # Sets command result history limit. Default value is set from
     # <code>IRB.conf[:EVAL_HISTORY]</code>.
     #
@@ -90,15 +90,14 @@ module IRB # :nodoc:
   #    # => 10
   #
   class History
-
-    def initialize(size = 16)  # :nodoc:
+    def initialize(size = 16) # :nodoc:
       @size = size
       @contents = []
     end
 
     def size(size) # :nodoc:
       if size != 0 && size < @size
-        @contents = @contents[@size - size .. @size]
+        @contents = @contents[@size - size..@size]
       end
       @size = size
     end
@@ -107,7 +106,7 @@ module IRB # :nodoc:
     def [](idx)
       begin
         if idx >= 0
-          @contents.find{|no, val| no == idx}[1]
+          @contents.find { |no, val| no == idx }[1]
         else
           @contents[idx][1]
         end
@@ -116,14 +115,14 @@ module IRB # :nodoc:
       end
     end
 
-    def push(no, val)  # :nodoc:
+    def push(no, val) # :nodoc:
       @contents.push [no, val]
       @contents.shift if @size != 0 && @contents.size > @size
     end
 
     alias real_inspect inspect
 
-    def inspect  # :nodoc:
+    def inspect # :nodoc:
       if @contents.empty?
         return real_inspect
       end
@@ -132,7 +131,7 @@ module IRB # :nodoc:
         @contents.push last
         last = nil
       end
-      str = @contents.collect{|no, val|
+      str = @contents.collect { |no, val|
         if val.equal?(self)
           "#{no} ...self-history..."
         else

@@ -63,7 +63,7 @@ module Capybara::Selenium::Driver::EdgeDriver
     end
   end
 
-private
+  private
 
   def storage_types_to_clear
     types = ['cookies']

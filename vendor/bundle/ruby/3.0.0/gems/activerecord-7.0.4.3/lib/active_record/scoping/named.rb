@@ -158,14 +158,14 @@ module ActiveRecord
 
           if dangerous_class_method?(name)
             raise ArgumentError, "You tried to define a scope named \"#{name}\" " \
-              "on the model \"#{self.name}\", but Active Record already defined " \
-              "a class method with the same name."
+                                 "on the model \"#{self.name}\", but Active Record already defined " \
+                                 "a class method with the same name."
           end
 
           if method_defined_within?(name, Relation)
             raise ArgumentError, "You tried to define a scope named \"#{name}\" " \
-              "on the model \"#{self.name}\", but ActiveRecord::Relation already defined " \
-              "an instance method with the same name."
+                                 "on the model \"#{self.name}\", but ActiveRecord::Relation already defined " \
+                                 "an instance method with the same name."
           end
 
           extension = Module.new(&block) if block
@@ -189,9 +189,10 @@ module ActiveRecord
         end
 
         private
-          def singleton_method_added(name)
-            generate_relation_method(name) if Kernel.respond_to?(name) && !ActiveRecord::Relation.method_defined?(name)
-          end
+
+        def singleton_method_added(name)
+          generate_relation_method(name) if Kernel.respond_to?(name) && !ActiveRecord::Relation.method_defined?(name)
+        end
       end
     end
   end

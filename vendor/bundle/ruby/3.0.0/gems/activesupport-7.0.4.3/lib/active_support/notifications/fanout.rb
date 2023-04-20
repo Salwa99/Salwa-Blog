@@ -42,7 +42,7 @@ module ActiveSupport
             @other_subscribers << subscriber
             @listeners_for.clear
           else
-            raise ArgumentError,  "pattern must be specified as a String, Regexp or empty"
+            raise ArgumentError, "pattern must be specified as a String, Regexp or empty"
           end
         end
         subscriber
@@ -275,9 +275,10 @@ module ActiveSupport
           end
 
           private
-            def build_event(name, id, payload)
-              ActiveSupport::Notifications::Event.new name, nil, nil, id, payload
-            end
+
+          def build_event(name, id, payload)
+            ActiveSupport::Notifications::Event.new name, nil, nil, id, payload
+          end
         end
       end
     end

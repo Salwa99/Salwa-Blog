@@ -17,7 +17,8 @@ module ActiveRecord
       # +default+ is the type-casted default value, such as +new+ in <tt>sales_stage varchar(20) default 'new'</tt>.
       # +sql_type_metadata+ is various information about the type of the column
       # +null+ determines if this column allows +NULL+ values.
-      def initialize(name, default, sql_type_metadata = nil, null = true, default_function = nil, collation: nil, comment: nil, **)
+      def initialize(name, default, sql_type_metadata = nil, null = true, default_function = nil, collation: nil,
+                     comment: nil, **)
         @name = name.freeze
         @sql_type_metadata = sql_type_metadata
         @null = null
@@ -92,15 +93,16 @@ module ActiveRecord
       end
 
       private
-        def deduplicated
-          @name = -name
-          @sql_type_metadata = sql_type_metadata.deduplicate if sql_type_metadata
-          @default = -default if default
-          @default_function = -default_function if default_function
-          @collation = -collation if collation
-          @comment = -comment if comment
-          super
-        end
+
+      def deduplicated
+        @name = -name
+        @sql_type_metadata = sql_type_metadata.deduplicate if sql_type_metadata
+        @default = -default if default
+        @default_function = -default_function if default_function
+        @collation = -collation if collation
+        @comment = -comment if comment
+        super
+      end
     end
 
     class NullColumn < Column

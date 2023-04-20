@@ -17,7 +17,6 @@ require 'builder'
 require 'builder/xmlevents'
 
 class TestEvents < Builder::Test
-
   class Target
     attr_reader :events
 
@@ -32,17 +31,15 @@ class TestEvents < Builder::Test
     def end_tag(tag)
       @events << [:end_tag, tag]
     end
-    
+
     def text(string)
       @events << [:text, string]
     end
-    
   end
-
 
   def setup
     @target = Target.new
-    @xml = Builder::XmlEvents.new(:target=>@target)
+    @xml = Builder::XmlEvents.new(:target => @target)
   end
 
   def test_simple
@@ -86,31 +83,31 @@ class TestEvents < Builder::Test
   end
 
   def test_attributes
-    @xml.a(:b=>"c", :x=>"y")
-    expect [:start_tag, :a, {:x => "y", :b => "c"}]
+    @xml.a(:b => "c", :x => "y")
+    expect [:start_tag, :a, { :x => "y", :b => "c" }]
     expect [:end_tag, :a]
     expect_done
   end
 
   def test_moderately_complex
     @xml.tag! "address-book" do |x|
-      x.entry :id=>"1" do
-	x.name {
-	  x.first "Bill"
-	  x.last "Smith"
-	}
-	x.address "Cincinnati"
+      x.entry :id => "1" do
+        x.name {
+          x.first "Bill"
+          x.last "Smith"
+        }
+        x.address "Cincinnati"
       end
-      x.entry :id=>"2" do
-	x.name {
-	  x.first "John"
-	  x.last "Doe"
-	}
-	x.address "Columbus"
+      x.entry :id => "2" do
+        x.name {
+          x.first "John"
+          x.last "Doe"
+        }
+        x.address "Columbus"
       end
     end
     expect [:start_tag, "address-book".intern, nil]
-    expect [:start_tag, :entry, {:id => "1"}]
+    expect [:start_tag, :entry, { :id => "1" }]
     expect [:start_tag, :name, nil]
     expect [:start_tag, :first, nil]
     expect [:text, "Bill"]
@@ -123,7 +120,7 @@ class TestEvents < Builder::Test
     expect [:text, "Cincinnati"]
     expect [:end_tag, :address]
     expect [:end_tag, :entry]
-    expect [:start_tag, :entry, {:id => "2"}]
+    expect [:start_tag, :entry, { :id => "2" }]
     expect [:start_tag, :name, nil]
     expect [:start_tag, :first, nil]
     expect [:text, "John"]
@@ -147,5 +144,4 @@ class TestEvents < Builder::Test
   def expect_done
     assert_nil @target.events.shift
   end
-
 end

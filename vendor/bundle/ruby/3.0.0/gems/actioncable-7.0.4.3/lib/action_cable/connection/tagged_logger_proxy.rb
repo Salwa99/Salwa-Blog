@@ -27,16 +27,17 @@ module ActionCable
         end
       end
 
-      %i( debug info warn error fatal unknown ).each do |severity|
+      %i(debug info warn error fatal unknown).each do |severity|
         define_method(severity) do |message|
           log severity, message
         end
       end
 
       private
-        def log(type, message) # :doc:
-          tag(@logger) { @logger.send type, message }
-        end
+
+      def log(type, message) # :doc:
+        tag(@logger) { @logger.send type, message }
+      end
     end
   end
 end

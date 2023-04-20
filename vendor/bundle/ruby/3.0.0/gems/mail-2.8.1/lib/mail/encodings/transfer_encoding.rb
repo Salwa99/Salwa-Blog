@@ -1,5 +1,6 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 module Mail
   module Encodings
     class TransferEncoding
@@ -34,7 +35,7 @@ module Mail
 
       def self.negotiate(message_encoding, source_encoding, str, allowed_encodings = nil)
         message_encoding = Encodings.get_encoding(message_encoding) || Encodings.get_encoding('8bit')
-        source_encoding  = Encodings.get_encoding(source_encoding)
+        source_encoding = Encodings.get_encoding(source_encoding)
 
         if message_encoding && source_encoding && message_encoding.can_transport?(source_encoding) && source_encoding.compatible_input?(str)
           source_encoding

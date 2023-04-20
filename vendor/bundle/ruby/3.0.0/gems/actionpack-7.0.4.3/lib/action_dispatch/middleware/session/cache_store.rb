@@ -46,14 +46,15 @@ module ActionDispatch
       end
 
       private
-        # Turn the session id into a cache key.
-        def cache_key(id)
-          "_session_id:#{id}"
-        end
 
-        def get_session_with_fallback(sid)
-          @cache.read(cache_key(sid.private_id)) || @cache.read(cache_key(sid.public_id))
-        end
+      # Turn the session id into a cache key.
+      def cache_key(id)
+        "_session_id:#{id}"
+      end
+
+      def get_session_with_fallback(sid)
+        @cache.read(cache_key(sid.private_id)) || @cache.read(cache_key(sid.public_id))
+      end
     end
   end
 end

@@ -105,14 +105,15 @@ module ActiveModel
       end
 
       private
-        def model
-          assert_respond_to @model, :to_model
-          @model.to_model
-        end
 
-        def assert_boolean(result, name)
-          assert result == true || result == false, "#{name} should be a boolean"
-        end
+      def model
+        assert_respond_to @model, :to_model
+        @model.to_model
+      end
+
+      def assert_boolean(result, name)
+        assert result == true || result == false, "#{name} should be a boolean"
+      end
     end
   end
 end

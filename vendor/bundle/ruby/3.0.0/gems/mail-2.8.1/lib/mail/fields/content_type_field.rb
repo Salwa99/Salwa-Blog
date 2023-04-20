@@ -1,10 +1,11 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/fields/named_structured_field'
 require 'mail/fields/parameter_hash'
 
 module Mail
-  class ContentTypeField < NamedStructuredField #:nodoc:
+  class ContentTypeField < NamedStructuredField # :nodoc:
     NAME = 'Content-Type'
 
     class << self
@@ -86,7 +87,7 @@ module Mail
     end
 
     def stringify(params)
-      params.map { |k,v| "#{k}=#{Encodings.param_encode(v)}" }.join("; ")
+      params.map { |k, v| "#{k}=#{Encodings.param_encode(v)}" }.join("; ")
     end
 
     def filename
@@ -118,10 +119,10 @@ module Mail
     # the parser for
     def sanitize(val)
       # TODO: check if there are cases where whitespace is not a separator
-      val = val.
-        gsub(/\s*=\s*/,'='). # remove whitespaces around equal sign
-        gsub(/[; ]+/, '; '). #use '; ' as a separator (or EOL)
-        gsub(/;\s*$/,'') #remove trailing to keep examples below
+      val = val
+        .gsub(/\s*=\s*/, '=') # remove whitespaces around equal sign
+        .gsub(/[; ]+/, '; ') # use '; ' as a separator (or EOL)
+        .gsub(/;\s*$/, '') # remove trailing to keep examples below
 
       if val =~ /((boundary|name|filename)=(\S*))/i
         val = "#{$`.downcase}#{$2}=#{$3}#{$'.downcase}"
@@ -151,7 +152,7 @@ module Mail
         params = $2.to_s.split(/\s+/)
         params = params.map { |i| i.to_s.chomp.strip }
         params = params.map { |i| i.split(/\s*\=\s*/, 2) }
-        params = params.map { |i| "#{i[0]}=#{Utilities.dquote(i[1].to_s.gsub(/;$/,""))}" }.join('; ')
+        params = params.map { |i| "#{i[0]}=#{Utilities.dquote(i[1].to_s.gsub(/;$/, ""))}" }.join('; ')
         "#{type}; #{params}"
       when val =~ /^\s*$/
         'text/plain'

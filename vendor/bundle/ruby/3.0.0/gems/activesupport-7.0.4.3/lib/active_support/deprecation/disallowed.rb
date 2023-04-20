@@ -23,34 +23,37 @@ module ActiveSupport
       end
 
       private
-        def deprecation_disallowed?(message)
-          disallowed = ActiveSupport::Deprecation.disallowed_warnings
-          return false if explicitly_allowed?(message)
-          return true if disallowed == :all
-          disallowed.any? do |rule|
-            case rule
-            when String, Symbol
-              message.include?(rule.to_s)
-            when Regexp
-              rule.match?(message)
-            end
-          end
-        end
 
-        def explicitly_allowed?(message)
-          allowances = @explicitly_allowed_warnings.value
-          return false unless allowances
-          return true if allowances == :all
-          allowances = [allowances] unless allowances.kind_of?(Array)
-          allowances.any? do |rule|
-            case rule
-            when String, Symbol
-              message.include?(rule.to_s)
-            when Regexp
-              rule.match?(message)
-            end
+      def deprecation_disallowed?(message)
+        disallowed = ActiveSupport::Deprecation.disallowed_warnings
+        return false if explicitly_allowed?(message)
+        return true if disallowed == :all
+
+        disallowed.any? do |rule|
+          case rule
+          when String, Symbol
+            message.include?(rule.to_s)
+          when Regexp
+            rule.match?(message)
           end
         end
+      end
+
+      def explicitly_allowed?(message)
+        allowances = @explicitly_allowed_warnings.value
+        return false unless allowances
+        return true if allowances == :all
+
+        allowances = [allowances] unless allowances.kind_of?(Array)
+        allowances.any? do |rule|
+          case rule
+          when String, Symbol
+            message.include?(rule.to_s)
+          when Regexp
+            rule.match?(message)
+          end
+        end
+      end
     end
   end
 end

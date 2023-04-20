@@ -1,5 +1,6 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/fields/common_field'
 
 module Mail
@@ -20,6 +21,6 @@ module Mail
   #     characters are subject to header "folding" and "unfolding" as
   #     described in section 2.2.3.  Semantic analysis of structured field
   #     bodies is given along with their syntax.
-  class StructuredField < CommonField #:nodoc:
+  class StructuredField < CommonField # :nodoc:
   end
 end

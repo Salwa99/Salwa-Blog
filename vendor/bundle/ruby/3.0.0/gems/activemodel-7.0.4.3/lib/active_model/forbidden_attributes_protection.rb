@@ -18,14 +18,16 @@ module ActiveModel
 
   module ForbiddenAttributesProtection # :nodoc:
     private
-      def sanitize_for_mass_assignment(attributes)
-        if attributes.respond_to?(:permitted?)
-          raise ActiveModel::ForbiddenAttributesError if !attributes.permitted?
-          attributes.to_h
-        else
-          attributes
-        end
+
+    def sanitize_for_mass_assignment(attributes)
+      if attributes.respond_to?(:permitted?)
+        raise ActiveModel::ForbiddenAttributesError if !attributes.permitted?
+
+        attributes.to_h
+      else
+        attributes
       end
-      alias :sanitize_forbidden_attributes :sanitize_for_mass_assignment
+    end
+    alias :sanitize_forbidden_attributes :sanitize_for_mass_assignment
   end
 end

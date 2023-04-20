@@ -9,9 +9,10 @@ else
 end
 
 say "Create application.js module as entrypoint"
-create_file Rails.root.join("app/javascript/application.js") do <<-JS
-// Configure your import map in config/importmap.rb. Read more: https://github.com/rails/importmap-rails
-JS
+create_file Rails.root.join("app/javascript/application.js") do
+  <<~JS
+    // Configure your import map in config/importmap.rb. Read more: https://github.com/rails/importmap-rails
+  JS
 end
 
 say "Use vendor/javascript for downloaded pins"
@@ -21,7 +22,7 @@ keep_file "vendor/javascript"
 if (sprockets_manifest_path = Rails.root.join("app/assets/config/manifest.js")).exist?
   say "Ensure JavaScript files are in the Sprocket manifest"
   append_to_file sprockets_manifest_path,
-    %(//= link_tree ../../javascript .js\n//= link_tree ../../../vendor/javascript .js\n)
+                 %(//= link_tree ../../javascript .js\n//= link_tree ../../../vendor/javascript .js\n)
 end
 
 say "Configure importmap paths in config/importmap.rb"

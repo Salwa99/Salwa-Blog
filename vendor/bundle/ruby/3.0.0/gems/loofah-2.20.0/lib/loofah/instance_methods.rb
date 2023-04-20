@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Loofah
   #
   #  Mixes +scrub!+ into Document, DocumentFragment, Node and NodeSet.
@@ -62,6 +63,7 @@ module Loofah
       unless scrubber.is_a?(Loofah::Scrubber)
         raise Loofah::ScrubberNotFound, "not a Scrubber or a scrubber name: #{scrubber.inspect}"
       end
+
       scrubber
     end
   end
@@ -94,10 +96,10 @@ module Loofah
     #
     def text(options = {})
       result = if serialize_root
-        serialize_root.children.reject(&:comment?).map(&:inner_text).join("")
-      else
-        ""
-      end
+                 serialize_root.children.reject(&:comment?).map(&:inner_text).join("")
+               else
+                 ""
+               end
       if options[:encode_special_chars] == false
         result # possibly dangerous if rendered in a browser
       else

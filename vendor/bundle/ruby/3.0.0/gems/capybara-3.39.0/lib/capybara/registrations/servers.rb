@@ -26,10 +26,12 @@ Capybara.register_server :puma do |app, port, host, **options| # rubocop:disable
   begin
     require 'rack/handler/puma'
   rescue LoadError
-    raise LoadError, 'Capybara is unable to load `puma` for its server, please add `puma` to your project or specify a different server via something like `Capybara.server = :webrick`.'
+    raise LoadError,
+          'Capybara is unable to load `puma` for its server, please add `puma` to your project or specify a different server via something like `Capybara.server = :webrick`.'
   else
     unless Rack::Handler::Puma.respond_to?(:config)
-      raise LoadError, 'Capybara requires `puma` version 3.8.0 or higher, please upgrade `puma` or register and specify your own server block'
+      raise LoadError,
+            'Capybara requires `puma` version 3.8.0 or higher, please upgrade `puma` or register and specify your own server block'
     end
   end
 

@@ -14,9 +14,9 @@ module ActionView
         @formats = formats
         @variants = variants
 
-        @locale_idx   = build_idx_hash(locale)
+        @locale_idx = build_idx_hash(locale)
         @handlers_idx = build_idx_hash(handlers)
-        @formats_idx  = build_idx_hash(formats)
+        @formats_idx = build_idx_hash(formats)
         if variants == :any
           @variants_idx = ANY_HASH
         else
@@ -25,9 +25,10 @@ module ActionView
       end
 
       private
-        def build_idx_hash(arr)
-          [*arr, nil].each_with_index.to_h.freeze
-        end
+
+      def build_idx_hash(arr)
+        [*arr, nil].each_with_index.to_h.freeze
+      end
     end
 
     attr_reader :locale, :handler, :format, :variant

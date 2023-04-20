@@ -12,9 +12,10 @@ module TestUnit
       end
 
       private
-        def file_name # :doc:
-          @_file_name ||= super.sub(/_channel\z/i, "")
-        end
+
+      def file_name # :doc:
+        @_file_name ||= super.sub(/_channel\z/i, "")
+      end
     end
   end
 end

@@ -16,7 +16,6 @@
 #    limitations under the License.
 #++
 
-
 begin
   require "addressable/idna/native"
 rescue LoadError

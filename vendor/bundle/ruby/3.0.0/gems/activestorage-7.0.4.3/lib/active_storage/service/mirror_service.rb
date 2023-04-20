@@ -14,7 +14,7 @@ module ActiveStorage
     attr_reader :primary, :mirrors
 
     delegate :download, :download_chunk, :exist?, :url,
-      :url_for_direct_upload, :headers_for_direct_upload, :path_for, :compose, to: :primary
+             :url_for_direct_upload, :headers_for_direct_upload, :path_for, :compose, to: :primary
 
     # Stitch together from named services.
     def self.build(primary:, mirrors:, name:, configurator:, **options) # :nodoc:
@@ -49,7 +49,6 @@ module ActiveStorage
       perform_across_services :delete_prefixed, prefix
     end
 
-
     # Copy the file at the +key+ from the primary service to each of the mirrors where it doesn't already exist.
     def mirror(key, checksum:)
       instrument :mirror, key: key, checksum: checksum do
@@ -65,15 +64,16 @@ module ActiveStorage
     end
 
     private
-      def each_service(&block)
-        [ primary, *mirrors ].each(&block)
-      end
 
-      def perform_across_services(method, *args)
-        # FIXME: Convert to be threaded
-        each_service.collect do |service|
-          service.public_send method, *args
-        end
+    def each_service(&block)
+      [primary, *mirrors].each(&block)
+    end
+
+    def perform_across_services(method, *args)
+      # FIXME: Convert to be threaded
+      each_service.collect do |service|
+        service.public_send method, *args
       end
+    end
   end
 end

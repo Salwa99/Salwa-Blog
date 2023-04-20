@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   irb/workspace-binding.rb -
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -51,7 +52,7 @@ EOF
                           TOPLEVEL_BINDING,
                           __FILE__,
                           __LINE__ - 3)
-        when 4  # binding is a copy of TOPLEVEL_BINDING (default)
+        when 4 # binding is a copy of TOPLEVEL_BINDING (default)
           # Note that this will typically be IRB::TOPLEVEL_BINDING
           # This is to avoid RubyGems' local variables (see issue #17623)
           @binding = TOPLEVEL_BINDING.dup
@@ -68,10 +69,12 @@ EOF
       unless main.empty?
         case @main
         when Module
-          @binding = eval("IRB.conf[:__MAIN__].module_eval('binding', __FILE__, __LINE__)", @binding, __FILE__, __LINE__)
+          @binding = eval("IRB.conf[:__MAIN__].module_eval('binding', __FILE__, __LINE__)", @binding, __FILE__,
+                          __LINE__)
         else
           begin
-            @binding = eval("IRB.conf[:__MAIN__].instance_eval('binding', __FILE__, __LINE__)", @binding, __FILE__, __LINE__)
+            @binding = eval("IRB.conf[:__MAIN__].instance_eval('binding', __FILE__, __LINE__)", @binding, __FILE__,
+                            __LINE__)
           rescue TypeError
             fail CantChangeBinding, @main.inspect
           end
@@ -96,7 +99,8 @@ EOF
           define_method(:binding, Kernel.instance_method(:binding))
           define_method(:local_variables, Kernel.instance_method(:local_variables))
         end
-        @binding = eval("IRB.conf[:__MAIN__].instance_eval('binding', __FILE__, __LINE__)", @binding, *@binding.source_location)
+        @binding = eval("IRB.conf[:__MAIN__].instance_eval('binding', __FILE__, __LINE__)", @binding,
+                        *@binding.source_location)
       end
 
       @binding.local_variable_set(:_, nil)
@@ -128,6 +132,7 @@ EOF
       return nil if bt =~ /\/irb\/.*\.rb/
       return nil if bt =~ /\/irb\.rb/
       return nil if bt =~ /tool\/lib\/.*\.rb|runner\.rb/ # for tests in Ruby repository
+
       case IRB.conf[:CONTEXT_MODE]
       when 1
         return nil if bt =~ %r!/tmp/irb-binding!
@@ -154,7 +159,7 @@ EOF
       pos -= 1
 
       start_pos = [pos - 5, 0].max
-      end_pos   = [pos + 5, lines.size - 1].min
+      end_pos = [pos + 5, lines.size - 1].min
 
       line_number_fmt = Color.colorize("%#{end_pos.to_s.length}d", [:BLUE, :BOLD])
       fmt = " %2s #{line_number_fmt}: %s"

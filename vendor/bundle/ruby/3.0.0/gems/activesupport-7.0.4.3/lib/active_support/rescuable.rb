@@ -59,12 +59,13 @@ module ActiveSupport
 
         klasses.each do |klass|
           key = if klass.is_a?(Module) && klass.respond_to?(:===)
-            klass.name
-          elsif klass.is_a?(String)
-            klass
-          else
-            raise ArgumentError, "#{klass.inspect} must be an Exception class or a String referencing an Exception class"
-          end
+                  klass.name
+                elsif klass.is_a?(String)
+                  klass
+                else
+                  raise ArgumentError,
+                        "#{klass.inspect} must be an Exception class or a String referencing an Exception class"
+                end
 
           # Put the new handler at the end because the list is read in reverse.
           self.rescue_handlers += [[key, with]]
@@ -105,58 +106,59 @@ module ActiveSupport
         when Symbol
           method = object.method(rescuer)
           if method.arity == 0
-            -> e { method.call }
+            ->e { method.call }
           else
             method
           end
         when Proc
           if rescuer.arity == 0
-            -> e { object.instance_exec(&rescuer) }
+            ->e { object.instance_exec(&rescuer) }
           else
-            -> e { object.instance_exec(e, &rescuer) }
+            ->e { object.instance_exec(e, &rescuer) }
           end
         end
       end
 
       private
-        def find_rescue_handler(exception)
-          if exception
-            # Handlers are in order of declaration but the most recently declared
-            # is the highest priority match, so we search for matching handlers
-            # in reverse.
-            _, handler = rescue_handlers.reverse_each.detect do |class_or_name, _|
-              if klass = constantize_rescue_handler_class(class_or_name)
-                klass === exception
-              end
-            end
 
-            handler
-          end
-        end
-
-        def constantize_rescue_handler_class(class_or_name)
-          case class_or_name
-          when String, Symbol
-            begin
-              # Try a lexical lookup first since we support
-              #
-              #     class Super
-              #       rescue_from 'Error', with: …
-              #     end
-              #
-              #     class Sub
-              #       class Error < StandardError; end
-              #     end
-              #
-              # so an Error raised in Sub will hit the 'Error' handler.
-              const_get class_or_name
-            rescue NameError
-              class_or_name.safe_constantize
+      def find_rescue_handler(exception)
+        if exception
+          # Handlers are in order of declaration but the most recently declared
+          # is the highest priority match, so we search for matching handlers
+          # in reverse.
+          _, handler = rescue_handlers.reverse_each.detect do |class_or_name, _|
+            if klass = constantize_rescue_handler_class(class_or_name)
+              klass === exception
             end
-          else
-            class_or_name
           end
+
+          handler
         end
+      end
+
+      def constantize_rescue_handler_class(class_or_name)
+        case class_or_name
+        when String, Symbol
+          begin
+            # Try a lexical lookup first since we support
+            #
+            #     class Super
+            #       rescue_from 'Error', with: …
+            #     end
+            #
+            #     class Sub
+            #       class Error < StandardError; end
+            #     end
+            #
+            # so an Error raised in Sub will hit the 'Error' handler.
+            const_get class_or_name
+          rescue NameError
+            class_or_name.safe_constantize
+          end
+        else
+          class_or_name
+        end
+      end
     end
 
     # Delegates to the class method, but uses the instance as the subject for

@@ -40,19 +40,20 @@ module ActiveRecord
       end
 
       protected
-        def perform_fetch(lookup_key, &block)
-          matching_pair = @mapping.reverse_each.detect do |key, _|
-            key === lookup_key
-          end
 
-          if matching_pair
-            matching_pair.last.call(lookup_key)
-          elsif @parent
-            @parent.perform_fetch(lookup_key, &block)
-          else
-            yield lookup_key
-          end
+      def perform_fetch(lookup_key, &block)
+        matching_pair = @mapping.reverse_each.detect do |key, _|
+          key === lookup_key
         end
+
+        if matching_pair
+          matching_pair.last.call(lookup_key)
+        elsif @parent
+          @parent.perform_fetch(lookup_key, &block)
+        else
+          yield lookup_key
+        end
+      end
     end
   end
 end

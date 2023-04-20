@@ -32,23 +32,24 @@ module ActionCable
       end
 
       private
-        class Broadcaster
-          attr_reader :server, :broadcasting, :coder
 
-          def initialize(server, broadcasting, coder:)
-            @server, @broadcasting, @coder = server, broadcasting, coder
-          end
+      class Broadcaster
+        attr_reader :server, :broadcasting, :coder
 
-          def broadcast(message)
-            server.logger.debug { "[ActionCable] Broadcasting to #{broadcasting}: #{message.inspect.truncate(300)}" }
+        def initialize(server, broadcasting, coder:)
+          @server, @broadcasting, @coder = server, broadcasting, coder
+        end
 
-            payload = { broadcasting: broadcasting, message: message, coder: coder }
-            ActiveSupport::Notifications.instrument("broadcast.action_cable", payload) do
-              encoded = coder ? coder.encode(message) : message
-              server.pubsub.broadcast broadcasting, encoded
-            end
+        def broadcast(message)
+          server.logger.debug { "[ActionCable] Broadcasting to #{broadcasting}: #{message.inspect.truncate(300)}" }
+
+          payload = { broadcasting: broadcasting, message: message, coder: coder }
+          ActiveSupport::Notifications.instrument("broadcast.action_cable", payload) do
+            encoded = coder ? coder.encode(message) : message
+            server.pubsub.broadcast broadcasting, encoded
           end
         end
+      end
     end
   end
 end

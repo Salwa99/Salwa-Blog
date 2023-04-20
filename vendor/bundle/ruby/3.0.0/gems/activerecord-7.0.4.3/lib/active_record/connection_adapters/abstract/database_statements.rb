@@ -18,7 +18,7 @@ module ActiveRecord
         if arel_or_sql_string.respond_to?(:ast)
           unless binds.empty?
             raise "Passing bind parameters with an arel AST is forbidden. " \
-              "The values must be stored on the AST directly"
+                  "The values must be stored on the AST directly"
           end
 
           collector = collector()
@@ -311,6 +311,7 @@ module ActiveRecord
           if isolation
             raise ActiveRecord::TransactionIsolationError, "cannot set isolation when joining a transaction"
           end
+
           yield
         else
           transaction_manager.within_new_transaction(isolation: isolation, joinable: joinable, &block)
@@ -347,14 +348,14 @@ module ActiveRecord
       end
 
       # Begins the transaction (and turns off auto-committing).
-      def begin_db_transaction()    end
+      def begin_db_transaction() end
 
       def transaction_isolation_levels
         {
           read_uncommitted: "READ UNCOMMITTED",
-          read_committed:   "READ COMMITTED",
-          repeatable_read:  "REPEATABLE READ",
-          serializable:     "SERIALIZABLE"
+          read_committed: "READ COMMITTED",
+          repeatable_read: "REPEATABLE READ",
+          serializable: "SERIALIZABLE"
         }
       end
 
@@ -366,7 +367,7 @@ module ActiveRecord
       end
 
       # Commits the transaction (and turns on auto-committing).
-      def commit_db_transaction()   end
+      def commit_db_transaction() end
 
       # Rolls back the transaction (and turns on auto-committing). Must be
       # done if the transaction block raises an exception or returns false.
@@ -455,131 +456,136 @@ module ActiveRecord
       end
 
       private
-        def execute_batch(statements, name = nil)
-          statements.each do |statement|
-            execute(statement, name)
-          end
+
+      def execute_batch(statements, name = nil)
+        statements.each do |statement|
+          execute(statement, name)
         end
+      end
 
-        DEFAULT_INSERT_VALUE = Arel.sql("DEFAULT").freeze
-        private_constant :DEFAULT_INSERT_VALUE
+      DEFAULT_INSERT_VALUE = Arel.sql("DEFAULT").freeze
+      private_constant :DEFAULT_INSERT_VALUE
 
-        def default_insert_value(column)
-          DEFAULT_INSERT_VALUE
-        end
+      def default_insert_value(column)
+        DEFAULT_INSERT_VALUE
+      end
 
-        def build_fixture_sql(fixtures, table_name)
-          columns = schema_cache.columns_hash(table_name).reject { |_, column| supports_virtual_columns? && column.virtual? }
+      def build_fixture_sql(fixtures, table_name)
+        columns = schema_cache.columns_hash(table_name).reject { |_, column|
+          supports_virtual_columns? && column.virtual?
+        }
 
-          values_list = fixtures.map do |fixture|
-            fixture = fixture.stringify_keys
+        values_list = fixtures.map do |fixture|
+          fixture = fixture.stringify_keys
 
-            unknown_columns = fixture.keys - columns.keys
-            if unknown_columns.any?
-              raise Fixture::FixtureError, %(table "#{table_name}" has no columns named #{unknown_columns.map(&:inspect).join(', ')}.)
-            end
-
-            columns.map do |name, column|
-              if fixture.key?(name)
-                type = lookup_cast_type_from_column(column)
-                with_yaml_fallback(type.serialize(fixture[name]))
-              else
-                default_insert_value(column)
-              end
-            end
+          unknown_columns = fixture.keys - columns.keys
+          if unknown_columns.any?
+            raise Fixture::FixtureError,
+                  %(table "#{table_name}" has no columns named #{unknown_columns.map(&:inspect).join(', ')}.)
           end
 
-          table = Arel::Table.new(table_name)
-          manager = Arel::InsertManager.new(table)
-
-          if values_list.size == 1
-            values = values_list.shift
-            new_values = []
-            columns.each_key.with_index { |column, i|
-              unless values[i].equal?(DEFAULT_INSERT_VALUE)
-                new_values << values[i]
-                manager.columns << table[column]
-              end
-            }
-            values_list << new_values
-          else
-            columns.each_key { |column| manager.columns << table[column] }
-          end
-
-          manager.values = manager.create_values_list(values_list)
-          visitor.compile(manager.ast)
-        end
-
-        def build_fixture_statements(fixture_set)
-          fixture_set.filter_map do |table_name, fixtures|
-            next if fixtures.empty?
-            build_fixture_sql(fixtures, table_name)
-          end
-        end
-
-        def build_truncate_statement(table_name)
-          "TRUNCATE TABLE #{quote_table_name(table_name)}"
-        end
-
-        def build_truncate_statements(table_names)
-          table_names.map do |table_name|
-            build_truncate_statement(table_name)
-          end
-        end
-
-        def with_multi_statements
-          yield
-        end
-
-        def combine_multi_statements(total_sql)
-          total_sql.join(";\n")
-        end
-
-        # Returns an ActiveRecord::Result instance.
-        def select(sql, name = nil, binds = [], prepare: false, async: false)
-          if async && async_enabled?
-            if current_transaction.joinable?
-              raise AsynchronousQueryInsideTransactionError, "Asynchronous queries are not allowed inside transactions"
-            end
-
-            future_result = async.new(
-              pool,
-              sql,
-              name,
-              binds,
-              prepare: prepare,
-            )
-            if supports_concurrent_connections? && current_transaction.closed?
-              future_result.schedule!(ActiveRecord::Base.asynchronous_queries_session)
+          columns.map do |name, column|
+            if fixture.key?(name)
+              type = lookup_cast_type_from_column(column)
+              with_yaml_fallback(type.serialize(fixture[name]))
             else
-              future_result.execute!(self)
+              default_insert_value(column)
             end
-            return future_result
+          end
+        end
+
+        table = Arel::Table.new(table_name)
+        manager = Arel::InsertManager.new(table)
+
+        if values_list.size == 1
+          values = values_list.shift
+          new_values = []
+          columns.each_key.with_index { |column, i|
+            unless values[i].equal?(DEFAULT_INSERT_VALUE)
+              new_values << values[i]
+              manager.columns << table[column]
+            end
+          }
+          values_list << new_values
+        else
+          columns.each_key { |column| manager.columns << table[column] }
+        end
+
+        manager.values = manager.create_values_list(values_list)
+        visitor.compile(manager.ast)
+      end
+
+      def build_fixture_statements(fixture_set)
+        fixture_set.filter_map do |table_name, fixtures|
+          next if fixtures.empty?
+
+          build_fixture_sql(fixtures, table_name)
+        end
+      end
+
+      def build_truncate_statement(table_name)
+        "TRUNCATE TABLE #{quote_table_name(table_name)}"
+      end
+
+      def build_truncate_statements(table_names)
+        table_names.map do |table_name|
+          build_truncate_statement(table_name)
+        end
+      end
+
+      def with_multi_statements
+        yield
+      end
+
+      def combine_multi_statements(total_sql)
+        total_sql.join(";\n")
+      end
+
+      # Returns an ActiveRecord::Result instance.
+      def select(sql, name = nil, binds = [], prepare: false, async: false)
+        if async && async_enabled?
+          if current_transaction.joinable?
+            raise AsynchronousQueryInsideTransactionError, "Asynchronous queries are not allowed inside transactions"
           end
 
-          exec_query(sql, name, binds, prepare: prepare)
-        end
-
-        def sql_for_insert(sql, pk, binds)
-          [sql, binds]
-        end
-
-        def last_inserted_id(result)
-          single_value_from_rows(result.rows)
-        end
-
-        def single_value_from_rows(rows)
-          row = rows.first
-          row && row.first
-        end
-
-        def arel_from_relation(relation)
-          if relation.is_a?(Relation)
-            relation.arel
+          future_result = async.new(
+            pool,
+            sql,
+            name,
+            binds,
+            prepare: prepare,
+          )
+          if supports_concurrent_connections? && current_transaction.closed?
+            future_result.schedule!(ActiveRecord::Base.asynchronous_queries_session)
           else
-            relation
+            future_result.execute!(self)
           end
+          return future_result
         end
+
+        exec_query(sql, name, binds, prepare: prepare)
+      end
+
+      def sql_for_insert(sql, pk, binds)
+        [sql, binds]
+      end
+
+      def last_inserted_id(result)
+        single_value_from_rows(result.rows)
+      end
+
+      def single_value_from_rows(rows)
+        row = rows.first
+        row && row.first
+      end
+
+      def arel_from_relation(relation)
+        if relation.is_a?(Relation)
+          relation.arel
+        else
+          relation
+        end
+      end
     end
   end
 end

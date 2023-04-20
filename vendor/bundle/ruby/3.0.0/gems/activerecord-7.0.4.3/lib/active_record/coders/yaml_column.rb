@@ -23,6 +23,7 @@ module ActiveRecord
       def load(yaml)
         return object_class.new if object_class != Object && yaml.nil?
         return yaml unless yaml.is_a?(String) && yaml.start_with?("---")
+
         obj = yaml_load(yaml)
 
         assert_valid_value(obj, action: "load")
@@ -34,34 +35,36 @@ module ActiveRecord
       def assert_valid_value(obj, action:)
         unless obj.nil? || obj.is_a?(object_class)
           raise SerializationTypeMismatch,
-            "can't #{action} `#{@attr_name}`: was supposed to be a #{object_class}, but was a #{obj.class}. -- #{obj.inspect}"
+                "can't #{action} `#{@attr_name}`: was supposed to be a #{object_class}, but was a #{obj.class}. -- #{obj.inspect}"
         end
       end
 
       private
-        def check_arity_of_constructor
-          load(nil)
-        rescue ArgumentError
-          raise ArgumentError, "Cannot serialize #{object_class}. Classes passed to `serialize` must have a 0 argument constructor."
-        end
 
-        if YAML.respond_to?(:unsafe_load)
-          def yaml_load(payload)
-            if ActiveRecord.use_yaml_unsafe_load
-              YAML.unsafe_load(payload)
-            else
-              YAML.safe_load(payload, permitted_classes: ActiveRecord.yaml_column_permitted_classes, aliases: true)
-            end
-          end
-        else
-          def yaml_load(payload)
-            if ActiveRecord.use_yaml_unsafe_load
-              YAML.load(payload)
-            else
-              YAML.safe_load(payload, permitted_classes: ActiveRecord.yaml_column_permitted_classes, aliases: true)
-            end
+      def check_arity_of_constructor
+        load(nil)
+      rescue ArgumentError
+        raise ArgumentError,
+              "Cannot serialize #{object_class}. Classes passed to `serialize` must have a 0 argument constructor."
+      end
+
+      if YAML.respond_to?(:unsafe_load)
+        def yaml_load(payload)
+          if ActiveRecord.use_yaml_unsafe_load
+            YAML.unsafe_load(payload)
+          else
+            YAML.safe_load(payload, permitted_classes: ActiveRecord.yaml_column_permitted_classes, aliases: true)
           end
         end
+      else
+        def yaml_load(payload)
+          if ActiveRecord.use_yaml_unsafe_load
+            YAML.load(payload)
+          else
+            YAML.safe_load(payload, permitted_classes: ActiveRecord.yaml_column_permitted_classes, aliases: true)
+          end
+        end
+      end
     end
   end
 end

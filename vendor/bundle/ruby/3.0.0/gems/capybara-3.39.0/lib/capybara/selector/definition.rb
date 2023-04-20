@@ -216,10 +216,10 @@ module Capybara
 
       def default_visibility(fallback = Capybara.ignore_hidden_elements, options = {})
         vis = if @default_visibility.respond_to?(:call)
-          @default_visibility.call(options)
-        else
-          @default_visibility
-        end
+                @default_visibility.call(options)
+              else
+                @default_visibility
+              end
         vis.nil? ? fallback : vis
       end
 
@@ -250,7 +250,7 @@ module Capybara
         Array(@locator_type)
       end
 
-    private
+      private
 
       def handled_custom_options(filter, options)
         options.select do |option, _|

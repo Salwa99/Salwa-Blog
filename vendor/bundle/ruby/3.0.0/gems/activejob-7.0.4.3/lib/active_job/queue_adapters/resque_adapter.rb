@@ -36,7 +36,7 @@ module ActiveJob
       def enqueue_at(job, timestamp) # :nodoc:
         unless Resque.respond_to?(:enqueue_at_with_queue)
           raise NotImplementedError, "To be able to schedule jobs with Resque you need the " \
-            "resque-scheduler gem. Please add it to your Gemfile and run bundle install"
+                                     "resque-scheduler gem. Please add it to your Gemfile and run bundle install"
         end
         Resque.enqueue_at_with_queue job.queue_name, timestamp, JobWrapper, job.serialize
       end

@@ -26,12 +26,14 @@ module ActionView
 
     def <<(value)
       return self if value.nil?
+
       super(value.to_s)
     end
     alias :append= :<<
 
     def safe_expr_append=(val)
       return self if val.nil?
+
       safe_concat val.to_s
     end
 
@@ -48,7 +50,7 @@ module ActionView
       value = ERB::Util.h(value) unless value.html_safe?
       @block.call(value)
     end
-    alias :concat  :<<
+    alias :concat :<<
     alias :append= :<<
 
     def safe_concat(value)

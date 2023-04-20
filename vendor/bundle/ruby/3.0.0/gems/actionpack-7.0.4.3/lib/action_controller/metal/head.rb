@@ -49,15 +49,16 @@ module ActionController
     end
 
     private
-      def include_content?(status)
-        case status
-        when 100..199
-          false
-        when 204, 205, 304
-          false
-        else
-          true
-        end
+
+    def include_content?(status)
+      case status
+      when 100..199
+        false
+      when 204, 205, 304
+        false
+      else
+        true
       end
+    end
   end
 end

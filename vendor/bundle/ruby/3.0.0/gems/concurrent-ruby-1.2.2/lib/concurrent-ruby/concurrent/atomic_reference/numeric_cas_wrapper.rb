@@ -1,11 +1,9 @@
 module Concurrent
-
   # Special "compare and set" handling of numeric values.
   #
   # @!visibility private
   # @!macro internal_implementation_note
   module AtomicNumericCompareAndSetWrapper
-
     # @!macro atomic_reference_method_compare_and_set
     def compare_and_set(old_value, new_value)
       if old_value.kind_of? Numeric
@@ -23,6 +21,5 @@ module Concurrent
         _compare_and_set(old_value, new_value)
       end
     end
-
   end
 end

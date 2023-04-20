@@ -67,14 +67,17 @@ module ActiveStorage
           end
         CODE
 
-        has_one :"#{name}_attachment", -> { where(name: name) }, class_name: "ActiveStorage::Attachment", as: :record, inverse_of: :record, dependent: :destroy, strict_loading: strict_loading
-        has_one :"#{name}_blob", through: :"#{name}_attachment", class_name: "ActiveStorage::Blob", source: :blob, strict_loading: strict_loading
+        has_one :"#{name}_attachment", -> {
+                                         where(name: name)
+                                       }, class_name: "ActiveStorage::Attachment", as: :record, inverse_of: :record, dependent: :destroy, strict_loading: strict_loading
+        has_one :"#{name}_blob", through: :"#{name}_attachment", class_name: "ActiveStorage::Blob", source: :blob,
+                                 strict_loading: strict_loading
 
         scope :"with_attached_#{name}", -> { includes("#{name}_attachment": :blob) }
 
         after_save { attachment_changes[name.to_s]&.save }
 
-        after_commit(on: %i[ create update ]) { attachment_changes.delete(name.to_s).try(:upload) }
+        after_commit(on: %i[create update]) { attachment_changes.delete(name.to_s).try(:upload) }
 
         reflection = ActiveRecord::Reflection.create(
           :has_one_attached,
@@ -161,7 +164,9 @@ module ActiveStorage
           end
         CODE
 
-        has_many :"#{name}_attachments", -> { where(name: name) }, as: :record, class_name: "ActiveStorage::Attachment", inverse_of: :record, dependent: :destroy, strict_loading: strict_loading do
+        has_many :"#{name}_attachments", -> {
+                                           where(name: name)
+                                         }, as: :record, class_name: "ActiveStorage::Attachment", inverse_of: :record, dependent: :destroy, strict_loading: strict_loading do
           def purge
             deprecate(:purge)
             each(&:purge)
@@ -184,7 +189,8 @@ module ActiveStorage
             MSG
           end
         end
-        has_many :"#{name}_blobs", through: :"#{name}_attachments", class_name: "ActiveStorage::Blob", source: :blob, strict_loading: strict_loading
+        has_many :"#{name}_blobs", through: :"#{name}_attachments", class_name: "ActiveStorage::Blob", source: :blob,
+                                   strict_loading: strict_loading
 
         scope :"with_attached_#{name}", -> {
           if ActiveStorage.track_variants
@@ -196,7 +202,7 @@ module ActiveStorage
 
         after_save { attachment_changes[name.to_s]&.save }
 
-        after_commit(on: %i[ create update ]) { attachment_changes.delete(name.to_s).try(:upload) }
+        after_commit(on: %i[create update]) { attachment_changes.delete(name.to_s).try(:upload) }
 
         reflection = ActiveRecord::Reflection.create(
           :has_many_attached,
@@ -210,13 +216,14 @@ module ActiveStorage
       end
 
       private
-        def validate_service_configuration(association_name, service)
-          if service.present?
-            ActiveStorage::Blob.services.fetch(service) do
-              raise ArgumentError, "Cannot configure service :#{service} for #{name}##{association_name}"
-            end
+
+      def validate_service_configuration(association_name, service)
+        if service.present?
+          ActiveStorage::Blob.services.fetch(service) do
+            raise ArgumentError, "Cannot configure service :#{service} for #{name}##{association_name}"
           end
         end
+      end
     end
 
     def attachment_changes # :nodoc:

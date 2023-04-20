@@ -49,7 +49,8 @@ Capybara::SpecHelper.spec '#save_screenshot', requires: [:screenshot] do
       custom_path = 'screenshots/2.png'
       @session.save_screenshot(custom_path)
 
-      expect(@session.driver).to have_received(:save_screenshot).with(File.expand_path(custom_path, alternative_path), any_args)
+      expect(@session.driver).to have_received(:save_screenshot).with(File.expand_path(custom_path, alternative_path),
+                                                                      any_args)
     end
   end
 end

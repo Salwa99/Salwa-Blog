@@ -17,7 +17,7 @@ class Capybara::Selenium::Node
       end
     end
 
-  private
+    private
 
     def perform_legacy_drag(element, drop_modifiers)
       element.scroll_if_needed do

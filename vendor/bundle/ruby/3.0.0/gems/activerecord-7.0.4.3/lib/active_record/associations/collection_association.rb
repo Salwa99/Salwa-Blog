@@ -145,12 +145,12 @@ module ActiveRecord
         end
 
         dependent = if dependent
-          dependent
-        elsif options[:dependent] == :destroy
-          :delete_all
-        else
-          options[:dependent]
-        end
+                      dependent
+                    elsif options[:dependent] == :destroy
+                      :delete_all
+                    else
+                      options[:dependent]
+                    end
 
         delete_or_nullify_all_records(dependent).tap do
           reset
@@ -304,218 +304,220 @@ module ActiveRecord
       end
 
       private
-        def transaction(&block)
-          reflection.klass.transaction(&block)
-        end
 
-        # We have some records loaded from the database (persisted) and some that are
-        # in-memory (memory). The same record may be represented in the persisted array
-        # and in the memory array.
-        #
-        # So the task of this method is to merge them according to the following rules:
-        #
-        #   * The final array must not have duplicates
-        #   * The order of the persisted array is to be preserved
-        #   * Any changes made to attributes on objects in the memory array are to be preserved
-        #   * Otherwise, attributes should have the value found in the database
-        def merge_target_lists(persisted, memory)
-          return persisted if memory.empty?
+      def transaction(&block)
+        reflection.klass.transaction(&block)
+      end
 
-          persisted.map! do |record|
-            if mem_record = memory.delete(record)
+      # We have some records loaded from the database (persisted) and some that are
+      # in-memory (memory). The same record may be represented in the persisted array
+      # and in the memory array.
+      #
+      # So the task of this method is to merge them according to the following rules:
+      #
+      #   * The final array must not have duplicates
+      #   * The order of the persisted array is to be preserved
+      #   * Any changes made to attributes on objects in the memory array are to be preserved
+      #   * Otherwise, attributes should have the value found in the database
+      def merge_target_lists(persisted, memory)
+        return persisted if memory.empty?
 
-              ((record.attribute_names & mem_record.attribute_names) - mem_record.changed_attribute_names_to_save).each do |name|
-                mem_record[name] = record[name]
-              end
+        persisted.map! do |record|
+          if mem_record = memory.delete(record)
 
-              mem_record
-            else
-              record
+            ((record.attribute_names & mem_record.attribute_names) - mem_record.changed_attribute_names_to_save).each do |name|
+              mem_record[name] = record[name]
             end
-          end
 
-          persisted + memory.reject(&:persisted?)
-        end
-
-        def _create_record(attributes, raise = false, &block)
-          unless owner.persisted?
-            raise ActiveRecord::RecordNotSaved.new("You cannot call create unless the parent is saved", owner)
-          end
-
-          if attributes.is_a?(Array)
-            attributes.collect { |attr| _create_record(attr, raise, &block) }
+            mem_record
           else
-            record = build_record(attributes, &block)
-            transaction do
-              result = nil
-              add_to_target(record) do
-                result = insert_record(record, true, raise) {
-                  @_was_loaded = loaded?
-                }
-              end
-              raise ActiveRecord::Rollback unless result
-            end
             record
           end
         end
 
-        # Do the relevant stuff to insert the given record into the association collection.
-        def insert_record(record, validate = true, raise = false, &block)
-          if raise
-            record.save!(validate: validate, &block)
-          else
-            record.save(validate: validate, &block)
-          end
+        persisted + memory.reject(&:persisted?)
+      end
+
+      def _create_record(attributes, raise = false, &block)
+        unless owner.persisted?
+          raise ActiveRecord::RecordNotSaved.new("You cannot call create unless the parent is saved", owner)
         end
 
-        def delete_or_destroy(records, method)
-          return if records.empty?
-          records = find(records) if records.any? { |record| record.kind_of?(Integer) || record.kind_of?(String) }
-          records = records.flatten
-          records.each { |record| raise_on_type_mismatch!(record) }
-          existing_records = records.reject(&:new_record?)
-
-          if existing_records.empty?
-            remove_records(existing_records, records, method)
-          else
-            transaction { remove_records(existing_records, records, method) }
-          end
-        end
-
-        def remove_records(existing_records, records, method)
-          catch(:abort) do
-            records.each { |record| callback(:before_remove, record) }
-          end || return
-
-          delete_records(existing_records, method) if existing_records.any?
-          @target -= records
-          @association_ids = nil
-
-          records.each { |record| callback(:after_remove, record) }
-        end
-
-        # Delete the given records from the association,
-        # using one of the methods +:destroy+, +:delete_all+
-        # or +:nullify+ (or +nil+, in which case a default is used).
-        def delete_records(records, method)
-          raise NotImplementedError
-        end
-
-        def replace_records(new_target, original_target)
-          delete(difference(target, new_target))
-
-          unless concat(difference(new_target, target))
-            @target = original_target
-            raise RecordNotSaved, "Failed to replace #{reflection.name} because one or more of the " \
-                                  "new records could not be saved."
-          end
-
-          target
-        end
-
-        def replace_common_records_in_memory(new_target, original_target)
-          common_records = intersection(new_target, original_target)
-          common_records.each do |record|
-            skip_callbacks = true
-            replace_on_target(record, skip_callbacks, replace: true)
-          end
-        end
-
-        def concat_records(records, raise = false)
-          result = true
-
-          records.each do |record|
-            raise_on_type_mismatch!(record)
+        if attributes.is_a?(Array)
+          attributes.collect { |attr| _create_record(attr, raise, &block) }
+        else
+          record = build_record(attributes, &block)
+          transaction do
+            result = nil
             add_to_target(record) do
-              unless owner.new_record?
-                result &&= insert_record(record, true, raise) {
-                  @_was_loaded = loaded?
-                }
-              end
+              result = insert_record(record, true, raise) {
+                @_was_loaded = loaded?
+              }
+            end
+            raise ActiveRecord::Rollback unless result
+          end
+          record
+        end
+      end
+
+      # Do the relevant stuff to insert the given record into the association collection.
+      def insert_record(record, validate = true, raise = false, &block)
+        if raise
+          record.save!(validate: validate, &block)
+        else
+          record.save(validate: validate, &block)
+        end
+      end
+
+      def delete_or_destroy(records, method)
+        return if records.empty?
+
+        records = find(records) if records.any? { |record| record.kind_of?(Integer) || record.kind_of?(String) }
+        records = records.flatten
+        records.each { |record| raise_on_type_mismatch!(record) }
+        existing_records = records.reject(&:new_record?)
+
+        if existing_records.empty?
+          remove_records(existing_records, records, method)
+        else
+          transaction { remove_records(existing_records, records, method) }
+        end
+      end
+
+      def remove_records(existing_records, records, method)
+        catch(:abort) do
+          records.each { |record| callback(:before_remove, record) }
+        end || return
+
+        delete_records(existing_records, method) if existing_records.any?
+        @target -= records
+        @association_ids = nil
+
+        records.each { |record| callback(:after_remove, record) }
+      end
+
+      # Delete the given records from the association,
+      # using one of the methods +:destroy+, +:delete_all+
+      # or +:nullify+ (or +nil+, in which case a default is used).
+      def delete_records(records, method)
+        raise NotImplementedError
+      end
+
+      def replace_records(new_target, original_target)
+        delete(difference(target, new_target))
+
+        unless concat(difference(new_target, target))
+          @target = original_target
+          raise RecordNotSaved, "Failed to replace #{reflection.name} because one or more of the " \
+                                "new records could not be saved."
+        end
+
+        target
+      end
+
+      def replace_common_records_in_memory(new_target, original_target)
+        common_records = intersection(new_target, original_target)
+        common_records.each do |record|
+          skip_callbacks = true
+          replace_on_target(record, skip_callbacks, replace: true)
+        end
+      end
+
+      def concat_records(records, raise = false)
+        result = true
+
+        records.each do |record|
+          raise_on_type_mismatch!(record)
+          add_to_target(record) do
+            unless owner.new_record?
+              result &&= insert_record(record, true, raise) {
+                @_was_loaded = loaded?
+              }
             end
           end
-
-          raise ActiveRecord::Rollback unless result
-
-          records
         end
 
-        def replace_on_target(record, skip_callbacks, replace:, inversing: false)
-          if replace && (!record.new_record? || @replaced_or_added_targets.include?(record))
-            index = @target.index(record)
-          end
+        raise ActiveRecord::Rollback unless result
 
-          catch(:abort) do
-            callback(:before_add, record)
-          end || return unless skip_callbacks
+        records
+      end
 
-          set_inverse_instance(record)
-
-          @_was_loaded = true
-
-          yield(record) if block_given?
-
-          if !index && @replaced_or_added_targets.include?(record)
-            index = @target.index(record)
-          end
-
-          @replaced_or_added_targets << record if inversing || index || record.new_record?
-
-          if index
-            target[index] = record
-          elsif @_was_loaded || !loaded?
-            @association_ids = nil
-            target << record
-          end
-
-          callback(:after_add, record) unless skip_callbacks
-
-          record
-        ensure
-          @_was_loaded = nil
+      def replace_on_target(record, skip_callbacks, replace:, inversing: false)
+        if replace && (!record.new_record? || @replaced_or_added_targets.include?(record))
+          index = @target.index(record)
         end
 
-        def callback(method, record)
-          callbacks_for(method).each do |callback|
-            callback.call(method, owner, record)
-          end
+        catch(:abort) do
+          callback(:before_add, record)
+        end || return unless skip_callbacks
+
+        set_inverse_instance(record)
+
+        @_was_loaded = true
+
+        yield(record) if block_given?
+
+        if !index && @replaced_or_added_targets.include?(record)
+          index = @target.index(record)
         end
 
-        def callbacks_for(callback_name)
-          full_callback_name = "#{callback_name}_for_#{reflection.name}"
-          if owner.class.respond_to?(full_callback_name)
-            owner.class.send(full_callback_name)
-          else
-            []
-          end
+        @replaced_or_added_targets << record if inversing || index || record.new_record?
+
+        if index
+          target[index] = record
+        elsif @_was_loaded || !loaded?
+          @association_ids = nil
+          target << record
         end
 
-        def include_in_memory?(record)
-          if reflection.is_a?(ActiveRecord::Reflection::ThroughReflection)
-            assoc = owner.association(reflection.through_reflection.name)
-            assoc.reader.any? { |source|
-              target_reflection = source.send(reflection.source_reflection.name)
-              target_reflection.respond_to?(:include?) ? target_reflection.include?(record) : target_reflection == record
-            } || target.include?(record)
-          else
-            target.include?(record)
-          end
-        end
+        callback(:after_add, record) unless skip_callbacks
 
-        # If the :inverse_of option has been
-        # specified, then #find scans the entire collection.
-        def find_by_scan(*args)
-          expects_array = args.first.kind_of?(Array)
-          ids           = args.flatten.compact.map(&:to_s).uniq
+        record
+      ensure
+        @_was_loaded = nil
+      end
 
-          if ids.size == 1
-            id = ids.first
-            record = load_target.detect { |r| id == r.id.to_s }
-            expects_array ? [ record ] : record
-          else
-            load_target.select { |r| ids.include?(r.id.to_s) }
-          end
+      def callback(method, record)
+        callbacks_for(method).each do |callback|
+          callback.call(method, owner, record)
         end
+      end
+
+      def callbacks_for(callback_name)
+        full_callback_name = "#{callback_name}_for_#{reflection.name}"
+        if owner.class.respond_to?(full_callback_name)
+          owner.class.send(full_callback_name)
+        else
+          []
+        end
+      end
+
+      def include_in_memory?(record)
+        if reflection.is_a?(ActiveRecord::Reflection::ThroughReflection)
+          assoc = owner.association(reflection.through_reflection.name)
+          assoc.reader.any? { |source|
+            target_reflection = source.send(reflection.source_reflection.name)
+            target_reflection.respond_to?(:include?) ? target_reflection.include?(record) : target_reflection == record
+          } || target.include?(record)
+        else
+          target.include?(record)
+        end
+      end
+
+      # If the :inverse_of option has been
+      # specified, then #find scans the entire collection.
+      def find_by_scan(*args)
+        expects_array = args.first.kind_of?(Array)
+        ids = args.flatten.compact.map(&:to_s).uniq
+
+        if ids.size == 1
+          id = ids.first
+          record = load_target.detect { |r| id == r.id.to_s }
+          expects_array ? [record] : record
+        else
+          load_target.select { |r| ids.include?(r.id.to_s) }
+        end
+      end
     end
   end
 end

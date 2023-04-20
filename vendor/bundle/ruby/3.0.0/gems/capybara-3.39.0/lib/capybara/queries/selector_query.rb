@@ -83,14 +83,14 @@ module Capybara
         desc << ' that is not focused' if options[:focused] == false
 
         desc << case options[:style]
-        when String
-          " with style attribute #{options[:style].inspect}"
-        when Regexp
-          " with style attribute matching #{options[:style].inspect}"
-        when Hash
-          " with styles #{options[:style].inspect}"
-        else ''
-        end
+                when String
+                  " with style attribute #{options[:style].inspect}"
+                when Regexp
+                  " with style attribute matching #{options[:style].inspect}"
+                when Hash
+                  " with styles #{options[:style].inspect}"
+                else ''
+                end
 
         %i[above below left_of right_of near].each do |spatial_filter|
           if options[spatial_filter] && show_for[:spatial]
@@ -183,7 +183,7 @@ module Capybara
         +"expected not to find #{applied_description}" << count_message
       end
 
-    private
+      private
 
       def selector_format
         @selector.format
@@ -343,7 +343,8 @@ module Capybara
 
       def assert_valid_keys
         unless VALID_MATCH.include?(match)
-          raise ArgumentError, "Invalid option #{match.inspect} for :match, should be one of #{VALID_MATCH.map(&:inspect).join(', ')}"
+          raise ArgumentError,
+                "Invalid option #{match.inspect} for :match, should be one of #{VALID_MATCH.map(&:inspect).join(', ')}"
         end
 
         unhandled_options = @options.keys.reject do |option_name|
@@ -567,15 +568,15 @@ module Capybara
         return (visible != :hidden) && (node.initial_cache[:visible] != false) && !node.obscured? if obscured == false
 
         vis = case visible
-        when :visible
-          node.initial_cache[:visible] || (node.initial_cache[:visible].nil? && node.visible?)
-        when :hidden
-          # TODO: check why the 'visbile' cache spelling mistake wasn't caught in a test
-          # (node.initial_cache[:visible] == false) || (node.initial_cache[:visbile].nil? && !node.visible?)
-          (node.initial_cache[:visible] == false) || (node.initial_cache[:visible].nil? && !node.visible?)
-        else
-          true
-        end
+              when :visible
+                node.initial_cache[:visible] || (node.initial_cache[:visible].nil? && node.visible?)
+              when :hidden
+                # TODO: check why the 'visbile' cache spelling mistake wasn't caught in a test
+                # (node.initial_cache[:visible] == false) || (node.initial_cache[:visbile].nil? && !node.visible?)
+                (node.initial_cache[:visible] == false) || (node.initial_cache[:visible].nil? && !node.visible?)
+              else
+                true
+              end
 
         vis && case obscured
                when true
@@ -669,7 +670,7 @@ module Capybara
           distance(other) <= 50
         end
 
-      protected
+        protected
 
         def line_segments
           [
@@ -680,7 +681,7 @@ module Capybara
           ]
         end
 
-      private
+        private
 
         def distance_segment_segment(l1p1, l1p2, l2p1, l2p2)
           # See http://geomalgorithms.com/a07-_distance.html

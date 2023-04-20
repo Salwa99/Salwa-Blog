@@ -10,7 +10,7 @@ module ActiveRecord
         end
         unless Array(options[:scope]).all? { |scope| scope.respond_to?(:to_sym) }
           raise ArgumentError, "#{options[:scope]} is not supported format for :scope option. " \
-            "Pass a symbol or an array of symbols instead: `scope: :user_id`"
+                               "Pass a symbol or an array of symbols instead: `scope: :user_id`"
         end
         super
         @klass = options[:class]
@@ -25,7 +25,8 @@ module ActiveRecord
           if finder_class.primary_key
             relation = relation.where.not(finder_class.primary_key => record.id_in_database)
           else
-            raise UnknownPrimaryKey.new(finder_class, "Cannot validate uniqueness for persisted record without primary key.")
+            raise UnknownPrimaryKey.new(finder_class,
+                                        "Cannot validate uniqueness for persisted record without primary key.")
           end
         end
         relation = scope_relation(record, relation)
@@ -34,10 +35,10 @@ module ActiveRecord
           conditions = options[:conditions]
 
           relation = if conditions.arity.zero?
-            relation.instance_exec(&conditions)
-          else
-            relation.instance_exec(record, &conditions)
-          end
+                       relation.instance_exec(&conditions)
+                     else
+                       relation.instance_exec(record, &conditions)
+                     end
         end
 
         if relation.exists?
@@ -48,7 +49,8 @@ module ActiveRecord
         end
       end
 
-    private
+      private
+
       # The check for an existing value should be run from a class that
       # isn't abstract. This means working down from the current class
       # (self), to the first non-abstract class. Since classes don't know
@@ -85,10 +87,10 @@ module ActiveRecord
       def scope_relation(record, relation)
         Array(options[:scope]).each do |scope_item|
           scope_value = if record.class._reflect_on_association(scope_item)
-            record.association(scope_item).reader
-          else
-            record.read_attribute(scope_item)
-          end
+                          record.association(scope_item).reader
+                        else
+                          record.read_attribute(scope_item)
+                        end
           relation = relation.where(scope_item => scope_value)
         end
 

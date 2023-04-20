@@ -195,7 +195,7 @@ module Capybara
         eql?(other) || (other.respond_to?(:native) && native == other.native)
       end
 
-    private
+      private
 
       def option_value(option)
         return nil if option.nil?

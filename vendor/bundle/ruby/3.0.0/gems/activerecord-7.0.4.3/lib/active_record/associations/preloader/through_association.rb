@@ -55,97 +55,100 @@ module ActiveRecord
             source_preloaders.flat_map(&:future_classes).uniq
           else
             through_classes = through_preloaders.flat_map(&:future_classes)
-            source_classes = source_reflection.
-              chain.
-              reject { |reflection| reflection.respond_to?(:polymorphic?) && reflection.polymorphic? }.
-              map(&:klass)
+            source_classes = source_reflection
+              .chain
+              .reject { |reflection| reflection.respond_to?(:polymorphic?) && reflection.polymorphic? }
+              .map(&:klass)
             (through_classes + source_classes).uniq
           end
         end
 
         private
-          def data_available?
-            owners.all? { |owner| loaded?(owner) } ||
-              through_preloaders.all?(&:run?) && source_preloaders.all?(&:run?)
+
+        def data_available?
+          owners.all? { |owner| loaded?(owner) } ||
+            through_preloaders.all?(&:run?) && source_preloaders.all?(&:run?)
+        end
+
+        def source_preloaders
+          @source_preloaders ||= ActiveRecord::Associations::Preloader.new(records: middle_records,
+                                                                           associations: source_reflection.name, scope: scope, associate_by_default: false).loaders
+        end
+
+        def middle_records
+          through_preloaders.flat_map(&:preloaded_records)
+        end
+
+        def through_preloaders
+          @through_preloaders ||= ActiveRecord::Associations::Preloader.new(records: owners,
+                                                                            associations: through_reflection.name, scope: through_scope, associate_by_default: false).loaders
+        end
+
+        def through_reflection
+          reflection.through_reflection
+        end
+
+        def source_reflection
+          reflection.source_reflection
+        end
+
+        def source_records_by_owner
+          @source_records_by_owner ||= source_preloaders.map(&:records_by_owner).reduce(:merge)
+        end
+
+        def through_records_by_owner
+          @through_records_by_owner ||= through_preloaders.map(&:records_by_owner).reduce(:merge)
+        end
+
+        def preload_index
+          @preload_index ||= preloaded_records.each_with_object({}).with_index do |(record, result), index|
+            result[record] = index
+          end
+        end
+
+        def through_scope
+          scope = through_reflection.klass.unscoped
+          options = reflection.options
+
+          return scope if options[:disable_joins]
+
+          values = reflection_scope.values
+          if annotations = values[:annotate]
+            scope.annotate!(*annotations)
           end
 
-          def source_preloaders
-            @source_preloaders ||= ActiveRecord::Associations::Preloader.new(records: middle_records, associations: source_reflection.name, scope: scope, associate_by_default: false).loaders
-          end
+          if options[:source_type]
+            scope.where! reflection.foreign_type => options[:source_type]
+          elsif !reflection_scope.where_clause.empty?
+            scope.where_clause = reflection_scope.where_clause
 
-          def middle_records
-            through_preloaders.flat_map(&:preloaded_records)
-          end
+            if includes = values[:includes]
+              scope.includes!(source_reflection.name => includes)
+            else
+              scope.includes!(source_reflection.name)
+            end
 
-          def through_preloaders
-            @through_preloaders ||= ActiveRecord::Associations::Preloader.new(records: owners, associations: through_reflection.name, scope: through_scope, associate_by_default: false).loaders
-          end
+            if values[:references] && !values[:references].empty?
+              scope.references_values |= values[:references]
+            else
+              scope.references!(source_reflection.table_name)
+            end
 
-          def through_reflection
-            reflection.through_reflection
-          end
+            if joins = values[:joins]
+              scope.joins!(source_reflection.name => joins)
+            end
 
-          def source_reflection
-            reflection.source_reflection
-          end
+            if left_outer_joins = values[:left_outer_joins]
+              scope.left_outer_joins!(source_reflection.name => left_outer_joins)
+            end
 
-          def source_records_by_owner
-            @source_records_by_owner ||= source_preloaders.map(&:records_by_owner).reduce(:merge)
-          end
-
-          def through_records_by_owner
-            @through_records_by_owner ||= through_preloaders.map(&:records_by_owner).reduce(:merge)
-          end
-
-          def preload_index
-            @preload_index ||= preloaded_records.each_with_object({}).with_index do |(record, result), index|
-              result[record] = index
+            if scope.eager_loading? && order_values = values[:order]
+              scope = scope.order(order_values)
             end
           end
 
-          def through_scope
-            scope = through_reflection.klass.unscoped
-            options = reflection.options
-
-            return scope if options[:disable_joins]
-
-            values = reflection_scope.values
-            if annotations = values[:annotate]
-              scope.annotate!(*annotations)
-            end
-
-            if options[:source_type]
-              scope.where! reflection.foreign_type => options[:source_type]
-            elsif !reflection_scope.where_clause.empty?
-              scope.where_clause = reflection_scope.where_clause
-
-              if includes = values[:includes]
-                scope.includes!(source_reflection.name => includes)
-              else
-                scope.includes!(source_reflection.name)
-              end
-
-              if values[:references] && !values[:references].empty?
-                scope.references_values |= values[:references]
-              else
-                scope.references!(source_reflection.table_name)
-              end
-
-              if joins = values[:joins]
-                scope.joins!(source_reflection.name => joins)
-              end
-
-              if left_outer_joins = values[:left_outer_joins]
-                scope.left_outer_joins!(source_reflection.name => left_outer_joins)
-              end
-
-              if scope.eager_loading? && order_values = values[:order]
-                scope = scope.order(order_values)
-              end
-            end
-
-            cascade_strict_loading(scope)
-          end
+          cascade_strict_loading(scope)
+        end
       end
     end
   end

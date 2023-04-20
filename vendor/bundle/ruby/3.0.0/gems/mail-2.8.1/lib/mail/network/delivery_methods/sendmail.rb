@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'mail/smtp_envelope'
 
 module Mail
@@ -39,8 +40,8 @@ module Mail
   #   mail.deliver!
   class Sendmail
     DEFAULTS = {
-      :location   => '/usr/sbin/sendmail',
-      :arguments  => %w[ -i ]
+      :location => '/usr/sbin/sendmail',
+      :arguments => %w[-i]
     }
 
     attr_accessor :settings
@@ -51,8 +52,8 @@ module Mail
     def initialize(values)
       if values[:arguments].is_a?(String)
         deprecation_warn.call \
-          'Initializing Mail::Sendmail with :arguments of type String is deprecated.' \
-          ' Instead ensure :arguments is an array of strings, e.g. ["-i", "-t"]'
+          'Initializing Mail::Sendmail with :arguments of type String is deprecated. ' \
+          'Instead ensure :arguments is an array of strings, e.g. ["-i", "-t"]'
       end
       self.settings = self.class::DEFAULTS.merge(values)
     end
@@ -71,7 +72,7 @@ module Mail
 
       command = [settings[:location]]
       command.concat Array(arguments)
-      command.concat [ '-f', envelope.from ] if envelope.from
+      command.concat ['-f', envelope.from] if envelope.from
 
       if destinations = destinations_for(envelope)
         command.push '--'
@@ -85,13 +86,14 @@ module Mail
     end
 
     private
-      def popen(command, &block)
-        IO.popen(command, 'w+', :err => :out, &block).tap do
-          if $?.exitstatus != 0
-            raise DeliveryError, "Delivery failed with exitstatus #{$?.exitstatus}: #{command.inspect}"
-          end
+
+    def popen(command, &block)
+      IO.popen(command, 'w+', :err => :out, &block).tap do
+        if $?.exitstatus != 0
+          raise DeliveryError, "Delivery failed with exitstatus #{$?.exitstatus}: #{command.inspect}"
         end
       end
+    end
 
     #+ support for delivery using string arguments (deprecated)
     def old_deliver(envelope)

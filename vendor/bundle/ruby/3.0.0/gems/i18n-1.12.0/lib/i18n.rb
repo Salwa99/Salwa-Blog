@@ -10,11 +10,11 @@ require 'i18n/interpolate/ruby'
 
 module I18n
   autoload :Backend, 'i18n/backend'
-  autoload :Config,  'i18n/config'
+  autoload :Config, 'i18n/config'
   autoload :Gettext, 'i18n/gettext'
-  autoload :Locale,  'i18n/locale'
-  autoload :Tests,   'i18n/tests'
-  autoload :Middleware,   'i18n/middleware'
+  autoload :Locale, 'i18n/locale'
+  autoload :Tests, 'i18n/tests'
+  autoload :Middleware, 'i18n/middleware'
 
   RESERVED_KEYS = %i[
     cascade
@@ -64,7 +64,7 @@ module I18n
 
     # Write methods which delegates to the configuration object
     %w(locale backend default_locale available_locales default_separator
-      exception_handler load_path enforce_available_locales).each do |method|
+       exception_handler load_path enforce_available_locales).each do |method|
       module_eval <<-DELEGATORS, __FILE__, __LINE__ + 1
         def #{method}
           config.#{method}
@@ -210,6 +210,7 @@ module I18n
     def translate(key = nil, throw: false, raise: false, locale: nil, **options) # TODO deprecate :raise
       locale ||= config.locale
       raise Disabled.new('t') if locale == false
+
       enforce_available_locales!(locale)
 
       backend = config.backend
@@ -236,6 +237,7 @@ module I18n
       locale ||= config.locale
       raise Disabled.new('exists?') if locale == false
       raise I18n::ArgumentError if key.is_a?(String) && key.empty?
+
       config.backend.exists?(locale, key, options)
     end
 
@@ -293,6 +295,7 @@ module I18n
     def transliterate(key, throw: false, raise: false, locale: nil, replacement: nil, **options)
       locale ||= config.locale
       raise Disabled.new('transliterate') if locale == false
+
       enforce_available_locales!(locale)
 
       config.backend.transliterate(locale, key, replacement)
@@ -304,6 +307,7 @@ module I18n
     def localize(object, locale: nil, format: nil, **options)
       locale ||= config.locale
       raise Disabled.new('l') if locale == false
+
       enforce_available_locales!(locale)
 
       format ||= :default
@@ -356,7 +360,7 @@ module I18n
       config.available_locales_initialized?
     end
 
-  private
+    private
 
     def translate_key(key, throw, raise, locale, backend, options)
       result = catch(:exception) do

@@ -83,31 +83,32 @@ module I18n
 
       protected
 
-        def fetch(cache_key, &block)
-          result = _fetch(cache_key, &block)
-          throw(:exception, result) if result.is_a?(MissingTranslation)
-          result = result.dup if result.frozen? rescue result
-          result
-        end
+      def fetch(cache_key, &block)
+        result = _fetch(cache_key, &block)
+        throw(:exception, result) if result.is_a?(MissingTranslation)
+        result = result.dup if result.frozen? rescue result
+        result
+      end
 
-        def _fetch(cache_key, &block)
-          result = I18n.cache_store.read(cache_key)
-          return result unless result.nil?
-          result = catch(:exception, &block)
-          I18n.cache_store.write(cache_key, result) unless result.is_a?(Proc)
-          result
-        end
+      def _fetch(cache_key, &block)
+        result = I18n.cache_store.read(cache_key)
+        return result unless result.nil?
 
-        def cache_key(locale, key, options)
-          # This assumes that only simple, native Ruby values are passed to I18n.translate.
-          "i18n/#{I18n.cache_namespace}/#{locale}/#{digest_item(key)}/#{digest_item(options)}"
-        end
+        result = catch(:exception, &block)
+        I18n.cache_store.write(cache_key, result) unless result.is_a?(Proc)
+        result
+      end
+
+      def cache_key(locale, key, options)
+        # This assumes that only simple, native Ruby values are passed to I18n.translate.
+        "i18n/#{I18n.cache_namespace}/#{locale}/#{digest_item(key)}/#{digest_item(options)}"
+      end
 
       private
 
-        def digest_item(key)
-          I18n.cache_key_digest ? I18n.cache_key_digest.hexdigest(key.to_s) : key.to_s.hash
-        end
+      def digest_item(key)
+        I18n.cache_key_digest ? I18n.cache_key_digest.hexdigest(key.to_s) : key.to_s.hash
+      end
     end
   end
 end

@@ -35,7 +35,8 @@ module ActionMailbox
     end
 
     private
-      attr_reader :routes
+
+    attr_reader :routes
   end
 end
 

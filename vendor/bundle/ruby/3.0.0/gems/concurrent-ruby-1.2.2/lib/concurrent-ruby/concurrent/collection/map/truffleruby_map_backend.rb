@@ -1,8 +1,6 @@
 module Concurrent
-
   # @!visibility private
   module Collection
-
     # @!visibility private
     class TruffleRubyMapBackend < TruffleRuby::ConcurrentMap
       def initialize(options = nil)

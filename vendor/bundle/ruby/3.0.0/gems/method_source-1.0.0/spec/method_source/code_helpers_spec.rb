@@ -32,7 +32,7 @@ describe MethodSource::CodeHelpers do
     ["puts :"]
   ] + (RbConfig::CONFIG['ruby_install_name'] == 'rbx' ? [] : [
     ["def", "method(1"], # in this case the syntax error is "expecting ')'".
-    ["o = Object.new.tap{ def o.render;","'MEH'", "}"] # in this case the syntax error is "expecting keyword_end".
+    ["o = Object.new.tap{ def o.render;", "'MEH'", "}"] # in this case the syntax error is "expecting keyword_end".
   ]).compact.each do |foo|
     it "should raise an error on invalid syntax like #{foo.inspect}" do
       expect {

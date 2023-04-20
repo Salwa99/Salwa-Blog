@@ -79,23 +79,25 @@ module ActiveRecord
       end
 
       private
-        def timestamp_attributes_for_create
-          ["created_at", "created_on"].map! { |name| attribute_aliases[name] || name }
-        end
 
-        def timestamp_attributes_for_update
-          ["updated_at", "updated_on"].map! { |name| attribute_aliases[name] || name }
-        end
+      def timestamp_attributes_for_create
+        ["created_at", "created_on"].map! { |name| attribute_aliases[name] || name }
+      end
 
-        def reload_schema_from_cache
-          @timestamp_attributes_for_create_in_model = nil
-          @timestamp_attributes_for_update_in_model = nil
-          @all_timestamp_attributes_in_model = nil
-          super
-        end
+      def timestamp_attributes_for_update
+        ["updated_at", "updated_on"].map! { |name| attribute_aliases[name] || name }
+      end
+
+      def reload_schema_from_cache
+        @timestamp_attributes_for_create_in_model = nil
+        @timestamp_attributes_for_update_in_model = nil
+        @all_timestamp_attributes_in_model = nil
+        super
+      end
     end
 
-  private
+    private
+
     def _create_record
       if record_timestamps
         current_time = current_time_from_proper_timezone
@@ -114,6 +116,7 @@ module ActiveRecord
 
         timestamp_attributes_for_update_in_model.each do |column|
           next if will_save_change_to_attribute?(column)
+
           _write_attribute(column, current_time)
         end
       end

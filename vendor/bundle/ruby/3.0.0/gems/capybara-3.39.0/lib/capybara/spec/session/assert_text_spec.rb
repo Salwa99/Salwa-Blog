@@ -71,12 +71,14 @@ Capybara::SpecHelper.spec '#assert_text' do
     end.to raise_error(Capybara::ExpectationNotMet, /it was found 1 time using a case insensitive search/)
   end
 
-  it 'should raise error with helpful message if requested text is present but invisible and with incorrect case', requires: [:js] do
+  it 'should raise error with helpful message if requested text is present but invisible and with incorrect case',
+     requires: [:js] do
     @session.visit('/with_html')
     el = @session.find(:css, '#uppercase')
     expect do
       el.assert_text('text here')
-    end.to raise_error(Capybara::ExpectationNotMet, /it was found 1 time using a case insensitive search and it was found 1 time including non-visible text/)
+    end.to raise_error(Capybara::ExpectationNotMet,
+                       /it was found 1 time using a case insensitive search and it was found 1 time including non-visible text/)
   end
 
   it 'should raise the correct error if requested text is missing but contains regex special characters' do
@@ -95,7 +97,8 @@ Capybara::SpecHelper.spec '#assert_text' do
     @session.visit('/with_html')
     expect do
       @session.assert_text(/xxxxyzzz/)
-    end.to raise_error(Capybara::ExpectationNotMet, %r{\Aexpected to find text matching /xxxxyzzz/ in "This is a test\\nHeader Class(.+)"\Z})
+    end.to raise_error(Capybara::ExpectationNotMet,
+                       %r{\Aexpected to find text matching /xxxxyzzz/ in "This is a test\\nHeader Class(.+)"\Z})
   end
 
   it 'should escape any characters that would have special meaning in a regexp' do
@@ -122,7 +125,8 @@ Capybara::SpecHelper.spec '#assert_text' do
       @session.visit('/with_html')
       expect do
         @session.find(:css, '.number').assert_text(/\d/, between: 0..1)
-      end.to raise_error(Capybara::ExpectationNotMet, 'expected to find text matching /\\d/ between 0 and 1 times but found 2 times in "42"')
+      end.to raise_error(Capybara::ExpectationNotMet,
+                         'expected to find text matching /\\d/ between 0 and 1 times but found 2 times in "42"')
     end
   end
 
@@ -217,7 +221,8 @@ Capybara::SpecHelper.spec '#assert_no_text' do
     el = @session.find(:css, '#hidden-text', visible: false)
     expect do
       el.assert_no_text(:all, 'Some of this text is hidden!')
-    end.to raise_error(Capybara::ExpectationNotMet, 'expected not to find text "Some of this text is hidden!" in "Some of this text is hidden!"')
+    end.to raise_error(Capybara::ExpectationNotMet,
+                       'expected not to find text "Some of this text is hidden!" in "Some of this text is hidden!"')
   end
 
   it 'should raise error if :all given and text is invisible.' do
@@ -225,7 +230,8 @@ Capybara::SpecHelper.spec '#assert_no_text' do
     el = @session.find(:css, '#some-hidden-text', visible: false)
     expect do
       el.assert_no_text(:visible, 'hidden')
-    end.to raise_error(Capybara::ExpectationNotMet, 'expected not to find text "hidden" in "Some of this text is not hidden"')
+    end.to raise_error(Capybara::ExpectationNotMet,
+                       'expected not to find text "hidden" in "Some of this text is not hidden"')
   end
 
   it "should be true if the text in the page doesn't match given regexp" do
@@ -243,7 +249,8 @@ Capybara::SpecHelper.spec '#assert_no_text' do
       @session.visit('/with_html')
       expect do
         @session.find(:css, '.number').assert_text(/\d/, count: 1)
-      end.to raise_error(Capybara::ExpectationNotMet, 'expected to find text matching /\\d/ 1 time but found 2 times in "42"')
+      end.to raise_error(Capybara::ExpectationNotMet,
+                         'expected to find text matching /\\d/ 1 time but found 2 times in "42"')
     end
   end
 

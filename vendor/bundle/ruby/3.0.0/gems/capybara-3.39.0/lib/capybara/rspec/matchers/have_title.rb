@@ -18,7 +18,7 @@ module Capybara
           "have title #{title.inspect}"
         end
 
-      private
+        private
 
         def title
           @args.first

@@ -6,7 +6,7 @@ namespace :git do
     task :list do
       tags = `git tag -l`
       tags.gsub!("\r", "")
-      tags = tags.split("\n").sort {|a, b| b <=> a }
+      tags = tags.split("\n").sort { |a, b| b <=> a }
       puts tags.join("\n")
     end
 

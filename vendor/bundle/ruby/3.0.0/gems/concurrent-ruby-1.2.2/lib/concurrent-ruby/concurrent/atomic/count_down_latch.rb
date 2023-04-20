@@ -3,7 +3,6 @@ require 'concurrent/atomic/mutex_count_down_latch'
 require 'concurrent/atomic/java_count_down_latch'
 
 module Concurrent
-
   ###################################################################
 
   # @!macro count_down_latch_method_initialize

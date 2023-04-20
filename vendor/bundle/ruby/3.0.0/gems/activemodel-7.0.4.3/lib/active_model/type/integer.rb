@@ -20,11 +20,13 @@ module ActiveModel
 
       def deserialize(value)
         return if value.blank?
+
         value.to_i
       end
 
       def serialize(value)
         return if value.is_a?(::String) && non_numeric_string?(value)
+
         ensure_in_range(super)
       end
 
@@ -37,34 +39,36 @@ module ActiveModel
       end
 
       private
-        attr_reader :range
 
-        def in_range?(value)
-          !value || range.member?(value)
+      attr_reader :range
+
+      def in_range?(value)
+        !value || range.member?(value)
+      end
+
+      def cast_value(value)
+        value.to_i rescue nil
+      end
+
+      def ensure_in_range(value)
+        unless in_range?(value)
+          raise ActiveModel::RangeError, "#{value} is out of range for #{self.class} with limit #{_limit} bytes"
         end
 
-        def cast_value(value)
-          value.to_i rescue nil
-        end
+        value
+      end
 
-        def ensure_in_range(value)
-          unless in_range?(value)
-            raise ActiveModel::RangeError, "#{value} is out of range for #{self.class} with limit #{_limit} bytes"
-          end
-          value
-        end
+      def max_value
+        1 << (_limit * 8 - 1) # 8 bits per byte with one bit for sign
+      end
 
-        def max_value
-          1 << (_limit * 8 - 1) # 8 bits per byte with one bit for sign
-        end
+      def min_value
+        -max_value
+      end
 
-        def min_value
-          -max_value
-        end
-
-        def _limit
-          limit || DEFAULT_LIMIT
-        end
+      def _limit
+        limit || DEFAULT_LIMIT
+      end
     end
   end
 end

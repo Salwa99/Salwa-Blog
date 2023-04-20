@@ -1,7 +1,6 @@
 require 'concurrent/atomic/mutex_semaphore'
 
 module Concurrent
-
   ###################################################################
 
   # @!macro semaphore_method_initialize

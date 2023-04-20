@@ -9,7 +9,7 @@ module ActiveSupport
       attr_reader :id
 
       def initialize(notifier)
-        @id       = unique_id
+        @id = unique_id
         @notifier = notifier
       end
 
@@ -50,9 +50,10 @@ module ActiveSupport
       end
 
       private
-        def unique_id
-          SecureRandom.hex(10)
-        end
+
+      def unique_id
+        SecureRandom.hex(10)
+      end
     end
 
     class Event
@@ -60,12 +61,12 @@ module ActiveSupport
       attr_accessor :payload
 
       def initialize(name, start, ending, transaction_id, payload)
-        @name           = name
-        @payload        = payload.dup
-        @time           = start ? start.to_f * 1_000.0 : start
+        @name = name
+        @payload = payload.dup
+        @time = start ? start.to_f * 1_000.0 : start
         @transaction_id = transaction_id
-        @end            = ending ? ending.to_f * 1_000.0 : ending
-        @children       = []
+        @end = ending ? ending.to_f * 1_000.0 : ending
+        @children = []
         @cpu_time_start = 0.0
         @cpu_time_finish = 0.0
         @allocation_count_start = 0
@@ -142,31 +143,32 @@ module ActiveSupport
       end
 
       private
-        def now
-          Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_millisecond)
-        end
 
-        begin
+      def now
+        Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_millisecond)
+      end
+
+      begin
+        Process.clock_gettime(Process::CLOCK_THREAD_CPUTIME_ID, :float_millisecond)
+
+        def now_cpu
           Process.clock_gettime(Process::CLOCK_THREAD_CPUTIME_ID, :float_millisecond)
-
-          def now_cpu
-            Process.clock_gettime(Process::CLOCK_THREAD_CPUTIME_ID, :float_millisecond)
-          end
-        rescue
-          def now_cpu # rubocop:disable Lint/DuplicateMethods
-            0.0
-          end
         end
-
-        if GC.stat.key?(:total_allocated_objects)
-          def now_allocations
-            GC.stat(:total_allocated_objects)
-          end
-        else # Likely on JRuby, TruffleRuby
-          def now_allocations
-            0
-          end
+      rescue
+        def now_cpu # rubocop:disable Lint/DuplicateMethods
+          0.0
         end
+      end
+
+      if GC.stat.key?(:total_allocated_objects)
+        def now_allocations
+          GC.stat(:total_allocated_objects)
+        end
+      else # Likely on JRuby, TruffleRuby
+        def now_allocations
+          0
+        end
+      end
     end
   end
 end

@@ -21,30 +21,30 @@ module ActiveSupport
 
     if RubyFeatures::CLASS_SUBCLASSES
       @@excluded_descendants = if RUBY_ENGINE == "ruby"
-        # On MRI `ObjectSpace::WeakMap` keys are weak references.
-        # So we can simply use WeakMap as a `Set`.
-        ObjectSpace::WeakMap.new
-      else
-        # On TruffleRuby `ObjectSpace::WeakMap` keys are strong references.
-        # So we use `object_id` as a key and the actual object as a value.
-        #
-        # JRuby for now doesn't have Class#descendant, but when it will, it will likely
-        # have the same WeakMap semantic than Truffle so we future proof this as much as possible.
-        class WeakSet # :nodoc:
-          def initialize
-            @map = ObjectSpace::WeakMap.new
-          end
+                                 # On MRI `ObjectSpace::WeakMap` keys are weak references.
+                                 # So we can simply use WeakMap as a `Set`.
+                                 ObjectSpace::WeakMap.new
+                               else
+                                 # On TruffleRuby `ObjectSpace::WeakMap` keys are strong references.
+                                 # So we use `object_id` as a key and the actual object as a value.
+                                 #
+                                 # JRuby for now doesn't have Class#descendant, but when it will, it will likely
+                                 # have the same WeakMap semantic than Truffle so we future proof this as much as possible.
+                                 class WeakSet # :nodoc:
+                                   def initialize
+                                     @map = ObjectSpace::WeakMap.new
+                                   end
 
-          def [](object)
-            @map.key?(object.object_id)
-          end
+                                   def [](object)
+                                     @map.key?(object.object_id)
+                                   end
 
-          def []=(object, _present)
-            @map[object.object_id] = object
-          end
-        end
-        WeakSet.new
-      end
+                                   def []=(object, _present)
+                                     @map[object.object_id] = object
+                                   end
+                                 end
+                                 WeakSet.new
+                               end
 
       class << self
         def disable_clear! # :nodoc:
@@ -140,14 +140,15 @@ module ActiveSupport
         end
 
         private
-          def accumulate_descendants(klass, acc)
-            if direct_descendants = @@direct_descendants[klass]
-              direct_descendants.each do |direct_descendant|
-                acc << direct_descendant
-                accumulate_descendants(direct_descendant, acc)
-              end
+
+        def accumulate_descendants(klass, acc)
+          if direct_descendants = @@direct_descendants[klass]
+            direct_descendants.each do |direct_descendant|
+              acc << direct_descendant
+              accumulate_descendants(direct_descendant, acc)
             end
           end
+        end
       end
 
       def inherited(base)

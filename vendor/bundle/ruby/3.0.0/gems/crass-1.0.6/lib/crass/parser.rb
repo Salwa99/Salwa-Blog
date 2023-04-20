@@ -1,9 +1,9 @@
 # encoding: utf-8
+
 require_relative 'token-scanner'
 require_relative 'tokenizer'
 
 module Crass
-
   # Parses a CSS string or list of tokens.
   #
   # 5. http://dev.w3.org/csswg/css-syntax/#parsing
@@ -35,7 +35,7 @@ module Crass
     # 5.3.3. http://dev.w3.org/csswg/css-syntax/#parse-a-list-of-rules
     def self.parse_rules(input, options = {})
       parser = Parser.new(input, options)
-      rules  = parser.consume_rules
+      rules = parser.consume_rules
 
       rules.map do |rule|
         if rule[:node] == :qualified_rule
@@ -53,7 +53,7 @@ module Crass
     # 5.3.2. http://dev.w3.org/csswg/css-syntax/#parse-a-stylesheet
     def self.parse_stylesheet(input, options = {})
       parser = Parser.new(input, options)
-      rules  = parser.consume_rules(:top_level => true)
+      rules = parser.consume_rules(:top_level => true)
 
       rules.map do |rule|
         if rule[:node] == :qualified_rule
@@ -72,7 +72,7 @@ module Crass
     #   * **:exclude_comments** - When `true`, comments will be excluded.
     #
     def self.stringify(nodes, options = {})
-      nodes  = [nodes] unless nodes.is_a?(Array)
+      nodes = [nodes] unless nodes.is_a?(Array)
       string = String.new
 
       nodes.each do |node|
@@ -138,7 +138,7 @@ module Crass
       rule = {}
 
       rule[:tokens] = input.collect do
-        rule[:name]    = input.consume[:value]
+        rule[:name] = input.consume[:value]
         rule[:prelude] = []
 
         while token = input.consume
@@ -208,7 +208,7 @@ module Crass
     # 5.4.5. http://dev.w3.org/csswg/css-syntax-3/#consume-a-declaration
     def consume_declaration(input = @tokens)
       declaration = {}
-      value       = []
+      value = []
 
       declaration[:tokens] = input.collect do
         declaration[:name] = input.consume[:value]
@@ -236,16 +236,16 @@ module Crass
       end
 
       # Look for !important.
-      important_tokens = value.reject {|token|
+      important_tokens = value.reject { |token|
         node = token[:node]
         node == :whitespace || node == :comment || node == :semicolon
       }.last(2)
 
       if important_tokens.size == 2 &&
-          important_tokens[0][:node] == :delim &&
-          important_tokens[0][:value] == '!' &&
-          important_tokens[1][:node] == :ident &&
-          important_tokens[1][:value].downcase == 'important'
+         important_tokens[0][:node] == :delim &&
+         important_tokens[0][:value] == '!' &&
+         important_tokens[1][:node] == :ident &&
+         important_tokens[1][:value].downcase == 'important'
 
         declaration[:important] = true
         excl_index = value.index(important_tokens[0])
@@ -294,6 +294,7 @@ module Crass
 
           while next_token = input.peek
             break if next_token[:node] == :semicolon
+
             decl_tokens << consume_component_value(input)
           end
 
@@ -312,6 +313,7 @@ module Crass
 
           while next_token = input.peek
             break if next_token[:node] == :semicolon
+
             consume_component_value(input)
           end
         end
@@ -325,8 +327,8 @@ module Crass
     # 5.4.8. http://dev.w3.org/csswg/css-syntax-3/#consume-a-function
     def consume_function(input = @tokens)
       function = {
-        :name   => input.current[:value],
-        :value  => [],
+        :name => input.current[:value],
+        :value => [],
         :tokens => [input.current] # Non-standard, used for serialization.
       }
 
@@ -355,7 +357,7 @@ module Crass
     #
     # 5.4.3. http://dev.w3.org/csswg/css-syntax-3/#consume-a-qualified-rule
     def consume_qualified_rule(input = @tokens)
-      rule = {:prelude => []}
+      rule = { :prelude => [] }
 
       rule[:tokens] = input.collect do
         while true
@@ -433,12 +435,12 @@ module Crass
     # 5.4.7. http://dev.w3.org/csswg/css-syntax/#consume-a-simple-block
     def consume_simple_block(input = @tokens)
       start_token = input.current[:node]
-      end_token   = BLOCK_END_TOKENS[start_token]
+      end_token = BLOCK_END_TOKENS[start_token]
 
       block = {
-        :start  => start_token.to_s,
-        :end    => end_token.to_s,
-        :value  => [],
+        :start => start_token.to_s,
+        :end => end_token.to_s,
+        :value => [],
         :tokens => [input.current] # Non-standard. Used for serialization.
       }
 
@@ -456,7 +458,7 @@ module Crass
 
     # Creates and returns a new parse node with the given _properties_.
     def create_node(type, properties = {})
-      {:node => type}.merge!(properties)
+      { :node => type }.merge!(properties)
     end
 
     # Parses the given _input_ tokens into a selector node and returns it.
@@ -465,16 +467,16 @@ module Crass
     # validating them. Feel free to do that yourself! It'll be fun!
     def create_selector(input)
       create_node(:selector,
-        :value  => parse_value(input),
-        :tokens => input)
+                  :value => parse_value(input),
+                  :tokens => input)
     end
 
     # Creates a `:style_rule` node from the given qualified _rule_, and returns
     # it.
     def create_style_rule(rule)
       create_node(:style_rule,
-        :selector => create_selector(rule[:prelude]),
-        :children => parse_properties(rule[:block]))
+                  :selector => create_selector(rule[:prelude]),
+                  :children => parse_properties(rule[:block]))
     end
 
     # Parses a single component value and returns it.
@@ -508,7 +510,7 @@ module Crass
     #
     # 5.3.8. http://dev.w3.org/csswg/css-syntax/#parse-a-list-of-component-values
     def parse_component_values(input = @tokens)
-      input  = TokenScanner.new(input) unless input.is_a?(TokenScanner)
+      input = TokenScanner.new(input) unless input.is_a?(TokenScanner)
       tokens = []
 
       while token = consume_component_value(input)
@@ -570,11 +572,11 @@ module Crass
         children.pop if children.last && children.last[:node] == :semicolon
 
         properties << create_node(:property,
-          :name      => decl[:name],
-          :value     => parse_value(decl[:value]),
-          :children  => children,
-          :important => decl[:important],
-          :tokens    => decl[:tokens])
+                                  :name => decl[:name],
+                                  :value => parse_value(decl[:value]),
+                                  :children => children,
+                                  :important => decl[:important],
+                                  :tokens => decl[:tokens])
       end
 
       properties
@@ -613,7 +615,7 @@ module Crass
 
     # Returns the unescaped value of a selector name or property declaration.
     def parse_value(nodes)
-      nodes  = [nodes] unless nodes.is_a?(Array)
+      nodes = [nodes] unless nodes.is_a?(Array)
       string = String.new
 
       nodes.each do |node|
@@ -644,5 +646,4 @@ module Crass
       string.strip
     end
   end
-
 end

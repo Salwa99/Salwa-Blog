@@ -15,7 +15,8 @@ module ActionText
       end
 
       attr_accessor :name
-      validates_inclusion_of :name, in: %w( horizontal-rule )
+
+      validates_inclusion_of :name, in: %w(horizontal-rule)
 
       def attachable_plain_text_representation(caption)
         case name

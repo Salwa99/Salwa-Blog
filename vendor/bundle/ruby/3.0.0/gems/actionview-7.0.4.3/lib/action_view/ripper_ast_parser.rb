@@ -35,6 +35,7 @@ module ActionView
         def argument_nodes
           raise unless fcall?
           return [] if self[1].nil?
+
           if self[1].last == false || self[1].last.type == :vcall
             self[1][0...-1]
           else
@@ -68,6 +69,7 @@ module ActionView
 
         def to_string
           raise unless string?
+
           self[0][0][0]
         end
 
@@ -156,31 +158,32 @@ module ActionView
         end
 
         private
-          def on_fcall(name, *args)
-            on_render_call(super)
-          end
 
-          def on_command(name, *args)
-            on_render_call(super)
-          end
+        def on_fcall(name, *args)
+          on_render_call(super)
+        end
 
-          def on_render_call(node)
-            METHODS_TO_PARSE.each do |method|
-              if node.fcall_named?(method)
-                @render_calls << [method, node]
-                return node
-              end
+        def on_command(name, *args)
+          on_render_call(super)
+        end
+
+        def on_render_call(node)
+          METHODS_TO_PARSE.each do |method|
+            if node.fcall_named?(method)
+              @render_calls << [method, node]
+              return node
             end
-            node
           end
+          node
+        end
 
-          def on_arg_paren(content)
-            content
-          end
+        def on_arg_paren(content)
+          content
+        end
 
-          def on_paren(content)
-            content
-          end
+        def on_paren(content)
+          content
+        end
       end
 
       extend self
@@ -190,7 +193,7 @@ module ActionView
         parser.parse
 
         parser.render_calls.group_by(&:first).collect do |method, nodes|
-          [ method.to_sym, nodes.collect { |v| v[1] } ]
+          [method.to_sym, nodes.collect { |v| v[1] }]
         end.to_h
       end
     end

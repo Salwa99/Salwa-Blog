@@ -2,7 +2,6 @@ require 'concurrent/synchronization/abstract_struct'
 require 'concurrent/synchronization/lockable_object'
 
 module Concurrent
-
   # A thread-safe, immutable variation of Ruby's standard `Struct`.
   #
   # @see http://ruby-doc.org/core/Struct.html Ruby standard library `Struct`
@@ -55,18 +54,21 @@ module Concurrent
     # @!macro struct_each
     def each(&block)
       return enum_for(:each) unless block_given?
+
       ns_each(&block)
     end
 
     # @!macro struct_each_pair
     def each_pair(&block)
       return enum_for(:each_pair) unless block_given?
+
       ns_each_pair(&block)
     end
 
     # @!macro struct_select
     def select(&block)
       return enum_for(:select) unless block_given?
+
       ns_select(&block)
     end
 
@@ -86,13 +88,15 @@ module Concurrent
       elsif args.length > 0 && args.first.is_a?(String)
         clazz_name = args.shift
       end
+
       FACTORY.define_struct(clazz_name, args, &block)
     end
 
     FACTORY = Class.new(Synchronization::LockableObject) do
       def define_struct(name, members, &block)
         synchronize do
-          Synchronization::AbstractStruct.define_struct_class(ImmutableStruct, Synchronization::Object, name, members, &block)
+          Synchronization::AbstractStruct.define_struct_class(ImmutableStruct, Synchronization::Object, name, members,
+                                                              &block)
         end
       end
     end.new

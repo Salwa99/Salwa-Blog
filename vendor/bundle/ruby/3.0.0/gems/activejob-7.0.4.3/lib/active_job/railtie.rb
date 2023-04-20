@@ -32,7 +32,7 @@ module ActiveJob
           :custom_serializers
         )
 
-        options.each do  |k, v|
+        options.each do |k, v|
           k = "#{k}="
           send(k, v) if respond_to? k
         end
@@ -59,8 +59,8 @@ module ActiveJob
 
     initializer "active_job.query_log_tags" do |app|
       query_logs_tags_enabled = app.config.respond_to?(:active_record) &&
-        app.config.active_record.query_log_tags_enabled &&
-        app.config.active_job.log_query_tags_around_perform
+                                app.config.active_record.query_log_tags_enabled &&
+                                app.config.active_job.log_query_tags_around_perform
 
       if query_logs_tags_enabled
         app.config.active_record.query_log_tags << :job

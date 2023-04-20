@@ -4,10 +4,8 @@ require 'concurrent/synchronization/object'
 
 module Concurrent
   module Synchronization
-
     # @!visibility private
     class AbstractLockableObject < Synchronization::Object
-
       protected
 
       # @!macro synchronization_object_method_synchronize
@@ -41,6 +39,7 @@ module Concurrent
             now = Concurrent.monotonic_time
             condition_result = condition.call
             return condition_result if now >= wait_until || condition_result
+
             ns_wait wait_until - now
           end
         else
@@ -96,7 +95,6 @@ module Concurrent
       def ns_broadcast
         raise NotImplementedError
       end
-
     end
   end
 end

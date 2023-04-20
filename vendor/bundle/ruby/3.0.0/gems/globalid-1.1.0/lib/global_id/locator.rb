@@ -96,7 +96,8 @@ class GlobalID
       #     end
       #   end
       def use(app, locator = nil, &locator_block)
-        raise ArgumentError, 'No locator provided. Pass a block or an object that responds to #locate.' unless locator || block_given?
+        raise ArgumentError,
+              'No locator provided. Pass a block or an object that responds to #locate.' unless locator || block_given?
 
         URI::GID.validate_app(app)
 
@@ -104,83 +105,89 @@ class GlobalID
       end
 
       private
-        def locator_for(gid)
-          @locators.fetch(normalize_app(gid.app)) { DEFAULT_LOCATOR }
-        end
 
-        def find_allowed?(model_class, only = nil)
-          only ? Array(only).any? { |c| model_class <= c } : true
-        end
+      def locator_for(gid)
+        @locators.fetch(normalize_app(gid.app)) { DEFAULT_LOCATOR }
+      end
 
-        def parse_allowed(gids, only = nil)
-          gids.collect { |gid| GlobalID.parse(gid) }.compact.select { |gid| find_allowed?(gid.model_class, only) }
-        end
+      def find_allowed?(model_class, only = nil)
+        only ? Array(only).any? { |c| model_class <= c } : true
+      end
 
-        def normalize_app(app)
-          app.to_s.downcase
-        end
+      def parse_allowed(gids, only = nil)
+        gids.collect { |gid| GlobalID.parse(gid) }.compact.select { |gid| find_allowed?(gid.model_class, only) }
+      end
+
+      def normalize_app(app)
+        app.to_s.downcase
+      end
     end
 
     private
-      @locators = {}
 
-      class BaseLocator
-        def locate(gid)
-          gid.model_class.find gid.model_id
-        end
+    @locators = {}
 
-        def locate_many(gids, options = {})
-          models_and_ids  = gids.collect { |gid| [ gid.model_class, gid.model_id ] }
-          ids_by_model    = models_and_ids.group_by(&:first)
-          loaded_by_model = Hash[ids_by_model.map { |model, ids|
-            [ model, find_records(model, ids.map(&:last), ignore_missing: options[:ignore_missing]).index_by { |record| record.id.to_s } ]
-          }]
-
-          models_and_ids.collect { |(model, id)| loaded_by_model[model][id] }.compact
-        end
-
-        private
-          def find_records(model_class, ids, options)
-            if options[:ignore_missing]
-              model_class.where(id: ids)
-            else
-              model_class.find(ids)
-            end
-          end
+    class BaseLocator
+      def locate(gid)
+        gid.model_class.find gid.model_id
       end
 
-      class UnscopedLocator < BaseLocator
-        def locate(gid)
-          unscoped(gid.model_class) { super }
-        end
+      def locate_many(gids, options = {})
+        models_and_ids = gids.collect { |gid| [gid.model_class, gid.model_id] }
+        ids_by_model = models_and_ids.group_by(&:first)
+        loaded_by_model = Hash[ids_by_model.map { |model, ids|
+          [model, find_records(model, ids.map(&:last), ignore_missing: options[:ignore_missing]).index_by { |record|
+                    record.id.to_s
+                  }]
+        }]
 
-        private
-          def find_records(model_class, ids, options)
-            unscoped(model_class) { super }
-          end
-
-          def unscoped(model_class)
-            if model_class.respond_to?(:unscoped)
-              model_class.unscoped { yield }
-            else
-              yield
-            end
-          end
+        models_and_ids.collect { |(model, id)| loaded_by_model[model][id] }.compact
       end
-      DEFAULT_LOCATOR = UnscopedLocator.new
 
-      class BlockLocator
-        def initialize(block)
-          @locator = block
-        end
+      private
 
-        def locate(gid)
-          @locator.call(gid)
-        end
-
-        def locate_many(gids, options = {})
-          gids.map { |gid| locate(gid) }
+      def find_records(model_class, ids, options)
+        if options[:ignore_missing]
+          model_class.where(id: ids)
+        else
+          model_class.find(ids)
         end
       end
+    end
+
+    class UnscopedLocator < BaseLocator
+      def locate(gid)
+        unscoped(gid.model_class) { super }
+      end
+
+      private
+
+      def find_records(model_class, ids, options)
+        unscoped(model_class) { super }
+      end
+
+      def unscoped(model_class)
+        if model_class.respond_to?(:unscoped)
+          model_class.unscoped { yield }
+        else
+          yield
+        end
+      end
+    end
+    DEFAULT_LOCATOR = UnscopedLocator.new
+
+    class BlockLocator
+      def initialize(block)
+        @locator = block
+      end
+
+      def locate(gid)
+        @locator.call(gid)
+      end
+
+      def locate_many(gids, options = {})
+        gids.map { |gid| locate(gid) }
+      end
+    end
   end
 end

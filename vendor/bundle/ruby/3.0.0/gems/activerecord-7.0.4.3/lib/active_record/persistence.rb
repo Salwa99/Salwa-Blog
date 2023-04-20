@@ -64,7 +64,7 @@ module ActiveRecord
       #
       # See #insert_all for documentation.
       def insert(attributes, returning: nil, unique_by: nil, record_timestamps: nil)
-        insert_all([ attributes ], returning: returning, unique_by: unique_by, record_timestamps: record_timestamps)
+        insert_all([attributes], returning: returning, unique_by: unique_by, record_timestamps: record_timestamps)
       end
 
       # Inserts multiple records into the database in a single SQL INSERT
@@ -143,7 +143,8 @@ module ActiveRecord
       #     { id: 2, title: "Eloquent Ruby" }
       #   ])
       def insert_all(attributes, returning: nil, unique_by: nil, record_timestamps: nil)
-        InsertAll.new(self, attributes, on_duplicate: :skip, returning: returning, unique_by: unique_by, record_timestamps: record_timestamps).execute
+        InsertAll.new(self, attributes, on_duplicate: :skip, returning: returning, unique_by: unique_by,
+                                        record_timestamps: record_timestamps).execute
       end
 
       # Inserts a single record into the database in a single SQL INSERT
@@ -153,7 +154,7 @@ module ActiveRecord
       #
       # See #insert_all! for more.
       def insert!(attributes, returning: nil, record_timestamps: nil)
-        insert_all!([ attributes ], returning: returning, record_timestamps: record_timestamps)
+        insert_all!([attributes], returning: returning, record_timestamps: record_timestamps)
       end
 
       # Inserts multiple records into the database in a single SQL INSERT
@@ -210,7 +211,8 @@ module ActiveRecord
       #     { id: 1, title: "Eloquent Ruby", author: "Russ" }
       #   ])
       def insert_all!(attributes, returning: nil, record_timestamps: nil)
-        InsertAll.new(self, attributes, on_duplicate: :raise, returning: returning, record_timestamps: record_timestamps).execute
+        InsertAll.new(self, attributes, on_duplicate: :raise, returning: returning,
+                                        record_timestamps: record_timestamps).execute
       end
 
       # Updates or inserts (upserts) a single record into the database in a
@@ -220,7 +222,8 @@ module ActiveRecord
       #
       # See #upsert_all for documentation.
       def upsert(attributes, on_duplicate: :update, returning: nil, unique_by: nil, record_timestamps: nil)
-        upsert_all([ attributes ], on_duplicate: on_duplicate, returning: returning, unique_by: unique_by, record_timestamps: record_timestamps)
+        upsert_all([attributes], on_duplicate: on_duplicate, returning: returning, unique_by: unique_by,
+                                 record_timestamps: record_timestamps)
       end
 
       # Updates or inserts (upserts) multiple records into the database in a
@@ -329,8 +332,10 @@ module ActiveRecord
       #   ], unique_by: :isbn)
       #
       #   Book.find_by(isbn: "1").title # => "Eloquent Ruby"
-      def upsert_all(attributes, on_duplicate: :update, update_only: nil, returning: nil, unique_by: nil, record_timestamps: nil)
-        InsertAll.new(self, attributes, on_duplicate: on_duplicate, update_only: update_only, returning: returning, unique_by: unique_by, record_timestamps: record_timestamps).execute
+      def upsert_all(attributes, on_duplicate: :update, update_only: nil, returning: nil, unique_by: nil,
+                     record_timestamps: nil)
+        InsertAll.new(self, attributes, on_duplicate: on_duplicate, update_only: update_only, returning: returning,
+                                        unique_by: unique_by, record_timestamps: record_timestamps).execute
       end
 
       # Given an attributes hash, +instantiate+ returns a new instance of
@@ -379,8 +384,8 @@ module ActiveRecord
         if id.is_a?(Array)
           if id.any?(ActiveRecord::Base)
             raise ArgumentError,
-              "You are passing an array of ActiveRecord::Base instances to `update`. " \
-              "Please pass the ids of the objects by calling `pluck(:id)` or `map(&:id)`."
+                  "You are passing an array of ActiveRecord::Base instances to `update`. " \
+                  "Please pass the ids of the objects by calling `pluck(:id)` or `map(&:id)`."
           end
           id.map { |one_id| find(one_id) }.each_with_index { |object, idx|
             object.update(attributes[idx])
@@ -390,8 +395,8 @@ module ActiveRecord
         else
           if ActiveRecord::Base === id
             raise ArgumentError,
-              "You are passing an instance of ActiveRecord::Base to `update`. " \
-              "Please pass the id of the object by calling `.id`."
+                  "You are passing an instance of ActiveRecord::Base to `update`. " \
+                  "Please pass the id of the object by calling `.id`."
           end
           object = find(id)
           object.update(attributes)
@@ -405,8 +410,8 @@ module ActiveRecord
         if id.is_a?(Array)
           if id.any?(ActiveRecord::Base)
             raise ArgumentError,
-              "You are passing an array of ActiveRecord::Base instances to `update!`. " \
-              "Please pass the ids of the objects by calling `pluck(:id)` or `map(&:id)`."
+                  "You are passing an array of ActiveRecord::Base instances to `update!`. " \
+                  "Please pass the ids of the objects by calling `pluck(:id)` or `map(&:id)`."
           end
           id.map { |one_id| find(one_id) }.each_with_index { |object, idx|
             object.update!(attributes[idx])
@@ -416,8 +421,8 @@ module ActiveRecord
         else
           if ActiveRecord::Base === id
             raise ArgumentError,
-              "You are passing an instance of ActiveRecord::Base to `update!`. " \
-              "Please pass the id of the object by calling `.id`."
+                  "You are passing an instance of ActiveRecord::Base to `update!`. " \
+                  "Please pass the id of the object by calling `.id`."
           end
           object = find(id)
           object.update!(attributes)
@@ -530,31 +535,32 @@ module ActiveRecord
       end
 
       private
-        # Given a class, an attributes hash, +instantiate_instance_of+ returns a
-        # new instance of the class. Accepts only keys as strings.
-        def instantiate_instance_of(klass, attributes, column_types = {}, &block)
-          attributes = klass.attributes_builder.build_from_database(attributes, column_types)
-          klass.allocate.init_with_attributes(attributes, &block)
-        end
 
-        # Called by +instantiate+ to decide which class to use for a new
-        # record instance.
-        #
-        # See +ActiveRecord::Inheritance#discriminate_class_for_record+ for
-        # the single-table inheritance discriminator.
-        def discriminate_class_for_record(record)
-          self
-        end
+      # Given a class, an attributes hash, +instantiate_instance_of+ returns a
+      # new instance of the class. Accepts only keys as strings.
+      def instantiate_instance_of(klass, attributes, column_types = {}, &block)
+        attributes = klass.attributes_builder.build_from_database(attributes, column_types)
+        klass.allocate.init_with_attributes(attributes, &block)
+      end
 
-        # Called by +_update_record+ and +_delete_record+
-        # to build `where` clause from default scopes.
-        # Skips empty scopes.
-        def build_default_constraint
-          return unless default_scopes?(all_queries: true)
+      # Called by +instantiate+ to decide which class to use for a new
+      # record instance.
+      #
+      # See +ActiveRecord::Inheritance#discriminate_class_for_record+ for
+      # the single-table inheritance discriminator.
+      def discriminate_class_for_record(record)
+        self
+      end
 
-          default_where_clause = default_scoped(all_queries: true).where_clause
-          default_where_clause.ast unless default_where_clause.empty?
-        end
+      # Called by +_update_record+ and +_delete_record+
+      # to build `where` clause from default scopes.
+      # Skips empty scopes.
+      def build_default_constraint
+        return unless default_scopes?(all_queries: true)
+
+        default_where_clause = default_scoped(all_queries: true).where_clause
+        default_where_clause.ast unless default_where_clause.empty?
+      end
     end
 
     # Returns true if this object hasn't been saved yet -- that is, a record
@@ -677,10 +683,10 @@ module ActiveRecord
       _raise_readonly_record_error if readonly?
       destroy_associations
       @_trigger_destroy_callback = if persisted?
-        destroy_row > 0
-      else
-        true
-      end
+                                     destroy_row > 0
+                                   else
+                                     true
+                                   end
       @destroyed = true
       freeze
     end
@@ -805,6 +811,7 @@ module ActiveRecord
     def update_columns(attributes)
       raise ActiveRecordError, "cannot update a new record" if new_record?
       raise ActiveRecordError, "cannot update a destroyed record" if destroyed?
+
       _raise_readonly_record_error if readonly?
 
       attributes = attributes.transform_keys do |key|
@@ -944,10 +951,10 @@ module ActiveRecord
       self.class.connection.clear_query_cache
 
       fresh_object = if apply_scoping?(options)
-        _find_record(options)
-      else
-        self.class.unscoped { _find_record(options) }
-      end
+                       _find_record(options)
+                     else
+                       self.class.unscoped { _find_record(options) }
+                     end
 
       @association_cache = fresh_object.instance_variable_get(:@association_cache)
       @attributes = fresh_object.instance_variable_get(:@attributes)
@@ -1008,7 +1015,8 @@ module ActiveRecord
       end
     end
 
-  private
+    private
+
     def strict_loaded_associations
       @association_cache.find_all do |_, assoc|
         assoc.owner.strict_loading? && !assoc.owner.strict_loading_n_plus_one_only?
@@ -1064,6 +1072,7 @@ module ActiveRecord
     def create_or_update(**, &block)
       _raise_readonly_record_error if readonly?
       return false if destroyed?
+
       result = new_record? ? _create_record(&block) : _update_record(&block)
       result != false
     end
@@ -1114,7 +1123,9 @@ module ActiveRecord
     def _raise_record_not_destroyed
       @_association_destroy_exception ||= nil
       key = self.class.primary_key
-      raise @_association_destroy_exception || RecordNotDestroyed.new("Failed to destroy #{self.class} with #{key}=#{send(key)}", self)
+      raise @_association_destroy_exception || RecordNotDestroyed.new(
+        "Failed to destroy #{self.class} with #{key}=#{send(key)}", self
+      )
     ensure
       @_association_destroy_exception = nil
     end

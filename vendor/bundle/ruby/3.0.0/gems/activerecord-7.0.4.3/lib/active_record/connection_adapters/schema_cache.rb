@@ -38,39 +38,39 @@ module ActiveRecord
       def initialize(conn)
         @connection = conn
 
-        @columns      = {}
+        @columns = {}
         @columns_hash = {}
         @primary_keys = {}
         @data_sources = {}
-        @indexes      = {}
+        @indexes = {}
       end
 
       def initialize_dup(other)
         super
-        @columns      = @columns.dup
+        @columns = @columns.dup
         @columns_hash = @columns_hash.dup
         @primary_keys = @primary_keys.dup
         @data_sources = @data_sources.dup
-        @indexes      = @indexes.dup
+        @indexes = @indexes.dup
       end
 
       def encode_with(coder)
         reset_version!
 
-        coder["columns"]          = @columns
-        coder["primary_keys"]     = @primary_keys
-        coder["data_sources"]     = @data_sources
-        coder["indexes"]          = @indexes
-        coder["version"]          = @version
+        coder["columns"] = @columns
+        coder["primary_keys"] = @primary_keys
+        coder["data_sources"] = @data_sources
+        coder["indexes"] = @indexes
+        coder["version"] = @version
         coder["database_version"] = database_version
       end
 
       def init_with(coder)
-        @columns          = coder["columns"]
-        @primary_keys     = coder["primary_keys"]
-        @data_sources     = coder["data_sources"]
-        @indexes          = coder["indexes"] || {}
-        @version          = coder["version"]
+        @columns = coder["columns"]
+        @primary_keys = coder["primary_keys"]
+        @data_sources = coder["data_sources"]
+        @indexes = coder["indexes"] || {}
+        @version = coder["version"]
         @database_version = coder["database_version"]
 
         derive_columns_hash_and_deduplicate_values
@@ -87,6 +87,7 @@ module ActiveRecord
       # A cached lookup for table existence.
       def data_source_exists?(name)
         return if ignored_table?(name)
+
         prepare_data_sources if @data_sources.empty?
         return @data_sources[name] if @data_sources.key? name
 
@@ -195,63 +196,64 @@ module ActiveRecord
       end
 
       private
-        def tables_to_cache
-          connection.data_sources.reject do |table|
-            ignored_table?(table)
-          end
-        end
 
-        def ignored_table?(table_name)
-          ActiveRecord.schema_cache_ignored_tables.any? do |ignored|
-            ignored === table_name
-          end
+      def tables_to_cache
+        connection.data_sources.reject do |table|
+          ignored_table?(table)
         end
+      end
 
-        def reset_version!
-          @version = connection.schema_version
+      def ignored_table?(table_name)
+        ActiveRecord.schema_cache_ignored_tables.any? do |ignored|
+          ignored === table_name
         end
+      end
 
-        def derive_columns_hash_and_deduplicate_values
-          @columns      = deep_deduplicate(@columns)
-          @columns_hash = @columns.transform_values { |columns| columns.index_by(&:name) }
-          @primary_keys = deep_deduplicate(@primary_keys)
-          @data_sources = deep_deduplicate(@data_sources)
-          @indexes      = deep_deduplicate(@indexes)
+      def reset_version!
+        @version = connection.schema_version
+      end
+
+      def derive_columns_hash_and_deduplicate_values
+        @columns = deep_deduplicate(@columns)
+        @columns_hash = @columns.transform_values { |columns| columns.index_by(&:name) }
+        @primary_keys = deep_deduplicate(@primary_keys)
+        @data_sources = deep_deduplicate(@data_sources)
+        @indexes = deep_deduplicate(@indexes)
+      end
+
+      def deep_deduplicate(value)
+        case value
+        when Hash
+          value.transform_keys { |k| deep_deduplicate(k) }.transform_values { |v| deep_deduplicate(v) }
+        when Array
+          value.map { |i| deep_deduplicate(i) }
+        when String, Deduplicable
+          -value
+        else
+          value
         end
+      end
 
-        def deep_deduplicate(value)
-          case value
-          when Hash
-            value.transform_keys { |k| deep_deduplicate(k) }.transform_values { |v| deep_deduplicate(v) }
-          when Array
-            value.map { |i| deep_deduplicate(i) }
-          when String, Deduplicable
-            -value
+      def prepare_data_sources
+        tables_to_cache.each do |source|
+          @data_sources[source] = true
+        end
+      end
+
+      def open(filename)
+        FileUtils.mkdir_p(File.dirname(filename))
+
+        File.atomic_write(filename) do |file|
+          if File.extname(filename) == ".gz"
+            zipper = Zlib::GzipWriter.new file
+            yield zipper
+            zipper.flush
+            zipper.close
           else
-            value
+            yield file
           end
         end
-
-        def prepare_data_sources
-          tables_to_cache.each do |source|
-            @data_sources[source] = true
-          end
-        end
-
-        def open(filename)
-          FileUtils.mkdir_p(File.dirname(filename))
-
-          File.atomic_write(filename) do |file|
-            if File.extname(filename) == ".gz"
-              zipper = Zlib::GzipWriter.new file
-              yield zipper
-              zipper.flush
-              zipper.close
-            else
-              yield file
-            end
-          end
-        end
+      end
     end
   end
 end

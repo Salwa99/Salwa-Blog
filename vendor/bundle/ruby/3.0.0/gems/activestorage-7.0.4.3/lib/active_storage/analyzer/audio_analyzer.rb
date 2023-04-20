@@ -19,47 +19,47 @@ module ActiveStorage
     end
 
     private
-      def duration
-        duration = audio_stream["duration"]
-        Float(duration) if duration
-      end
 
-      def bit_rate
-        bit_rate = audio_stream["bit_rate"]
-        Integer(bit_rate) if bit_rate
-      end
+    def duration
+      duration = audio_stream["duration"]
+      Float(duration) if duration
+    end
 
-      def audio_stream
-        @audio_stream ||= streams.detect { |stream| stream["codec_type"] == "audio" } || {}
-      end
+    def bit_rate
+      bit_rate = audio_stream["bit_rate"]
+      Integer(bit_rate) if bit_rate
+    end
 
-      def streams
-        probe["streams"] || []
-      end
+    def audio_stream
+      @audio_stream ||= streams.detect { |stream| stream["codec_type"] == "audio" } || {}
+    end
 
-      def probe
-        @probe ||= download_blob_to_tempfile { |file| probe_from(file) }
-      end
+    def streams
+      probe["streams"] || []
+    end
 
-      def probe_from(file)
-        instrument(File.basename(ffprobe_path)) do
-          IO.popen([ ffprobe_path,
-            "-print_format", "json",
-            "-show_streams",
-            "-show_format",
-            "-v", "error",
-            file.path
-          ]) do |output|
-            JSON.parse(output.read)
-          end
+    def probe
+      @probe ||= download_blob_to_tempfile { |file| probe_from(file) }
+    end
+
+    def probe_from(file)
+      instrument(File.basename(ffprobe_path)) do
+        IO.popen([ffprobe_path,
+                  "-print_format", "json",
+                  "-show_streams",
+                  "-show_format",
+                  "-v", "error",
+                  file.path]) do |output|
+          JSON.parse(output.read)
         end
-      rescue Errno::ENOENT
-        logger.info "Skipping audio analysis because ffprobe isn't installed"
-        {}
       end
+    rescue Errno::ENOENT
+      logger.info "Skipping audio analysis because ffprobe isn't installed"
+      {}
+    end
 
-      def ffprobe_path
-        ActiveStorage.paths[:ffprobe] || "ffprobe"
-      end
+    def ffprobe_path
+      ActiveStorage.paths[:ffprobe] || "ffprobe"
+    end
   end
 end

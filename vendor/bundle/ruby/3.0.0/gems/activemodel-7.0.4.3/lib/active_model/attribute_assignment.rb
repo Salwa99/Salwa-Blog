@@ -27,7 +27,8 @@ module ActiveModel
     #   cat.status # => 'sleeping'
     def assign_attributes(new_attributes)
       unless new_attributes.respond_to?(:each_pair)
-        raise ArgumentError, "When assigning attributes, you must pass a hash as an argument, #{new_attributes.class} passed."
+        raise ArgumentError,
+              "When assigning attributes, you must pass a hash as an argument, #{new_attributes.class} passed."
       end
       return if new_attributes.empty?
 
@@ -37,19 +38,20 @@ module ActiveModel
     alias attributes= assign_attributes
 
     private
-      def _assign_attributes(attributes)
-        attributes.each do |k, v|
-          _assign_attribute(k, v)
-        end
-      end
 
-      def _assign_attribute(k, v)
-        setter = :"#{k}="
-        if respond_to?(setter)
-          public_send(setter, v)
-        else
-          raise UnknownAttributeError.new(self, k.to_s)
-        end
+    def _assign_attributes(attributes)
+      attributes.each do |k, v|
+        _assign_attribute(k, v)
       end
+    end
+
+    def _assign_attribute(k, v)
+      setter = :"#{k}="
+      if respond_to?(setter)
+        public_send(setter, v)
+      else
+        raise UnknownAttributeError.new(self, k.to_s)
+      end
+    end
   end
 end

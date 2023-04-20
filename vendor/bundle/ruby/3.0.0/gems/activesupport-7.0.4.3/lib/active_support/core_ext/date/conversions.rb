@@ -81,6 +81,7 @@ class Date
   # If the <b>application's</b> timezone is needed, then use +in_time_zone+ instead.
   def to_time(form = :local)
     raise ArgumentError, "Expected :local or :utc, got #{form.inspect}." unless [:local, :utc].include?(form)
+
     ::Time.public_send(form, year, month, day)
   end
 

@@ -37,9 +37,7 @@ require 'concurrent/synchronization/object'
 #     *coordinated*, *synchronous*, change of *many* stated. Used when multiple
 #     value must change together, in an all-or-nothing transaction.
 
-
 module Concurrent
-
   # Atoms provide a way to manage shared, synchronous, independent state.
   #
   # An atom is initialized with an initial value and an optional validation
@@ -120,9 +118,9 @@ module Concurrent
     # @raise [ArgumentError] if the validator is not a `Proc` (when given)
     def initialize(value, opts = {})
       super()
-      @Validator     = opts.fetch(:validator, -> v { true })
+      @Validator = opts.fetch(:validator, ->v { true })
       self.observers = Collection::CopyOnNotifyObserverSet.new
-      self.value     = value
+      self.value = value
     end
 
     # Atomically swaps the value of atom using the given block. The current

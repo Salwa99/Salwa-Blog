@@ -23,7 +23,8 @@ module ActiveJob
       end
 
       def enqueue_at(job, timestamp) # :nodoc:
-        delayed_job = Delayed::Job.enqueue(JobWrapper.new(job.serialize), queue: job.queue_name, priority: job.priority, run_at: Time.at(timestamp))
+        delayed_job = Delayed::Job.enqueue(JobWrapper.new(job.serialize), queue: job.queue_name,
+                                                                          priority: job.priority, run_at: Time.at(timestamp))
         job.provider_job_id = delayed_job.id
         delayed_job
       end
@@ -48,9 +49,10 @@ module ActiveJob
         end
 
         private
-          def log_arguments?
-            job_data["job_class"].constantize.log_arguments?
-          end
+
+        def log_arguments?
+          job_data["job_class"].constantize.log_arguments?
+        end
       end
     end
   end

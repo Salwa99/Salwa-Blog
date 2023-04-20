@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'pp'
 require_relative 'color'
 
@@ -10,7 +11,7 @@ module IRB
     class << self
       def pp(obj, out = $>, width = screen_width)
         q = ColorPrinter.new(out, width)
-        q.guard_inspect_key {q.pp obj}
+        q.guard_inspect_key { q.pp obj }
         q.flush
         out << "\n"
       end

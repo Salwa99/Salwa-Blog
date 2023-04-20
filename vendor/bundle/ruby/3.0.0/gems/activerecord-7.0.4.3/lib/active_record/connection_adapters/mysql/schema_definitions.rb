@@ -52,8 +52,8 @@ module ActiveRecord
 
         included do
           define_column_methods :blob, :tinyblob, :mediumblob, :longblob,
-            :tinytext, :mediumtext, :longtext, :unsigned_integer, :unsigned_bigint,
-            :unsigned_float, :unsigned_decimal
+                                :tinytext, :mediumtext, :longtext, :unsigned_integer, :unsigned_bigint,
+                                :unsigned_float, :unsigned_decimal
         end
       end
 
@@ -85,14 +85,15 @@ module ActiveRecord
         end
 
         private
-          def aliased_types(name, fallback)
-            fallback
-          end
 
-          def integer_like_primary_key_type(type, options)
-            options[:auto_increment] = true
-            type
-          end
+        def aliased_types(name, fallback)
+          fallback
+        end
+
+        def integer_like_primary_key_type(type, options)
+          options[:auto_increment] = true
+          type
+        end
       end
 
       class Table < ActiveRecord::ConnectionAdapters::Table

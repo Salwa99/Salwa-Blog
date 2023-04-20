@@ -2,14 +2,11 @@ if Concurrent.on_jruby?
 
   module Concurrent
     module Collection
-
-
       # @!macro priority_queue
-      # 
+      #
       # @!visibility private
       # @!macro internal_implementation_note
       class JavaNonConcurrentPriorityQueue
-
         # @!macro priority_queue_method_initialize
         def initialize(opts = {})
           order = opts.fetch(:order, :max)
@@ -67,6 +64,7 @@ if Concurrent.on_jruby?
         # @!macro priority_queue_method_push
         def push(item)
           raise ArgumentError.new('cannot enqueue nil') if item.nil?
+
           @queue.add(item)
         end
         alias_method :<<, :push
@@ -75,7 +73,7 @@ if Concurrent.on_jruby?
         # @!macro priority_queue_method_from_list
         def self.from_list(list, opts = {})
           queue = new(opts)
-          list.each{|item| queue << item }
+          list.each { |item| queue << item }
           queue
         end
       end

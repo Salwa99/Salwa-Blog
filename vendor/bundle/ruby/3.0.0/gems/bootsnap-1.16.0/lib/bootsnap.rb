@@ -18,10 +18,10 @@ module Bootsnap
     def logger=(logger)
       @logger = logger
       self.instrumentation = if logger.respond_to?(:debug)
-        ->(event, path) { @logger.debug("[Bootsnap] #{event} #{path}") }
-      else
-        ->(event, path) { @logger.call("[Bootsnap] #{event} #{path}") }
-      end
+                               ->(event, path) { @logger.debug("[Bootsnap] #{event} #{path}") }
+                             else
+                               ->(event, path) { @logger.call("[Bootsnap] #{event} #{path}") }
+                             end
     end
 
     def instrumentation=(callback)
@@ -94,8 +94,8 @@ module Bootsnap
         end
 
         ignore_directories = if ENV.key?("BOOTSNAP_IGNORE_DIRECTORIES")
-          ENV["BOOTSNAP_IGNORE_DIRECTORIES"].split(",")
-        end
+                               ENV["BOOTSNAP_IGNORE_DIRECTORIES"].split(",")
+                             end
 
         setup(
           cache_dir: cache_dir,

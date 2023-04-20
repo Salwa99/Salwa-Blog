@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   irb/locale.rb - internationalization module
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -6,7 +7,6 @@
 
 module IRB # :nodoc:
   class Locale
-
     LOCALE_NAME_RE = %r[
       (?<language>[[:alpha:]]{2,3})
       (?:_  (?<territory>[[:alpha:]]{2,3}) )?
@@ -28,7 +28,10 @@ module IRB # :nodoc:
         if @encoding_name
           begin load 'irb/encoding_aliases.rb'; rescue LoadError; end
           if @encoding = @@legacy_encoding_alias_map[@encoding_name]
-            warn(("%s is obsolete. use %s" % ["#{@lang}_#{@territory}.#{@encoding_name}", "#{@lang}_#{@territory}.#{@encoding.name}"]), uplevel: 1)
+            warn(
+              ("%s is obsolete. use %s" % ["#{@lang}_#{@territory}.#{@encoding_name}",
+                                           "#{@lang}_#{@territory}.#{@encoding.name}"]), uplevel: 1
+            )
           end
           @encoding = Encoding.find(@encoding_name) rescue nil
         end
@@ -64,7 +67,7 @@ module IRB # :nodoc:
     end
 
     def print(*opts)
-      ary = opts.collect{|opt| String(opt)}
+      ary = opts.collect { |opt| String(opt) }
       super(*ary)
     end
 
@@ -74,13 +77,13 @@ module IRB # :nodoc:
     end
 
     def puts(*opts)
-      ary = opts.collect{|opt| String(opt)}
+      ary = opts.collect { |opt| String(opt) }
       super(*ary)
     end
 
     def require(file, priv = nil)
       rex = Regexp.new("lc/#{Regexp.quote(file)}\.(so|o|sl|rb)?")
-      return false if $".find{|f| f =~ rex}
+      return false if $".find { |f| f =~ rex }
 
       case file
       when /\.rb$/
@@ -96,7 +99,7 @@ module IRB # :nodoc:
 
       begin
         load(f = file + ".rb")
-        $".push f  #"
+        $".push f # "
         return true
       rescue LoadError
         return ruby_require(file)
@@ -105,7 +108,7 @@ module IRB # :nodoc:
 
     alias toplevel_load load
 
-    def load(file, priv=nil)
+    def load(file, priv = nil)
       found = find(file)
       if found
         unless @@loaded.include?(found)
@@ -117,23 +120,24 @@ module IRB # :nodoc:
       end
     end
 
-    def find(file , paths = $:)
+    def find(file, paths = $:)
       dir = File.dirname(file)
       dir = "" if dir == "."
       base = File.basename(file)
 
       if dir.start_with?('/')
-        return each_localized_path(dir, base).find{|full_path| File.readable? full_path}
+        return each_localized_path(dir, base).find { |full_path| File.readable? full_path }
       else
         return search_file(paths, dir, base)
       end
     end
 
     private
+
     def real_load(path, priv)
-      src = MagicFile.open(path){|f| f.read}
+      src = MagicFile.open(path) { |f| f.read }
       if priv
-        eval("self", TOPLEVEL_BINDING).extend(Module.new {eval(src, nil, path)})
+        eval("self", TOPLEVEL_BINDING).extend(Module.new { eval(src, nil, path) })
       else
         eval(src, TOPLEVEL_BINDING, path)
       end
@@ -158,6 +162,7 @@ module IRB # :nodoc:
 
     def each_localized_path(dir, file)
       return enum_for(:each_localized_path) unless block_given?
+
       each_sublocale do |lc|
         yield lc.nil? ? File.join(dir, LOCALE_DIR, file) : File.join(dir, LOCALE_DIR, lc, file)
       end

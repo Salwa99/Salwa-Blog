@@ -23,7 +23,8 @@ module ActionCable
       #   # Asserts that connection without user_id fails
       #   assert_reject_connection { connect params: { user_id: '' } }
       def assert_reject_connection(&block)
-        assert_raises(Authorization::UnauthorizedError, "Expected to reject connection but no rejection was made", &block)
+        assert_raises(Authorization::UnauthorizedError, "Expected to reject connection but no rejection was made",
+                      &block)
       end
     end
 
@@ -168,6 +169,7 @@ module ActionCable
               Class === constant && constant < ActionCable::Connection::Base
             end
             raise NonInferrableConnectionError.new(name) if connection.nil?
+
             connection
           end
         end
@@ -205,27 +207,28 @@ module ActionCable
         end
 
         private
-          def build_test_request(path, params: nil, headers: {}, session: {}, env: {})
-            wrapped_headers = ActionDispatch::Http::Headers.from_hash(headers)
 
-            uri = URI.parse(path)
+        def build_test_request(path, params: nil, headers: {}, session: {}, env: {})
+          wrapped_headers = ActionDispatch::Http::Headers.from_hash(headers)
 
-            query_string = params.nil? ? uri.query : params.to_query
+          uri = URI.parse(path)
 
-            request_env = {
-              "QUERY_STRING" => query_string,
-              "PATH_INFO" => uri.path
-            }.merge(env)
+          query_string = params.nil? ? uri.query : params.to_query
 
-            if wrapped_headers.present?
-              ActionDispatch::Http::Headers.from_hash(request_env).merge!(wrapped_headers)
-            end
+          request_env = {
+            "QUERY_STRING" => query_string,
+            "PATH_INFO" => uri.path
+          }.merge(env)
 
-            TestRequest.create(request_env).tap do |request|
-              request.session = session.with_indifferent_access
-              request.cookie_jar = cookies
-            end
+          if wrapped_headers.present?
+            ActionDispatch::Http::Headers.from_hash(request_env).merge!(wrapped_headers)
           end
+
+          TestRequest.create(request_env).tap do |request|
+            request.session = session.with_indifferent_access
+            request.cookie_jar = cookies
+          end
+        end
       end
 
       include Behavior

@@ -1,9 +1,10 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/fields/named_structured_field'
 
 module Mail
-  class ContentTransferEncodingField < NamedStructuredField #:nodoc:
+  class ContentTransferEncodingField < NamedStructuredField # :nodoc:
     NAME = 'Content-Transfer-Encoding'
 
     def self.singular?
@@ -34,12 +35,13 @@ module Mail
     end
 
     private
-      def do_encode
-        "#{name}: #{encoding}\r\n"
-      end
 
-      def do_decode
-        encoding
-      end
+    def do_encode
+      "#{name}: #{encoding}\r\n"
+    end
+
+    def do_decode
+      encoding
+    end
   end
 end

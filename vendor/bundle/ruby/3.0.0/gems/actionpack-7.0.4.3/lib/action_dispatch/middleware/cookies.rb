@@ -70,7 +70,7 @@ module ActionDispatch
     end
 
     def cookies_same_site_protection
-      get_header(Cookies::COOKIES_SAME_SITE_PROTECTION) || Proc.new { }
+      get_header(Cookies::COOKIES_SAME_SITE_PROTECTION) || Proc.new {}
     end
 
     def cookies_digest
@@ -180,7 +180,7 @@ module ActionDispatch
   #   determines how this cookie should be restricted in cross-site contexts.
   #   Possible values are +:none+, +:lax+, and +:strict+. Defaults to +:lax+.
   class Cookies
-    HTTP_HEADER   = "Set-Cookie"
+    HTTP_HEADER = "Set-Cookie"
     GENERATOR_KEY = "action_dispatch.key_generator"
     SIGNED_COOKIE_SALT = "action_dispatch.signed_cookie_salt"
     ENCRYPTED_COOKIE_SALT = "action_dispatch.encrypted_cookie_salt"
@@ -265,26 +265,27 @@ module ActionDispatch
       end
 
       private
-        def upgrade_legacy_hmac_aes_cbc_cookies?
-          request.secret_key_base.present? &&
-            request.encrypted_signed_cookie_salt.present? &&
-            request.encrypted_cookie_salt.present? &&
-            request.use_authenticated_cookie_encryption
-        end
 
-        def prepare_upgrade_legacy_hmac_aes_cbc_cookies?
-          request.secret_key_base.present? &&
-            request.authenticated_encrypted_cookie_salt.present? &&
-            !request.use_authenticated_cookie_encryption
-        end
+      def upgrade_legacy_hmac_aes_cbc_cookies?
+        request.secret_key_base.present? &&
+          request.encrypted_signed_cookie_salt.present? &&
+          request.encrypted_cookie_salt.present? &&
+          request.use_authenticated_cookie_encryption
+      end
 
-        def encrypted_cookie_cipher
-          request.encrypted_cookie_cipher || "aes-256-gcm"
-        end
+      def prepare_upgrade_legacy_hmac_aes_cbc_cookies?
+        request.secret_key_base.present? &&
+          request.authenticated_encrypted_cookie_salt.present? &&
+          !request.use_authenticated_cookie_encryption
+      end
 
-        def signed_cookie_digest
-          request.signed_cookie_digest || "SHA1"
-        end
+      def encrypted_cookie_cipher
+        request.encrypted_cookie_cipher || "aes-256-gcm"
+      end
+
+      def signed_cookie_digest
+        request.signed_cookie_digest || "SHA1"
+      end
     end
 
     class CookieJar # :nodoc:
@@ -410,76 +411,77 @@ module ActionDispatch
       mattr_accessor :always_write_cookie, default: false
 
       private
-        def escape(string)
-          ::Rack::Utils.escape(string)
+
+      def escape(string)
+        ::Rack::Utils.escape(string)
+      end
+
+      def make_set_cookie_header(header)
+        header = @set_cookies.inject(header) { |m, (k, v)|
+          if write_cookie?(v)
+            ::Rack::Utils.add_cookie_to_header(m, k, v)
+          else
+            m
+          end
+        }
+        @delete_cookies.inject(header) { |m, (k, v)|
+          ::Rack::Utils.add_remove_cookie_to_header(m, k, v)
+        }
+      end
+
+      def write_cookie?(cookie)
+        request.ssl? || !cookie[:secure] || always_write_cookie || request.host.end_with?(".onion")
+      end
+
+      def handle_options(options)
+        if options[:expires].respond_to?(:from_now)
+          options[:expires] = options[:expires].from_now
         end
 
-        def make_set_cookie_header(header)
-          header = @set_cookies.inject(header) { |m, (k, v)|
-            if write_cookie?(v)
-              ::Rack::Utils.add_cookie_to_header(m, k, v)
-            else
-              m
-            end
-          }
-          @delete_cookies.inject(header) { |m, (k, v)|
-            ::Rack::Utils.add_remove_cookie_to_header(m, k, v)
-          }
-        end
+        options[:path] ||= "/"
 
-        def write_cookie?(cookie)
-          request.ssl? || !cookie[:secure] || always_write_cookie || request.host.end_with?(".onion")
-        end
+        cookies_same_site_protection = request.cookies_same_site_protection
+        options[:same_site] ||= cookies_same_site_protection.call(request)
 
-        def handle_options(options)
-          if options[:expires].respond_to?(:from_now)
-            options[:expires] = options[:expires].from_now
+        if options[:domain] == :all || options[:domain] == "all"
+          cookie_domain = ""
+          dot_splitted_host = request.host.split('.', -1)
+
+          # Case where request.host is not an IP address or it's an invalid domain
+          # (ip confirms to the domain structure we expect so we explicitly check for ip)
+          if request.host.match?(/^[\d.]+$/) || dot_splitted_host.include?("") || dot_splitted_host.length == 1
+            options[:domain] = nil
+            return
           end
 
-          options[:path]      ||= "/"
-
-          cookies_same_site_protection = request.cookies_same_site_protection
-          options[:same_site] ||= cookies_same_site_protection.call(request)
-
-          if options[:domain] == :all || options[:domain] == "all"
-            cookie_domain = ""
-            dot_splitted_host = request.host.split('.', -1)
-
-            # Case where request.host is not an IP address or it's an invalid domain
-            # (ip confirms to the domain structure we expect so we explicitly check for ip)
-            if request.host.match?(/^[\d.]+$/) || dot_splitted_host.include?("") || dot_splitted_host.length == 1
-              options[:domain] = nil
-              return
+          # If there is a provided tld length then we use it otherwise default domain.
+          if options[:tld_length].present?
+            # Case where the tld_length provided is valid
+            if dot_splitted_host.length >= options[:tld_length]
+              cookie_domain = dot_splitted_host.last(options[:tld_length]).join('.')
             end
-
-            # If there is a provided tld length then we use it otherwise default domain.
-            if options[:tld_length].present? 
-              # Case where the tld_length provided is valid
-              if dot_splitted_host.length >= options[:tld_length]
-                cookie_domain = dot_splitted_host.last(options[:tld_length]).join('.')
-              end
-            # Case where tld_length is not provided
+          # Case where tld_length is not provided
+          else
+            # Regular TLDs
+            if !(/\.[^.]{2,3}\.[^.]{2}\z/.match?(request.host))
+              cookie_domain = dot_splitted_host.last(2).join(".")
+            # **.**, ***.** style TLDs like co.uk and com.au
             else
-              # Regular TLDs
-              if !(/\.[^.]{2,3}\.[^.]{2}\z/.match?(request.host))
-                cookie_domain = dot_splitted_host.last(2).join(".")
-              # **.**, ***.** style TLDs like co.uk and com.au
-              else
-                cookie_domain = dot_splitted_host.last(3).join('.')
-              end
-            end
-
-            options[:domain] = if cookie_domain.present?
-              ".#{cookie_domain}"
-            end
-          elsif options[:domain].is_a? Array
-            # If host matches one of the supplied domains.
-            options[:domain] = options[:domain].find do |domain|
-              domain = domain.delete_prefix(".")
-              request.host == domain || request.host.end_with?(".#{domain}")
+              cookie_domain = dot_splitted_host.last(3).join('.')
             end
           end
+
+          options[:domain] = if cookie_domain.present?
+                               ".#{cookie_domain}"
+                             end
+        elsif options[:domain].is_a? Array
+          # If host matches one of the supplied domains.
+          options[:domain] = options[:domain].find do |domain|
+            domain = domain.delete_prefix(".")
+            request.host == domain || request.host.end_with?(".#{domain}")
+          end
         end
+      end
     end
 
     class AbstractCookieJar # :nodoc:
@@ -513,32 +515,35 @@ module ActionDispatch
       end
 
       protected
-        def request; @parent_jar.request; end
+
+      def request; @parent_jar.request; end
 
       private
-        def expiry_options(options)
-          if options[:expires].respond_to?(:from_now)
-            { expires_in: options[:expires] }
-          else
-            { expires_at: options[:expires] }
-          end
-        end
 
-        def cookie_metadata(name, options)
-          expiry_options(options).tap do |metadata|
-            metadata[:purpose] = "cookie.#{name}" if request.use_cookies_with_metadata
-          end
+      def expiry_options(options)
+        if options[:expires].respond_to?(:from_now)
+          { expires_in: options[:expires] }
+        else
+          { expires_at: options[:expires] }
         end
+      end
 
-        def parse(name, data, purpose: nil); data; end
-        def commit(name, options); end
+      def cookie_metadata(name, options)
+        expiry_options(options).tap do |metadata|
+          metadata[:purpose] = "cookie.#{name}" if request.use_cookies_with_metadata
+        end
+      end
+
+      def parse(name, data, purpose: nil); data; end
+      def commit(name, options); end
     end
 
     class PermanentCookieJar < AbstractCookieJar # :nodoc:
       private
-        def commit(name, options)
-          options[:expires] = 20.years.from_now
-        end
+
+      def commit(name, options)
+        options[:expires] = 20.years.from_now
+      end
     end
 
     class MarshalWithJsonFallback # :nodoc:
@@ -568,49 +573,50 @@ module ActionDispatch
       SERIALIZER = ActiveSupport::MessageEncryptor::NullSerializer
 
       protected
-        def needs_migration?(value)
-          request.cookies_serializer == :hybrid && value.start_with?(MARSHAL_SIGNATURE)
-        end
 
-        def serialize(value)
-          serializer.dump(value)
-        end
+      def needs_migration?(value)
+        request.cookies_serializer == :hybrid && value.start_with?(MARSHAL_SIGNATURE)
+      end
 
-        def deserialize(name)
-          rotate = false
-          value  = yield -> { rotate = true }
+      def serialize(value)
+        serializer.dump(value)
+      end
 
-          if value
-            case
-            when needs_migration?(value)
-              Marshal.load(value).tap do |v|
-                self[name] = { value: v }
-              end
-            when rotate
-              serializer.load(value).tap do |v|
-                self[name] = { value: v }
-              end
-            else
-              serializer.load(value)
+      def deserialize(name)
+        rotate = false
+        value = yield -> { rotate = true }
+
+        if value
+          case
+          when needs_migration?(value)
+            Marshal.load(value).tap do |v|
+              self[name] = { value: v }
             end
-          end
-        end
-
-        def serializer
-          serializer = request.cookies_serializer || :marshal
-          case serializer
-          when :marshal
-            MarshalWithJsonFallback
-          when :json, :hybrid
-            JsonSerializer
+          when rotate
+            serializer.load(value).tap do |v|
+              self[name] = { value: v }
+            end
           else
-            serializer
+            serializer.load(value)
           end
         end
+      end
 
-        def digest
-          request.cookies_digest || "SHA1"
+      def serializer
+        serializer = request.cookies_serializer || :marshal
+        case serializer
+        when :marshal
+          MarshalWithJsonFallback
+        when :json, :hybrid
+          JsonSerializer
+        else
+          serializer
         end
+      end
+
+      def digest
+        request.cookies_digest || "SHA1"
+      end
     end
 
     class SignedKeyRotatingCookieJar < AbstractCookieJar # :nodoc:
@@ -629,17 +635,18 @@ module ActionDispatch
       end
 
       private
-        def parse(name, signed_message, purpose: nil)
-          deserialize(name) do |rotate|
-            @verifier.verified(signed_message, on_rotation: rotate, purpose: purpose)
-          end
-        end
 
-        def commit(name, options)
-          options[:value] = @verifier.generate(serialize(options[:value]), **cookie_metadata(name, options))
-
-          raise CookieOverflow if options[:value].bytesize > MAX_COOKIE_SIZE
+      def parse(name, signed_message, purpose: nil)
+        deserialize(name) do |rotate|
+          @verifier.verified(signed_message, on_rotation: rotate, purpose: purpose)
         end
+      end
+
+      def commit(name, options)
+        options[:value] = @verifier.generate(serialize(options[:value]), **cookie_metadata(name, options))
+
+        raise CookieOverflow if options[:value].bytesize > MAX_COOKIE_SIZE
+      end
     end
 
     class EncryptedKeyRotatingCookieJar < AbstractCookieJar # :nodoc:
@@ -651,12 +658,14 @@ module ActionDispatch
         if request.use_authenticated_cookie_encryption
           key_len = ActiveSupport::MessageEncryptor.key_len(encrypted_cookie_cipher)
           secret = request.key_generator.generate_key(request.authenticated_encrypted_cookie_salt, key_len)
-          @encryptor = ActiveSupport::MessageEncryptor.new(secret, cipher: encrypted_cookie_cipher, serializer: SERIALIZER)
+          @encryptor = ActiveSupport::MessageEncryptor.new(secret, cipher: encrypted_cookie_cipher,
+                                                                   serializer: SERIALIZER)
         else
           key_len = ActiveSupport::MessageEncryptor.key_len("aes-256-cbc")
           secret = request.key_generator.generate_key(request.encrypted_cookie_salt, key_len)
           sign_secret = request.key_generator.generate_key(request.encrypted_signed_cookie_salt)
-          @encryptor = ActiveSupport::MessageEncryptor.new(secret, sign_secret, cipher: "aes-256-cbc", serializer: SERIALIZER)
+          @encryptor = ActiveSupport::MessageEncryptor.new(secret, sign_secret, cipher: "aes-256-cbc",
+                                                                                serializer: SERIALIZER)
         end
 
         request.cookies_rotations.encrypted.each do |(*secrets)|
@@ -666,32 +675,35 @@ module ActionDispatch
 
         if upgrade_legacy_hmac_aes_cbc_cookies?
           legacy_cipher = "aes-256-cbc"
-          secret = request.key_generator.generate_key(request.encrypted_cookie_salt, ActiveSupport::MessageEncryptor.key_len(legacy_cipher))
+          secret = request.key_generator.generate_key(request.encrypted_cookie_salt,
+                                                      ActiveSupport::MessageEncryptor.key_len(legacy_cipher))
           sign_secret = request.key_generator.generate_key(request.encrypted_signed_cookie_salt)
 
           @encryptor.rotate(secret, sign_secret, cipher: legacy_cipher, digest: digest, serializer: SERIALIZER)
         elsif prepare_upgrade_legacy_hmac_aes_cbc_cookies?
           future_cipher = encrypted_cookie_cipher
-          secret = request.key_generator.generate_key(request.authenticated_encrypted_cookie_salt, ActiveSupport::MessageEncryptor.key_len(future_cipher))
+          secret = request.key_generator.generate_key(request.authenticated_encrypted_cookie_salt,
+                                                      ActiveSupport::MessageEncryptor.key_len(future_cipher))
 
           @encryptor.rotate(secret, nil, cipher: future_cipher, serializer: SERIALIZER)
         end
       end
 
       private
-        def parse(name, encrypted_message, purpose: nil)
-          deserialize(name) do |rotate|
-            @encryptor.decrypt_and_verify(encrypted_message, on_rotation: rotate, purpose: purpose)
-          end
-        rescue ActiveSupport::MessageEncryptor::InvalidMessage, ActiveSupport::MessageVerifier::InvalidSignature
-          nil
-        end
 
-        def commit(name, options)
-          options[:value] = @encryptor.encrypt_and_sign(serialize(options[:value]), **cookie_metadata(name, options))
-
-          raise CookieOverflow if options[:value].bytesize > MAX_COOKIE_SIZE
+      def parse(name, encrypted_message, purpose: nil)
+        deserialize(name) do |rotate|
+          @encryptor.decrypt_and_verify(encrypted_message, on_rotation: rotate, purpose: purpose)
         end
+      rescue ActiveSupport::MessageEncryptor::InvalidMessage, ActiveSupport::MessageVerifier::InvalidSignature
+        nil
+      end
+
+      def commit(name, options)
+        options[:value] = @encryptor.encrypt_and_sign(serialize(options[:value]), **cookie_metadata(name, options))
+
+        raise CookieOverflow if options[:value].bytesize > MAX_COOKIE_SIZE
+      end
     end
 
     def initialize(app)

@@ -20,17 +20,17 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
   JBUILDER
 
   PARTIALS = {
-    "_partial.json.jbuilder"      => "json.content content",
-    "_post.json.jbuilder"         => POST_PARTIAL,
+    "_partial.json.jbuilder" => "json.content content",
+    "_post.json.jbuilder" => POST_PARTIAL,
     "racers/_racer.json.jbuilder" => RACER_PARTIAL,
-    "_collection.json.jbuilder"   => COLLECTION_PARTIAL,
+    "_collection.json.jbuilder" => COLLECTION_PARTIAL,
 
     # Ensure we find only Jbuilder partials from within Jbuilder templates.
     "_post.html.erb" => "Hello world!"
   }
 
-  AUTHORS = [ "David Heinemeier Hansson", "Pavel Pravosud" ].cycle
-  POSTS   = (1..10).collect { |i| Post.new(i, "Post ##{i}", AUTHORS.next) }
+  AUTHORS = ["David Heinemeier Hansson", "Pavel Pravosud"].cycle
+  POSTS = (1..10).collect { |i| Post.new(i, "Post ##{i}", AUTHORS.next) }
 
   setup { Rails.cache.clear }
 
@@ -213,7 +213,7 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
       end
     JBUILDER
 
-    assert_equal %w[ a b c ], render('json.cache! "cache-key" do; end')
+    assert_equal %w[a b c], render('json.cache! "cache-key" do; end')
   end
 
   test "array root caching" do
@@ -223,9 +223,9 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
       end
     JBUILDER
 
-    assert_equal JSON.dump(%w[ a b c ]), Rails.cache.read("jbuilder/root/cache-key")
+    assert_equal JSON.dump(%w[a b c]), Rails.cache.read("jbuilder/root/cache-key")
 
-    assert_equal %w[ a b c ], render(<<-JBUILDER)
+    assert_equal %w[a b c], render(<<-JBUILDER)
       json.cache_root! "cache-key" do
         json.array! %w[ d e f ]
       end
@@ -335,7 +335,8 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
     end
 
     test "supports the cached: ->() {} option" do
-      result = render('json.array! @posts, partial: "post", as: :post, cached: ->(post) { [post, "foo"] }', posts: POSTS)
+      result = render('json.array! @posts, partial: "post", as: :post, cached: ->(post) { [post, "foo"] }',
+                      posts: POSTS)
 
       assert_equal 10, result.count
       assert_equal "Post #5", result[4]["body"]
@@ -353,7 +354,8 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
 
       assert_equal expected, Rails.cache.read("post-1/foo")
 
-      result = render('json.array! @posts, partial: "post", as: :post, cached: ->(post) { [post, "foo"] }', posts: POSTS)
+      result = render('json.array! @posts, partial: "post", as: :post, cached: ->(post) { [post, "foo"] }',
+                      posts: POSTS)
 
       assert_equal 10, result.count
       assert_equal "Post #5", result[4]["body"]
@@ -379,32 +381,33 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
   end
 
   private
-    def render(*args)
-      JSON.load render_without_parsing(*args)
-    end
 
-    def render_without_parsing(source, assigns = {})
-      view = build_view(fixtures: PARTIALS.merge("source.json.jbuilder" => source), assigns: assigns)
-      view.render(template: "source")
-    end
+  def render(*args)
+    JSON.load render_without_parsing(*args)
+  end
 
-    def build_view(options = {})
-      resolver = ActionView::FixtureResolver.new(options.fetch(:fixtures))
-      lookup_context = ActionView::LookupContext.new([ resolver ], {}, [""])
-      controller = ActionView::TestCase::TestController.new
+  def render_without_parsing(source, assigns = {})
+    view = build_view(fixtures: PARTIALS.merge("source.json.jbuilder" => source), assigns: assigns)
+    view.render(template: "source")
+  end
 
-      # TODO: Use with_empty_template_cache unconditionally after dropping support for Rails <6.0.
-      view = if ActionView::Base.respond_to?(:with_empty_template_cache)
-        ActionView::Base.with_empty_template_cache.new(lookup_context, options.fetch(:assigns, {}), controller)
-      else
-        ActionView::Base.new(lookup_context, options.fetch(:assigns, {}), controller)
-      end
+  def build_view(options = {})
+    resolver = ActionView::FixtureResolver.new(options.fetch(:fixtures))
+    lookup_context = ActionView::LookupContext.new([resolver], {}, [""])
+    controller = ActionView::TestCase::TestController.new
 
-      def view.view_cache_dependencies; []; end
-      def view.combined_fragment_cache_key(key) [ key ] end
-      def view.cache_fragment_name(key, *) key end
-      def view.fragment_name_with_digest(key) key end
+    # TODO: Use with_empty_template_cache unconditionally after dropping support for Rails <6.0.
+    view = if ActionView::Base.respond_to?(:with_empty_template_cache)
+             ActionView::Base.with_empty_template_cache.new(lookup_context, options.fetch(:assigns, {}), controller)
+           else
+             ActionView::Base.new(lookup_context, options.fetch(:assigns, {}), controller)
+           end
 
-      view
-    end
+    def view.view_cache_dependencies; []; end
+    def view.combined_fragment_cache_key(key) [key] end
+    def view.cache_fragment_name(key, *) key end
+    def view.fragment_name_with_digest(key) key end
+
+    view
+  end
 end

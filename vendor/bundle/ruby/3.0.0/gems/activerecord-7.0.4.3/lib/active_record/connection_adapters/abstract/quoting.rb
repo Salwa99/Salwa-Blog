@@ -12,16 +12,16 @@ module ActiveRecord
         case value
         when String, Symbol, ActiveSupport::Multibyte::Chars
           "'#{quote_string(value.to_s)}'"
-        when true       then quoted_true
-        when false      then quoted_false
-        when nil        then "NULL"
+        when true then quoted_true
+        when false then quoted_false
+        when nil then "NULL"
         # BigDecimals need to be put in a non-normalized form and quoted.
         when BigDecimal then value.to_s("F")
         when Numeric, ActiveSupport::Duration then value.to_s
         when Type::Binary::Data then quoted_binary(value)
         when Type::Time::Value then "'#{quoted_time(value)}'"
         when Date, Time then "'#{quoted_date(value)}'"
-        when Class      then "'#{value}'"
+        when Class then "'#{value}'"
         else raise TypeError, "can't quote #{value.class.name}"
         end
       end
@@ -33,8 +33,8 @@ module ActiveRecord
         case value
         when Symbol, ActiveSupport::Multibyte::Chars, Type::Binary::Data
           value.to_s
-        when true       then unquoted_true
-        when false      then unquoted_false
+        when true then unquoted_true
+        when false then unquoted_false
         # BigDecimals need to be put in a non-normalized form and quoted.
         when BigDecimal then value.to_s("F")
         when nil, Numeric, String then value
@@ -212,19 +212,20 @@ module ActiveRecord
       private_constant :COLUMN_NAME, :COLUMN_NAME_WITH_ORDER
 
       private
-        def type_casted_binds(binds)
-          binds.map do |value|
-            if ActiveModel::Attribute === value
-              type_cast(value.value_for_database)
-            else
-              type_cast(value)
-            end
+
+      def type_casted_binds(binds)
+        binds.map do |value|
+          if ActiveModel::Attribute === value
+            type_cast(value.value_for_database)
+          else
+            type_cast(value)
           end
         end
+      end
 
-        def lookup_cast_type(sql_type)
-          type_map.lookup(sql_type)
-        end
+      def lookup_cast_type(sql_type)
+        type_map.lookup(sql_type)
+      end
     end
   end
 end

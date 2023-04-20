@@ -2,7 +2,6 @@ require 'concurrent/constants'
 require_relative 'locals'
 
 module Concurrent
-
   # A `FiberLocalVar` is a variable where the value is different for each fiber.
   # Each variable may have a default value, but when you modify the variable only
   # the current fiber will ever see that change.

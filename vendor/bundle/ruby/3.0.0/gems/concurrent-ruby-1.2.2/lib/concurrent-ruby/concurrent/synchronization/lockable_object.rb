@@ -5,7 +5,6 @@ require 'concurrent/synchronization/jruby_lockable_object'
 
 module Concurrent
   module Synchronization
-
     # @!visibility private
     # @!macro internal_implementation_note
     LockableObjectImplementation = case
@@ -48,7 +47,6 @@ module Concurrent
     #
     # @!visibility private
     class LockableObject < LockableObjectImplementation
-
       # TODO (pitr 12-Sep-2015): make private for c-r, prohibit subclassing
       # TODO (pitr 12-Sep-2015): we inherit too much ourselves :/
 
@@ -69,7 +67,6 @@ module Concurrent
 
       # @!method broadcast
       #   @!macro synchronization_object_method_ns_broadcast
-
     end
   end
 end

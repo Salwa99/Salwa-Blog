@@ -1,20 +1,21 @@
 # frozen_string_literal: true
+
 require 'reline'
 require 'ripper'
 require_relative 'ruby-lex'
 
 module IRB # :nodoc:
   module Color
-    CLEAR     = 0
-    BOLD      = 1
+    CLEAR = 0
+    BOLD = 1
     UNDERLINE = 4
-    REVERSE   = 7
-    RED       = 31
-    GREEN     = 32
-    YELLOW    = 33
-    BLUE      = 34
-    MAGENTA   = 35
-    CYAN      = 36
+    REVERSE = 7
+    RED = 31
+    GREEN = 32
+    YELLOW = 33
+    BLUE = 34
+    MAGENTA = 35
+    CYAN = 36
 
     TOKEN_KEYWORDS = {
       on_kw: ['nil', 'self', 'true', 'false', '__FILE__', '__LINE__', '__ENCODING__'],
@@ -30,41 +31,41 @@ module IRB # :nodoc:
       # Following pry's colors where possible, but sometimes having a compromise like making
       # backtick and regexp as red (string's color, because they're sharing tokens).
       TOKEN_SEQ_EXPRS = {
-        on_CHAR:            [[BLUE, BOLD],            ALL],
-        on_backtick:        [[RED, BOLD],             ALL],
-        on_comment:         [[BLUE, BOLD],            ALL],
-        on_const:           [[BLUE, BOLD, UNDERLINE], ALL],
-        on_embexpr_beg:     [[RED],                   ALL],
-        on_embexpr_end:     [[RED],                   ALL],
-        on_embvar:          [[RED],                   ALL],
-        on_float:           [[MAGENTA, BOLD],         ALL],
-        on_gvar:            [[GREEN, BOLD],           ALL],
-        on_heredoc_beg:     [[RED],                   ALL],
-        on_heredoc_end:     [[RED],                   ALL],
-        on_ident:           [[BLUE, BOLD],            Ripper::EXPR_ENDFN],
-        on_imaginary:       [[BLUE, BOLD],            ALL],
-        on_int:             [[BLUE, BOLD],            ALL],
-        on_kw:              [[GREEN],                 ALL],
-        on_label:           [[MAGENTA],               ALL],
-        on_label_end:       [[RED, BOLD],             ALL],
-        on_qsymbols_beg:    [[RED, BOLD],             ALL],
-        on_qwords_beg:      [[RED, BOLD],             ALL],
-        on_rational:        [[BLUE, BOLD],            ALL],
-        on_regexp_beg:      [[RED, BOLD],             ALL],
-        on_regexp_end:      [[RED, BOLD],             ALL],
-        on_symbeg:          [[YELLOW],                ALL],
-        on_symbols_beg:     [[RED, BOLD],             ALL],
-        on_tstring_beg:     [[RED, BOLD],             ALL],
-        on_tstring_content: [[RED],                   ALL],
-        on_tstring_end:     [[RED, BOLD],             ALL],
-        on_words_beg:       [[RED, BOLD],             ALL],
-        on_parse_error:     [[RED, REVERSE],          ALL],
-        compile_error:      [[RED, REVERSE],          ALL],
-        on_assign_error:    [[RED, REVERSE],          ALL],
-        on_alias_error:     [[RED, REVERSE],          ALL],
-        on_class_name_error:[[RED, REVERSE],          ALL],
-        on_param_error:     [[RED, REVERSE],          ALL],
-        on___end__:         [[GREEN],                 ALL],
+        on_CHAR: [[BLUE, BOLD], ALL],
+        on_backtick: [[RED, BOLD], ALL],
+        on_comment: [[BLUE, BOLD], ALL],
+        on_const: [[BLUE, BOLD, UNDERLINE], ALL],
+        on_embexpr_beg: [[RED], ALL],
+        on_embexpr_end: [[RED], ALL],
+        on_embvar: [[RED], ALL],
+        on_float: [[MAGENTA, BOLD], ALL],
+        on_gvar: [[GREEN, BOLD], ALL],
+        on_heredoc_beg: [[RED], ALL],
+        on_heredoc_end: [[RED], ALL],
+        on_ident: [[BLUE, BOLD], Ripper::EXPR_ENDFN],
+        on_imaginary: [[BLUE, BOLD], ALL],
+        on_int: [[BLUE, BOLD], ALL],
+        on_kw: [[GREEN], ALL],
+        on_label: [[MAGENTA], ALL],
+        on_label_end: [[RED, BOLD], ALL],
+        on_qsymbols_beg: [[RED, BOLD], ALL],
+        on_qwords_beg: [[RED, BOLD], ALL],
+        on_rational: [[BLUE, BOLD], ALL],
+        on_regexp_beg: [[RED, BOLD], ALL],
+        on_regexp_end: [[RED, BOLD], ALL],
+        on_symbeg: [[YELLOW], ALL],
+        on_symbols_beg: [[RED, BOLD], ALL],
+        on_tstring_beg: [[RED, BOLD], ALL],
+        on_tstring_content: [[RED], ALL],
+        on_tstring_end: [[RED, BOLD], ALL],
+        on_words_beg: [[RED, BOLD], ALL],
+        on_parse_error: [[RED, REVERSE], ALL],
+        compile_error: [[RED, REVERSE], ALL],
+        on_assign_error: [[RED, REVERSE], ALL],
+        on_alias_error: [[RED, REVERSE], ALL],
+        on_class_name_error: [[RED, REVERSE], ALL],
+        on_param_error: [[RED, REVERSE], ALL],
+        on___end__: [[GREEN], ALL],
       }
     rescue NameError
       # Give up highlighting Ripper-incompatible older Ruby
@@ -111,11 +112,13 @@ module IRB # :nodoc:
 
       def clear(colorable: colorable?)
         return '' unless colorable
+
         "\e[#{CLEAR}m"
       end
 
       def colorize(text, seq, colorable: colorable?)
         return text unless colorable
+
         seq = seq.map { |s| "\e[#{const_get(s)}m" }.join('')
         "#{seq}#{text}#{clear(colorable: colorable)}"
       end
@@ -157,6 +160,7 @@ module IRB # :nodoc:
 
         if lvars_code
           raise "#{lvars_code.dump} should have no \\n" if lvars_code.include?("\n")
+
           colored.sub!(/\A.+\n/, '') # delete_prefix lvars_code with colors
         end
         colored
@@ -166,6 +170,7 @@ module IRB # :nodoc:
 
       def without_circular_ref(obj, seen:, &block)
         return false if seen.key?(obj)
+
         seen[obj] = true
         block.call
       ensure
@@ -199,6 +204,7 @@ module IRB # :nodoc:
 
           lexer.scan.each do |elem|
             next if allow_last_error and /meets end of file|unexpected end-of-input/ =~ elem.message
+
             on_scan.call(elem)
           end
           # yield uncolorable DATA section

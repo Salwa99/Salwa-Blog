@@ -47,7 +47,7 @@ module ActiveRecord
 
       # table_joins is an array of arel joins which might conflict with the aliases we assign here
       def initialize(connection, aliases)
-        @aliases    = aliases
+        @aliases = aliases
         @connection = connection
       end
 
@@ -76,9 +76,10 @@ module ActiveRecord
       attr_reader :aliases
 
       private
-        def truncate(name)
-          name.slice(0, @connection.table_alias_length - 2)
-        end
+
+      def truncate(name)
+        name.slice(0, @connection.table_alias_length - 2)
+      end
     end
   end
 end

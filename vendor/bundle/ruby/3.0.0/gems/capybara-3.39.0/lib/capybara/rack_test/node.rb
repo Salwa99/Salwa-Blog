@@ -140,7 +140,7 @@ class Capybara::RackTest::Node < Capybara::Driver::Node
     end
   end
 
-protected
+  protected
 
   # @api private
   def displayed_text(check_ancestor: true)
@@ -163,7 +163,7 @@ protected
     end
   end
 
-private
+  private
 
   def stale_check
     raise Capybara::RackTest::Errors::StaleElementReferenceError unless native.document == driver.dom
@@ -254,10 +254,10 @@ private
 
   def click_label
     labelled_control = if native[:for]
-      find_xpath("//input[@id='#{native[:for]}']")
-    else
-      find_xpath('.//input')
-    end.first
+                         find_xpath("//input[@id='#{native[:for]}']")
+                       else
+                         find_xpath('.//input')
+                       end.first
 
     labelled_control.set(!labelled_control.checked?) if checkbox_or_radio?(labelled_control)
   end
@@ -285,7 +285,7 @@ private
     tag_name == 'input' && %w[checkbox radio].include?(type)
   end
 
-protected
+  protected
 
   def checkbox_or_radio?(field = self)
     field&.checkbox? || field&.radio?

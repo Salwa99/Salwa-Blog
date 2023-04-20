@@ -39,12 +39,12 @@ module I18n
 
       def translate(locale, key, options = EMPTY_HASH)
         metadata = {
-          :locale    => locale,
-          :key       => key,
-          :scope     => options[:scope],
-          :default   => options[:default],
+          :locale => locale,
+          :key => key,
+          :scope => options[:scope],
+          :default => options[:default],
           :separator => options[:separator],
-          :values    => options.reject { |name, _value| RESERVED_KEYS.include?(name) }
+          :values => options.reject { |name, _value| RESERVED_KEYS.include?(name) }
         }
         with_metadata(metadata) { super }
       end
@@ -60,12 +60,11 @@ module I18n
 
       protected
 
-        def with_metadata(metadata, &block)
-          result = yield
-          result.translation_metadata = result.translation_metadata.merge(metadata) if result
-          result
-        end
-
+      def with_metadata(metadata, &block)
+        result = yield
+        result.translation_metadata = result.translation_metadata.merge(metadata) if result
+        result
+      end
     end
   end
 end

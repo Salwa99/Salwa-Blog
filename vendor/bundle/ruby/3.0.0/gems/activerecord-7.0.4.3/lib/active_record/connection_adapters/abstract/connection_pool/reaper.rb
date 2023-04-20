@@ -16,7 +16,7 @@ module ActiveRecord
         attr_reader :pool, :frequency
 
         def initialize(pool, frequency)
-          @pool      = pool
+          @pool = pool
           @frequency = frequency
         end
 
@@ -36,38 +36,40 @@ module ActiveRecord
           end
 
           private
-            def spawn_thread(frequency)
-              Thread.new(frequency) do |t|
-                # Advise multi-threaded app servers to ignore this thread for
-                # the purposes of fork safety warnings
-                Thread.current.thread_variable_set(:fork_safe, true)
-                running = true
-                while running
-                  sleep t
-                  @mutex.synchronize do
-                    @pools[frequency].select! do |pool|
-                      pool.weakref_alive? && !pool.discarded?
-                    end
 
-                    @pools[frequency].each do |p|
-                      p.reap
-                      p.flush
-                    rescue WeakRef::RefError
-                    end
+          def spawn_thread(frequency)
+            Thread.new(frequency) do |t|
+              # Advise multi-threaded app servers to ignore this thread for
+              # the purposes of fork safety warnings
+              Thread.current.thread_variable_set(:fork_safe, true)
+              running = true
+              while running
+                sleep t
+                @mutex.synchronize do
+                  @pools[frequency].select! do |pool|
+                    pool.weakref_alive? && !pool.discarded?
+                  end
 
-                    if @pools[frequency].empty?
-                      @pools.delete(frequency)
-                      @threads.delete(frequency)
-                      running = false
-                    end
+                  @pools[frequency].each do |p|
+                    p.reap
+                    p.flush
+                  rescue WeakRef::RefError
+                  end
+
+                  if @pools[frequency].empty?
+                    @pools.delete(frequency)
+                    @threads.delete(frequency)
+                    running = false
                   end
                 end
               end
             end
+          end
         end
 
         def run
           return unless frequency && frequency > 0
+
           self.class.register_pool(pool, frequency)
         end
       end

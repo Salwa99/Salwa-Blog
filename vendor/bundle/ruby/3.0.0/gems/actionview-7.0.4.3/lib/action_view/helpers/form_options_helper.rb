@@ -196,7 +196,8 @@ module ActionView
       #     <option value="3">M. Clark</option>
       #   </select>
       def collection_select(object, method, collection, value_method, text_method, options = {}, html_options = {})
-        Tags::CollectionSelect.new(object, method, self, collection, value_method, text_method, options, html_options).render
+        Tags::CollectionSelect.new(object, method, self, collection, value_method, text_method, options,
+                                   html_options).render
       end
 
       # Returns <tt><select></tt>, <tt><optgroup></tt> and <tt><option></tt> tags for the collection of existing return values of
@@ -254,8 +255,10 @@ module ActionView
       #       <option value="2">Ireland</option>
       #     </optgroup>
       #   </select>
-      def grouped_collection_select(object, method, collection, group_method, group_label_method, option_key_method, option_value_method, options = {}, html_options = {})
-        Tags::GroupedCollectionSelect.new(object, method, self, collection, group_method, group_label_method, option_key_method, option_value_method, options, html_options).render
+      def grouped_collection_select(object, method, collection, group_method, group_label_method, option_key_method,
+                                    option_value_method, options = {}, html_options = {})
+        Tags::GroupedCollectionSelect.new(object, method, self, collection, group_method, group_label_method,
+                                          option_key_method, option_value_method, options, html_options).render
       end
 
       # Returns select and option tags for the given object and method, using
@@ -399,7 +402,8 @@ module ActionView
       # should produce the desired results.
       def options_from_collection_for_select(collection, value_method, text_method, selected = nil)
         options = collection.map do |element|
-          [value_for_collection(element, text_method), value_for_collection(element, value_method), option_html_attributes(element)]
+          [value_for_collection(element, text_method), value_for_collection(element, value_method),
+           option_html_attributes(element)]
         end
         selected, disabled = extract_selected_and_disabled(selected)
         select_deselect = {
@@ -458,10 +462,12 @@ module ActionView
       #
       # <b>Note:</b> Only the <tt><optgroup></tt> and <tt><option></tt> tags are returned, so you still have to
       # wrap the output in an appropriate <tt><select></tt> tag.
-      def option_groups_from_collection_for_select(collection, group_method, group_label_method, option_key_method, option_value_method, selected_key = nil)
+      def option_groups_from_collection_for_select(collection, group_method, group_label_method, option_key_method,
+                                                   option_value_method, selected_key = nil)
         collection.map do |group|
           option_tags = options_from_collection_for_select(
-            value_for_collection(group, group_method), option_key_method, option_value_method, selected_key)
+            value_for_collection(group, group_method), option_key_method, option_value_method, selected_key
+          )
 
           content_tag("optgroup", option_tags, label: value_for_collection(group, group_label_method))
         end.join.html_safe
@@ -529,7 +535,7 @@ module ActionView
       # <b>Note:</b> Only the <tt><optgroup></tt> and <tt><option></tt> tags are returned, so you still have to
       # wrap the output in an appropriate <tt><select></tt> tag.
       def grouped_options_for_select(grouped_options, selected_key = nil, options = {})
-        prompt  = options[:prompt]
+        prompt = options[:prompt]
         divider = options[:divider]
 
         body = "".html_safe
@@ -577,7 +583,7 @@ module ActionView
         zone_options = "".html_safe
 
         zones = model.all
-        convert_zones = lambda { |list| list.map { |z| [ z.to_s, z.name ] } }
+        convert_zones = lambda { |list| list.map { |z| [z.to_s, z.name] } }
 
         if priority_zones
           if priority_zones.is_a?(Regexp)
@@ -605,7 +611,8 @@ module ActionView
       #
       # NOTE: Only the option tags are returned, you have to wrap this call in
       # a regular HTML select tag.
-      def weekday_options_for_select(selected = nil, index_as_value: false, day_format: :day_names, beginning_of_week: Date.beginning_of_week)
+      def weekday_options_for_select(selected = nil, index_as_value: false, day_format: :day_names,
+                                     beginning_of_week: Date.beginning_of_week)
         day_names = I18n.translate("date.#{day_format}")
         day_names = day_names.map.with_index.to_a if index_as_value
         day_names = day_names.rotate(Date::DAYS_INTO_WEEK.fetch(beginning_of_week))
@@ -692,8 +699,10 @@ module ActionView
       #
       # In case if you don't want the helper to generate this hidden field you can specify
       # <tt>include_hidden: false</tt> option.
-      def collection_radio_buttons(object, method, collection, value_method, text_method, options = {}, html_options = {}, &block)
-        Tags::CollectionRadioButtons.new(object, method, self, collection, value_method, text_method, options, html_options).render(&block)
+      def collection_radio_buttons(object, method, collection, value_method, text_method, options = {},
+                                   html_options = {}, &block)
+        Tags::CollectionRadioButtons.new(object, method, self, collection, value_method, text_method, options,
+                                         html_options).render(&block)
       end
 
       # Returns check box tags for the collection of existing return values of
@@ -776,61 +785,64 @@ module ActionView
       #
       # In the rare case you don't want this hidden field, you can pass the
       # <tt>include_hidden: false</tt> option to the helper method.
-      def collection_check_boxes(object, method, collection, value_method, text_method, options = {}, html_options = {}, &block)
-        Tags::CollectionCheckBoxes.new(object, method, self, collection, value_method, text_method, options, html_options).render(&block)
+      def collection_check_boxes(object, method, collection, value_method, text_method, options = {},
+                                 html_options = {}, &block)
+        Tags::CollectionCheckBoxes.new(object, method, self, collection, value_method, text_method, options,
+                                       html_options).render(&block)
       end
 
       private
-        def option_html_attributes(element)
-          if Array === element
-            element.select { |e| Hash === e }.reduce({}, :merge!)
-          else
-            {}
+
+      def option_html_attributes(element)
+        if Array === element
+          element.select { |e| Hash === e }.reduce({}, :merge!)
+        else
+          {}
+        end
+      end
+
+      def option_text_and_value(option)
+        # Options are [text, value] pairs or strings used for both.
+        if !option.is_a?(String) && option.respond_to?(:first) && option.respond_to?(:last)
+          option = option.reject { |e| Hash === e } if Array === option
+          [option.first, option.last]
+        else
+          [option, option]
+        end
+      end
+
+      def option_value_selected?(value, selected)
+        Array(selected).include? value
+      end
+
+      def extract_selected_and_disabled(selected)
+        if selected.is_a?(Proc)
+          [selected, nil]
+        else
+          selected = Array.wrap(selected)
+          options = selected.extract_options!.symbolize_keys
+          selected_items = options.fetch(:selected, selected)
+          [selected_items, options[:disabled]]
+        end
+      end
+
+      def extract_values_from_collection(collection, value_method, selected)
+        if selected.is_a?(Proc)
+          collection.filter_map do |element|
+            element.public_send(value_method) if selected.call(element)
           end
+        else
+          selected
         end
+      end
 
-        def option_text_and_value(option)
-          # Options are [text, value] pairs or strings used for both.
-          if !option.is_a?(String) && option.respond_to?(:first) && option.respond_to?(:last)
-            option = option.reject { |e| Hash === e } if Array === option
-            [option.first, option.last]
-          else
-            [option, option]
-          end
-        end
+      def value_for_collection(item, value)
+        value.respond_to?(:call) ? value.call(item) : item.public_send(value)
+      end
 
-        def option_value_selected?(value, selected)
-          Array(selected).include? value
-        end
-
-        def extract_selected_and_disabled(selected)
-          if selected.is_a?(Proc)
-            [selected, nil]
-          else
-            selected = Array.wrap(selected)
-            options = selected.extract_options!.symbolize_keys
-            selected_items = options.fetch(:selected, selected)
-            [selected_items, options[:disabled]]
-          end
-        end
-
-        def extract_values_from_collection(collection, value_method, selected)
-          if selected.is_a?(Proc)
-            collection.filter_map do |element|
-              element.public_send(value_method) if selected.call(element)
-            end
-          else
-            selected
-          end
-        end
-
-        def value_for_collection(item, value)
-          value.respond_to?(:call) ? value.call(item) : item.public_send(value)
-        end
-
-        def prompt_text(prompt)
-          prompt.kind_of?(String) ? prompt : I18n.translate("helpers.select.prompt", default: "Please select")
-        end
+      def prompt_text(prompt)
+        prompt.kind_of?(String) ? prompt : I18n.translate("helpers.select.prompt", default: "Please select")
+      end
     end
 
     class FormBuilder
@@ -843,7 +855,8 @@ module ActionView
       #
       # Please refer to the documentation of the base helper for details.
       def select(method, choices = nil, options = {}, html_options = {}, &block)
-        @template.select(@object_name, method, choices, objectify_options(options), @default_html_options.merge(html_options), &block)
+        @template.select(@object_name, method, choices, objectify_options(options),
+                         @default_html_options.merge(html_options), &block)
       end
 
       # Wraps ActionView::Helpers::FormOptionsHelper#collection_select for form builders:
@@ -855,7 +868,8 @@ module ActionView
       #
       # Please refer to the documentation of the base helper for details.
       def collection_select(method, collection, value_method, text_method, options = {}, html_options = {})
-        @template.collection_select(@object_name, method, collection, value_method, text_method, objectify_options(options), @default_html_options.merge(html_options))
+        @template.collection_select(@object_name, method, collection, value_method, text_method,
+                                    objectify_options(options), @default_html_options.merge(html_options))
       end
 
       # Wraps ActionView::Helpers::FormOptionsHelper#grouped_collection_select for form builders:
@@ -866,8 +880,10 @@ module ActionView
       #   <% end %>
       #
       # Please refer to the documentation of the base helper for details.
-      def grouped_collection_select(method, collection, group_method, group_label_method, option_key_method, option_value_method, options = {}, html_options = {})
-        @template.grouped_collection_select(@object_name, method, collection, group_method, group_label_method, option_key_method, option_value_method, objectify_options(options), @default_html_options.merge(html_options))
+      def grouped_collection_select(method, collection, group_method, group_label_method, option_key_method,
+                                    option_value_method, options = {}, html_options = {})
+        @template.grouped_collection_select(@object_name, method, collection, group_method, group_label_method,
+                                            option_key_method, option_value_method, objectify_options(options), @default_html_options.merge(html_options))
       end
 
       # Wraps ActionView::Helpers::FormOptionsHelper#time_zone_select for form builders:
@@ -879,7 +895,8 @@ module ActionView
       #
       # Please refer to the documentation of the base helper for details.
       def time_zone_select(method, priority_zones = nil, options = {}, html_options = {})
-        @template.time_zone_select(@object_name, method, priority_zones, objectify_options(options), @default_html_options.merge(html_options))
+        @template.time_zone_select(@object_name, method, priority_zones, objectify_options(options),
+                                   @default_html_options.merge(html_options))
       end
 
       # Wraps ActionView::Helpers::FormOptionsHelper#weekday_select for form builders:
@@ -891,7 +908,8 @@ module ActionView
       #
       # Please refer to the documentation of the base helper for details.
       def weekday_select(method, options = {}, html_options = {})
-        @template.weekday_select(@object_name, method, objectify_options(options), @default_html_options.merge(html_options))
+        @template.weekday_select(@object_name, method, objectify_options(options),
+                                 @default_html_options.merge(html_options))
       end
 
       # Wraps ActionView::Helpers::FormOptionsHelper#collection_check_boxes for form builders:
@@ -903,7 +921,8 @@ module ActionView
       #
       # Please refer to the documentation of the base helper for details.
       def collection_check_boxes(method, collection, value_method, text_method, options = {}, html_options = {}, &block)
-        @template.collection_check_boxes(@object_name, method, collection, value_method, text_method, objectify_options(options), @default_html_options.merge(html_options), &block)
+        @template.collection_check_boxes(@object_name, method, collection, value_method, text_method,
+                                         objectify_options(options), @default_html_options.merge(html_options), &block)
       end
 
       # Wraps ActionView::Helpers::FormOptionsHelper#collection_radio_buttons for form builders:
@@ -914,8 +933,10 @@ module ActionView
       #   <% end %>
       #
       # Please refer to the documentation of the base helper for details.
-      def collection_radio_buttons(method, collection, value_method, text_method, options = {}, html_options = {}, &block)
-        @template.collection_radio_buttons(@object_name, method, collection, value_method, text_method, objectify_options(options), @default_html_options.merge(html_options), &block)
+      def collection_radio_buttons(method, collection, value_method, text_method, options = {}, html_options = {},
+                                   &block)
+        @template.collection_radio_buttons(@object_name, method, collection, value_method, text_method,
+                                           objectify_options(options), @default_html_options.merge(html_options), &block)
       end
     end
   end

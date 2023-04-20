@@ -7,7 +7,7 @@ CLEAN.include ["#{NAME}-*.gem", "rdoc", "coverage"]
 # Gem Packaging and Release
 
 desc "Packages #{NAME}"
-task :package=>[:clean] do |p|
+task :package => [:clean] do |p|
   sh %{gem build #{NAME}.gemspec}
 end
 
@@ -41,9 +41,9 @@ end
 ### Specs
 
 spec = proc do |env|
-  env.each{|k,v| ENV[k] = v}
+  env.each { |k, v| ENV[k] = v }
   sh "#{FileUtils::RUBY} #{'-w' if RUBY_VERSION >= '3'} test/test.rb"
-  env.each{|k,v| ENV.delete(k)}
+  env.each { |k, v| ENV.delete(k) }
 end
 
 desc "Run specs"
@@ -51,11 +51,11 @@ task "spec" do
   spec.call({})
 end
 
-task :default=>:spec
+task :default => :spec
 
 desc "Run specs with coverage"
 task "spec_cov" do
-  spec.call('COVERAGE'=>'1')
+  spec.call('COVERAGE' => '1')
 end
 
 ### Other
@@ -67,5 +67,3 @@ task :irb do
   irb = ENV['IRB'] || File.join(RbConfig::CONFIG['bindir'], File.basename(ruby).sub('ruby', 'irb'))
   sh %{#{irb} -I lib -r #{NAME}}
 end
-
-

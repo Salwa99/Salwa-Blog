@@ -56,7 +56,6 @@ if Rails::VERSION::MAJOR > 4
       end
     end
 
-
     if Rails::VERSION::MAJOR >= 6
       test 'handles virtual attributes' do
         run_generator ["Message", "content:rich_text", "video:attachment", "photos:attachments"]

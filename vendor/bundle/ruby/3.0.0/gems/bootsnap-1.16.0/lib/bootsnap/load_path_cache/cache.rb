@@ -31,7 +31,7 @@ module Bootsnap
         next unless feat.size < 20 && !feat.include?("/")
 
         base = File.basename(feat, ".*") # enumerator.so -> enumerator
-        ext  = File.extname(feat) # .so
+        ext = File.extname(feat) # .so
 
         features[feat] = nil # enumerator.so
         features[base] = nil # enumerator
@@ -146,7 +146,7 @@ module Bootsnap
             expanded_path = p.expanded_path
             entries, dirs = p.entries_and_dirs(@store)
             # push -> low precedence -> set only if unset
-            dirs.each    { |dir| @dirs[dir] ||= path }
+            dirs.each { |dir| @dirs[dir] ||= path }
             entries.each { |rel| @index[rel] ||= expanded_path }
           end
         end
@@ -163,7 +163,7 @@ module Bootsnap
             expanded_path = p.expanded_path
             entries, dirs = p.entries_and_dirs(@store)
             # unshift -> high precedence -> unconditional set
-            dirs.each    { |dir| @dirs[dir]  = path }
+            dirs.each { |dir| @dirs[dir] = path }
             entries.each { |rel| @index[rel] = expanded_path }
           end
         end

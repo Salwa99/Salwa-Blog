@@ -15,9 +15,10 @@ module ActiveJob
       end
 
       private
-        def klass
-          ActiveSupport::Duration
-        end
+
+      def klass
+        ActiveSupport::Duration
+      end
     end
   end
 end

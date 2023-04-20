@@ -1,5 +1,6 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/fields/common_address_field'
 
 module Mail
@@ -30,7 +31,7 @@ module Mail
   # item-value      =       1*angle-addr / addr-spec /
   #                          atom / domain / msg-id
   #
-  class ReturnPathField < CommonAddressField #:nodoc:
+  class ReturnPathField < CommonAddressField # :nodoc:
     NAME = 'Return-Path'
 
     def self.singular?
@@ -50,12 +51,13 @@ module Mail
     end
 
     private
-      def do_encode
-        "#{name}: <#{address}>\r\n"
-      end
 
-      def do_decode
-        address
-      end
+    def do_encode
+      "#{name}: <#{address}>\r\n"
+    end
+
+    def do_decode
+      address
+    end
   end
 end

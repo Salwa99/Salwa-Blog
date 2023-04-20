@@ -435,6 +435,7 @@ module ActiveRecord
     def destroy # :nodoc:
       @_destroy_callback_already_called ||= false
       return if @_destroy_callback_already_called
+
       @_destroy_callback_already_called = true
       _run_destroy_callbacks { super }
     rescue RecordNotDestroyed => e
@@ -452,7 +453,8 @@ module ActiveRecord
       touch ? _run_touch_callbacks { super } : super
     end
 
-  private
+    private
+
     def create_or_update(**)
       _run_save_callbacks { super }
     end

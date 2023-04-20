@@ -10,7 +10,8 @@ module Capybara
         when true
           '*'
         else
-          raise CapybaraError, 'Capybara.disable_animation supports either a String (the css selector to disable) or a boolean'
+          raise CapybaraError,
+                'Capybara.disable_animation supports either a String (the css selector to disable) or a boolean'
         end
       end
 
@@ -34,7 +35,7 @@ module Capybara
         response.finish
       end
 
-    private
+      private
 
       attr_reader :disable_css_markup, :disable_js_markup
 
@@ -44,21 +45,21 @@ module Capybara
 
       def insert_disable(html, nonces)
         html.sub(%r{(</head>)}, "<style #{nonces['style-src']}>#{disable_css_markup}</style>\\1")
-            .sub(%r{(</body>)}, "<script #{nonces['script-src']}>#{disable_js_markup}</script>\\1")
+          .sub(%r{(</body>)}, "<script #{nonces['script-src']}>#{disable_js_markup}</script>\\1")
       end
 
       def directive_nonces(headers)
         headers.fetch('Content-Security-Policy', '')
-               .split(';')
-               .map(&:split)
-               .to_h do |s|
-                 [
-                   s[0], s[1..].filter_map do |value|
-                     /^'nonce-(?<nonce>.+)'/ =~ value
-                     nonce
-                   end[0]
-                 ]
-               end
+          .split(';')
+          .map(&:split)
+          .to_h do |s|
+          [
+            s[0], s[1..].filter_map do |value|
+              /^'nonce-(?<nonce>.+)'/ =~ value
+              nonce
+            end[0]
+          ]
+        end
       end
 
       DISABLE_CSS_MARKUP_TEMPLATE = <<~CSS

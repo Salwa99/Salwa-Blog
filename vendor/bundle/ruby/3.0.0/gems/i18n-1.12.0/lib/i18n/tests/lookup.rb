@@ -6,7 +6,7 @@ module I18n
       def setup
         super
         I18n.backend.store_translations(:en, :foo => { :bar => 'bar', :baz => 'baz' }, :falsy => false, :truthy => true,
-          :string => "a", :array => %w(a b c), :hash => { "a" => "b" })
+                                             :string => "a", :array => %w(a b c), :hash => { "a" => "b" })
       end
 
       test "lookup: it returns a string" do

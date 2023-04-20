@@ -139,60 +139,61 @@ module ActiveModel
 
       serializable_add_includes(options) do |association, records, opts|
         hash[association.to_s] = if records.respond_to?(:to_ary)
-          records.to_ary.map { |a| a.serializable_hash(opts) }
-        else
-          records.serializable_hash(opts)
-        end
+                                   records.to_ary.map { |a| a.serializable_hash(opts) }
+                                 else
+                                   records.serializable_hash(opts)
+                                 end
       end
 
       hash
     end
 
     private
-      def attribute_names_for_serialization
-        attributes.keys
+
+    def attribute_names_for_serialization
+      attributes.keys
+    end
+
+    # Hook method defining how an attribute value should be retrieved for
+    # serialization. By default this is assumed to be an instance named after
+    # the attribute. Override this method in subclasses should you need to
+    # retrieve the value for a given attribute differently:
+    #
+    #   class MyClass
+    #     include ActiveModel::Serialization
+    #
+    #     def initialize(data = {})
+    #       @data = data
+    #     end
+    #
+    #     def read_attribute_for_serialization(key)
+    #       @data[key]
+    #     end
+    #   end
+    alias :read_attribute_for_serialization :send
+
+    def serializable_attributes(attribute_names)
+      attribute_names.index_with { |n| read_attribute_for_serialization(n) }
+    end
+
+    # Add associations specified via the <tt>:include</tt> option.
+    #
+    # Expects a block that takes as arguments:
+    #   +association+ - name of the association
+    #   +records+     - the association record(s) to be serialized
+    #   +opts+        - options for the association records
+    def serializable_add_includes(options = {}) # :nodoc:
+      return unless includes = options[:include]
+
+      unless includes.is_a?(Hash)
+        includes = Hash[Array(includes).flat_map { |n| n.is_a?(Hash) ? n.to_a : [[n, {}]] }]
       end
 
-      # Hook method defining how an attribute value should be retrieved for
-      # serialization. By default this is assumed to be an instance named after
-      # the attribute. Override this method in subclasses should you need to
-      # retrieve the value for a given attribute differently:
-      #
-      #   class MyClass
-      #     include ActiveModel::Serialization
-      #
-      #     def initialize(data = {})
-      #       @data = data
-      #     end
-      #
-      #     def read_attribute_for_serialization(key)
-      #       @data[key]
-      #     end
-      #   end
-      alias :read_attribute_for_serialization :send
-
-      def serializable_attributes(attribute_names)
-        attribute_names.index_with { |n| read_attribute_for_serialization(n) }
-      end
-
-      # Add associations specified via the <tt>:include</tt> option.
-      #
-      # Expects a block that takes as arguments:
-      #   +association+ - name of the association
-      #   +records+     - the association record(s) to be serialized
-      #   +opts+        - options for the association records
-      def serializable_add_includes(options = {}) # :nodoc:
-        return unless includes = options[:include]
-
-        unless includes.is_a?(Hash)
-          includes = Hash[Array(includes).flat_map { |n| n.is_a?(Hash) ? n.to_a : [[n, {}]] }]
+      includes.each do |association, opts|
+        if records = send(association)
+          yield association, records, opts
         end
-
-        includes.each do |association, opts|
-          if records = send(association)
-            yield association, records, opts
-          end
-        end
       end
+    end
   end
 end

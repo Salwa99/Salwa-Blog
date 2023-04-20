@@ -2,12 +2,11 @@
 
 module DEBUGGER__
   FrameInfo = Struct.new(:location, :self, :binding, :iseq, :class, :frame_depth,
-                          :has_return_value,     :return_value,
-                          :has_raised_exception, :raised_exception,
-                          :show_line,
-                          :_local_variables, :_callee, # for recorder
-                          :dupped_binding,
-                        )
+                         :has_return_value, :return_value,
+                         :has_raised_exception, :raised_exception,
+                         :show_line,
+                         :_local_variables, :_callee, # for recorder
+                         :dupped_binding,)
 
   # extend FrameInfo with debug.so
   begin
@@ -29,14 +28,15 @@ module DEBUGGER__
 
     def self.pretty_path path
       return '#<none>' unless path
+
       use_short_path = CONFIG[:use_short_path]
 
       case
       when use_short_path && path.start_with?(dir = RbConfig::CONFIG["rubylibdir"] + '/')
         path.sub(dir, '$(rubylibdir)/')
       when use_short_path && Gem.path.any? do |gp|
-          path.start_with?(dir = gp + '/gems/')
-        end
+             path.start_with?(dir = gp + '/gems/')
+           end
         path.sub(dir, '$(Gem)/')
       when HOME && path.start_with?(HOME)
         path.sub(HOME, '~/')
@@ -86,31 +86,35 @@ module DEBUGGER__
 
     def block_identifier
       return unless frame_type == :block
+
       _, level, block_loc = location.label.match(BLOCK_LABL_REGEXP).to_a
       [level || "", block_loc]
     end
 
     def method_identifier
       return unless frame_type == :method
+
       "#{klass_sig}#{callee}"
     end
 
     def c_identifier
       return unless frame_type == :c
+
       "[C] #{klass_sig}#{location.base_label}"
     end
 
     def other_identifier
       return unless frame_type == :other
+
       location.label
     end
 
     def callee
       self._callee ||= begin
-                         self.binding&.eval('__callee__')
-                       rescue NameError # BasicObject
-                         nil
-                       end
+        self.binding&.eval('__callee__')
+      rescue NameError # BasicObject
+        nil
+      end
     end
 
     def return_str
@@ -141,7 +145,7 @@ module DEBUGGER__
       if lvars = self._local_variables
         lvars
       elsif b = self.binding
-        b.local_variables.map{|var|
+        b.local_variables.map { |var|
           [var, b.local_variable_get(var)]
         }.to_h
       end
@@ -149,7 +153,7 @@ module DEBUGGER__
 
     def parameters_info
       vars = iseq.parameters_symbols
-      vars.map{|var|
+      vars.map { |var|
         begin
           { name: var, value: DEBUGGER__.safe_inspect(local_variable_get(var), short: true) }
         rescue NameError, TypeError

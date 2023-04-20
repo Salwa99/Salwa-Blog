@@ -67,12 +67,13 @@ module ActiveStorage
     end
 
     private
-      def purge_many
-        Attached::Changes::PurgeMany.new(name, record, attachments)
-      end
 
-      def detach_many
-        Attached::Changes::DetachMany.new(name, record, attachments)
-      end
+    def purge_many
+      Attached::Changes::PurgeMany.new(name, record, attachments)
+    end
+
+    def detach_many
+      Attached::Changes::DetachMany.new(name, record, attachments)
+    end
   end
 end

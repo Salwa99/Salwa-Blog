@@ -1,9 +1,10 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/parsers/content_transfer_encoding_parser'
 
 module Mail
-  class ContentTransferEncodingElement #:nodoc:
+  class ContentTransferEncodingElement # :nodoc:
     attr_reader :encoding
 
     def initialize(string)

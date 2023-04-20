@@ -54,7 +54,7 @@ module Capybara::Selenium::Driver::ChromeDriver
     execute_cdp('Storage.clearDataForOrigin', origin: '*', storageTypes: storage_types_to_clear)
   end
 
-private
+  private
 
   def storage_types_to_clear
     types = ['cookies']

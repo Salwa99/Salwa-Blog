@@ -55,7 +55,8 @@ module ActiveRecord
         # * Reading encrypted content will return its ciphertext.
         # * Writing encrypted content will fail.
         def protecting_encrypted_data(&block)
-          with_encryption_context encryptor: ActiveRecord::Encryption::EncryptingOnlyEncryptor.new, frozen_encryption: true, &block
+          with_encryption_context encryptor: ActiveRecord::Encryption::EncryptingOnlyEncryptor.new, frozen_encryption: true,
+&block
         end
 
         # Returns the current context. By default it will return the current context.

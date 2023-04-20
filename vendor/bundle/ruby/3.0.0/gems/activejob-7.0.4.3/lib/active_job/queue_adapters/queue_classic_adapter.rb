@@ -29,8 +29,8 @@ module ActiveJob
         queue = build_queue(job.queue_name)
         unless queue.respond_to?(:enqueue_at)
           raise NotImplementedError, "To be able to schedule jobs with queue_classic " \
-            "the QC::Queue needs to respond to `enqueue_at(timestamp, method, *args)`. " \
-            "You can implement this yourself or you can use the queue_classic-later gem."
+                                     "the QC::Queue needs to respond to `enqueue_at(timestamp, method, *args)`. " \
+                                     "You can implement this yourself or you can use the queue_classic-later gem."
         end
         qc_job = queue.enqueue_at(timestamp, "#{JobWrapper.name}.perform", job.serialize)
         job.provider_job_id = qc_job["id"] if qc_job.is_a?(Hash)

@@ -1,7 +1,6 @@
 require 'concurrent/errors'
 
 module Concurrent
-
   # Define update methods that use direct paths
   #
   # @!visibility private

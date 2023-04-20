@@ -3,12 +3,10 @@ if Concurrent.on_jruby?
   require 'concurrent/executor/java_executor_service'
 
   module Concurrent
-
     # @!macro thread_pool_executor
     # @!macro thread_pool_options
     # @!visibility private
     class JavaThreadPoolExecutor < JavaExecutorService
-
       # @!macro thread_pool_executor_constant_default_max_pool_size
       DEFAULT_MAX_POOL_SIZE = java.lang.Integer::MAX_VALUE # 2147483647
 
@@ -100,11 +98,11 @@ if Concurrent.on_jruby?
       private
 
       def ns_initialize(opts)
-        min_length       = opts.fetch(:min_threads, DEFAULT_MIN_POOL_SIZE).to_i
-        max_length       = opts.fetch(:max_threads, DEFAULT_MAX_POOL_SIZE).to_i
-        idletime         = opts.fetch(:idletime, DEFAULT_THREAD_IDLETIMEOUT).to_i
-        @max_queue       = opts.fetch(:max_queue, DEFAULT_MAX_QUEUE_SIZE).to_i
-        @synchronous     = opts.fetch(:synchronous, DEFAULT_SYNCHRONOUS)
+        min_length = opts.fetch(:min_threads, DEFAULT_MIN_POOL_SIZE).to_i
+        max_length = opts.fetch(:max_threads, DEFAULT_MAX_POOL_SIZE).to_i
+        idletime = opts.fetch(:idletime, DEFAULT_THREAD_IDLETIMEOUT).to_i
+        @max_queue = opts.fetch(:max_queue, DEFAULT_MAX_QUEUE_SIZE).to_i
+        @synchronous = opts.fetch(:synchronous, DEFAULT_SYNCHRONOUS)
         @fallback_policy = opts.fetch(:fallback_policy, :abort)
 
         raise ArgumentError.new("`synchronous` cannot be set unless `max_queue` is 0") if @synchronous && @max_queue > 0
@@ -125,16 +123,15 @@ if Concurrent.on_jruby?
         end
 
         @executor = java.util.concurrent.ThreadPoolExecutor.new(
-            min_length,
-            max_length,
-            idletime,
-            java.util.concurrent.TimeUnit::SECONDS,
-            queue,
-            DaemonThreadFactory.new(ns_auto_terminate?),
-            FALLBACK_POLICY_CLASSES[@fallback_policy].new)
-
+          min_length,
+          max_length,
+          idletime,
+          java.util.concurrent.TimeUnit::SECONDS,
+          queue,
+          DaemonThreadFactory.new(ns_auto_terminate?),
+          FALLBACK_POLICY_CLASSES[@fallback_policy].new
+        )
       end
     end
-
   end
 end

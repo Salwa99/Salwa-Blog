@@ -11,7 +11,7 @@ module ActionCable
     class ClientSocket # :nodoc:
       def self.determine_url(env)
         scheme = secure_request?(env) ? "wss:" : "ws:"
-        "#{ scheme }//#{ env['HTTP_HOST'] }#{ env['REQUEST_URI'] }"
+        "#{scheme}//#{env['HTTP_HOST']}#{env['REQUEST_URI']}"
       end
 
       def self.secure_request?(env)
@@ -25,16 +25,16 @@ module ActionCable
       end
 
       CONNECTING = 0
-      OPEN       = 1
-      CLOSING    = 2
-      CLOSED     = 3
+      OPEN = 1
+      CLOSING = 2
+      CLOSED = 3
 
       attr_reader :env, :url
 
       def initialize(env, event_target, event_loop, protocols)
-        @env          = env
+        @env = env
         @event_target = event_target
-        @event_loop   = event_loop
+        @event_loop = event_loop
 
         @url = ClientSocket.determine_url(@env)
 
@@ -46,16 +46,17 @@ module ActionCable
         # The driver calls +env+, +url+, and +write+
         @driver = ::WebSocket::Driver.rack(self, protocols: protocols)
 
-        @driver.on(:open)    { |e| open }
+        @driver.on(:open) { |e| open }
         @driver.on(:message) { |e| receive_message(e.data) }
-        @driver.on(:close)   { |e| begin_close(e.reason, e.code) }
-        @driver.on(:error)   { |e| emit_error(e.message) }
+        @driver.on(:close) { |e| begin_close(e.reason, e.code) }
+        @driver.on(:error) { |e| emit_error(e.message) }
 
         @stream = ActionCable::Connection::Stream.new(@event_loop, self)
       end
 
       def start_driver
         return if @driver.nil? || @driver_started
+
         @stream.hijack_rack_socket
 
         if callback = @env["async.callback"]
@@ -68,7 +69,7 @@ module ActionCable
 
       def rack_response
         start_driver
-        [ -1, {}, [] ]
+        [-1, {}, []]
       end
 
       def write(data)
@@ -79,16 +80,17 @@ module ActionCable
 
       def transmit(message)
         return false if @ready_state > OPEN
+
         case message
         when Numeric then @driver.text(message.to_s)
-        when String  then @driver.text(message)
-        when Array   then @driver.binary(message)
+        when String then @driver.text(message)
+        when Array then @driver.binary(message)
         else false
         end
       end
 
       def close(code = nil, reason = nil)
-        code   ||= 1000
+        code ||= 1000
         reason ||= ""
 
         unless code == 1000 || (code >= 3000 && code <= 4999)
@@ -118,40 +120,44 @@ module ActionCable
       end
 
       private
-        def open
-          return unless @ready_state == CONNECTING
-          @ready_state = OPEN
 
-          @event_target.on_open
-        end
+      def open
+        return unless @ready_state == CONNECTING
 
-        def receive_message(data)
-          return unless @ready_state == OPEN
+        @ready_state = OPEN
 
-          @event_target.on_message(data)
-        end
+        @event_target.on_open
+      end
 
-        def emit_error(message)
-          return if @ready_state >= CLOSING
+      def receive_message(data)
+        return unless @ready_state == OPEN
 
-          @event_target.on_error(message)
-        end
+        @event_target.on_message(data)
+      end
 
-        def begin_close(reason, code)
-          return if @ready_state == CLOSED
-          @ready_state = CLOSING
-          @close_params = [reason, code]
+      def emit_error(message)
+        return if @ready_state >= CLOSING
 
-          @stream.shutdown if @stream
-          finalize_close
-        end
+        @event_target.on_error(message)
+      end
 
-        def finalize_close
-          return if @ready_state == CLOSED
-          @ready_state = CLOSED
+      def begin_close(reason, code)
+        return if @ready_state == CLOSED
 
-          @event_target.on_close(*@close_params)
-        end
+        @ready_state = CLOSING
+        @close_params = [reason, code]
+
+        @stream.shutdown if @stream
+        finalize_close
+      end
+
+      def finalize_close
+        return if @ready_state == CLOSED
+
+        @ready_state = CLOSED
+
+        @event_target.on_close(*@close_params)
+      end
     end
   end
 end

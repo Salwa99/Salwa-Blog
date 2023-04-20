@@ -55,9 +55,9 @@ module ActiveSupport
 
       if message.nil?
         if block_given?
-          message  = yield
+          message = yield
         else
-          message  = progname
+          message = progname
           progname = @progname
         end
       end

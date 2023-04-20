@@ -14,7 +14,7 @@ module ActionDispatch
       end
 
       class Simulator # :nodoc:
-        INITIAL_STATE = [ [0, nil] ].freeze
+        INITIAL_STATE = [[0, nil]].freeze
 
         attr_reader :tt
 

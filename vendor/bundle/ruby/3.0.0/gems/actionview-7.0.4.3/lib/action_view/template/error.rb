@@ -18,11 +18,11 @@ module ActionView
     def message
       @string.force_encoding(Encoding::ASCII_8BIT)
       "Your template was not saved as valid #{@encoding}. Please " \
-      "either specify #{@encoding} as the encoding for your template " \
-      "in your text editor, or mark the template with its " \
-      "encoding by inserting the following as the first line " \
-      "of the template:\n\n# encoding: <name of correct encoding>.\n\n" \
-      "The source of your template was:\n\n#{@string}"
+        "either specify #{@encoding} as the encoding for your template " \
+        "in your text editor, or mark the template with its " \
+        "encoding by inserting the following as the first line " \
+        "of the template:\n\n# encoding: <name of correct encoding>.\n\n" \
+        "The source of your template was:\n\n#{@string}"
     end
   end
 
@@ -39,16 +39,16 @@ module ActionView
       @prefixes = Array(prefixes)
       @partial = partial
       template_type = if partial
-        "partial"
-      elsif /layouts/i.match?(path)
-        "layout"
-      else
-        "template"
-      end
+                        "partial"
+                      elsif /layouts/i.match?(path)
+                        "layout"
+                      else
+                        "template"
+                      end
 
       searched_paths = @prefixes.map { |prefix| [prefix, path].join("/") }
 
-      out  = "Missing #{template_type} #{searched_paths.join(", ")} with #{details.inspect}.\n\nSearched in:\n"
+      out = "Missing #{template_type} #{searched_paths.join(", ")} with #{details.inspect}.\n\nSearched in:\n"
       out += paths.compact.map { |p| "  * #{p.to_s.inspect}\n" }.join
       super out
     end
@@ -170,7 +170,7 @@ module ActionView
       def sub_template_message
         if @sub_templates
           "Trace of template inclusion: " +
-          @sub_templates.collect(&:inspect).join(", ")
+            @sub_templates.collect(&:inspect).join(", ")
         else
           ""
         end
@@ -178,12 +178,13 @@ module ActionView
 
       def source_extract(indentation = 0)
         return [] unless num = line_number
+
         num = num.to_i
 
         source_code = @template.encode!.split("\n")
 
-        start_on_line = [ num - SOURCE_CODE_RADIUS - 1, 0 ].max
-        end_on_line   = [ num + SOURCE_CODE_RADIUS - 1, source_code.length].min
+        start_on_line = [num - SOURCE_CODE_RADIUS - 1, 0].max
+        end_on_line = [num + SOURCE_CODE_RADIUS - 1, source_code.length].min
 
         indent = end_on_line.to_s.size + indentation
         return [] unless source_code = source_code[start_on_line..end_on_line]
@@ -209,21 +210,22 @@ module ActionView
       end
 
       private
-        def source_location
-          if line_number
-            "on line ##{line_number} of "
-          else
-            "in "
-          end + file_name
-        end
 
-        def formatted_code_for(source_code, line_counter, indent)
-          indent_template = "%#{indent}s: %s"
-          source_code.map do |line|
-            line_counter += 1
-            indent_template % [line_counter, line]
-          end
+      def source_location
+        if line_number
+          "on line ##{line_number} of "
+        else
+          "in "
+        end + file_name
+      end
+
+      def formatted_code_for(source_code, line_counter, indent)
+        indent_template = "%#{indent}s: %s"
+        source_code.map do |line|
+          line_counter += 1
+          indent_template % [line_counter, line]
         end
+      end
     end
   end
 

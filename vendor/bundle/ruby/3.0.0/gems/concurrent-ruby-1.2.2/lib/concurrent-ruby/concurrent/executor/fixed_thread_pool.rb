@@ -2,7 +2,6 @@ require 'concurrent/utility/engine'
 require 'concurrent/executor/thread_pool_executor'
 
 module Concurrent
-
   # @!macro thread_pool_executor_constant_default_max_pool_size
   #   Default maximum number of threads that will be created in the pool.
 
@@ -122,9 +121,6 @@ module Concurrent
   #   @!method prune_pool
   #     @!macro thread_pool_executor_method_prune_pool
 
-
-
-
   # @!macro thread_pool_options
   #
   #   **Thread Pool Options**
@@ -179,10 +175,6 @@ module Concurrent
   #   @see http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ExecutorService.html Java ExecutorService interface
   #   @see https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.html#setDaemon-boolean-
 
-
-
-
-
   # @!macro fixed_thread_pool
   #
   #   A thread pool that reuses a fixed number of threads operating off an unbounded queue.
@@ -195,7 +187,6 @@ module Concurrent
   #
   # @!macro thread_pool_options
   class FixedThreadPool < ThreadPoolExecutor
-
     # @!macro fixed_thread_pool_method_initialize
     #
     #   Create a new thread pool.
@@ -210,8 +201,9 @@ module Concurrent
     #   @see http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/Executors.html#newFixedThreadPool-int-
     def initialize(num_threads, opts = {})
       raise ArgumentError.new('number of threads must be greater than zero') if num_threads.to_i < 1
-      defaults  = { max_queue:   DEFAULT_MAX_QUEUE_SIZE,
-                    idletime:    DEFAULT_THREAD_IDLETIMEOUT }
+
+      defaults = { max_queue: DEFAULT_MAX_QUEUE_SIZE,
+                   idletime: DEFAULT_THREAD_IDLETIMEOUT }
       overrides = { min_threads: num_threads,
                     max_threads: num_threads }
       super(defaults.merge(opts).merge(overrides))

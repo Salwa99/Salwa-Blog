@@ -2,7 +2,6 @@ require 'concurrent/utility/engine'
 require 'concurrent/thread_safe/util'
 
 module Concurrent
-
   # @!macro concurrent_hash
   #
   #   A thread-safe subclass of Hash. This version locks against the object
@@ -46,5 +45,4 @@ module Concurrent
   # @!macro concurrent_hash
   class Hash < HashImplementation
   end
-
 end

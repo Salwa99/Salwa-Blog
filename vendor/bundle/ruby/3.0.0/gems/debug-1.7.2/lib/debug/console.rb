@@ -1,8 +1,10 @@
 # frozen_string_literal: true
+
 module DEBUGGER__
   class Console
     begin
       raise LoadError if CONFIG[:no_reline]
+
       require 'reline'
 
       # reline 0.2.7 or later is required.
@@ -53,24 +55,24 @@ module DEBUGGER__
         # prompt state
         state = nil # :command, :ruby, nil (unknown)
 
-        Reline.prompt_proc = -> args, *kw do
+        Reline.prompt_proc = ->args, *kw do
           case state = parse_input(args.first, commands)
           when nil, :command
             [prompt, prompt]
           when :ruby
-            [prompt.sub('rdbg'){colorize('ruby', [:RED])}] * 2
+            [prompt.sub('rdbg') { colorize('ruby', [:RED]) }] * 2
           end
         end
 
-        Reline.completion_proc = -> given do
+        Reline.completion_proc = ->given do
           buff = Reline.line_buffer
-          Reline.completion_append_character= ' '
+          Reline.completion_append_character = ' '
 
           if /\s/ =~ buff # second parameters
             given = File.expand_path(given + 'a').sub(/a\z/, '')
             files = Dir.glob(given + '*')
             if files.size == 1 && File.directory?(files.first)
-              Reline.completion_append_character= '/'
+              Reline.completion_append_character = '/'
             end
             files
           else
@@ -78,7 +80,7 @@ module DEBUGGER__
           end
         end
 
-        Reline.output_modifier_proc = -> buff, **kw do
+        Reline.output_modifier_proc = ->buff, **kw do
           c, rest = get_command buff
 
           case state
@@ -101,7 +103,6 @@ module DEBUGGER__
         end unless CONFIG[:no_hint]
 
         yield
-
       ensure
         Reline.completion_proc = prev_completion_proc
         Reline.output_modifier_proc = prev_output_modifier_proc
@@ -119,14 +120,13 @@ module DEBUGGER__
 
       def readline prompt
         readline_setup prompt do
-          Reline.readmultiline(prompt, true){ true }
+          Reline.readmultiline(prompt, true) { true }
         end
       end
 
       def history
         Reline::HISTORY
       end
-
     rescue LoadError
       begin
         require 'readline.so'
@@ -135,15 +135,15 @@ module DEBUGGER__
           load_history_if_not_loaded
           commands = DEBUGGER__.commands
 
-          Readline.completion_proc = proc{|given|
+          Readline.completion_proc = proc { |given|
             buff = Readline.line_buffer
-            Readline.completion_append_character= ' '
+            Readline.completion_append_character = ' '
 
             if /\s/ =~ buff # second parameters
               given = File.expand_path(given + 'a').sub(/a\z/, '')
               files = Dir.glob(given + '*')
               if files.size == 1 && File.directory?(files.first)
-                Readline.completion_append_character= '/'
+                Readline.completion_append_character = '/'
               end
               files
             else
@@ -160,7 +160,6 @@ module DEBUGGER__
         def history
           Readline::HISTORY
         end
-
       rescue LoadError
         def readline prompt
           print prompt
@@ -187,7 +186,7 @@ module DEBUGGER__
 
     def read_history_file
       if history && File.exist?(path = history_file)
-        f = (['', 'DAI-', 'CHU-', 'SHO-'].map{|e| e+'KICHI'}+['KYO']).sample
+        f = (['', 'DAI-', 'CHU-', 'SHO-'].map { |e| e + 'KICHI' } + ['KYO']).sample
         ["#{FH}#{f}".dup] + File.readlines(path)
       else
         []
@@ -206,14 +205,14 @@ module DEBUGGER__
 
     def deactivate
       if history && @init_history_lines
-        added_records = history.to_a[@init_history_lines .. -1]
+        added_records = history.to_a[@init_history_lines..-1]
         path = history_file
         max = CONFIG[:save_history]
 
         if !added_records.empty? && !path.empty?
           orig_records = read_history_file
-          open(history_file, 'w'){|f|
-            (orig_records + added_records).last(max).each{|line|
+          open(history_file, 'w') { |f|
+            (orig_records + added_records).last(max).each { |line|
               if !line.start_with?(FH) && !line.strip.empty?
                 f.puts line.strip
               end
@@ -224,11 +223,10 @@ module DEBUGGER__
     end
 
     def load_history
-      read_history_file.count{|line|
+      read_history_file.count { |line|
         line.strip!
         history << line unless line.empty?
       }
     end
   end # class Console
 end
-

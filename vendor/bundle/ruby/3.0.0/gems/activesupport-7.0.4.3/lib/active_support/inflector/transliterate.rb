@@ -64,7 +64,9 @@ module ActiveSupport
     def transliterate(string, replacement = "?", locale: nil)
       string = string.dup if string.frozen?
       raise ArgumentError, "Can only transliterate strings. Received #{string.class.name}" unless string.is_a?(String)
-      raise ArgumentError, "Cannot transliterate strings with #{string.encoding} encoding" unless ALLOWED_ENCODINGS_FOR_TRANSLITERATE.include?(string.encoding)
+
+      raise ArgumentError,
+            "Cannot transliterate strings with #{string.encoding} encoding" unless ALLOWED_ENCODINGS_FOR_TRANSLITERATE.include?(string.encoding)
 
       input_encoding = string.encoding
 
@@ -87,7 +89,8 @@ module ActiveSupport
 
       # Restore the string encoding of the input if it was not UTF-8.
       # Apply invalid/undef :replace as tidy_bytes does
-      transliterated.encode!(input_encoding, invalid: :replace, undef: :replace) if input_encoding != transliterated.encoding
+      transliterated.encode!(input_encoding, invalid: :replace,
+                                             undef: :replace) if input_encoding != transliterated.encoding
 
       transliterated
     end
@@ -127,11 +130,11 @@ module ActiveSupport
 
       unless separator.nil? || separator.empty?
         if separator == "-"
-          re_duplicate_separator        = /-{2,}/
+          re_duplicate_separator = /-{2,}/
           re_leading_trailing_separator = /^-|-$/i
         else
           re_sep = Regexp.escape(separator)
-          re_duplicate_separator        = /#{re_sep}{2,}/
+          re_duplicate_separator = /#{re_sep}{2,}/
           re_leading_trailing_separator = /^#{re_sep}|#{re_sep}$/i
         end
         # No more than one of the separator in a row.

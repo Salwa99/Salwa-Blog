@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   irb/ws-for-case-2.rb -
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)

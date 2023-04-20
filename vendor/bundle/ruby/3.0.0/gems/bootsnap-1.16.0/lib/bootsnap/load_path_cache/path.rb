@@ -71,7 +71,7 @@ module Bootsnap
         cached_mtime, entries, dirs = store.get(expanded_path)
 
         current_mtime = latest_mtime(expanded_path, dirs || [])
-        return [[], []]        if current_mtime == -1 # path does not exist
+        return [[], []] if current_mtime == -1 # path does not exist
         return [entries, dirs] if cached_mtime == current_mtime
 
         entries, dirs = scan!
@@ -101,8 +101,8 @@ module Bootsnap
         ["", *dirs].each do |dir|
           curr = begin
             File.mtime("#{path}/#{dir}").to_i
-                 rescue Errno::ENOENT, Errno::ENOTDIR, Errno::EINVAL
-                   -1
+          rescue Errno::ENOENT, Errno::ENOTDIR, Errno::EINVAL
+            -1
           end
           max = curr if curr > max
         end
@@ -112,24 +112,24 @@ module Bootsnap
       # a Path can be either stable of volatile, depending on how frequently we
       # expect its contents may change. Stable paths aren't rescanned nearly as
       # often.
-      STABLE   = :stable
+      STABLE = :stable
       VOLATILE = :volatile
 
       # Built-in ruby lib stuff doesn't change, but things can occasionally be
       # installed into sitedir, which generally lives under rubylibdir.
-      RUBY_LIBDIR  = RbConfig::CONFIG["rubylibdir"]
+      RUBY_LIBDIR = RbConfig::CONFIG["rubylibdir"]
       RUBY_SITEDIR = RbConfig::CONFIG["sitedir"]
 
       def stability
         @stability ||= if Gem.path.detect { |p| expanded_path.start_with?(p.to_s) }
-          STABLE
-        elsif Bootsnap.bundler? && expanded_path.start_with?(Bundler.bundle_path.to_s)
-          STABLE
-        elsif expanded_path.start_with?(RUBY_LIBDIR) && !expanded_path.start_with?(RUBY_SITEDIR)
-          STABLE
-        else
-          VOLATILE
-        end
+                         STABLE
+                       elsif Bootsnap.bundler? && expanded_path.start_with?(Bundler.bundle_path.to_s)
+                         STABLE
+                       elsif expanded_path.start_with?(RUBY_LIBDIR) && !expanded_path.start_with?(RUBY_SITEDIR)
+                         STABLE
+                       else
+                         VOLATILE
+                       end
       end
     end
   end

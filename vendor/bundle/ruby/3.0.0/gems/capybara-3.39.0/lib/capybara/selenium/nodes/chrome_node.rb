@@ -75,10 +75,10 @@ class Capybara::Selenium::ChromeNode < Capybara::Selenium::Node
 
   def send_keys(*args)
     args.chunk { |inp| inp.is_a?(String) && inp.match?(/\p{Emoji Presentation}/) }
-        .each do |contains_emoji, inputs|
+      .each do |contains_emoji, inputs|
       if contains_emoji
         inputs.join.grapheme_clusters.chunk { |gc| gc.match?(/\p{Emoji Presentation}/) }
-              .each do |emoji, clusters|
+          .each do |emoji, clusters|
           if emoji
             driver.send(:execute_cdp, 'Input.insertText', text: clusters.join)
           else
@@ -91,12 +91,13 @@ class Capybara::Selenium::ChromeNode < Capybara::Selenium::Node
     end
   end
 
-private
+  private
 
   def perform_legacy_drag(element, drop_modifiers)
     return super if chromedriver_fixed_actions_key_state? || !w3c? || element.obscured?
 
-    raise ArgumentError, 'Modifier keys are not supported while dragging in this version of Chrome.' unless drop_modifiers.empty?
+    raise ArgumentError,
+          'Modifier keys are not supported while dragging in this version of Chrome.' unless drop_modifiers.empty?
 
     # W3C Chrome/chromedriver < 77 doesn't maintain mouse button state across actions API performs
     # https://bugs.chromium.org/p/chromedriver/issues/detail?id=2981

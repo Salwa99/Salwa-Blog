@@ -6,7 +6,7 @@ require "active_support/multibyte/unicode"
 
 class ERB
   module Util
-    HTML_ESCAPE = { "&" => "&amp;",  ">" => "&gt;",   "<" => "&lt;", '"' => "&quot;", "'" => "&#39;" }
+    HTML_ESCAPE = { "&" => "&amp;", ">" => "&gt;", "<" => "&lt;", '"' => "&quot;", "'" => "&#39;" }
     JSON_ESCAPE = { "&" => '\u0026', ">" => '\u003e', "<" => '\u003c', "\u2028" => '\u2028', "\u2029" => '\u2029' }
     HTML_ESCAPE_ONCE_REGEXP = /["><']|&(?!([a-zA-Z]+|(#\d+)|(#[xX][\dA-Fa-f]+));)/
     JSON_ESCAPE_REGEXP = /[\u2028\u2029&><]/u
@@ -194,6 +194,7 @@ module ActiveSupport # :nodoc:
 
     def safe_concat(value)
       raise SafeConcatError unless html_safe?
+
       original_concat(value)
     end
 
@@ -324,38 +325,39 @@ module ActiveSupport # :nodoc:
     end
 
     private
-      def explicit_html_escape_interpolated_argument(arg)
-        (!html_safe? || arg.html_safe?) ? arg : CGI.escapeHTML(arg.to_s)
-      end
 
-      def implicit_html_escape_interpolated_argument(arg)
-        if !html_safe? || arg.html_safe?
-          arg
-        else
-          arg_string = begin
-            arg.to_str
-          rescue NoMethodError => error
-            if error.name == :to_str
-              str = arg.to_s
-              ActiveSupport::Deprecation.warn <<~MSG.squish
-                Implicit conversion of #{arg.class} into String by ActiveSupport::SafeBuffer
-                is deprecated and will be removed in Rails 7.1.
-                You must explicitly cast it to a String.
-              MSG
-              str
-            else
-              raise
-            end
+    def explicit_html_escape_interpolated_argument(arg)
+      (!html_safe? || arg.html_safe?) ? arg : CGI.escapeHTML(arg.to_s)
+    end
+
+    def implicit_html_escape_interpolated_argument(arg)
+      if !html_safe? || arg.html_safe?
+        arg
+      else
+        arg_string = begin
+          arg.to_str
+        rescue NoMethodError => error
+          if error.name == :to_str
+            str = arg.to_s
+            ActiveSupport::Deprecation.warn <<~MSG.squish
+              Implicit conversion of #{arg.class} into String by ActiveSupport::SafeBuffer
+              is deprecated and will be removed in Rails 7.1.
+              You must explicitly cast it to a String.
+            MSG
+            str
+          else
+            raise
           end
-          CGI.escapeHTML(arg_string)
         end
+        CGI.escapeHTML(arg_string)
       end
+    end
 
-      def set_block_back_references(block, match_data)
-        block.binding.eval("proc { |m| $~ = m }").call(match_data)
-      rescue ArgumentError
-        # Can't create binding from C level Proc
-      end
+    def set_block_back_references(block, match_data)
+      block.binding.eval("proc { |m| $~ = m }").call(match_data)
+    rescue ArgumentError
+      # Can't create binding from C level Proc
+    end
   end
 end
 

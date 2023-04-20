@@ -96,13 +96,13 @@ Capybara::SpecHelper.spec '#unselect' do
     context 'when `true`' do
       it 'can match select box approximately' do
         expect do
-          @session.unselect('Boxerbriefs', from: 'Under', exact:  true)
+          @session.unselect('Boxerbriefs', from: 'Under', exact: true)
         end.to raise_error(Capybara::ElementNotFound)
       end
 
       it 'can match option approximately' do
         expect do
-          @session.unselect('Boxerbr', from: 'Underwear', exact:  true)
+          @session.unselect('Boxerbr', from: 'Underwear', exact: true)
         end.to raise_error(Capybara::ElementNotFound)
       end
 

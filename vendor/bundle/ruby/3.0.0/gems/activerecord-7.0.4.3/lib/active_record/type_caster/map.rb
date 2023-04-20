@@ -17,7 +17,8 @@ module ActiveRecord
       end
 
       private
-        attr_reader :klass
+
+      attr_reader :klass
     end
   end
 end

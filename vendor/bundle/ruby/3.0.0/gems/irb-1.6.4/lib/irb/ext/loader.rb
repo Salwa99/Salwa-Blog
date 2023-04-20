@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   loader.rb -
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -6,13 +7,12 @@
 
 module IRB # :nodoc:
   # Raised in the event of an exception in a file loaded from an Irb session
-  class LoadAbort < Exception;end
+  class LoadAbort < Exception; end
 
   # Provides a few commands for loading files within an irb session.
   #
   # See ExtendCommandBundle for more information.
   module IrbLoader
-
     alias ruby_load load
     alias ruby_require require
 
@@ -27,6 +27,7 @@ module IRB # :nodoc:
     def search_file_from_ruby_path(fn) # :nodoc:
       if File.absolute_path?(fn)
         return fn if File.exist?(fn)
+
         return nil
       end
 
@@ -44,8 +45,7 @@ module IRB # :nodoc:
     def source_file(path)
       irb.suspend_name(path, File.basename(path)) do
         FileInputMethod.open(path) do |io|
-          irb.suspend_input_method(io) do
-            |back_io|
+          irb.suspend_input_method(io) do |back_io|
             irb.signal_status(:IN_LOAD) do
               if back_io.kind_of?(FileInputMethod)
                 irb.eval_input
@@ -67,7 +67,6 @@ module IRB # :nodoc:
     # See Irb#suspend_input_method for more information.
     def load_file(path, priv = nil)
       irb.suspend_name(path, File.basename(path)) do
-
         if priv
           ws = WorkSpace.new(Module.new)
         else
@@ -75,8 +74,7 @@ module IRB # :nodoc:
         end
         irb.suspend_workspace(ws) do
           FileInputMethod.open(path) do |io|
-            irb.suspend_input_method(io) do
-              |back_io|
+            irb.suspend_input_method(io) do |back_io|
               irb.signal_status(:IN_LOAD) do
                 if back_io.kind_of?(FileInputMethod)
                   irb.eval_input

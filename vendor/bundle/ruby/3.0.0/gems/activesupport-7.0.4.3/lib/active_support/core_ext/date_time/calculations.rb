@@ -51,6 +51,7 @@ class DateTime
   def change(options)
     if new_nsec = options[:nsec]
       raise ArgumentError, "Can't change both :nsec and :usec at the same time: #{options.inspect}" if options[:usec]
+
       new_fraction = Rational(new_nsec, 1000000000)
     else
       new_usec = options.fetch(:usec, (options[:hour] || options[:min] || options[:sec]) ? 0 : Rational(nsec, 1000))

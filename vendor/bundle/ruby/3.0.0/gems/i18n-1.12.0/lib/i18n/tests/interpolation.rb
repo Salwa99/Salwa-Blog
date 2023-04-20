@@ -125,13 +125,15 @@ module I18n
       test "interpolation: deep interpolation for Hash" do
         people = { :people => { :ann => 'Ann is %{ann}', :john => 'John is %{john}' } }
         interpolated_people = { :people => { :ann => 'Ann is good', :john => 'John is big' } }
-        assert_equal interpolated_people, interpolate(:default => people, :ann => 'good', :john => 'big', :deep_interpolation => true)
+        assert_equal interpolated_people,
+                     interpolate(:default => people, :ann => 'good', :john => 'big', :deep_interpolation => true)
       end
 
       test "interpolation: deep interpolation for Array" do
         people = { :people => ['Ann is %{ann}', 'John is %{john}'] }
         interpolated_people = { :people => ['Ann is good', 'John is big'] }
-        assert_equal interpolated_people, interpolate(:default => people, :ann => 'good', :john => 'big', :deep_interpolation => true)
+        assert_equal interpolated_people,
+                     interpolate(:default => people, :ann => 'good', :john => 'big', :deep_interpolation => true)
       end
 
       protected

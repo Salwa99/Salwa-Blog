@@ -10,6 +10,7 @@ db_namespace = namespace :db do
   desc "Set the environment value for the database"
   task "environment:set" => :load_config do
     raise ActiveRecord::EnvironmentStorageError unless ActiveRecord::InternalMetadata.enabled?
+
     ActiveRecord::InternalMetadata.create_table
     ActiveRecord::InternalMetadata[:environment] = ActiveRecord::Base.connection.migration_context.current_environment
   end
@@ -121,7 +122,8 @@ db_namespace = namespace :db do
     ActiveRecord::Tasks::DatabaseTasks.for_each(databases) do |name|
       # IMPORTANT: This task won't dump the schema if ActiveRecord.dump_schema_after_migration is set to false
       task name do
-        db_config = ActiveRecord::Base.configurations.configs_for(env_name: ActiveRecord::Tasks::DatabaseTasks.env, name: name)
+        db_config = ActiveRecord::Base.configurations.configs_for(env_name: ActiveRecord::Tasks::DatabaseTasks.env,
+                                                                  name: name)
 
         if ActiveRecord.dump_schema_after_migration && db_config.schema_dump
           ActiveRecord::Base.establish_connection(db_config)
@@ -316,7 +318,7 @@ db_namespace = namespace :db do
   end
 
   desc "Drops and recreates all databases from their schema for the current environment and loads the seeds."
-  task reset: [ "db:drop", "db:setup" ]
+  task reset: ["db:drop", "db:setup"]
 
   # desc "Retrieves the charset for the current environment's database"
   task charset: :load_config do
@@ -410,18 +412,18 @@ db_namespace = namespace :db do
       base_dir = ActiveRecord::Tasks::DatabaseTasks.fixtures_path
 
       fixtures_dir = if ENV["FIXTURES_DIR"]
-        File.join base_dir, ENV["FIXTURES_DIR"]
-      else
-        base_dir
-      end
+                       File.join base_dir, ENV["FIXTURES_DIR"]
+                     else
+                       base_dir
+                     end
 
       fixture_files = if ENV["FIXTURES"]
-        ENV["FIXTURES"].split(",")
-      else
-        files = Dir[File.join(fixtures_dir, "**/*.{yml}")]
-        files.reject! { |f| f.start_with?(File.join(fixtures_dir, "files")) }
-        files.map! { |f| f[fixtures_dir.to_s.size..-5].delete_prefix("/") }
-      end
+                        ENV["FIXTURES"].split(",")
+                      else
+                        files = Dir[File.join(fixtures_dir, "**/*.{yml}")]
+                        files.reject! { |f| f.start_with?(File.join(fixtures_dir, "files")) }
+                        files.map! { |f| f[fixtures_dir.to_s.size..-5].delete_prefix("/") }
+                      end
 
       ActiveRecord::FixtureSet.create_fixtures(fixtures_dir, fixture_files)
     end
@@ -474,7 +476,8 @@ db_namespace = namespace :db do
       ActiveRecord::Tasks::DatabaseTasks.for_each(databases) do |name|
         desc "Creates a database schema file (either db/schema.rb or db/structure.sql, depending on `ENV['SCHEMA_FORMAT']` or `config.active_record.schema_format`) for #{name} database"
         task name => :load_config do
-          db_config = ActiveRecord::Base.configurations.configs_for(env_name: ActiveRecord::Tasks::DatabaseTasks.env, name: name)
+          db_config = ActiveRecord::Base.configurations.configs_for(env_name: ActiveRecord::Tasks::DatabaseTasks.env,
+                                                                    name: name)
           ActiveRecord::Base.establish_connection(db_config)
           schema_format = ENV.fetch("SCHEMA_FORMAT", ActiveRecord.schema_format).to_sym
           ActiveRecord::Tasks::DatabaseTasks.dump_schema(db_config, schema_format)
@@ -488,7 +491,8 @@ db_namespace = namespace :db do
         desc "Loads a database schema file (either db/schema.rb or db/structure.sql, depending on `ENV['SCHEMA_FORMAT']` or `config.active_record.schema_format`) into the #{name} database"
         task name => [:load_config, :check_protected_environments] do
           original_db_config = ActiveRecord::Base.connection_db_config
-          db_config = ActiveRecord::Base.configurations.configs_for(env_name: ActiveRecord::Tasks::DatabaseTasks.env, name: name)
+          db_config = ActiveRecord::Base.configurations.configs_for(env_name: ActiveRecord::Tasks::DatabaseTasks.env,
+                                                                    name: name)
           schema_format = ENV.fetch("SCHEMA_FORMAT", ActiveRecord.schema_format).to_sym
           ActiveRecord::Tasks::DatabaseTasks.load_schema(db_config, schema_format)
         ensure
@@ -644,7 +648,7 @@ namespace :railties do
       end
 
       ActiveRecord::Migration.copy(ActiveRecord::Tasks::DatabaseTasks.migrations_paths.first, railties,
-                                    on_skip: on_skip, on_copy: on_copy)
+                                   on_skip: on_skip, on_copy: on_copy)
     end
   end
 end

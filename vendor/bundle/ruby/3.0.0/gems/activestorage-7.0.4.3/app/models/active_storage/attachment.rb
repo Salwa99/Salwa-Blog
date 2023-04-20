@@ -67,25 +67,26 @@ class ActiveStorage::Attachment < ActiveStorage::Record
   end
 
   private
-    def analyze_blob_later
-      blob.analyze_later unless blob.analyzed?
-    end
 
-    def mirror_blob_later
-      blob.mirror_later
-    end
+  def analyze_blob_later
+    blob.analyze_later unless blob.analyzed?
+  end
 
-    def purge_dependent_blob_later
-      blob&.purge_later if dependent == :purge_later
-    end
+  def mirror_blob_later
+    blob.mirror_later
+  end
 
-    def dependent
-      record.attachment_reflections[name]&.options&.fetch(:dependent, nil)
-    end
+  def purge_dependent_blob_later
+    blob&.purge_later if dependent == :purge_later
+  end
 
-    def variants
-      record.attachment_reflections[name]&.variants
-    end
+  def dependent
+    record.attachment_reflections[name]&.options&.fetch(:dependent, nil)
+  end
+
+  def variants
+    record.attachment_reflections[name]&.variants
+  end
 end
 
 ActiveSupport.run_load_hooks :active_storage_attachment, ActiveStorage::Attachment

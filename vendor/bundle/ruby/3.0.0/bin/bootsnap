@@ -22,8 +22,8 @@ if str
 end
 
 if Gem.respond_to?(:activate_bin_path)
-load Gem.activate_bin_path('bootsnap', 'bootsnap', version)
+  load Gem.activate_bin_path('bootsnap', 'bootsnap', version)
 else
-gem "bootsnap", version
-load Gem.bin_path("bootsnap", "bootsnap", version)
+  gem "bootsnap", version
+  load Gem.bin_path("bootsnap", "bootsnap", version)
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
+
 module Mail
   class AttachmentsList < Array
-
     def initialize(parts_list)
       @parts_list = parts_list
       @content_disposition_type = 'attachment'
@@ -102,6 +102,5 @@ module Mail
       @mime_type = MiniMime.lookup_by_filename(filename)
       @mime_type && @mime_type.content_type
     end
-
   end
 end

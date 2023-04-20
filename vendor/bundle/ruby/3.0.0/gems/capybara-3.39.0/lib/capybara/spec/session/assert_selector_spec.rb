@@ -14,7 +14,9 @@ Capybara::SpecHelper.spec '#assert_selector' do
   it 'should be false if the given selector is not on the page' do
     expect { @session.assert_selector(:xpath, '//abbr') }.to raise_error(Capybara::ElementNotFound)
     expect { @session.assert_selector(:css, 'p a#doesnotexist') }.to raise_error(Capybara::ElementNotFound)
-    expect { @session.assert_selector("//p[contains(.,'thisstringisnotonpage')]") }.to raise_error(Capybara::ElementNotFound)
+    expect {
+      @session.assert_selector("//p[contains(.,'thisstringisnotonpage')]")
+    }.to raise_error(Capybara::ElementNotFound)
   end
 
   it 'should use default selector' do
@@ -45,7 +47,9 @@ Capybara::SpecHelper.spec '#assert_selector' do
 
     it "should be false if the content isn't on the page at all" do
       expect { @session.assert_selector('//abbr', count: 2) }.to raise_error(Capybara::ElementNotFound)
-      expect { @session.assert_selector("//p//a[@id='doesnotexist']", count: 1) }.to raise_error(Capybara::ElementNotFound)
+      expect {
+        @session.assert_selector("//p//a[@id='doesnotexist']", count: 1)
+      }.to raise_error(Capybara::ElementNotFound)
     end
   end
 
@@ -106,7 +110,9 @@ Capybara::SpecHelper.spec '#assert_no_selector' do
     it 'should be false if the content is on the page the given number of times' do
       expect { @session.assert_no_selector('//p', count: 3) }.to raise_error(Capybara::ElementNotFound)
       expect { @session.assert_no_selector("//p//a[@id='foo']", count: 1) }.to raise_error(Capybara::ElementNotFound)
-      expect { @session.assert_no_selector("//p[contains(.,'est')]", count: 1) }.to raise_error(Capybara::ElementNotFound)
+      expect {
+        @session.assert_no_selector("//p[contains(.,'est')]", count: 1)
+      }.to raise_error(Capybara::ElementNotFound)
     end
 
     it 'should be true if the content is on the page the wrong number of times' do
@@ -123,12 +129,16 @@ Capybara::SpecHelper.spec '#assert_no_selector' do
 
   context 'with text' do
     it 'should discard all matches where the given string is contained' do
-      expect { @session.assert_no_selector('//p//a', text: 'Redirect', count: 1) }.to raise_error(Capybara::ElementNotFound)
+      expect {
+        @session.assert_no_selector('//p//a', text: 'Redirect', count: 1)
+      }.to raise_error(Capybara::ElementNotFound)
       @session.assert_no_selector('//p', text: 'Doesnotexist')
     end
 
     it 'should discard all matches where the given regexp is matched' do
-      expect { @session.assert_no_selector('//p//a', text: /re[dab]i/i, count: 1) }.to raise_error(Capybara::ElementNotFound)
+      expect {
+        @session.assert_no_selector('//p//a', text: /re[dab]i/i, count: 1)
+      }.to raise_error(Capybara::ElementNotFound)
       @session.assert_no_selector('//p//a', text: /Red$/)
     end
   end

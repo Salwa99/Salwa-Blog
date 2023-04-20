@@ -21,7 +21,7 @@ def apply_spec_defaults(s)
   s.require_path = 'lib'
   s.license = 'MIT'
 
-  s.add_development_dependency("rspec","~>3.6")
+  s.add_development_dependency("rspec", "~>3.6")
   s.add_development_dependency("rake", "~>0.9")
   s.homepage = "http://banisterfiend.wordpress.com"
   s.has_rdoc = 'yard'
@@ -57,7 +57,7 @@ namespace :ruby do
     pkg.need_tar = false
   end
 
-  desc  "Generate gemspec file"
+  desc "Generate gemspec file"
   task :gemspec do
     File.open("#{spec.name}.gemspec", "w") do |f|
       f << spec.to_ruby

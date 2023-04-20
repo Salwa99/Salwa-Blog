@@ -44,7 +44,7 @@ module AbstractController
         @actions.include?(controller.action_name)
       end
 
-      alias after  match?
+      alias after match?
       alias before match?
       alias around match?
     end
@@ -227,12 +227,13 @@ module AbstractController
     end
 
     private
-      # Override <tt>AbstractController::Base#process_action</tt> to run the
-      # <tt>process_action</tt> callbacks around the normal behavior.
-      def process_action(...)
-        run_callbacks(:process_action) do
-          super
-        end
+
+    # Override <tt>AbstractController::Base#process_action</tt> to run the
+    # <tt>process_action</tt> callbacks around the normal behavior.
+    def process_action(...)
+      run_callbacks(:process_action) do
+        super
       end
+    end
   end
 end

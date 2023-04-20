@@ -12,7 +12,8 @@ class Capybara::Selenium::Node < Capybara::Driver::Node
   include Capybara::Selenium::Scroll
 
   def visible_text
-    raise NotImplementedError, 'Getting visible text is not currently supported directly on shadow roots' if shadow_root?
+    raise NotImplementedError,
+          'Getting visible text is not currently supported directly on shadow roots' if shadow_root?
 
     native.text
   end
@@ -225,7 +226,7 @@ class Capybara::Selenium::Node < Capybara::Driver::Node
     root && build_node(native.shadow_root)
   end
 
-protected
+  protected
 
   def scroll_if_needed
     yield
@@ -249,7 +250,7 @@ protected
     end
   end
 
-private
+  private
 
   def sibling_index(parent, node, selector)
     siblings = parent.find_xpath(selector)

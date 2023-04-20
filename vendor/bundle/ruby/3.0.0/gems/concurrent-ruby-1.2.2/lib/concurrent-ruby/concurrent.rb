@@ -128,7 +128,6 @@ require 'concurrent/options'
 #     -   Features developed in `concurrent-ruby-edge` are expected to move
 #         to `concurrent-ruby` when finalised.
 
-
 # {include:file:README.md}
 module Concurrent
 end

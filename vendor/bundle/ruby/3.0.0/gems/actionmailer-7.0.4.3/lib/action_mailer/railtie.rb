@@ -15,10 +15,10 @@ module ActionMailer
     end
 
     initializer "action_mailer.set_configs" do |app|
-      paths   = app.config.paths
+      paths = app.config.paths
       options = app.config.action_mailer
 
-      options.assets_dir      ||= paths["public"].first
+      options.assets_dir ||= paths["public"].first
       options.javascripts_dir ||= paths["public/javascripts"].first
       options.stylesheets_dir ||= paths["public/stylesheets"].first
       options.show_previews = Rails.env.development? if options.show_previews.nil?
@@ -29,8 +29,8 @@ module ActionMailer
       end
 
       # make sure readers methods get compiled
-      options.asset_host          ||= app.config.asset_host
-      options.relative_url_root   ||= app.config.relative_url_root
+      options.asset_host ||= app.config.asset_host
+      options.relative_url_root ||= app.config.relative_url_root
 
       ActiveSupport.on_load(:action_mailer) do
         include AbstractController::UrlFor
@@ -90,7 +90,7 @@ module ActionMailer
 
       if options.show_previews
         app.routes.prepend do
-          get "/rails/mailers"       => "rails/mailers#index", internal: true
+          get "/rails/mailers" => "rails/mailers#index", internal: true
           get "/rails/mailers/*path" => "rails/mailers#preview", internal: true
         end
       end

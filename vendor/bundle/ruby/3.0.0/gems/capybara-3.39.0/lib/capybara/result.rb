@@ -53,20 +53,20 @@ module Capybara
     def [](*args)
       idx, length = args
       max_idx = case idx
-      when Integer
-        if idx.negative?
-          nil
-        else
-          length.nil? ? idx : idx + length - 1
-        end
-      when Range
-        # idx.max is broken with beginless ranges
-        # idx.end && idx.max # endless range will have end == nil
-        max = idx.end
-        max = nil if max&.negative?
-        max -= 1 if max && idx.exclude_end?
-        max
-      end
+                when Integer
+                  if idx.negative?
+                    nil
+                  else
+                    length.nil? ? idx : idx + length - 1
+                  end
+                when Range
+                  # idx.max is broken with beginless ranges
+                  # idx.end && idx.max # endless range will have end == nil
+                  max = idx.end
+                  max = nil if max&.negative?
+                  max -= 1 if max && idx.exclude_end?
+                  max
+                end
 
       if max_idx.nil?
         full_results[*args]
@@ -142,7 +142,7 @@ module Capybara
       self
     end
 
-  private
+    private
 
     def add_to_cache(elem)
       elem.allow_reload!(@result_cache.size) if @allow_reload

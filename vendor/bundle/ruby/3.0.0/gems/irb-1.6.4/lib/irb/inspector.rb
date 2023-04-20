@@ -1,12 +1,11 @@
 # frozen_string_literal: false
+
 #
 #   irb/inspector.rb - inspect methods
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
 #
 
 module IRB # :nodoc:
-
-
   # Convenience method to create a new Inspector, using the given +inspect+
   # proc, and optional +init+ proc and passes them to Inspector.new
   #
@@ -46,7 +45,7 @@ module IRB # :nodoc:
     # Determines the inspector to use where +inspector+ is one of the keys passed
     # during inspector definition.
     def self.keys_with_inspector(inspector)
-      INSPECTORS.select{|k,v| v == inspector}.collect{|k, v| k}
+      INSPECTORS.select { |k, v| v == inspector }.collect { |k, v| k }
     end
 
     # Example
@@ -55,7 +54,7 @@ module IRB # :nodoc:
     #     Inspector.def_inspector([key1,..], init_p=nil){|v| v.inspect}
     #     Inspector.def_inspector(key, inspector)
     #     Inspector.def_inspector([key1,...], inspector)
-    def self.def_inspector(key, arg=nil, &block)
+    def self.def_inspector(key, arg = nil, &block)
       if block_given?
         inspector = IRB::Inspector(block, arg)
       else
@@ -108,14 +107,14 @@ module IRB # :nodoc:
     end
   end
 
-  Inspector.def_inspector([false, :to_s, :raw]){|v| v.to_s}
-  Inspector.def_inspector([:p, :inspect]){|v|
+  Inspector.def_inspector([false, :to_s, :raw]) { |v| v.to_s }
+  Inspector.def_inspector([:p, :inspect]) { |v|
     Color.colorize_code(v.inspect, colorable: Color.colorable? && Color.inspect_colorable?(v))
   }
-  Inspector.def_inspector([true, :pp, :pretty_inspect], proc{require_relative "color_printer"}){|v|
+  Inspector.def_inspector([true, :pp, :pretty_inspect], proc { require_relative "color_printer" }) { |v|
     IRB::ColorPrinter.pp(v, '').chomp
   }
-  Inspector.def_inspector([:yaml, :YAML], proc{require "yaml"}){|v|
+  Inspector.def_inspector([:yaml, :YAML], proc { require "yaml" }) { |v|
     begin
       YAML.dump(v)
     rescue
@@ -124,7 +123,7 @@ module IRB # :nodoc:
     end
   }
 
-  Inspector.def_inspector([:marshal, :Marshal, :MARSHAL, Marshal]){|v|
+  Inspector.def_inspector([:marshal, :Marshal, :MARSHAL, Marshal]) { |v|
     Marshal.dump(v)
   }
 end

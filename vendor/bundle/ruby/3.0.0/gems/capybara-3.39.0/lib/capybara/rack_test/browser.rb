@@ -66,7 +66,8 @@ class Capybara::RackTest::Browser
     end
 
     if last_response.redirect? # rubocop:disable Style/GuardClause
-      raise Capybara::InfiniteRedirectError, "redirected more than #{driver.redirect_limit} times, check for infinite redirects."
+      raise Capybara::InfiniteRedirectError,
+            "redirected more than #{driver.redirect_limit} times, check for infinite redirects."
     end
   end
 
@@ -147,7 +148,7 @@ class Capybara::RackTest::Browser
     super
   end
 
-protected
+  protected
 
   def base_href
     find(:css, 'head > base').first&.[](:href).to_s
@@ -185,7 +186,7 @@ protected
     nil
   end
 
-private
+  private
 
   def fragment_or_script?(path)
     path.gsub(/^#{Regexp.escape(request_path)}/, '').start_with?('#') || path.downcase.start_with?('javascript:')

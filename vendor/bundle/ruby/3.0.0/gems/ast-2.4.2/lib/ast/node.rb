@@ -69,7 +69,7 @@ module AST
     # your code does not expect the argument to be frozen, use `#dup`.
     #
     # The `properties` hash is passed to {#assign_properties}.
-    def initialize(type, children=[], properties={})
+    def initialize(type, children = [], properties = {})
       @type, @children = type.to_sym, children.to_a.freeze
 
       assign_properties(properties)
@@ -83,9 +83,9 @@ module AST
     # @param [Object] other
     # @return [Boolean]
     def eql?(other)
-      self.class.eql?(other.class)   &&
-      @type.eql?(other.type)         &&
-      @children.eql?(other.children)
+      self.class.eql?(other.class) &&
+        @type.eql?(other.type) &&
+        @children.eql?(other.children)
     end
 
     # By default, each entry in the `properties` hash is assigned to
@@ -104,7 +104,7 @@ module AST
     end
     protected :assign_properties
 
-    alias   :original_dup :dup
+    alias :original_dup :dup
     private :original_dup
 
     # Nodes are already frozen, so there is no harm in returning the
@@ -130,14 +130,14 @@ module AST
     # @param  [Array, nil]  children
     # @param  [Hash, nil]   properties
     # @return [AST::Node]
-    def updated(type=nil, children=nil, properties=nil)
-      new_type       = type       || @type
-      new_children   = children   || @children
+    def updated(type = nil, children = nil, properties = nil)
+      new_type = type || @type
+      new_children = children || @children
       new_properties = properties || {}
 
       if @type == new_type &&
-          @children == new_children &&
-          properties.nil?
+         @children == new_children &&
+         properties.nil?
         self
       else
         copy = original_dup
@@ -184,7 +184,7 @@ module AST
     #
     # @param  [Integer] indent Base indentation level.
     # @return [String]
-    def to_sexp(indent=0)
+    def to_sexp(indent = 0)
       indented = "  " * indent
       sexp = "#{indented}(#{fancy_type}"
 
@@ -208,7 +208,7 @@ module AST
     #
     # @param  [Integer] indent Base indentation level.
     # @return [String]
-    def inspect(indent=0)
+    def inspect(indent = 0)
       indented = "  " * indent
       sexp = "#{indented}s(:#{@type}"
 

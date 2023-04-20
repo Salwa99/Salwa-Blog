@@ -19,7 +19,10 @@ Capybara::SpecHelper.spec '#assert_current_path' do
   end
 
   it 'should raise if the page has not the given current_path' do
-    expect { @session.assert_current_path('/with_html') }.to raise_error(Capybara::ExpectationNotMet, 'expected "/with_js" to equal "/with_html"')
+    expect {
+      @session.assert_current_path('/with_html')
+    }.to raise_error(Capybara::ExpectationNotMet,
+                     'expected "/with_js" to equal "/with_html"')
   end
 
   it 'should check query options' do

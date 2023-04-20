@@ -22,13 +22,14 @@ module ActionView
         end
 
         private
-          def render_component(builder)
-            builder.check_box + builder.label
-          end
 
-          def hidden_field_name
-            "#{super}[]"
-          end
+        def render_component(builder)
+          builder.check_box + builder.label
+        end
+
+        def hidden_field_name
+          "#{super}[]"
+        end
       end
     end
   end

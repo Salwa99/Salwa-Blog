@@ -30,7 +30,9 @@ Capybara::SpecHelper.spec '#scroll_to', requires: [:scroll] do
   it 'can scroll the window to the vertical top' do
     @session.scroll_to :bottom
     @session.scroll_to :top
-    expect(@session.evaluate_script('[window.scrollX || window.pageXOffset, window.scrollY || window.pageYOffset]')).to eq [0, 0]
+    expect(@session.evaluate_script('[window.scrollX || window.pageXOffset, window.scrollY || window.pageYOffset]')).to eq [
+      0, 0
+    ]
   end
 
   it 'can scroll the window to the vertical bottom' do
@@ -44,12 +46,16 @@ Capybara::SpecHelper.spec '#scroll_to', requires: [:scroll] do
   it 'can scroll the window to the vertical center' do
     @session.scroll_to :center
     max_scroll = @session.evaluate_script('document.documentElement.scrollHeight - document.documentElement.clientHeight')
-    expect(@session.evaluate_script('[window.scrollX || window.pageXOffset, window.scrollY || window.pageYOffset]')).to eq [0, max_scroll / 2]
+    expect(@session.evaluate_script('[window.scrollX || window.pageXOffset, window.scrollY || window.pageYOffset]')).to eq [
+      0, max_scroll / 2
+    ]
   end
 
   it 'can scroll the window to specific location' do
     @session.scroll_to 100, 100
-    expect(@session.evaluate_script('[window.scrollX || window.pageXOffset, window.scrollY || window.pageYOffset]')).to eq [100, 100]
+    expect(@session.evaluate_script('[window.scrollX || window.pageXOffset, window.scrollY || window.pageYOffset]')).to eq [
+      100, 100
+    ]
   end
 
   it 'can scroll an element to the top of the scrolling element' do
@@ -107,7 +113,9 @@ Capybara::SpecHelper.spec '#scroll_to', requires: [:scroll] do
 
   it 'can scroll the window by a specific amount' do
     @session.scroll_to(:current, offset: [50, 75])
-    expect(@session.evaluate_script('[window.scrollX || window.pageXOffset, window.scrollY || window.pageYOffset]')).to eq [50, 75]
+    expect(@session.evaluate_script('[window.scrollX || window.pageXOffset, window.scrollY || window.pageYOffset]')).to eq [
+      50, 75
+    ]
   end
 
   it 'can scroll the scroll the scrolling element by a specific amount' do

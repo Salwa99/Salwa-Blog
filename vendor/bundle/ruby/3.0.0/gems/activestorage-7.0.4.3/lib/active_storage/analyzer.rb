@@ -28,21 +28,22 @@ module ActiveStorage
     end
 
     private
-      # Downloads the blob to a tempfile on disk. Yields the tempfile.
-      def download_blob_to_tempfile(&block) # :doc:
-        blob.open tmpdir: tmpdir, &block
-      end
 
-      def logger # :doc:
-        ActiveStorage.logger
-      end
+    # Downloads the blob to a tempfile on disk. Yields the tempfile.
+    def download_blob_to_tempfile(&block) # :doc:
+      blob.open tmpdir: tmpdir, &block
+    end
 
-      def tmpdir # :doc:
-        Dir.tmpdir
-      end
+    def logger # :doc:
+      ActiveStorage.logger
+    end
 
-      def instrument(analyzer, &block) # :doc:
-        ActiveSupport::Notifications.instrument("analyze.active_storage", analyzer: analyzer, &block)
-      end
+    def tmpdir # :doc:
+      Dir.tmpdir
+    end
+
+    def instrument(analyzer, &block) # :doc:
+      ActiveSupport::Notifications.instrument("analyze.active_storage", analyzer: analyzer, &block)
+    end
   end
 end

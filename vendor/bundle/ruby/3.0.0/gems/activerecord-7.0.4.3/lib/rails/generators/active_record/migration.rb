@@ -17,36 +17,38 @@ module ActiveRecord
       end
 
       private
-        def primary_key_type
-          key_type = options[:primary_key_type]
-          ", id: :#{key_type}" if key_type
-        end
 
-        def foreign_key_type
-          key_type = options[:primary_key_type]
-          ", type: :#{key_type}" if key_type
-        end
+      def primary_key_type
+        key_type = options[:primary_key_type]
+        ", id: :#{key_type}" if key_type
+      end
 
-        def db_migrate_path
-          if defined?(Rails.application) && Rails.application
-            configured_migrate_path || default_migrate_path
-          else
-            "db/migrate"
-          end
-        end
+      def foreign_key_type
+        key_type = options[:primary_key_type]
+        ", type: :#{key_type}" if key_type
+      end
 
-        def default_migrate_path
-          Rails.application.config.paths["db/migrate"].to_ary.first
+      def db_migrate_path
+        if defined?(Rails.application) && Rails.application
+          configured_migrate_path || default_migrate_path
+        else
+          "db/migrate"
         end
+      end
 
-        def configured_migrate_path
-          return unless database = options[:database]
-          config = ActiveRecord::Base.configurations.configs_for(
-            env_name: Rails.env,
-            name: database
-          )
-          config&.migrations_paths
-        end
+      def default_migrate_path
+        Rails.application.config.paths["db/migrate"].to_ary.first
+      end
+
+      def configured_migrate_path
+        return unless database = options[:database]
+
+        config = ActiveRecord::Base.configurations.configs_for(
+          env_name: Rails.env,
+          name: database
+        )
+        config&.migrations_paths
+      end
     end
   end
 end

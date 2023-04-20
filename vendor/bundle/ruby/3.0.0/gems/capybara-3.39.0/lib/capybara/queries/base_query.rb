@@ -67,7 +67,7 @@ module Capybara
         +"expected not to find #{description}" << count_message
       end
 
-    private
+      private
 
       def count_specified?
         COUNT_KEYS.any? { |key| options.key? key }

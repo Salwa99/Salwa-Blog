@@ -17,7 +17,7 @@ module ActiveSupport
 
     def self.actions(error) # :nodoc:
       case error
-      when ActionableError, -> it { Class === it && it < ActionableError }
+      when ActionableError, ->it { Class === it && it < ActionableError }
         error._actions
       else
         {}

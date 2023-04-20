@@ -1,5 +1,6 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/constants'
 require 'mail/utilities'
 
@@ -178,7 +179,6 @@ module Mail
       @charset = val
     end
 
-
     def encoded
       buffer = String.new
       buffer.force_encoding('us-ascii') if buffer.respond_to?(:force_encoding)
@@ -193,7 +193,8 @@ module Mail
     end
 
     def decoded
-      raise NoMethodError, 'Can not decode an entire header as there could be character set conflicts. Try calling #decoded on the various fields.'
+      raise NoMethodError,
+            'Can not decode an entire header as there could be character set conflicts. Try calling #decoded on the various fields.'
     end
 
     def field_summary
@@ -227,7 +228,6 @@ module Mail
     def split_header
       self.fields = @raw_source.split(Constants::HEADER_SPLIT)
     end
-
 
     # Enumerable support. Yield each field in order.
     def each(&block)

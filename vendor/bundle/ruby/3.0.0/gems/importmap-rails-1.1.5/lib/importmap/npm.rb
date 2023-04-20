@@ -3,7 +3,7 @@ require "uri"
 require "json"
 
 class Importmap::Npm
-  Error     = Class.new(StandardError)
+  Error = Class.new(StandardError)
   HTTPError = Class.new(Error)
 
   singleton_class.attr_accessor :base_uri
@@ -45,76 +45,77 @@ class Importmap::Npm
   end
 
   private
-    OutdatedPackage   = Struct.new(:name, :current_version, :latest_version, :error, keyword_init: true)
-    VulnerablePackage = Struct.new(:name, :severity, :vulnerable_versions, :vulnerability, keyword_init: true)
 
-    def packages_with_versions
-      # We cannot use the name after "pin" because some dependencies are loaded from inside packages
-      # Eg. pin "buffer", to: "https://ga.jspm.io/npm:@jspm/core@2.0.0-beta.19/nodelibs/browser/buffer.js"
+  OutdatedPackage = Struct.new(:name, :current_version, :latest_version, :error, keyword_init: true)
+  VulnerablePackage = Struct.new(:name, :severity, :vulnerable_versions, :vulnerability, keyword_init: true)
 
-      importmap.scan(/^pin .*(?<=npm:|npm\/|skypack\.dev\/|unpkg\.com\/)(.*)(?=@\d+\.\d+\.\d+)@(\d+\.\d+\.\d+(?:[^\/\s"]*)).*$/) |
-        importmap.scan(/^pin "([^"]*)".* #.*@(\d+\.\d+\.\d+(?:[^\s]*)).*$/)
-    end
+  def packages_with_versions
+    # We cannot use the name after "pin" because some dependencies are loaded from inside packages
+    # Eg. pin "buffer", to: "https://ga.jspm.io/npm:@jspm/core@2.0.0-beta.19/nodelibs/browser/buffer.js"
 
-    def importmap
-      @importmap ||= File.read(@importmap_path)
-    end
+    importmap.scan(/^pin .*(?<=npm:|npm\/|skypack\.dev\/|unpkg\.com\/)(.*)(?=@\d+\.\d+\.\d+)@(\d+\.\d+\.\d+(?:[^\/\s"]*)).*$/) |
+      importmap.scan(/^pin "([^"]*)".* #.*@(\d+\.\d+\.\d+(?:[^\s]*)).*$/)
+  end
 
-    def get_package(package)
-      uri = self.class.base_uri.dup
-      uri.path = "/" + package
-      response = get_json(uri)
+  def importmap
+    @importmap ||= File.read(@importmap_path)
+  end
 
-      JSON.parse(response)
-    rescue JSON::ParserError
-      nil
-    end
+  def get_package(package)
+    uri = self.class.base_uri.dup
+    uri.path = "/" + package
+    response = get_json(uri)
 
-    def get_json(uri)
-      request = Net::HTTP::Get.new(uri)
-      request["Content-Type"] = "application/json"
+    JSON.parse(response)
+  rescue JSON::ParserError
+    nil
+  end
 
-      response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |http|
-        http.request(request)
-      }
+  def get_json(uri)
+    request = Net::HTTP::Get.new(uri)
+    request["Content-Type"] = "application/json"
 
-      response.body
-    rescue => error
-      raise HTTPError, "Unexpected transport error (#{error.class}: #{error.message})"
-    end
+    response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |http|
+      http.request(request)
+    }
 
-    def find_latest_version(response)
-      latest_version = response.dig('dist-tags', 'latest')
-      return latest_version if latest_version
+    response.body
+  rescue => error
+    raise HTTPError, "Unexpected transport error (#{error.class}: #{error.message})"
+  end
 
-      return unless response['versions']
+  def find_latest_version(response)
+    latest_version = response.dig('dist-tags', 'latest')
+    return latest_version if latest_version
 
-      response['versions'].keys.map { |v| Gem::Version.new(v) rescue nil }.compact.sort.last
-    end
+    return unless response['versions']
 
-    def outdated?(current_version, latest_version)
-      Gem::Version.new(current_version) < Gem::Version.new(latest_version)
-    rescue ArgumentError
-      current_version.to_s < latest_version.to_s
-    end
+    response['versions'].keys.map { |v| Gem::Version.new(v) rescue nil }.compact.sort.last
+  end
 
-    def get_audit
-      uri = self.class.base_uri.dup
-      uri.path = "/-/npm/v1/security/advisories/bulk"
+  def outdated?(current_version, latest_version)
+    Gem::Version.new(current_version) < Gem::Version.new(latest_version)
+  rescue ArgumentError
+    current_version.to_s < latest_version.to_s
+  end
 
-      body = packages_with_versions.each.with_object({}) { |(package, version), data|
-        data[package] ||= []
-        data[package] << version
-      }
-      return {} if body.empty?
+  def get_audit
+    uri = self.class.base_uri.dup
+    uri.path = "/-/npm/v1/security/advisories/bulk"
 
-      response = post_json(uri, body)
-      JSON.parse(response.body)
-    end
+    body = packages_with_versions.each.with_object({}) { |(package, version), data|
+      data[package] ||= []
+      data[package] << version
+    }
+    return {} if body.empty?
 
-    def post_json(uri, body)
-      Net::HTTP.post(uri, body.to_json, "Content-Type" => "application/json")
-    rescue => error
-      raise HTTPError, "Unexpected transport error (#{error.class}: #{error.message})"
-    end
+    response = post_json(uri, body)
+    JSON.parse(response.body)
+  end
+
+  def post_json(uri, body)
+    Net::HTTP.post(uri, body.to_json, "Content-Type" => "application/json")
+  rescue => error
+    raise HTTPError, "Unexpected transport error (#{error.class}: #{error.message})"
+  end
 end

@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   irb/help.rb - print usage module
 #   	by Keiju ISHITSUKA(keiju@ishitsuka.com)
@@ -12,7 +13,7 @@ module IRB
     lc = IRB.conf[:LC_MESSAGES]
     path = lc.find("irb/help-message")
     space_line = false
-    IRB::MagicFile.open(path){|f|
+    IRB::MagicFile.open(path) { |f|
       f.each_line do |l|
         if /^\s*$/ =~ l
           lc.puts l unless space_line
@@ -23,6 +24,7 @@ module IRB
 
         l.sub!(/#.*$/, "")
         next if /^\s*$/ =~ l
+
         lc.puts l
       end
     }

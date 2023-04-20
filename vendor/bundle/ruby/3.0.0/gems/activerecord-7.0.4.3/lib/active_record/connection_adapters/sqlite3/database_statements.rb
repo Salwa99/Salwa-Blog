@@ -77,10 +77,13 @@ module ActiveRecord
         alias :exec_update :exec_delete
 
         def begin_isolated_db_transaction(isolation) # :nodoc:
-          raise TransactionIsolationError, "SQLite3 only supports the `read_uncommitted` transaction isolation level" if isolation != :read_uncommitted
-          raise StandardError, "You need to enable the shared-cache mode in SQLite mode before attempting to change the transaction isolation level" unless shared_cache?
+          raise TransactionIsolationError,
+                "SQLite3 only supports the `read_uncommitted` transaction isolation level" if isolation != :read_uncommitted
+          raise StandardError,
+                "You need to enable the shared-cache mode in SQLite mode before attempting to change the transaction isolation level" unless shared_cache?
 
-          ActiveSupport::IsolatedExecutionState[:active_record_read_uncommitted] = @connection.get_first_value("PRAGMA read_uncommitted")
+          ActiveSupport::IsolatedExecutionState[:active_record_read_uncommitted] =
+            @connection.get_first_value("PRAGMA read_uncommitted")
           @connection.read_uncommitted = true
           begin_db_transaction
         end
@@ -109,43 +112,45 @@ module ActiveRecord
         end
 
         private
-          def reset_read_uncommitted
-            read_uncommitted = ActiveSupport::IsolatedExecutionState[:active_record_read_uncommitted]
-            return unless read_uncommitted
 
-            @connection.read_uncommitted = read_uncommitted
-          end
+        def reset_read_uncommitted
+          read_uncommitted = ActiveSupport::IsolatedExecutionState[:active_record_read_uncommitted]
+          return unless read_uncommitted
 
-          def execute_batch(statements, name = nil)
-            statements = statements.map { |sql| transform_query(sql) }
-            sql = combine_multi_statements(statements)
+          @connection.read_uncommitted = read_uncommitted
+        end
 
-            check_if_write_query(sql)
+        def execute_batch(statements, name = nil)
+          statements = statements.map { |sql| transform_query(sql) }
+          sql = combine_multi_statements(statements)
 
-            materialize_transactions
-            mark_transaction_written_if_write(sql)
+          check_if_write_query(sql)
 
-            log(sql, name) do
-              ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
-                @connection.execute_batch2(sql)
-              end
+          materialize_transactions
+          mark_transaction_written_if_write(sql)
+
+          log(sql, name) do
+            ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
+              @connection.execute_batch2(sql)
             end
           end
+        end
 
-          def last_inserted_id(result)
-            @connection.last_insert_row_id
-          end
+        def last_inserted_id(result)
+          @connection.last_insert_row_id
+        end
 
-          def build_fixture_statements(fixture_set)
-            fixture_set.flat_map do |table_name, fixtures|
-              next if fixtures.empty?
-              fixtures.map { |fixture| build_fixture_sql([fixture], table_name) }
-            end.compact
-          end
+        def build_fixture_statements(fixture_set)
+          fixture_set.flat_map do |table_name, fixtures|
+            next if fixtures.empty?
 
-          def build_truncate_statement(table_name)
-            "DELETE FROM #{quote_table_name(table_name)}"
-          end
+            fixtures.map { |fixture| build_fixture_sql([fixture], table_name) }
+          end.compact
+        end
+
+        def build_truncate_statement(table_name)
+          "DELETE FROM #{quote_table_name(table_name)}"
+        end
       end
     end
   end

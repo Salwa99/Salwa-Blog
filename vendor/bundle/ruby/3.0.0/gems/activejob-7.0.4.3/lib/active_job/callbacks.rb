@@ -19,7 +19,7 @@ module ActiveJob
   # NOTE: Calling the same callback multiple times will overwrite previous callback definitions.
   #
   module Callbacks
-    extend  ActiveSupport::Concern
+    extend ActiveSupport::Concern
     include ActiveSupport::Callbacks
 
     class << self

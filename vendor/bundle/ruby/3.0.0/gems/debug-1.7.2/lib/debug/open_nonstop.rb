@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #
 # Open the door for the debugger to connect.
 # Unlike debug/open, it does not stop at the beginning of the program.

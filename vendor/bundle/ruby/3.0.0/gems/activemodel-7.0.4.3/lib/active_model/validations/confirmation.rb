@@ -12,29 +12,31 @@ module ActiveModel
         unless (confirmed = record.public_send("#{attribute}_confirmation")).nil?
           unless confirmation_value_equal?(record, attribute, value, confirmed)
             human_attribute_name = record.class.human_attribute_name(attribute)
-            record.errors.add(:"#{attribute}_confirmation", :confirmation, **options.except(:case_sensitive).merge!(attribute: human_attribute_name))
+            record.errors.add(:"#{attribute}_confirmation", :confirmation,
+                              **options.except(:case_sensitive).merge!(attribute: human_attribute_name))
           end
         end
       end
 
       private
-        def setup!(klass)
-          klass.attr_reader(*attributes.filter_map do |attribute|
-            :"#{attribute}_confirmation" unless klass.method_defined?(:"#{attribute}_confirmation")
-          end)
 
-          klass.attr_writer(*attributes.filter_map do |attribute|
-            :"#{attribute}_confirmation" unless klass.method_defined?(:"#{attribute}_confirmation=")
-          end)
-        end
+      def setup!(klass)
+        klass.attr_reader(*attributes.filter_map do |attribute|
+          :"#{attribute}_confirmation" unless klass.method_defined?(:"#{attribute}_confirmation")
+        end)
 
-        def confirmation_value_equal?(record, attribute, value, confirmed)
-          if !options[:case_sensitive] && value.is_a?(String)
-            value.casecmp(confirmed) == 0
-          else
-            value == confirmed
-          end
+        klass.attr_writer(*attributes.filter_map do |attribute|
+          :"#{attribute}_confirmation" unless klass.method_defined?(:"#{attribute}_confirmation=")
+        end)
+      end
+
+      def confirmation_value_equal?(record, attribute, value, confirmed)
+        if !options[:case_sensitive] && value.is_a?(String)
+          value.casecmp(confirmed) == 0
+        else
+          value == confirmed
         end
+      end
     end
 
     module HelperMethods

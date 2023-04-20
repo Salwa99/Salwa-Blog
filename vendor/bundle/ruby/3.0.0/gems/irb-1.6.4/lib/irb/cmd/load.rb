@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   load.rb -
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -36,7 +37,7 @@ module IRB
         raise_cmd_argument_error unless file_name
 
         rex = Regexp.new("#{Regexp.quote(file_name)}(\.o|\.rb)?")
-        return false if $".find{|f| f =~ rex}
+        return false if $".find { |f| f =~ rex }
 
         case file_name
         when /\.rb$/

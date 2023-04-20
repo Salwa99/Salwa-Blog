@@ -1,5 +1,4 @@
 module Concurrent
-
   # @!macro monotonic_get_time
   #
   #   Returns the current time as tracked by the application monotonic clock.

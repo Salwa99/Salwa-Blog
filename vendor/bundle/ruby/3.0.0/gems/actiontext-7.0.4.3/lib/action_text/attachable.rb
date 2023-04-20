@@ -26,11 +26,12 @@ module ActionText
       end
 
       private
-        def attachable_from_sgid(sgid)
-          from_attachable_sgid(sgid)
-        rescue ActiveRecord::RecordNotFound
-          nil
-        end
+
+      def attachable_from_sgid(sgid)
+        from_attachable_sgid(sgid)
+      rescue ActiveRecord::RecordNotFound
+        nil
+      end
     end
 
     class_methods do

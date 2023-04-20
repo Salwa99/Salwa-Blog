@@ -3,13 +3,10 @@ require 'concurrent/thread_safe/util/volatile'
 require 'concurrent/utility/engine'
 
 module Concurrent
-
   # @!visibility private
   module ThreadSafe
-
     # @!visibility private
     module Util
-
       # Provides a cheapest possible (mainly in terms of memory usage) +Mutex+
       # with the +ConditionVariable+ bundled in.
       #
@@ -29,10 +26,11 @@ module Concurrent
       #       end
       #     end
       #   end
-      # 
+      #
       # @!visibility private
       module CheapLockable
         private
+
         if Concurrent.on_jruby?
           # Use Java's native synchronized (this) { wait(); notifyAll(); } to avoid the overhead of the extra Mutex objects
           require 'jruby'

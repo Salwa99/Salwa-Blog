@@ -47,7 +47,7 @@ module ActionView
       locales.uniq!
       locales
     end
-    register_detail(:formats) { ActionView::Base.default_formats || [:html, :text, :js, :css,  :xml, :json] }
+    register_detail(:formats) { ActionView::Base.default_formats || [:html, :text, :js, :css, :xml, :json] }
     register_detail(:variants) { [] }
     register_detail(:handlers) { Template::Handlers.extensions }
 
@@ -108,7 +108,8 @@ module ActionView
         @cache = old_value
       end
 
-    private
+      private
+
       def _set_detail(key, value) # :doc:
         @details = @details.dup if @digest_cache || @details_key
         @digest_cache = nil
@@ -148,7 +149,8 @@ module ActionView
       end
       alias :any_templates? :any?
 
-    private
+      private
+
       # Whenever setting view paths, makes a copy so that we can manipulate them in
       # instance objects as we wish.
       def build_view_paths(paths)
@@ -158,6 +160,7 @@ module ActionView
       # Compute details hash and key according to user options (e.g. passed from #render).
       def detail_args_for(options) # :doc:
         return @details, details_key if options.empty? # most common path.
+
         user_details = @details.merge(options)
 
         if @cache

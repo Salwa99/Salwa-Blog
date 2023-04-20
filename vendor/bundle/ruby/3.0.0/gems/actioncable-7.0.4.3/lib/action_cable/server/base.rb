@@ -75,7 +75,9 @@ module ActionCable
       # the database connection pool and block while they wait for other workers to release their connections. Use a smaller worker pool or a larger
       # database connection pool instead.
       def worker_pool
-        @worker_pool || @mutex.synchronize { @worker_pool ||= ActionCable::Server::Worker.new(max_size: config.worker_pool_size) }
+        @worker_pool || @mutex.synchronize {
+          @worker_pool ||= ActionCable::Server::Worker.new(max_size: config.worker_pool_size)
+        }
       end
 
       # Adapter used for all streams/broadcasting.

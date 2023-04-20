@@ -10,9 +10,10 @@ module ActiveRecord
         alias :belongs_to :references
 
         private
-          def integer_like_primary_key_type(type, options)
-            :primary_key
-          end
+
+        def integer_like_primary_key_type(type, options)
+          :primary_key
+        end
       end
     end
   end

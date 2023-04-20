@@ -156,31 +156,32 @@ module ActiveSupport
       end
 
       private
-        def generated_attribute_methods
-          @generated_attribute_methods ||= Module.new.tap { |mod| include mod }
-        end
 
-        def current_instances
-          IsolatedExecutionState[:current_attributes_instances] ||= {}
-        end
+      def generated_attribute_methods
+        @generated_attribute_methods ||= Module.new.tap { |mod| include mod }
+      end
 
-        def current_instances_key
-          @current_instances_key ||= name.to_sym
-        end
+      def current_instances
+        IsolatedExecutionState[:current_attributes_instances] ||= {}
+      end
 
-        def method_missing(name, *args, &block)
-          # Caches the method definition as a singleton method of the receiver.
-          #
-          # By letting #delegate handle it, we avoid an enclosure that'll capture args.
-          singleton_class.delegate name, to: :instance
+      def current_instances_key
+        @current_instances_key ||= name.to_sym
+      end
 
-          send(name, *args, &block)
-        end
-        ruby2_keywords(:method_missing)
+      def method_missing(name, *args, &block)
+        # Caches the method definition as a singleton method of the receiver.
+        #
+        # By letting #delegate handle it, we avoid an enclosure that'll capture args.
+        singleton_class.delegate name, to: :instance
 
-        def respond_to_missing?(name, _)
-          super || instance.respond_to?(name)
-        end
+        send(name, *args, &block)
+      end
+      ruby2_keywords(:method_missing)
+
+      def respond_to_missing?(name, _)
+        super || instance.respond_to?(name)
+      end
     end
 
     attr_accessor :attributes
@@ -215,12 +216,13 @@ module ActiveSupport
     end
 
     private
-      def assign_attributes(new_attributes)
-        new_attributes.each { |key, value| public_send("#{key}=", value) }
-      end
 
-      def compute_attributes(keys)
-        keys.index_with { |key| public_send(key) }
-      end
+    def assign_attributes(new_attributes)
+      new_attributes.each { |key, value| public_send("#{key}=", value) }
+    end
+
+    def compute_attributes(keys)
+      keys.index_with { |key| public_send(key) }
+    end
   end
 end

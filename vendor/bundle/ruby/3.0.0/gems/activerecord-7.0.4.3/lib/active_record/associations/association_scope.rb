@@ -49,120 +49,121 @@ module ActiveRecord
       end
 
       private
-        attr_reader :value_transformation
 
-        def join(table, constraint)
-          Arel::Nodes::LeadingJoin.new(table, Arel::Nodes::On.new(constraint))
+      attr_reader :value_transformation
+
+      def join(table, constraint)
+        Arel::Nodes::LeadingJoin.new(table, Arel::Nodes::On.new(constraint))
+      end
+
+      def last_chain_scope(scope, reflection, owner)
+        primary_key = reflection.join_primary_key
+        foreign_key = reflection.join_foreign_key
+
+        table = reflection.aliased_table
+        value = transform_value(owner[foreign_key])
+        scope = apply_scope(scope, table, primary_key, value)
+
+        if reflection.type
+          polymorphic_type = transform_value(owner.class.polymorphic_name)
+          scope = apply_scope(scope, table, reflection.type, polymorphic_type)
         end
 
-        def last_chain_scope(scope, reflection, owner)
-          primary_key = reflection.join_primary_key
-          foreign_key = reflection.join_foreign_key
+        scope
+      end
 
-          table = reflection.aliased_table
-          value = transform_value(owner[foreign_key])
-          scope = apply_scope(scope, table, primary_key, value)
+      def transform_value(value)
+        value_transformation.call(value)
+      end
 
-          if reflection.type
-            polymorphic_type = transform_value(owner.class.polymorphic_name)
-            scope = apply_scope(scope, table, reflection.type, polymorphic_type)
+      def next_chain_scope(scope, reflection, next_reflection)
+        primary_key = reflection.join_primary_key
+        foreign_key = reflection.join_foreign_key
+
+        table = reflection.aliased_table
+        foreign_table = next_reflection.aliased_table
+        constraint = table[primary_key].eq(foreign_table[foreign_key])
+
+        if reflection.type
+          value = transform_value(next_reflection.klass.polymorphic_name)
+          scope = apply_scope(scope, table, reflection.type, value)
+        end
+
+        scope.joins!(join(foreign_table, constraint))
+      end
+
+      class ReflectionProxy < SimpleDelegator # :nodoc:
+        attr_reader :aliased_table
+
+        def initialize(reflection, aliased_table)
+          super(reflection)
+          @aliased_table = aliased_table
+        end
+
+        def all_includes; nil; end
+      end
+
+      def get_chain(reflection, association, tracker)
+        name = reflection.name
+        chain = [Reflection::RuntimeReflection.new(reflection, association)]
+        reflection.chain.drop(1).each do |refl|
+          aliased_table = tracker.aliased_table_for(refl.klass.arel_table) do
+            refl.alias_candidate(name)
           end
+          chain << ReflectionProxy.new(refl, aliased_table)
+        end
+        chain
+      end
 
-          scope
+      def add_constraints(scope, owner, chain)
+        scope = last_chain_scope(scope, chain.last, owner)
+
+        chain.each_cons(2) do |reflection, next_reflection|
+          scope = next_chain_scope(scope, reflection, next_reflection)
         end
 
-        def transform_value(value)
-          value_transformation.call(value)
-        end
+        chain_head = chain.first
+        chain.reverse_each do |reflection|
+          reflection.constraints.each do |scope_chain_item|
+            item = eval_scope(reflection, scope_chain_item, owner)
 
-        def next_chain_scope(scope, reflection, next_reflection)
-          primary_key = reflection.join_primary_key
-          foreign_key = reflection.join_foreign_key
+            if scope_chain_item == chain_head.scope
+              scope.merge! item.except(:where, :includes, :unscope, :order)
+            elsif !item.references_values.empty?
+              scope.merge! item.only(:joins, :left_outer_joins)
 
-          table = reflection.aliased_table
-          foreign_table = next_reflection.aliased_table
-          constraint = table[primary_key].eq(foreign_table[foreign_key])
+              associations = item.eager_load_values | item.includes_values
 
-          if reflection.type
-            value = transform_value(next_reflection.klass.polymorphic_name)
-            scope = apply_scope(scope, table, reflection.type, value)
-          end
-
-          scope.joins!(join(foreign_table, constraint))
-        end
-
-        class ReflectionProxy < SimpleDelegator # :nodoc:
-          attr_reader :aliased_table
-
-          def initialize(reflection, aliased_table)
-            super(reflection)
-            @aliased_table = aliased_table
-          end
-
-          def all_includes; nil; end
-        end
-
-        def get_chain(reflection, association, tracker)
-          name = reflection.name
-          chain = [Reflection::RuntimeReflection.new(reflection, association)]
-          reflection.chain.drop(1).each do |refl|
-            aliased_table = tracker.aliased_table_for(refl.klass.arel_table) do
-              refl.alias_candidate(name)
-            end
-            chain << ReflectionProxy.new(refl, aliased_table)
-          end
-          chain
-        end
-
-        def add_constraints(scope, owner, chain)
-          scope = last_chain_scope(scope, chain.last, owner)
-
-          chain.each_cons(2) do |reflection, next_reflection|
-            scope = next_chain_scope(scope, reflection, next_reflection)
-          end
-
-          chain_head = chain.first
-          chain.reverse_each do |reflection|
-            reflection.constraints.each do |scope_chain_item|
-              item = eval_scope(reflection, scope_chain_item, owner)
-
-              if scope_chain_item == chain_head.scope
-                scope.merge! item.except(:where, :includes, :unscope, :order)
-              elsif !item.references_values.empty?
-                scope.merge! item.only(:joins, :left_outer_joins)
-
-                associations = item.eager_load_values | item.includes_values
-
-                unless associations.empty?
-                  scope.joins! item.construct_join_dependency(associations, Arel::Nodes::OuterJoin)
-                end
+              unless associations.empty?
+                scope.joins! item.construct_join_dependency(associations, Arel::Nodes::OuterJoin)
               end
-
-              reflection.all_includes do
-                scope.includes_values |= item.includes_values
-              end
-
-              scope.unscope!(*item.unscope_values)
-              scope.where_clause += item.where_clause
-              scope.order_values = item.order_values | scope.order_values
             end
-          end
 
-          scope
-        end
+            reflection.all_includes do
+              scope.includes_values |= item.includes_values
+            end
 
-        def apply_scope(scope, table, key, value)
-          if scope.table == table
-            scope.where!(key => value)
-          else
-            scope.where!(table.name => { key => value })
+            scope.unscope!(*item.unscope_values)
+            scope.where_clause += item.where_clause
+            scope.order_values = item.order_values | scope.order_values
           end
         end
 
-        def eval_scope(reflection, scope, owner)
-          relation = reflection.build_scope(reflection.aliased_table)
-          relation.instance_exec(owner, &scope) || relation
+        scope
+      end
+
+      def apply_scope(scope, table, key, value)
+        if scope.table == table
+          scope.where!(key => value)
+        else
+          scope.where!(table.name => { key => value })
         end
+      end
+
+      def eval_scope(reflection, scope, owner)
+        relation = reflection.build_scope(reflection.aliased_table)
+        relation.instance_exec(owner, &scope) || relation
+      end
     end
   end
 end

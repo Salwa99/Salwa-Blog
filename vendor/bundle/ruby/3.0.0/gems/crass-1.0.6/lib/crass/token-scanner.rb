@@ -1,7 +1,6 @@
 # encoding: utf-8
 
 module Crass
-
   # Like {Scanner}, but for tokens!
   class TokenScanner
     attr_reader :current, :pos, :tokens
@@ -43,8 +42,7 @@ module Crass
     # Resets the pointer to the first token in the list.
     def reset
       @current = nil
-      @pos     = 0
+      @pos = 0
     end
   end
-
 end

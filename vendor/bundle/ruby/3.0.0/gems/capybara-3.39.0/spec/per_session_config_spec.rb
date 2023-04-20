@@ -41,7 +41,9 @@ RSpec.describe Capybara::SessionConfig do
     it "doesn't allow session config when false" do
       Capybara.threadsafe = false
       session = Capybara::Session.new(:rack_test, TestApp)
-      expect { session.config.default_selector = :title }.to raise_error(/Per session settings are only supported when Capybara.threadsafe == true/)
+      expect {
+        session.config.default_selector = :title
+      }.to raise_error(/Per session settings are only supported when Capybara.threadsafe == true/)
       expect do
         session.configure do |config|
           config.exact = true
@@ -62,7 +64,9 @@ RSpec.describe Capybara::SessionConfig do
       Capybara.threadsafe = true
       Capybara.threadsafe = false
       Capybara::Session.new(:rack_test, TestApp)
-      expect { Capybara.threadsafe = true }.to raise_error(/Threadsafe setting cannot be changed once a session is created/)
+      expect {
+        Capybara.threadsafe = true
+      }.to raise_error(/Threadsafe setting cannot be changed once a session is created/)
     end
   end
 end

@@ -76,6 +76,7 @@ module ActiveRecord
     attr_reader :arel_table
 
     private
-      attr_reader :klass, :reflection
+
+    attr_reader :klass, :reflection
   end
 end

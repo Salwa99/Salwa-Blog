@@ -218,14 +218,14 @@ module ActiveRecord
           if (prev_cast_type, prev_default = attributes_to_define_after_schema_loads[name])
             default = prev_default if default == NO_DEFAULT_PROVIDED
           else
-            prev_cast_type = -> subtype { subtype }
+            prev_cast_type = ->subtype { subtype }
           end
 
           cast_type = if block_given?
-            -> subtype { yield Proc === prev_cast_type ? prev_cast_type[subtype] : prev_cast_type }
-          else
-            prev_cast_type
-          end
+                        ->subtype { yield Proc === prev_cast_type ? prev_cast_type[subtype] : prev_cast_type }
+                      else
+                        prev_cast_type
+                      end
         end
 
         self.attributes_to_define_after_schema_loads =
@@ -269,24 +269,25 @@ module ActiveRecord
       end
 
       private
-        NO_DEFAULT_PROVIDED = Object.new # :nodoc:
-        private_constant :NO_DEFAULT_PROVIDED
 
-        def define_default_attribute(name, value, type, from_user:)
-          if value == NO_DEFAULT_PROVIDED
-            default_attribute = _default_attributes[name].with_type(type)
-          elsif from_user
-            default_attribute = ActiveModel::Attribute::UserProvidedDefault.new(
-              name,
-              value,
-              type,
-              _default_attributes.fetch(name.to_s) { nil },
-            )
-          else
-            default_attribute = ActiveModel::Attribute.from_database(name, value, type)
-          end
-          _default_attributes[name] = default_attribute
+      NO_DEFAULT_PROVIDED = Object.new # :nodoc:
+      private_constant :NO_DEFAULT_PROVIDED
+
+      def define_default_attribute(name, value, type, from_user:)
+        if value == NO_DEFAULT_PROVIDED
+          default_attribute = _default_attributes[name].with_type(type)
+        elsif from_user
+          default_attribute = ActiveModel::Attribute::UserProvidedDefault.new(
+            name,
+            value,
+            type,
+            _default_attributes.fetch(name.to_s) { nil },
+          )
+        else
+          default_attribute = ActiveModel::Attribute.from_database(name, value, type)
         end
+        _default_attributes[name] = default_attribute
+      end
     end
   end
 end

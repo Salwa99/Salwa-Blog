@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   output-method.rb - output methods used by irb
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -62,7 +63,7 @@ module IRB
     #
     # See #puts for more detail.
     def pp(*objs)
-      puts(*objs.collect{|obj| obj.inspect})
+      puts(*objs.collect { |obj| obj.inspect })
     end
 
     # Prints the given +objs+ calling Object#inspect on each and appending the
@@ -70,9 +71,8 @@ module IRB
     #
     # See #puts for more detail.
     def ppx(prefix, *objs)
-      puts(*objs.collect{|obj| prefix+obj.inspect})
+      puts(*objs.collect { |obj| prefix + obj.inspect })
     end
-
   end
 
   # A standard output printer

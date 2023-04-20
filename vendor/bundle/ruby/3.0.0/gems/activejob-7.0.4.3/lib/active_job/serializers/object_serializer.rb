@@ -44,10 +44,11 @@ module ActiveJob
       end
 
       private
-        # The class of the object that will be serialized.
-        def klass # :doc:
-          raise NotImplementedError
-        end
+
+      # The class of the object that will be serialized.
+      def klass # :doc:
+        raise NotImplementedError
+      end
     end
   end
 end

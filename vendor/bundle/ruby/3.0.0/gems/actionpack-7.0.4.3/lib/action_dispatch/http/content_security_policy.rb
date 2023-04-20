@@ -48,17 +48,18 @@ module ActionDispatch # :nodoc:
       end
 
       private
-        def header_name(request)
-          if request.content_security_policy_report_only
-            POLICY_REPORT_ONLY
-          else
-            POLICY
-          end
-        end
 
-        def policy_present?(headers)
-          headers[POLICY] || headers[POLICY_REPORT_ONLY]
+      def header_name(request)
+        if request.content_security_policy_report_only
+          POLICY_REPORT_ONLY
+        else
+          POLICY
         end
+      end
+
+      def policy_present?(headers)
+        headers[POLICY] || headers[POLICY_REPORT_ONLY]
+      end
     end
 
     module Request
@@ -111,53 +112,54 @@ module ActionDispatch # :nodoc:
       end
 
       private
-        def generate_content_security_policy_nonce
-          content_security_policy_nonce_generator.call(self)
-        end
+
+      def generate_content_security_policy_nonce
+        content_security_policy_nonce_generator.call(self)
+      end
     end
 
     MAPPINGS = {
-      self:             "'self'",
-      unsafe_eval:      "'unsafe-eval'",
-      unsafe_inline:    "'unsafe-inline'",
-      none:             "'none'",
-      http:             "http:",
-      https:            "https:",
-      data:             "data:",
-      mediastream:      "mediastream:",
+      self: "'self'",
+      unsafe_eval: "'unsafe-eval'",
+      unsafe_inline: "'unsafe-inline'",
+      none: "'none'",
+      http: "http:",
+      https: "https:",
+      data: "data:",
+      mediastream: "mediastream:",
       allow_duplicates: "'allow-duplicates'",
-      blob:             "blob:",
-      filesystem:       "filesystem:",
-      report_sample:    "'report-sample'",
-      script:           "'script'",
-      strict_dynamic:   "'strict-dynamic'",
-      ws:               "ws:",
-      wss:              "wss:"
+      blob: "blob:",
+      filesystem: "filesystem:",
+      report_sample: "'report-sample'",
+      script: "'script'",
+      strict_dynamic: "'strict-dynamic'",
+      ws: "ws:",
+      wss: "wss:"
     }.freeze
 
     DIRECTIVES = {
-      base_uri:                   "base-uri",
-      child_src:                  "child-src",
-      connect_src:                "connect-src",
-      default_src:                "default-src",
-      font_src:                   "font-src",
-      form_action:                "form-action",
-      frame_ancestors:            "frame-ancestors",
-      frame_src:                  "frame-src",
-      img_src:                    "img-src",
-      manifest_src:               "manifest-src",
-      media_src:                  "media-src",
-      object_src:                 "object-src",
-      prefetch_src:               "prefetch-src",
-      require_trusted_types_for:  "require-trusted-types-for",
-      script_src:                 "script-src",
-      script_src_attr:            "script-src-attr",
-      script_src_elem:            "script-src-elem",
-      style_src:                  "style-src",
-      style_src_attr:             "style-src-attr",
-      style_src_elem:             "style-src-elem",
-      trusted_types:              "trusted-types",
-      worker_src:                 "worker-src"
+      base_uri: "base-uri",
+      child_src: "child-src",
+      connect_src: "connect-src",
+      default_src: "default-src",
+      font_src: "font-src",
+      form_action: "form-action",
+      frame_ancestors: "frame-ancestors",
+      frame_src: "frame-src",
+      img_src: "img-src",
+      manifest_src: "manifest-src",
+      media_src: "media-src",
+      object_src: "object-src",
+      prefetch_src: "prefetch-src",
+      require_trusted_types_for: "require-trusted-types-for",
+      script_src: "script-src",
+      script_src_attr: "script-src-attr",
+      script_src_elem: "script-src-elem",
+      style_src: "style-src",
+      style_src_attr: "style-src-attr",
+      style_src_elem: "style-src-elem",
+      trusted_types: "trusted-types",
+      worker_src: "worker-src"
     }.freeze
 
     DEFAULT_NONCE_DIRECTIVES = %w[script-src style-src].freeze
@@ -289,65 +291,66 @@ module ActionDispatch # :nodoc:
     end
 
     private
-      def apply_mappings(sources)
-        sources.map do |source|
-          case source
-          when Symbol
-            apply_mapping(source)
-          when String, Proc
-            source
-          else
-            raise ArgumentError, "Invalid content security policy source: #{source.inspect}"
-          end
-        end
-      end
 
-      def apply_mapping(source)
-        MAPPINGS.fetch(source) do
-          raise ArgumentError, "Unknown content security policy source mapping: #{source.inspect}"
-        end
-      end
-
-      def build_directives(context, nonce, nonce_directives)
-        @directives.map do |directive, sources|
-          if sources.is_a?(Array)
-            if nonce && nonce_directive?(directive, nonce_directives)
-              "#{directive} #{build_directive(sources, context).join(' ')} 'nonce-#{nonce}'"
-            else
-              "#{directive} #{build_directive(sources, context).join(' ')}"
-            end
-          elsif sources
-            directive
-          else
-            nil
-          end
-        end
-      end
-
-      def build_directive(sources, context)
-        sources.map { |source| resolve_source(source, context) }
-      end
-
-      def resolve_source(source, context)
+    def apply_mappings(sources)
+      sources.map do |source|
         case source
-        when String
-          source
         when Symbol
-          source.to_s
-        when Proc
-          if context.nil?
-            raise RuntimeError, "Missing context for the dynamic content security policy source: #{source.inspect}"
-          else
-            resolved = context.instance_exec(&source)
-            apply_mappings(Array.wrap(resolved))
-          end
+          apply_mapping(source)
+        when String, Proc
+          source
         else
-          raise RuntimeError, "Unexpected content security policy source: #{source.inspect}"
+          raise ArgumentError, "Invalid content security policy source: #{source.inspect}"
         end
       end
+    end
 
-      def nonce_directive?(directive, nonce_directives)
-        nonce_directives.include?(directive)
+    def apply_mapping(source)
+      MAPPINGS.fetch(source) do
+        raise ArgumentError, "Unknown content security policy source mapping: #{source.inspect}"
       end
+    end
+
+    def build_directives(context, nonce, nonce_directives)
+      @directives.map do |directive, sources|
+        if sources.is_a?(Array)
+          if nonce && nonce_directive?(directive, nonce_directives)
+            "#{directive} #{build_directive(sources, context).join(' ')} 'nonce-#{nonce}'"
+          else
+            "#{directive} #{build_directive(sources, context).join(' ')}"
+          end
+        elsif sources
+          directive
+        else
+          nil
+        end
+      end
+    end
+
+    def build_directive(sources, context)
+      sources.map { |source| resolve_source(source, context) }
+    end
+
+    def resolve_source(source, context)
+      case source
+      when String
+        source
+      when Symbol
+        source.to_s
+      when Proc
+        if context.nil?
+          raise RuntimeError, "Missing context for the dynamic content security policy source: #{source.inspect}"
+        else
+          resolved = context.instance_exec(&source)
+          apply_mappings(Array.wrap(resolved))
+        end
+      else
+        raise RuntimeError, "Unexpected content security policy source: #{source.inspect}"
+      end
+    end
+
+    def nonce_directive?(directive, nonce_directives)
+      nonce_directives.include?(directive)
+    end
   end
 end

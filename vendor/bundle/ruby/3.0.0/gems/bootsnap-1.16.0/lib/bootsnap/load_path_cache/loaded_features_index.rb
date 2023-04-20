@@ -110,13 +110,13 @@ module Bootsnap
         # Do we have a filename with an elidable extension, e.g.,
         # 'bundler.rb', or 'libgit2.so'?
         altname = if extension_elidable?(short)
-          # Strip the extension off, e.g. 'bundler.rb' -> 'bundler'.
-          strip_extension_if_elidable(short)
-        elsif long && (ext = File.extname(long.freeze))
-          # We already know the extension of the actual file this
-          # resolves to, so put that back on.
-          short + ext
-        end
+                    # Strip the extension off, e.g. 'bundler.rb' -> 'bundler'.
+                    strip_extension_if_elidable(short)
+                  elsif long && (ext = File.extname(long.freeze))
+                    # We already know the extension of the actual file this
+                    # resolves to, so put that back on.
+                    short + ext
+                  end
 
         @mutex.synchronize do
           @lfi[short] = hash

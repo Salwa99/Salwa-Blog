@@ -56,8 +56,9 @@ module ActiveRecord
     end
 
     private
-      def exec_main_query(async: false)
-        [].freeze
-      end
+
+    def exec_main_query(async: false)
+      [].freeze
+    end
   end
 end

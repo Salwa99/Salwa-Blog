@@ -1,11 +1,11 @@
-#frozen_string_literal: false
+# frozen_string_literal: false
+
 unless defined?(::JSON::JSON_LOADED) and ::JSON::JSON_LOADED
   require 'json'
 end
 require 'date'
 
 class DateTime
-
   # Deserializes JSON string by converting year <tt>y</tt>, month <tt>m</tt>,
   # day <tt>d</tt>, hour <tt>H</tt>, minute <tt>M</tt>, second <tt>S</tt>,
   # offset <tt>of</tt> and Day of Calendar Reform <tt>sg</tt> to DateTime.
@@ -46,5 +46,3 @@ class DateTime
     as_json.to_json(*args)
   end
 end
-
-

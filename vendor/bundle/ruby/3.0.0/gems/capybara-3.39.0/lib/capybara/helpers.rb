@@ -3,7 +3,7 @@
 module Capybara
   # @api private
   module Helpers
-  module_function
+    module_function
 
     ##
     # @deprecated
@@ -107,7 +107,8 @@ module Capybara
 
       def expired?
         if stalled?
-          raise Capybara::FrozenInTime, 'Time appears to be frozen. Capybara does not work with libraries which freeze time, consider using time travelling instead'
+          raise Capybara::FrozenInTime,
+                'Time appears to be frozen. Capybara does not work with libraries which freeze time, consider using time travelling instead'
         end
 
         current - @start >= @expire_in
@@ -117,7 +118,7 @@ module Capybara
         @start == current
       end
 
-    private
+      private
 
       def current
         Capybara::Helpers.monotonic_time

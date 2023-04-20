@@ -3,7 +3,7 @@
 require "active_record"
 require "benchmark/ips"
 
-TIME    = (ENV["BENCHMARK_TIME"] || 20).to_i
+TIME = (ENV["BENCHMARK_TIME"] || 20).to_i
 RECORDS = (ENV["BENCHMARK_RECORDS"] || TIME * 1000).to_i
 
 conn = { adapter: "sqlite3", database: ":memory:" }
@@ -44,7 +44,7 @@ class Exhibit < ActiveRecord::Base
   def self.feel(exhibits) exhibits.each(&:feel) end
 end
 
-def progress_bar(int); print "." if (int % 100).zero? ; end
+def progress_bar(int); print "." if (int % 100).zero?; end
 
 puts "Generating data..."
 
@@ -96,11 +96,11 @@ end
 puts "Done!\n"
 
 Benchmark.ips(TIME) do |x|
-  ar_obj       = Exhibit.find(1)
-  attrs        = { name: "sam" }
-  attrs_first  = { name: "sam" }
+  ar_obj = Exhibit.find(1)
+  attrs = { name: "sam" }
+  attrs_first = { name: "sam" }
   attrs_second = { name: "tom" }
-  exhibit      = {
+  exhibit = {
     name: ActiveRecord::Faker.name,
     notes: notes,
     created_at: Date.today
@@ -176,7 +176,7 @@ Benchmark.ips(TIME) do |x|
   end
 
   x.report "Model.log" do
-    Exhibit.connection.send(:log, "hello", "world") { }
+    Exhibit.connection.send(:log, "hello", "world") {}
   end
 
   x.report "AR.execute(query)" do

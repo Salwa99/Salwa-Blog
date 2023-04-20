@@ -55,14 +55,15 @@ module ActionMailer
       end
 
       private
-        def interceptor_class_for(interceptor)
-          case interceptor
-          when String, Symbol
-            interceptor.to_s.camelize.constantize
-          else
-            interceptor
-          end
+
+      def interceptor_class_for(interceptor)
+        case interceptor
+        when String, Symbol
+          interceptor.to_s.camelize.constantize
+        else
+          interceptor
         end
+      end
     end
   end
 
@@ -118,25 +119,26 @@ module ActionMailer
       end
 
       private
-        def load_previews
-          if preview_path
-            Dir["#{preview_path}/**/*_preview.rb"].sort.each { |file| require_dependency file }
-          end
-        end
 
-        def preview_path
-          Base.preview_path
+      def load_previews
+        if preview_path
+          Dir["#{preview_path}/**/*_preview.rb"].sort.each { |file| require_dependency file }
         end
+      end
 
-        def show_previews
-          Base.show_previews
-        end
+      def preview_path
+        Base.preview_path
+      end
 
-        def inform_preview_interceptors(message)
-          Base.preview_interceptors.each do |interceptor|
-            interceptor.previewing_email(message)
-          end
+      def show_previews
+        Base.show_previews
+      end
+
+      def inform_preview_interceptors(message)
+        Base.preview_interceptors.each do |interceptor|
+          interceptor.previewing_email(message)
         end
+      end
     end
   end
 end

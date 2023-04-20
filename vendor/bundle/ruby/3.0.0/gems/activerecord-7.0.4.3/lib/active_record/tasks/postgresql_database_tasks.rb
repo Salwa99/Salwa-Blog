@@ -10,7 +10,7 @@ module ActiveRecord
       SQL_COMMENT_BEGIN = "--"
 
       delegate :connection, :establish_connection, :clear_active_connections!,
-        to: ActiveRecord::Base
+               to: ActiveRecord::Base
 
       def self.using_database_configurations?
         true
@@ -87,58 +87,59 @@ module ActiveRecord
       end
 
       private
-        attr_reader :db_config, :configuration_hash
 
-        def encoding
-          configuration_hash[:encoding] || DEFAULT_ENCODING
+      attr_reader :db_config, :configuration_hash
+
+      def encoding
+        configuration_hash[:encoding] || DEFAULT_ENCODING
+      end
+
+      def establish_master_connection
+        establish_connection configuration_hash.merge(
+          database: "postgres",
+          schema_search_path: "public"
+        )
+      end
+
+      def psql_env
+        {}.tap do |env|
+          env["PGHOST"] = db_config.host if db_config.host
+          env["PGPORT"] = configuration_hash[:port].to_s if configuration_hash[:port]
+          env["PGPASSWORD"] = configuration_hash[:password].to_s if configuration_hash[:password]
+          env["PGUSER"] = configuration_hash[:username].to_s if configuration_hash[:username]
+          env["PGSSLMODE"] = configuration_hash[:sslmode].to_s if configuration_hash[:sslmode]
+          env["PGSSLCERT"] = configuration_hash[:sslcert].to_s if configuration_hash[:sslcert]
+          env["PGSSLKEY"] = configuration_hash[:sslkey].to_s if configuration_hash[:sslkey]
+          env["PGSSLROOTCERT"] = configuration_hash[:sslrootcert].to_s if configuration_hash[:sslrootcert]
         end
+      end
 
-        def establish_master_connection
-          establish_connection configuration_hash.merge(
-            database: "postgres",
-            schema_search_path: "public"
-          )
-        end
+      def run_cmd(cmd, args, action)
+        fail run_cmd_error(cmd, args, action) unless Kernel.system(psql_env, cmd, *args)
+      end
 
-        def psql_env
-          {}.tap do |env|
-            env["PGHOST"]         = db_config.host                        if db_config.host
-            env["PGPORT"]         = configuration_hash[:port].to_s        if configuration_hash[:port]
-            env["PGPASSWORD"]     = configuration_hash[:password].to_s    if configuration_hash[:password]
-            env["PGUSER"]         = configuration_hash[:username].to_s    if configuration_hash[:username]
-            env["PGSSLMODE"]      = configuration_hash[:sslmode].to_s     if configuration_hash[:sslmode]
-            env["PGSSLCERT"]      = configuration_hash[:sslcert].to_s     if configuration_hash[:sslcert]
-            env["PGSSLKEY"]       = configuration_hash[:sslkey].to_s      if configuration_hash[:sslkey]
-            env["PGSSLROOTCERT"]  = configuration_hash[:sslrootcert].to_s if configuration_hash[:sslrootcert]
-          end
-        end
+      def run_cmd_error(cmd, args, action)
+        msg = +"failed to execute:\n"
+        msg << "#{cmd} #{args.join(' ')}\n\n"
+        msg << "Please check the output above for any errors and make sure that `#{cmd}` is installed in your PATH and has proper permissions.\n\n"
+        msg
+      end
 
-        def run_cmd(cmd, args, action)
-          fail run_cmd_error(cmd, args, action) unless Kernel.system(psql_env, cmd, *args)
-        end
-
-        def run_cmd_error(cmd, args, action)
-          msg = +"failed to execute:\n"
-          msg << "#{cmd} #{args.join(' ')}\n\n"
-          msg << "Please check the output above for any errors and make sure that `#{cmd}` is installed in your PATH and has proper permissions.\n\n"
-          msg
-        end
-
-        def remove_sql_header_comments(filename)
-          removing_comments = true
-          tempfile = Tempfile.open("uncommented_structure.sql")
-          begin
-            File.foreach(filename) do |line|
-              unless removing_comments && (line.start_with?(SQL_COMMENT_BEGIN) || line.blank?)
-                tempfile << line
-                removing_comments = false
-              end
+      def remove_sql_header_comments(filename)
+        removing_comments = true
+        tempfile = Tempfile.open("uncommented_structure.sql")
+        begin
+          File.foreach(filename) do |line|
+            unless removing_comments && (line.start_with?(SQL_COMMENT_BEGIN) || line.blank?)
+              tempfile << line
+              removing_comments = false
             end
-          ensure
-            tempfile.close
           end
-          FileUtils.cp(tempfile.path, filename)
+        ensure
+          tempfile.close
         end
+        FileUtils.cp(tempfile.path, filename)
+      end
     end
   end
 end

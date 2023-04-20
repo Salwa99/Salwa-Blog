@@ -45,10 +45,10 @@ module ActiveRecord::Associations::Builder # :nodoc:
     end
 
     def self.add_touch_callbacks(model, reflection)
-      name  = reflection.name
+      name = reflection.name
       touch = reflection.options[:touch]
 
-      callback = -> (record) { HasOne.touch_record(record, name, touch) }
+      callback = ->(record) { HasOne.touch_record(record, name, touch) }
       model.after_create callback, if: :saved_changes?
       model.after_create_commit { association(name).reset_negative_cache }
       model.after_update callback, if: :saved_changes?
@@ -57,6 +57,6 @@ module ActiveRecord::Associations::Builder # :nodoc:
     end
 
     private_class_method :macro, :valid_options, :valid_dependent_options, :add_destroy_callbacks,
-      :define_callbacks, :define_validations, :add_touch_callbacks
+                         :define_callbacks, :define_validations, :add_touch_callbacks
   end
 end

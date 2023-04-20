@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Loofah
   #
   #  Loofah provides some built-in scrubbers for sanitizing with
@@ -100,6 +101,7 @@ module Loofah
 
       def scrub(node)
         return CONTINUE if html5lib_sanitize(node) == CONTINUE
+
         node.before(node.children)
         node.remove
         return STOP
@@ -122,6 +124,7 @@ module Loofah
 
       def scrub(node)
         return CONTINUE if html5lib_sanitize(node) == CONTINUE
+
         node.remove
         return STOP
       end
@@ -143,6 +146,7 @@ module Loofah
 
       def scrub(node)
         return CONTINUE if html5lib_sanitize(node) == CONTINUE
+
         node.add_next_sibling Nokogiri::XML::Text.new(node.to_s, node.document)
         node.remove
         return STOP
@@ -203,6 +207,7 @@ module Loofah
 
       def scrub(node)
         return CONTINUE unless (node.type == Nokogiri::XML::Node::ELEMENT_NODE) && (node.name == "a")
+
         append_attribute(node, "rel", "nofollow")
         return STOP
       end
@@ -224,6 +229,7 @@ module Loofah
 
       def scrub(node)
         return CONTINUE unless (node.type == Nokogiri::XML::Node::ELEMENT_NODE) && (node.name == "a")
+
         append_attribute(node, "rel", "noopener")
         return STOP
       end
@@ -237,11 +243,12 @@ module Loofah
 
       def scrub(node)
         return CONTINUE unless Loofah::Elements::LINEBREAKERS.include?(node.name)
+
         replacement = if Loofah::Elements::INLINE_LINE_BREAK.include?(node.name)
-          "\n"
-        else
-          "\n#{node.content}\n"
-        end
+                        "\n"
+                      else
+                        "\n#{node.content}\n"
+                      end
         node.add_next_sibling Nokogiri::XML::Text.new(replacement, node.document)
         node.remove
       end

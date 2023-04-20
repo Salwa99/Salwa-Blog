@@ -76,7 +76,7 @@ module ActiveRecord
     class ScopeRegistry # :nodoc:
       class << self
         delegate :current_scope, :set_current_scope, :ignore_default_scope, :set_ignore_default_scope,
-          :global_current_scope, :set_global_current_scope, to: :instance
+                 :global_current_scope, :set_global_current_scope, to: :instance
 
         def instance
           ActiveSupport::IsolatedExecutionState[:active_record_scope_registry] ||= new
@@ -84,7 +84,7 @@ module ActiveRecord
       end
 
       def initialize
-        @current_scope        = {}
+        @current_scope = {}
         @ignore_default_scope = {}
         @global_current_scope = {}
       end
@@ -114,22 +114,25 @@ module ActiveRecord
       end
 
       private
-        # Obtains the value for a given +scope_type+ and +model+.
-        def value_for(scope_type, model, skip_inherited_scope = false)
-          return scope_type[model.name] if skip_inherited_scope
-          klass = model
-          base = model.base_class
-          while klass <= base
-            value = scope_type[klass.name]
-            return value if value
-            klass = klass.superclass
-          end
-        end
 
-        # Sets the +value+ for a given +scope_type+ and +model+.
-        def set_value_for(scope_type, model, value)
-          scope_type[model.name] = value
+      # Obtains the value for a given +scope_type+ and +model+.
+      def value_for(scope_type, model, skip_inherited_scope = false)
+        return scope_type[model.name] if skip_inherited_scope
+
+        klass = model
+        base = model.base_class
+        while klass <= base
+          value = scope_type[klass.name]
+          return value if value
+
+          klass = klass.superclass
         end
+      end
+
+      # Sets the +value+ for a given +scope_type+ and +model+.
+      def set_value_for(scope_type, model, value)
+        scope_type[model.name] = value
+      end
     end
   end
 end

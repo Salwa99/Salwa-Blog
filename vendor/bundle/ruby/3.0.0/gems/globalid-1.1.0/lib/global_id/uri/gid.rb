@@ -44,7 +44,7 @@ module URI
         parse("gid://#{app}/Model/1").app
       rescue URI::Error
         raise ArgumentError, 'Invalid app name. ' \
-          'App names must be valid URI hostnames: alphanumeric and hyphen characters only.'
+                             'App names must be valid URI hostnames: alphanumeric and hyphen characters only.'
       end
 
       # Create a new URI::GID by parsing a gid string with argument check.
@@ -99,79 +99,81 @@ module URI
     end
 
     def deconstruct_keys(_keys)
-      {app: app, model_name: model_name, model_id: model_id, params: params}
+      { app: app, model_name: model_name, model_id: model_id, params: params }
     end
 
     protected
-      def set_path(path)
-        set_model_components(path) unless defined?(@model_name) && @model_id
-        super
-      end
 
-      # Ruby 2.2 uses #query= instead of #set_query
-      def query=(query)
-        set_params parse_query_params(query)
-        super
-      end
+    def set_path(path)
+      set_model_components(path) unless defined?(@model_name) && @model_id
+      super
+    end
 
-      # Ruby 2.1 or less uses #set_query to assign the query
-      def set_query(query)
-        set_params parse_query_params(query)
-        super
-      end
+    # Ruby 2.2 uses #query= instead of #set_query
+    def query=(query)
+      set_params parse_query_params(query)
+      super
+    end
 
-      def set_params(params)
-        @params = params
-      end
+    # Ruby 2.1 or less uses #set_query to assign the query
+    def set_query(query)
+      set_params parse_query_params(query)
+      super
+    end
+
+    def set_params(params)
+      @params = params
+    end
 
     private
-      COMPONENT = [ :scheme, :app, :model_name, :model_id, :params ].freeze
 
-      def check_host(host)
-        validate_component(host)
-        super
+    COMPONENT = [:scheme, :app, :model_name, :model_id, :params].freeze
+
+    def check_host(host)
+      validate_component(host)
+      super
+    end
+
+    def check_path(path)
+      validate_component(path)
+      set_model_components(path, true)
+    end
+
+    def check_scheme(scheme)
+      if scheme == 'gid'
+        true
+      else
+        raise URI::BadURIError, "Not a gid:// URI scheme: #{inspect}"
       end
+    end
 
-      def check_path(path)
-        validate_component(path)
-        set_model_components(path, true)
-      end
+    def set_model_components(path, validate = false)
+      _, model_name, model_id = path.split('/', 3)
+      validate_component(model_name) && validate_model_id(model_id, model_name) if validate
 
-      def check_scheme(scheme)
-        if scheme == 'gid'
-          true
-        else
-          raise URI::BadURIError, "Not a gid:// URI scheme: #{inspect}"
-        end
-      end
+      model_id = CGI.unescape(model_id) if model_id
 
-      def set_model_components(path, validate = false)
-        _, model_name, model_id = path.split('/', 3)
-        validate_component(model_name) && validate_model_id(model_id, model_name) if validate
+      @model_name = model_name
+      @model_id = model_id
+    end
 
-        model_id = CGI.unescape(model_id) if model_id
+    def validate_component(component)
+      return component unless component.blank?
 
-        @model_name = model_name
-        @model_id = model_id
-      end
+      raise URI::InvalidComponentError,
+            "Expected a URI like gid://app/Person/1234: #{inspect}"
+    end
 
-      def validate_component(component)
-        return component unless component.blank?
+    def validate_model_id(model_id, model_name)
+      return model_id unless model_id.blank? || model_id.include?('/')
 
-        raise URI::InvalidComponentError,
-          "Expected a URI like gid://app/Person/1234: #{inspect}"
-      end
+      raise MissingModelIdError, "Unable to create a Global ID for " \
+                                 "#{model_name} without a model id."
+    end
 
-      def validate_model_id(model_id, model_name)
-        return model_id unless model_id.blank? || model_id.include?('/')
-
-        raise MissingModelIdError, "Unable to create a Global ID for " \
-          "#{model_name} without a model id."
-      end
-
-      def parse_query_params(query)
-        Hash[URI.decode_www_form(query)].with_indifferent_access if query
-      end
+    def parse_query_params(query)
+      Hash[URI.decode_www_form(query)].with_indifferent_access if query
+    end
   end
 
   if respond_to?(:register_scheme)

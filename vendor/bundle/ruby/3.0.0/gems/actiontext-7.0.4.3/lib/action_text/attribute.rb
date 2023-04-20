@@ -47,7 +47,7 @@ module ActionText
 
         rich_text_class_name = encrypted ? "ActionText::EncryptedRichText" : "ActionText::RichText"
         has_one :"rich_text_#{name}", -> { where(name: name) },
-          class_name: rich_text_class_name, as: :record, inverse_of: :record, autosave: true, dependent: :destroy
+                class_name: rich_text_class_name, as: :record, inverse_of: :record, autosave: true, dependent: :destroy
 
         scope :"with_rich_text_#{name}", -> { includes("rich_text_#{name}") }
         scope :"with_rich_text_#{name}_and_embeds", -> { includes("rich_text_#{name}": { embeds_attachments: :blob }) }

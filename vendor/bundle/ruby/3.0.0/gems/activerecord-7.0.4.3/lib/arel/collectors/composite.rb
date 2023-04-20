@@ -33,7 +33,8 @@ module Arel # :nodoc: all
       end
 
       private
-        attr_reader :left, :right
+
+      attr_reader :left, :right
     end
   end
 end

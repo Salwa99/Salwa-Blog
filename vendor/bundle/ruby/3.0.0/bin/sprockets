@@ -22,8 +22,8 @@ if str
 end
 
 if Gem.respond_to?(:activate_bin_path)
-load Gem.activate_bin_path('sprockets', 'sprockets', version)
+  load Gem.activate_bin_path('sprockets', 'sprockets', version)
 else
-gem "sprockets", version
-load Gem.bin_path("sprockets", "sprockets", version)
+  gem "sprockets", version
+  load Gem.bin_path("sprockets", "sprockets", version)
 end

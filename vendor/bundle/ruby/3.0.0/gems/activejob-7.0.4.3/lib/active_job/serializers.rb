@@ -29,6 +29,7 @@ module ActiveJob
       def serialize(argument)
         serializer = serializers.detect { |s| s.serialize?(argument) }
         raise SerializationError.new("Unsupported argument type: #{argument.class.name}") unless serializer
+
         serializer.serialize(argument)
       end
 
@@ -37,7 +38,8 @@ module ActiveJob
       # If no serializer found will raise <tt>ArgumentError</tt>.
       def deserialize(argument)
         serializer_name = argument[Arguments::OBJECT_SERIALIZER_KEY]
-        raise ArgumentError, "Serializer name is not present in the argument: #{argument.inspect}" unless serializer_name
+        raise ArgumentError,
+              "Serializer name is not present in the argument: #{argument.inspect}" unless serializer_name
 
         serializer = serializer_name.safe_constantize
         raise ArgumentError, "Serializer #{serializer_name} is not known" unless serializer
@@ -57,12 +59,12 @@ module ActiveJob
     end
 
     add_serializers SymbolSerializer,
-      DurationSerializer,
-      DateTimeSerializer,
-      DateSerializer,
-      TimeWithZoneSerializer,
-      TimeSerializer,
-      ModuleSerializer,
-      RangeSerializer
+                    DurationSerializer,
+                    DateTimeSerializer,
+                    DateSerializer,
+                    TimeWithZoneSerializer,
+                    TimeSerializer,
+                    ModuleSerializer,
+                    RangeSerializer
   end
 end

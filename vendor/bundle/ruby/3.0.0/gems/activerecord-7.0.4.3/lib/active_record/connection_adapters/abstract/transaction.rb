@@ -125,6 +125,7 @@ module ActiveRecord
 
       def rollback_records
         return unless records
+
         ite = records.uniq(&:__id__)
         already_run_callbacks = {}
         while record = ite.shift
@@ -145,6 +146,7 @@ module ActiveRecord
 
       def commit_records
         return unless records
+
         ite = records.uniq(&:__id__)
         already_run_callbacks = {}
         while record = ite.shift
@@ -361,14 +363,16 @@ module ActiveRecord
       end
 
       private
-        NULL_TRANSACTION = NullTransaction.new
 
-        # Deallocate invalidated prepared statements outside of the transaction
-        def after_failure_actions(transaction, error)
-          return unless transaction.is_a?(RealTransaction)
-          return unless error.is_a?(ActiveRecord::PreparedStatementCacheExpired)
-          @connection.clear_cache!
-        end
+      NULL_TRANSACTION = NullTransaction.new
+
+      # Deallocate invalidated prepared statements outside of the transaction
+      def after_failure_actions(transaction, error)
+        return unless transaction.is_a?(RealTransaction)
+        return unless error.is_a?(ActiveRecord::PreparedStatementCacheExpired)
+
+        @connection.clear_cache!
+      end
     end
   end
 end

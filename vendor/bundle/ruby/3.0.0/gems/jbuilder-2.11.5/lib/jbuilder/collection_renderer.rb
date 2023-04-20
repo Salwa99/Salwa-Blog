@@ -73,9 +73,10 @@ class Jbuilder
       end
 
       private
-        def collection_with_template(view, template, layout, collection)
-          super(view, template, layout, ScopedIterator.new(collection, @scope))
-        end
+
+      def collection_with_template(view, template, layout, collection)
+        super(view, template, layout, ScopedIterator.new(collection, @scope))
+      end
     end
   else
     # Rails 6.0 support:
@@ -93,17 +94,18 @@ class Jbuilder
       end
 
       private
-        def collection_without_template(view)
-          @collection = ScopedIterator.new(@collection, @scope)
 
-          super(view)
-        end
+      def collection_without_template(view)
+        @collection = ScopedIterator.new(@collection, @scope)
 
-        def collection_with_template(view, template)
-          @collection = ScopedIterator.new(@collection, @scope)
+        super(view)
+      end
 
-          super(view, template)
-        end
+      def collection_with_template(view, template)
+        @collection = ScopedIterator.new(@collection, @scope)
+
+        super(view, template)
+      end
     end
   end
 end

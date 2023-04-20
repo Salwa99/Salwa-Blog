@@ -4,7 +4,6 @@ require 'concurrent/synchronization/full_memory_barrier'
 
 module Concurrent
   module Synchronization
-
     # Volatile adds the attr_volatile class method when included.
     #
     # @example
@@ -66,7 +65,6 @@ module Concurrent
                   ::Concurrent::Synchronization::JRubyAttrVolatile.instance_variable_set_volatile(self, :#{ivar}, value)
                 end
               RUBY
-
             end
             names.map { |n| [n, :"#{n}="] }.flatten
           end
@@ -95,7 +93,6 @@ module Concurrent
           end
         end
       end
-
     end
   end
 end

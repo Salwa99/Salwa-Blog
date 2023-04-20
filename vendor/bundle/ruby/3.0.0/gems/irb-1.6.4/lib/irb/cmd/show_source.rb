@@ -48,6 +48,7 @@ module IRB
 
         def find_end(file, first_line, irb_context)
           return first_line unless File.exist?(file)
+
           lex = RubyLex.new(irb_context)
           lines = File.read(file).lines[(first_line - 1)..-1]
           tokens = RubyLex.ripper_lex_without_warning(lines.join)
@@ -99,9 +100,9 @@ module IRB
       end
 
       Source = Struct.new(
-        :file,       # @param [String] - file name
+        :file, # @param [String] - file name
         :first_line, # @param [String] - first line
-        :last_line,  # @param [String] - last line
+        :last_line, # @param [String] - last line
         keyword_init: true,
       )
       private_constant :Source

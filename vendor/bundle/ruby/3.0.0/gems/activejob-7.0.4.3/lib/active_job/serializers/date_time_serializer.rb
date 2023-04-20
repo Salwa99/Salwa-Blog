@@ -8,9 +8,10 @@ module ActiveJob
       end
 
       private
-        def klass
-          DateTime
-        end
+
+      def klass
+        DateTime
+      end
     end
   end
 end

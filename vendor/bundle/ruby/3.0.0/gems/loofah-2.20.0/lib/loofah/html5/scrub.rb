@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "cgi"
 require "crass"
 
@@ -21,10 +22,10 @@ module Loofah
         def scrub_attributes(node)
           node.attribute_nodes.each do |attr_node|
             attr_name = if attr_node.namespace
-              "#{attr_node.namespace.prefix}:#{attr_node.node_name}"
-            else
-              attr_node.node_name
-            end
+                          "#{attr_node.namespace.prefix}:#{attr_node.node_name}"
+                        else
+                          attr_node.node_name
+                        end
 
             if attr_name =~ DATA_ATTRIBUTE_NAME
               next
@@ -77,8 +78,8 @@ module Loofah
 
             name = node[:name].downcase
             next unless SafeList::ALLOWED_CSS_PROPERTIES.include?(name) ||
-                SafeList::ALLOWED_SVG_PROPERTIES.include?(name) ||
-                SafeList::SHORTHAND_CSS_PROPERTIES.include?(name.split("-").first)
+                        SafeList::ALLOWED_SVG_PROPERTIES.include?(name) ||
+                        SafeList::SHORTHAND_CSS_PROPERTIES.include?(name.split("-").first)
 
             value = node[:children].map do |child|
               case child[:node]
@@ -107,6 +108,7 @@ module Loofah
             end.compact
 
             next if value.empty?
+
             value << CSS_IMPORTANT if node[:important]
             propstring = format("%s:%s", name, value.join(" "))
             sanitized_node = Crass.parse_properties(propstring).first
@@ -212,7 +214,7 @@ module Loofah
               enc = Encoding::Converter.asciicompat_encoding(enc)
               string = enc ? string.encode(enc) : string.b
             end
-            table = Hash[TABLE_FOR_ESCAPE_HTML__.map {|pair|pair.map {|s|s.encode(enc)}}]
+            table = Hash[TABLE_FOR_ESCAPE_HTML__.map { |pair| pair.map { |s| s.encode(enc) } }]
             string = string.gsub(/#{"[<>&]".encode(enc)}/, table)
             string.encode!(origenc) if origenc
             string

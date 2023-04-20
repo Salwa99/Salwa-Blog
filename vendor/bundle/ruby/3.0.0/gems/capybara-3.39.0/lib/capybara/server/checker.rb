@@ -22,7 +22,7 @@ module Capybara
         @ssl
       end
 
-    private
+      private
 
       def http_request(&block)
         make_request(read_timeout: 2, &block)

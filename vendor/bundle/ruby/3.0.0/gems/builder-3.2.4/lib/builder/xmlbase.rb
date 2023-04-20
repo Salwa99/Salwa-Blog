@@ -4,14 +4,12 @@
 require 'builder/blankslate'
 
 module Builder
-
   # Generic error for builder
   class IllegalBlockError < RuntimeError; end
 
   # XmlBase is a base class for building XML builders.  See
   # Builder::XmlMarkup and Builder::XmlEvents for examples.
   class XmlBase < BlankSlate
-
     class << self
       attr_accessor :cache_method_calls
     end
@@ -26,9 +24,9 @@ module Builder
     # encoding :: When <tt>encoding</tt> and $KCODE are set to 'utf-8'
     #             characters aren't converted to character entities in
     #             the output stream.
-    def initialize(indent=0, initial=0, encoding='utf-8')
+    def initialize(indent = 0, initial = 0, encoding = 'utf-8')
       @indent = indent
-      @level  = initial
+      @level = initial
       @encoding = encoding.downcase
     end
 
@@ -51,7 +49,7 @@ module Builder
           attrs.merge!(arg)
         when nil
           attrs ||= {}
-          attrs.merge!({:nil => true}) if explicit_nil_handling?
+          attrs.merge!({ :nil => true }) if explicit_nil_handling?
         else
           text ||= ''.dup
           text << arg.to_s
@@ -60,7 +58,7 @@ module Builder
       if block
         unless text.nil?
           ::Kernel::raise ::ArgumentError,
-            "XmlMarkup cannot mix a text argument with a block"
+                          "XmlMarkup cannot mix a text argument with a block"
         end
         _indent
         _start_tag(sym, attrs)
@@ -138,12 +136,13 @@ module Builder
         begin
           encoding = ::Encoding::find(@encoding)
           raise Exception if encoding.dummy?
+
           result.encode(encoding)
         rescue
           # if the encoding can't be supported, use numeric character references
-          result.
-            gsub(/[^\u0000-\u007F]/) {|c| "&##{c.ord};"}.
-            force_encoding('ascii')
+          result
+            .gsub(/[^\u0000-\u007F]/) { |c| "&##{c.ord};" }
+            .force_encoding('ascii')
         end
       end
     else
@@ -157,17 +156,19 @@ module Builder
     end
 
     def _escape_attribute(text)
-      _escape(text).gsub("\n", "&#10;").gsub("\r", "&#13;").
-        gsub(%r{"}, '&quot;') # " WART
+      _escape(text).gsub("\n", "&#10;").gsub("\r", "&#13;")
+        .gsub(%r{"}, '&quot;') # " WART
     end
 
     def _newline
       return if @indent == 0
+
       text! "\n"
     end
 
     def _indent
       return if @indent == 0 || @level == 0
+
       text!(" " * (@level * @indent))
     end
 
@@ -196,5 +197,4 @@ module Builder
   end
 
   XmlBase.cache_method_calls = true
-
 end

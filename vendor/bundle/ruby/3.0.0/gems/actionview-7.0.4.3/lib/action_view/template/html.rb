@@ -8,7 +8,7 @@ module ActionView # :nodoc:
 
       def initialize(string, type)
         @string = string.to_s
-        @type   = type
+        @type = type
       end
 
       def identifier

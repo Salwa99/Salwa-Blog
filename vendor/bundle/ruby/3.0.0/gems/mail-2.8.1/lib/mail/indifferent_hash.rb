@@ -6,7 +6,6 @@
 
 module Mail
   class IndifferentHash < Hash
-
     def initialize(constructor = {})
       if constructor.is_a?(Hash)
         super()
@@ -89,7 +88,7 @@ module Mail
     #   hash.values_at("a", "b") # => ["x", "y"]
     #
     def values_at(*indices)
-      indices.collect {|key| self[convert_key(key)]}
+      indices.collect { |key| self[convert_key(key)] }
     end
 
     # Returns an exact copy of the hash.
@@ -110,7 +109,7 @@ module Mail
     end
 
     def reverse_merge!(other_hash)
-      replace(reverse_merge( other_hash ))
+      replace(reverse_merge(other_hash))
     end
 
     # Removes a specified key from the hash.
@@ -127,7 +126,7 @@ module Mail
       Hash.new(default).merge!(self)
     end
 
-  protected
+    protected
 
     def convert_key(key)
       key.kind_of?(Symbol) ? key.to_s : key
@@ -142,6 +141,5 @@ module Mail
         value
       end
     end
-
   end
 end

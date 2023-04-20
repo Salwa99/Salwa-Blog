@@ -39,29 +39,30 @@ module ActionDispatch
       end
 
       private
-        attr_reader :symbols, :stars
 
-        def visit_tree(formatted)
-          tree.each do |node|
-            if node.symbol?
-              path_params << node.to_sym
-              names << node.name
-              symbols << node
-            elsif node.star?
-              stars << node
+      attr_reader :symbols, :stars
 
-              if formatted != false
-                # Add a constraint for wildcard route to make it non-greedy and
-                # match the optional format part of the route by default.
-                wildcard_options[node.name.to_sym] ||= /.+?/m
-              end
-            end
+      def visit_tree(formatted)
+        tree.each do |node|
+          if node.symbol?
+            path_params << node.to_sym
+            names << node.name
+            symbols << node
+          elsif node.star?
+            stars << node
 
-            if node.terminal?
-              terminals << node
+            if formatted != false
+              # Add a constraint for wildcard route to make it non-greedy and
+              # match the optional format part of the route by default.
+              wildcard_options[node.name.to_sym] ||= /.+?/m
             end
           end
+
+          if node.terminal?
+            terminals << node
+          end
         end
+      end
     end
 
     module Nodes # :nodoc:

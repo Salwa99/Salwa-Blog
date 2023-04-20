@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   xmp.rb - irb version of gotoken xmp
 #   	by Keiju ISHITSUKA(Nippon Rational Inc.)
@@ -38,7 +39,6 @@ require_relative "frame"
 #     ctx.eval 'today # is what?'
 #     #=> "a good day"
 class XMP
-
   # Creates a new XMP object.
   #
   # The top-level binding or, optional +bind+ parameter will be used when
@@ -76,7 +76,7 @@ class XMP
 
     if @irb.context.ignore_sigint
       begin
-        trap_proc_b = trap("SIGINT"){@irb.signal_handle}
+        trap_proc_b = trap("SIGINT") { @irb.signal_handle }
         catch(:IRB_EXIT) do
           @irb.eval_input
         end
@@ -109,6 +109,7 @@ class XMP
     def gets
       while l = @exps.shift
         next if /^\s+$/ =~ l
+
         l.concat "\n"
         print @prompt, l
         break
@@ -124,7 +125,8 @@ class XMP
       if @encoding and exps.encoding != @encoding
         enc = Encoding.compatible?(@exps.join("\n"), exps)
         if enc.nil?
-          raise Encoding::CompatibilityError, "Encoding in which the passed expression is encoded is not compatible to the preceding's one"
+          raise Encoding::CompatibilityError,
+                "Encoding in which the passed expression is encoded is not compatible to the preceding's one"
         else
           @encoding = enc
         end

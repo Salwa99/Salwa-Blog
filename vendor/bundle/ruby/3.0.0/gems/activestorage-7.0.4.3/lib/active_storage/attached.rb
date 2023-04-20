@@ -13,9 +13,10 @@ module ActiveStorage
     end
 
     private
-      def change
-        record.attachment_changes[name]
-      end
+
+    def change
+      record.attachment_changes[name]
+    end
   end
 end
 

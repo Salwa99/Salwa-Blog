@@ -2,7 +2,7 @@
 
 module I18n
   module Gettext
-    PLURAL_SEPARATOR  = "\001"
+    PLURAL_SEPARATOR = "\001"
     CONTEXT_SEPARATOR = "\004"
 
     autoload :Helpers, 'i18n/gettext/helpers'

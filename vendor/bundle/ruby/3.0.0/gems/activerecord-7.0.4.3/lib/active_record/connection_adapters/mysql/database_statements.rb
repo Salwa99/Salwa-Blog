@@ -7,10 +7,10 @@ module ActiveRecord
         # Returns an ActiveRecord::Result instance.
         def select_all(*, **) # :nodoc:
           result = if ExplainRegistry.collect? && prepared_statements
-            unprepared_statement { super }
-          else
-            super
-          end
+                     unprepared_statement { super }
+                   else
+                     super
+                   end
           @connection.abandon_results!
           result
         end
@@ -31,9 +31,9 @@ module ActiveRecord
         end
 
         def explain(arel, binds = [])
-          sql     = "EXPLAIN #{to_sql(arel, binds)}"
-          start   = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-          result  = exec_query(sql, "EXPLAIN", binds)
+          sql = "EXPLAIN #{to_sql(arel, binds)}"
+          start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+          result = exec_query(sql, "EXPLAIN", binds)
           elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
 
           MySQL::ExplainPrettyPrinter.new.pp(result, elapsed)
@@ -88,120 +88,121 @@ module ActiveRecord
         end
 
         private
-          def raw_execute(sql, name, async: false)
-            # make sure we carry over any changes to ActiveRecord.default_timezone that have been
-            # made since we established the connection
-            @connection.query_options[:database_timezone] = ActiveRecord.default_timezone
 
-            super
+        def raw_execute(sql, name, async: false)
+          # make sure we carry over any changes to ActiveRecord.default_timezone that have been
+          # made since we established the connection
+          @connection.query_options[:database_timezone] = ActiveRecord.default_timezone
+
+          super
+        end
+
+        def execute_batch(statements, name = nil)
+          statements = statements.map { |sql| transform_query(sql) }
+          combine_multi_statements(statements).each do |statement|
+            raw_execute(statement, name)
+            @connection.abandon_results!
+          end
+        end
+
+        def default_insert_value(column)
+          super unless column.auto_increment?
+        end
+
+        def last_inserted_id(result)
+          @connection.last_id
+        end
+
+        def multi_statements_enabled?
+          flags = @config[:flags]
+
+          if flags.is_a?(Array)
+            flags.include?("MULTI_STATEMENTS")
+          else
+            flags.anybits?(Mysql2::Client::MULTI_STATEMENTS)
+          end
+        end
+
+        def with_multi_statements
+          multi_statements_was = multi_statements_enabled?
+
+          unless multi_statements_was
+            @connection.set_server_option(Mysql2::Client::OPTION_MULTI_STATEMENTS_ON)
           end
 
-          def execute_batch(statements, name = nil)
-            statements = statements.map { |sql| transform_query(sql) }
-            combine_multi_statements(statements).each do |statement|
-              raw_execute(statement, name)
-              @connection.abandon_results!
-            end
+          yield
+        ensure
+          unless multi_statements_was
+            @connection.set_server_option(Mysql2::Client::OPTION_MULTI_STATEMENTS_OFF)
           end
+        end
 
-          def default_insert_value(column)
-            super unless column.auto_increment?
-          end
-
-          def last_inserted_id(result)
-            @connection.last_id
-          end
-
-          def multi_statements_enabled?
-            flags = @config[:flags]
-
-            if flags.is_a?(Array)
-              flags.include?("MULTI_STATEMENTS")
+        def combine_multi_statements(total_sql)
+          total_sql.each_with_object([]) do |sql, total_sql_chunks|
+            previous_packet = total_sql_chunks.last
+            if max_allowed_packet_reached?(sql, previous_packet)
+              total_sql_chunks << +sql
             else
-              flags.anybits?(Mysql2::Client::MULTI_STATEMENTS)
+              previous_packet << ";\n"
+              previous_packet << sql
             end
           end
+        end
 
-          def with_multi_statements
-            multi_statements_was = multi_statements_enabled?
-
-            unless multi_statements_was
-              @connection.set_server_option(Mysql2::Client::OPTION_MULTI_STATEMENTS_ON)
-            end
-
-            yield
-          ensure
-            unless multi_statements_was
-              @connection.set_server_option(Mysql2::Client::OPTION_MULTI_STATEMENTS_OFF)
-            end
+        def max_allowed_packet_reached?(current_packet, previous_packet)
+          if current_packet.bytesize > max_allowed_packet
+            raise ActiveRecordError,
+                  "Fixtures set is too large #{current_packet.bytesize}. Consider increasing the max_allowed_packet variable."
+          elsif previous_packet.nil?
+            true
+          else
+            (current_packet.bytesize + previous_packet.bytesize + 2) > max_allowed_packet
           end
+        end
 
-          def combine_multi_statements(total_sql)
-            total_sql.each_with_object([]) do |sql, total_sql_chunks|
-              previous_packet = total_sql_chunks.last
-              if max_allowed_packet_reached?(sql, previous_packet)
-                total_sql_chunks << +sql
-              else
-                previous_packet << ";\n"
-                previous_packet << sql
+        def max_allowed_packet
+          @max_allowed_packet ||= show_variable("max_allowed_packet")
+        end
+
+        def exec_stmt_and_free(sql, name, binds, cache_stmt: false, async: false)
+          sql = transform_query(sql)
+          check_if_write_query(sql)
+
+          materialize_transactions
+          mark_transaction_written_if_write(sql)
+
+          # make sure we carry over any changes to ActiveRecord.default_timezone that have been
+          # made since we established the connection
+          @connection.query_options[:database_timezone] = ActiveRecord.default_timezone
+
+          type_casted_binds = type_casted_binds(binds)
+
+          log(sql, name, binds, type_casted_binds, async: async) do
+            if cache_stmt
+              stmt = @statements[sql] ||= @connection.prepare(sql)
+            else
+              stmt = @connection.prepare(sql)
+            end
+
+            begin
+              result = ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
+                stmt.execute(*type_casted_binds)
               end
-            end
-          end
-
-          def max_allowed_packet_reached?(current_packet, previous_packet)
-            if current_packet.bytesize > max_allowed_packet
-              raise ActiveRecordError,
-                "Fixtures set is too large #{current_packet.bytesize}. Consider increasing the max_allowed_packet variable."
-            elsif previous_packet.nil?
-              true
-            else
-              (current_packet.bytesize + previous_packet.bytesize + 2) > max_allowed_packet
-            end
-          end
-
-          def max_allowed_packet
-            @max_allowed_packet ||= show_variable("max_allowed_packet")
-          end
-
-          def exec_stmt_and_free(sql, name, binds, cache_stmt: false, async: false)
-            sql = transform_query(sql)
-            check_if_write_query(sql)
-
-            materialize_transactions
-            mark_transaction_written_if_write(sql)
-
-            # make sure we carry over any changes to ActiveRecord.default_timezone that have been
-            # made since we established the connection
-            @connection.query_options[:database_timezone] = ActiveRecord.default_timezone
-
-            type_casted_binds = type_casted_binds(binds)
-
-            log(sql, name, binds, type_casted_binds, async: async) do
+            rescue Mysql2::Error => e
               if cache_stmt
-                stmt = @statements[sql] ||= @connection.prepare(sql)
+                @statements.delete(sql)
               else
-                stmt = @connection.prepare(sql)
+                stmt.close
               end
-
-              begin
-                result = ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
-                  stmt.execute(*type_casted_binds)
-                end
-              rescue Mysql2::Error => e
-                if cache_stmt
-                  @statements.delete(sql)
-                else
-                  stmt.close
-                end
-                raise e
-              end
-
-              ret = yield stmt, result
-              result.free if result
-              stmt.close unless cache_stmt
-              ret
+              raise e
             end
+
+            ret = yield stmt, result
+            result.free if result
+            stmt.close unless cache_stmt
+            ret
           end
+        end
       end
     end
   end

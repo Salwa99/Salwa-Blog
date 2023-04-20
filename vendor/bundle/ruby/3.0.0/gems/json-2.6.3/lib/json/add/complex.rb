@@ -1,10 +1,10 @@
-#frozen_string_literal: false
+# frozen_string_literal: false
+
 unless defined?(::JSON::JSON_LOADED) and ::JSON::JSON_LOADED
   require 'json'
 end
 
 class Complex
-
   # Deserializes JSON string by converting Real value <tt>r</tt>, imaginary
   # value <tt>i</tt>, to a Complex object.
   def self.json_create(object)
@@ -16,8 +16,8 @@ class Complex
   def as_json(*)
     {
       JSON.create_id => self.class.name,
-      'r'            => real,
-      'i'            => imag,
+      'r' => real,
+      'i' => imag,
     }
   end
 

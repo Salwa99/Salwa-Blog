@@ -41,6 +41,7 @@ module Arel # :nodoc: all
       case relation
       when String, Nodes::SqlLiteral
         raise EmptyJoinError if relation.empty?
+
         klass = Nodes::StringJoin
       end
 
@@ -112,6 +113,7 @@ module Arel # :nodoc: all
     end
 
     private
-      attr_reader :type_caster
+
+    attr_reader :type_caster
   end
 end

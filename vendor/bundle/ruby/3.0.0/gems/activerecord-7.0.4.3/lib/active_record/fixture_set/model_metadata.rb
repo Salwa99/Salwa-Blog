@@ -17,7 +17,7 @@ module ActiveRecord
 
       def has_primary_key_column?
         @has_primary_key_column ||= primary_key_name &&
-          @model_class.columns.any? { |col| col.name == primary_key_name }
+                                    @model_class.columns.any? { |col| col.name == primary_key_name }
       end
 
       def timestamp_column_names

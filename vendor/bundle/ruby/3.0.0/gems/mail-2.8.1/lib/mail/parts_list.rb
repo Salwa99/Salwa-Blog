@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'delegate'
 
 module Mail
@@ -76,7 +77,7 @@ module Mail
 
     def recursive_size
       i = 0
-      recursive_each {|p| i += 1 }
+      recursive_each { |p| i += 1 }
       i
     end
 
@@ -89,7 +90,7 @@ module Mail
         end
         (yield part).tap {
           if sub_list.any?
-            sub_list.recursive_delete_if {|part| yield part }
+            sub_list.recursive_delete_if { |part| yield part }
           end
         }
       }
@@ -118,7 +119,7 @@ module Mail
       sorted.each { |p| @parts << p }
     end
 
-  private
+    private
 
     def get_order_value(part, order)
       is_attachment = part.respond_to?(:attachment?) && part.attachment?
@@ -126,6 +127,5 @@ module Mail
 
       [is_attachment ? 1 : 0, (has_content_type ? order.index(part[:content_type].string.downcase) : nil) || 10000]
     end
-
   end
 end

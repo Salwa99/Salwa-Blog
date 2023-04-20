@@ -18,13 +18,13 @@ module ActiveRecord
           begin
             yield
           rescue ActiveRecord::InvalidForeignKey => e
-            warn <<-WARNING
-WARNING: Rails was not able to disable referential integrity.
+            warn <<~WARNING
+              WARNING: Rails was not able to disable referential integrity.
 
-This is most likely caused due to missing permissions.
-Rails needs superuser privileges to disable referential integrity.
+              This is most likely caused due to missing permissions.
+              Rails needs superuser privileges to disable referential integrity.
 
-    cause: #{original_exception&.message}
+                  cause: #{original_exception&.message}
 
             WARNING
             raise e

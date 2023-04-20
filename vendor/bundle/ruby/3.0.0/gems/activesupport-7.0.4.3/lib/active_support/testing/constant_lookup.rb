@@ -32,7 +32,7 @@ module ActiveSupport
     module ConstantLookup
       extend ::ActiveSupport::Concern
 
-      module ClassMethods  # :nodoc:
+      module ClassMethods # :nodoc:
         def determine_constant_from_test_name(test_name)
           names = test_name.split "::"
           while names.size > 0 do

@@ -27,7 +27,7 @@ module ActionDispatch # :nodoc:
       # yet supported by all browsers. To avoid having to rename this
       # middleware in the future we use the new name for the middleware but
       # keep the old header name and implementation for now.
-      POLICY       = "Feature-Policy"
+      POLICY = "Feature-Policy"
 
       def initialize(app)
         @app = app
@@ -52,19 +52,20 @@ module ActionDispatch # :nodoc:
       end
 
       private
-        def html_response?(headers)
-          if content_type = headers[CONTENT_TYPE]
-            /html/.match?(content_type)
-          end
-        end
 
-        def policy_present?(headers)
-          headers[POLICY]
+      def html_response?(headers)
+        if content_type = headers[CONTENT_TYPE]
+          /html/.match?(content_type)
         end
+      end
 
-        def policy_empty?(policy)
-          policy&.directives&.empty?
-        end
+      def policy_present?(headers)
+        headers[POLICY]
+      end
+
+      def policy_empty?(policy)
+        policy&.directives&.empty?
+      end
     end
 
     module Request
@@ -87,23 +88,23 @@ module ActionDispatch # :nodoc:
     # List of available permissions can be found at
     # https://github.com/w3c/webappsec-permissions-policy/blob/master/features.md#policy-controlled-features
     DIRECTIVES = {
-      accelerometer:        "accelerometer",
+      accelerometer: "accelerometer",
       ambient_light_sensor: "ambient-light-sensor",
-      autoplay:             "autoplay",
-      camera:               "camera",
-      encrypted_media:      "encrypted-media",
-      fullscreen:           "fullscreen",
-      geolocation:          "geolocation",
-      gyroscope:            "gyroscope",
-      magnetometer:         "magnetometer",
-      microphone:           "microphone",
-      midi:                 "midi",
-      payment:              "payment",
-      picture_in_picture:   "picture-in-picture",
-      speaker:              "speaker",
-      usb:                  "usb",
-      vibrate:              "vibrate",
-      vr:                   "vr",
+      autoplay: "autoplay",
+      camera: "camera",
+      encrypted_media: "encrypted-media",
+      fullscreen: "fullscreen",
+      geolocation: "geolocation",
+      gyroscope: "gyroscope",
+      magnetometer: "magnetometer",
+      microphone: "microphone",
+      midi: "midi",
+      payment: "payment",
+      picture_in_picture: "picture-in-picture",
+      speaker: "speaker",
+      usb: "usb",
+      vibrate: "vibrate",
+      vr: "vr",
     }.freeze
 
     private_constant :MAPPINGS, :DIRECTIVES
@@ -134,56 +135,57 @@ module ActionDispatch # :nodoc:
     end
 
     private
-      def apply_mappings(sources)
-        sources.map do |source|
-          case source
-          when Symbol
-            apply_mapping(source)
-          when String, Proc
-            source
-          else
-            raise ArgumentError, "Invalid HTTP permissions policy source: #{source.inspect}"
-          end
-        end
-      end
 
-      def apply_mapping(source)
-        MAPPINGS.fetch(source) do
-          raise ArgumentError, "Unknown HTTP permissions policy source mapping: #{source.inspect}"
-        end
-      end
-
-      def build_directives(context)
-        @directives.map do |directive, sources|
-          if sources.is_a?(Array)
-            "#{directive} #{build_directive(sources, context).join(' ')}"
-          elsif sources
-            directive
-          else
-            nil
-          end
-        end
-      end
-
-      def build_directive(sources, context)
-        sources.map { |source| resolve_source(source, context) }
-      end
-
-      def resolve_source(source, context)
+    def apply_mappings(sources)
+      sources.map do |source|
         case source
-        when String
-          source
         when Symbol
-          source.to_s
-        when Proc
-          if context.nil?
-            raise RuntimeError, "Missing context for the dynamic permissions policy source: #{source.inspect}"
-          else
-            context.instance_exec(&source)
-          end
+          apply_mapping(source)
+        when String, Proc
+          source
         else
-          raise RuntimeError, "Unexpected permissions policy source: #{source.inspect}"
+          raise ArgumentError, "Invalid HTTP permissions policy source: #{source.inspect}"
         end
       end
+    end
+
+    def apply_mapping(source)
+      MAPPINGS.fetch(source) do
+        raise ArgumentError, "Unknown HTTP permissions policy source mapping: #{source.inspect}"
+      end
+    end
+
+    def build_directives(context)
+      @directives.map do |directive, sources|
+        if sources.is_a?(Array)
+          "#{directive} #{build_directive(sources, context).join(' ')}"
+        elsif sources
+          directive
+        else
+          nil
+        end
+      end
+    end
+
+    def build_directive(sources, context)
+      sources.map { |source| resolve_source(source, context) }
+    end
+
+    def resolve_source(source, context)
+      case source
+      when String
+        source
+      when Symbol
+        source.to_s
+      when Proc
+        if context.nil?
+          raise RuntimeError, "Missing context for the dynamic permissions policy source: #{source.inspect}"
+        else
+          context.instance_exec(&source)
+        end
+      else
+        raise RuntimeError, "Unexpected permissions policy source: #{source.inspect}"
+      end
+    end
   end
 end

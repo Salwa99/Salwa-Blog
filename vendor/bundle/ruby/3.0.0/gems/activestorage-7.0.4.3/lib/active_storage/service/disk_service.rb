@@ -111,66 +111,68 @@ module ActiveStorage
     end
 
     private
-      def private_url(key, expires_in:, filename:, content_type:, disposition:, **)
-        generate_url(key, expires_in: expires_in, filename: filename, content_type: content_type, disposition: disposition)
+
+    def private_url(key, expires_in:, filename:, content_type:, disposition:, **)
+      generate_url(key, expires_in: expires_in, filename: filename, content_type: content_type,
+                        disposition: disposition)
+    end
+
+    def public_url(key, filename:, content_type: nil, disposition: :attachment, **)
+      generate_url(key, expires_in: nil, filename: filename, content_type: content_type, disposition: disposition)
+    end
+
+    def generate_url(key, expires_in:, filename:, content_type:, disposition:)
+      content_disposition = content_disposition_with(type: disposition, filename: filename)
+      verified_key_with_expiration = ActiveStorage.verifier.generate(
+        {
+          key: key,
+          disposition: content_disposition,
+          content_type: content_type,
+          service_name: name
+        },
+        expires_in: expires_in,
+        purpose: :blob_key
+      )
+
+      if url_options.blank?
+        raise ArgumentError,
+              "Cannot generate URL for #{filename} using Disk service, please set ActiveStorage::Current.url_options."
       end
 
-      def public_url(key, filename:, content_type: nil, disposition: :attachment, **)
-        generate_url(key, expires_in: nil, filename: filename, content_type: content_type, disposition: disposition)
-      end
+      url_helpers.rails_disk_service_url(verified_key_with_expiration, filename: filename, **url_options)
+    end
 
-      def generate_url(key, expires_in:, filename:, content_type:, disposition:)
-        content_disposition = content_disposition_with(type: disposition, filename: filename)
-        verified_key_with_expiration = ActiveStorage.verifier.generate(
-          {
-            key: key,
-            disposition: content_disposition,
-            content_type: content_type,
-            service_name: name
-          },
-          expires_in: expires_in,
-          purpose: :blob_key
-        )
-
-        if url_options.blank?
-          raise ArgumentError, "Cannot generate URL for #{filename} using Disk service, please set ActiveStorage::Current.url_options."
-        end
-
-        url_helpers.rails_disk_service_url(verified_key_with_expiration, filename: filename, **url_options)
-      end
-
-
-      def stream(key)
-        File.open(path_for(key), "rb") do |file|
-          while data = file.read(5.megabytes)
-            yield data
-          end
-        end
-      rescue Errno::ENOENT
-        raise ActiveStorage::FileNotFoundError
-      end
-
-      def folder_for(key)
-        [ key[0..1], key[2..3] ].join("/")
-      end
-
-      def make_path_for(key)
-        path_for(key).tap { |path| FileUtils.mkdir_p File.dirname(path) }
-      end
-
-      def ensure_integrity_of(key, checksum)
-        unless OpenSSL::Digest::MD5.file(path_for(key)).base64digest == checksum
-          delete key
-          raise ActiveStorage::IntegrityError
+    def stream(key)
+      File.open(path_for(key), "rb") do |file|
+        while data = file.read(5.megabytes)
+          yield data
         end
       end
+    rescue Errno::ENOENT
+      raise ActiveStorage::FileNotFoundError
+    end
 
-      def url_helpers
-        @url_helpers ||= Rails.application.routes.url_helpers
-      end
+    def folder_for(key)
+      [key[0..1], key[2..3]].join("/")
+    end
 
-      def url_options
-        ActiveStorage::Current.url_options
+    def make_path_for(key)
+      path_for(key).tap { |path| FileUtils.mkdir_p File.dirname(path) }
+    end
+
+    def ensure_integrity_of(key, checksum)
+      unless OpenSSL::Digest::MD5.file(path_for(key)).base64digest == checksum
+        delete key
+        raise ActiveStorage::IntegrityError
       end
+    end
+
+    def url_helpers
+      @url_helpers ||= Rails.application.routes.url_helpers
+    end
+
+    def url_options
+      ActiveStorage::Current.url_options
+    end
   end
 end

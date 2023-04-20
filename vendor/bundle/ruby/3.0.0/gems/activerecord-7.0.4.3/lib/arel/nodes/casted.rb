@@ -7,7 +7,7 @@ module Arel # :nodoc: all
       alias :value_before_type_cast :value
 
       def initialize(value, attribute)
-        @value     = value
+        @value = value
         @attribute = attribute
         super()
       end

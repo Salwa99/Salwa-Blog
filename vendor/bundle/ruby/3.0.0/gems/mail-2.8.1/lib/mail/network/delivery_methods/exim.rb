@@ -38,8 +38,8 @@ module Mail
   #   mail.deliver!
   class Exim < Sendmail
     DEFAULTS = {
-      :location   => '/usr/sbin/exim',
-      :arguments  => %w[ -i -t ]
+      :location => '/usr/sbin/exim',
+      :arguments => %w[-i -t]
     }
 
     # Uses -t option to extract recipients from the message.

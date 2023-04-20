@@ -61,15 +61,16 @@ module ActiveSupport
         end
 
         private
-          def local_cache
-            if ActiveSupport::Cache.format_version == 6.1
-              if local_cache = super
-                DupLocalStore.new(local_cache)
-              end
-            else
-              super
+
+        def local_cache
+          if ActiveSupport::Cache.format_version == 6.1
+            if local_cache = super
+              DupLocalStore.new(local_cache)
             end
+          else
+            super
           end
+        end
       end
       prepend DupLocalCache
 
@@ -117,6 +118,7 @@ module ActiveSupport
         unless [String, Dalli::Client, NilClass].include?(addresses.first.class)
           raise ArgumentError, "First argument must be an empty array, an array of hosts or a Dalli::Client instance."
         end
+
         if addresses.first.is_a?(Dalli::Client)
           @data = addresses.first
         else
@@ -182,143 +184,144 @@ module ActiveSupport
       end
 
       private
-        module Coders # :nodoc:
-          class << self
-            def [](version)
-              case version
-              when 6.1
-                Rails61Coder
-              when 7.0
-                Rails70Coder
-              else
-                raise ArgumentError, "Unknown ActiveSupport::Cache.format_version #{Cache.format_version.inspect}"
-              end
+
+      module Coders # :nodoc:
+        class << self
+          def [](version)
+            case version
+            when 6.1
+              Rails61Coder
+            when 7.0
+              Rails70Coder
+            else
+              raise ArgumentError, "Unknown ActiveSupport::Cache.format_version #{Cache.format_version.inspect}"
             end
           end
+        end
 
-          module Loader
-            def load(payload)
-              if payload.is_a?(Entry)
-                payload
-              else
-                Cache::Coders::Loader.load(payload)
-              end
+        module Loader
+          def load(payload)
+            if payload.is_a?(Entry)
+              payload
+            else
+              Cache::Coders::Loader.load(payload)
             end
           end
+        end
 
-          module Rails61Coder
-            include Loader
-            extend self
+        module Rails61Coder
+          include Loader
+          extend self
 
-            def dump(entry)
-              entry
-            end
-
-            def dump_compressed(entry, threshold)
-              entry.compressed(threshold)
-            end
+          def dump(entry)
+            entry
           end
 
-          module Rails70Coder
-            include Cache::Coders::Rails70Coder
-            include Loader
-            extend self
+          def dump_compressed(entry, threshold)
+            entry.compressed(threshold)
           end
         end
 
-        def default_coder
-          Coders[Cache.format_version]
+        module Rails70Coder
+          include Cache::Coders::Rails70Coder
+          include Loader
+          extend self
         end
+      end
 
-        # Read an entry from the cache.
-        def read_entry(key, **options)
-          deserialize_entry(read_serialized_entry(key, **options), **options)
+      def default_coder
+        Coders[Cache.format_version]
+      end
+
+      # Read an entry from the cache.
+      def read_entry(key, **options)
+        deserialize_entry(read_serialized_entry(key, **options), **options)
+      end
+
+      def read_serialized_entry(key, **options)
+        rescue_error_with(nil) do
+          @data.with { |c| c.get(key, options) }
         end
+      end
 
-        def read_serialized_entry(key, **options)
-          rescue_error_with(nil) do
-            @data.with { |c| c.get(key, options) }
+      # Write an entry to the cache.
+      def write_entry(key, entry, **options)
+        write_serialized_entry(key, serialize_entry(entry, **options), **options)
+      end
+
+      def write_serialized_entry(key, payload, **options)
+        method = options[:unless_exist] ? :add : :set
+        expires_in = options[:expires_in].to_i
+        if options[:race_condition_ttl] && expires_in > 0 && !options[:raw]
+          # Set the memcache expire a few minutes in the future to support race condition ttls on read
+          expires_in += 5.minutes
+        end
+        rescue_error_with false do
+          # Don't pass compress option to Dalli since we are already dealing with compression.
+          options.delete(:compress)
+          @data.with { |c| c.send(method, key, payload, expires_in, **options) }
+        end
+      end
+
+      # Reads multiple entries from the cache implementation.
+      def read_multi_entries(names, **options)
+        keys_to_names = names.index_by { |name| normalize_key(name, options) }
+
+        raw_values = @data.with { |c| c.get_multi(keys_to_names.keys) }
+        values = {}
+
+        raw_values.each do |key, value|
+          entry = deserialize_entry(value, raw: options[:raw])
+
+          unless entry.expired? || entry.mismatched?(normalize_version(keys_to_names[key], options))
+            values[keys_to_names[key]] = entry.value
           end
         end
 
-        # Write an entry to the cache.
-        def write_entry(key, entry, **options)
-          write_serialized_entry(key, serialize_entry(entry, **options), **options)
+        values
+      end
+
+      # Delete an entry from the cache.
+      def delete_entry(key, **options)
+        rescue_error_with(false) { @data.with { |c| c.delete(key) } }
+      end
+
+      def serialize_entry(entry, raw: false, **options)
+        if raw
+          entry.value.to_s
+        else
+          super(entry, raw: raw, **options)
         end
+      end
 
-        def write_serialized_entry(key, payload, **options)
-          method = options[:unless_exist] ? :add : :set
-          expires_in = options[:expires_in].to_i
-          if options[:race_condition_ttl] && expires_in > 0 && !options[:raw]
-            # Set the memcache expire a few minutes in the future to support race condition ttls on read
-            expires_in += 5.minutes
-          end
-          rescue_error_with false do
-            # Don't pass compress option to Dalli since we are already dealing with compression.
-            options.delete(:compress)
-            @data.with { |c| c.send(method, key, payload, expires_in, **options) }
-          end
+      # Memcache keys are binaries. So we need to force their encoding to binary
+      # before applying the regular expression to ensure we are escaping all
+      # characters properly.
+      def normalize_key(key, options)
+        key = super
+        if key
+          key = key.dup.force_encoding(Encoding::ASCII_8BIT)
+          key = key.gsub(ESCAPE_KEY_CHARS) { |match| "%#{match.getbyte(0).to_s(16).upcase}" }
+          key = "#{key[0, 212]}:hash:#{ActiveSupport::Digest.hexdigest(key)}" if key.size > 250
         end
+        key
+      end
 
-        # Reads multiple entries from the cache implementation.
-        def read_multi_entries(names, **options)
-          keys_to_names = names.index_by { |name| normalize_key(name, options) }
-
-          raw_values = @data.with { |c| c.get_multi(keys_to_names.keys) }
-          values = {}
-
-          raw_values.each do |key, value|
-            entry = deserialize_entry(value, raw: options[:raw])
-
-            unless entry.expired? || entry.mismatched?(normalize_version(keys_to_names[key], options))
-              values[keys_to_names[key]] = entry.value
-            end
-          end
-
-          values
+      def deserialize_entry(payload, raw: false, **)
+        if payload && raw
+          Entry.new(payload)
+        else
+          super(payload)
         end
+      end
 
-        # Delete an entry from the cache.
-        def delete_entry(key, **options)
-          rescue_error_with(false) { @data.with { |c| c.delete(key) } }
-        end
-
-        def serialize_entry(entry, raw: false, **options)
-          if raw
-            entry.value.to_s
-          else
-            super(entry, raw: raw, **options)
-          end
-        end
-
-        # Memcache keys are binaries. So we need to force their encoding to binary
-        # before applying the regular expression to ensure we are escaping all
-        # characters properly.
-        def normalize_key(key, options)
-          key = super
-          if key
-            key = key.dup.force_encoding(Encoding::ASCII_8BIT)
-            key = key.gsub(ESCAPE_KEY_CHARS) { |match| "%#{match.getbyte(0).to_s(16).upcase}" }
-            key = "#{key[0, 212]}:hash:#{ActiveSupport::Digest.hexdigest(key)}" if key.size > 250
-          end
-          key
-        end
-
-        def deserialize_entry(payload, raw: false, **)
-          if payload && raw
-            Entry.new(payload)
-          else
-            super(payload)
-          end
-        end
-
-        def rescue_error_with(fallback)
-          yield
-        rescue Dalli::DalliError => error
-          ActiveSupport.error_reporter&.report(error, handled: true, severity: :warning)
-          logger.error("DalliError (#{error}): #{error.message}") if logger
-          fallback
-        end
+      def rescue_error_with(fallback)
+        yield
+      rescue Dalli::DalliError => error
+        ActiveSupport.error_reporter&.report(error, handled: true, severity: :warning)
+        logger.error("DalliError (#{error}): #{error.message}") if logger
+        fallback
+      end
     end
   end
 end

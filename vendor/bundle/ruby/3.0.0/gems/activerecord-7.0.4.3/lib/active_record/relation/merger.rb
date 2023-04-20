@@ -11,8 +11,8 @@ module ActiveRecord
         hash.assert_valid_keys(*Relation::VALUE_METHODS)
 
         @relation = relation
-        @hash     = hash
-        @rewhere  = rewhere
+        @hash = hash
+        @rewhere = rewhere
       end
 
       def merge
@@ -46,9 +46,9 @@ module ActiveRecord
 
       def initialize(relation, other, rewhere = nil)
         @relation = relation
-        @values   = other.values
-        @other    = other
-        @rewhere  = rewhere
+        @values = other.values
+        @other = other
+        @rewhere = rewhere
       end
 
       NORMAL_VALUES = Relation::VALUE_METHODS - Relation::CLAUSE_METHODS -
@@ -81,112 +81,113 @@ module ActiveRecord
       end
 
       private
-        def merge_select_values
-          return if other.select_values.empty?
 
-          if other.klass == relation.klass
-            relation.select_values |= other.select_values
-          else
-            relation.select_values |= other.instance_eval do
-              arel_columns(select_values)
+      def merge_select_values
+        return if other.select_values.empty?
+
+        if other.klass == relation.klass
+          relation.select_values |= other.select_values
+        else
+          relation.select_values |= other.instance_eval do
+            arel_columns(select_values)
+          end
+        end
+      end
+
+      def merge_preloads
+        return if other.preload_values.empty? && other.includes_values.empty?
+
+        if other.klass == relation.klass
+          relation.preload_values |= other.preload_values unless other.preload_values.empty?
+          relation.includes_values |= other.includes_values unless other.includes_values.empty?
+        else
+          reflection = relation.klass.reflect_on_all_associations.find do |r|
+            r.class_name == other.klass.name
+          end || return
+
+          unless other.preload_values.empty?
+            relation.preload! reflection.name => other.preload_values
+          end
+
+          unless other.includes_values.empty?
+            relation.includes! reflection.name => other.includes_values
+          end
+        end
+      end
+
+      def merge_joins
+        return if other.joins_values.empty?
+
+        if other.klass == relation.klass
+          relation.joins_values |= other.joins_values
+        else
+          associations, others = other.joins_values.partition do |join|
+            case join
+            when Hash, Symbol, Array; true
             end
           end
+
+          join_dependency = other.construct_join_dependency(
+            associations, Arel::Nodes::InnerJoin
+          )
+          relation.joins!(join_dependency, *others)
         end
+      end
 
-        def merge_preloads
-          return if other.preload_values.empty? && other.includes_values.empty?
+      def merge_outer_joins
+        return if other.left_outer_joins_values.empty?
 
-          if other.klass == relation.klass
-            relation.preload_values |= other.preload_values unless other.preload_values.empty?
-            relation.includes_values |= other.includes_values unless other.includes_values.empty?
-          else
-            reflection = relation.klass.reflect_on_all_associations.find do |r|
-              r.class_name == other.klass.name
-            end || return
-
-            unless other.preload_values.empty?
-              relation.preload! reflection.name => other.preload_values
-            end
-
-            unless other.includes_values.empty?
-              relation.includes! reflection.name => other.includes_values
+        if other.klass == relation.klass
+          relation.left_outer_joins_values |= other.left_outer_joins_values
+        else
+          associations, others = other.left_outer_joins_values.partition do |join|
+            case join
+            when Hash, Symbol, Array; true
             end
           end
+
+          join_dependency = other.construct_join_dependency(
+            associations, Arel::Nodes::OuterJoin
+          )
+          relation.left_outer_joins!(join_dependency, *others)
+        end
+      end
+
+      def merge_multi_values
+        if other.reordering_value
+          # override any order specified in the original relation
+          relation.reorder!(*other.order_values)
+        elsif other.order_values.any?
+          # merge in order_values from relation
+          relation.order!(*other.order_values)
         end
 
-        def merge_joins
-          return if other.joins_values.empty?
+        extensions = other.extensions - relation.extensions
+        relation.extending!(*extensions) if extensions.any?
+      end
 
-          if other.klass == relation.klass
-            relation.joins_values |= other.joins_values
-          else
-            associations, others = other.joins_values.partition do |join|
-              case join
-              when Hash, Symbol, Array; true
-              end
-            end
+      def merge_single_values
+        relation.lock_value ||= other.lock_value if other.lock_value
 
-            join_dependency = other.construct_join_dependency(
-              associations, Arel::Nodes::InnerJoin
-            )
-            relation.joins!(join_dependency, *others)
-          end
+        unless other.create_with_value.blank?
+          relation.create_with_value = (relation.create_with_value || {}).merge(other.create_with_value)
         end
+      end
 
-        def merge_outer_joins
-          return if other.left_outer_joins_values.empty?
+      def merge_clauses
+        relation.from_clause = other.from_clause if replace_from_clause?
 
-          if other.klass == relation.klass
-            relation.left_outer_joins_values |= other.left_outer_joins_values
-          else
-            associations, others = other.left_outer_joins_values.partition do |join|
-              case join
-              when Hash, Symbol, Array; true
-              end
-            end
+        where_clause = relation.where_clause.merge(other.where_clause, @rewhere)
+        relation.where_clause = where_clause unless where_clause.empty?
 
-            join_dependency = other.construct_join_dependency(
-              associations, Arel::Nodes::OuterJoin
-            )
-            relation.left_outer_joins!(join_dependency, *others)
-          end
-        end
+        having_clause = relation.having_clause.merge(other.having_clause)
+        relation.having_clause = having_clause unless having_clause.empty?
+      end
 
-        def merge_multi_values
-          if other.reordering_value
-            # override any order specified in the original relation
-            relation.reorder!(*other.order_values)
-          elsif other.order_values.any?
-            # merge in order_values from relation
-            relation.order!(*other.order_values)
-          end
-
-          extensions = other.extensions - relation.extensions
-          relation.extending!(*extensions) if extensions.any?
-        end
-
-        def merge_single_values
-          relation.lock_value ||= other.lock_value if other.lock_value
-
-          unless other.create_with_value.blank?
-            relation.create_with_value = (relation.create_with_value || {}).merge(other.create_with_value)
-          end
-        end
-
-        def merge_clauses
-          relation.from_clause = other.from_clause if replace_from_clause?
-
-          where_clause = relation.where_clause.merge(other.where_clause, @rewhere)
-          relation.where_clause = where_clause unless where_clause.empty?
-
-          having_clause = relation.having_clause.merge(other.having_clause)
-          relation.having_clause = having_clause unless having_clause.empty?
-        end
-
-        def replace_from_clause?
-          relation.from_clause.empty? && !other.from_clause.empty? &&
-            relation.klass.base_class == other.klass.base_class
-        end
+      def replace_from_clause?
+        relation.from_clause.empty? && !other.from_clause.empty? &&
+          relation.klass.base_class == other.klass.base_class
+      end
     end
   end
 end

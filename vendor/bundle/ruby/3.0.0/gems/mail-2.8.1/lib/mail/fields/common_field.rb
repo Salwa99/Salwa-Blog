@@ -1,9 +1,10 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/constants'
 
 module Mail
-  class CommonField #:nodoc:
+  class CommonField # :nodoc:
     def self.singular?
       false
     end

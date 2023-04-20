@@ -27,9 +27,9 @@ module ActiveRecord
             loaders.flat_map(&:future_classes).uniq
           else
             likely_reflections.reject(&:polymorphic?).flat_map do |reflection|
-              reflection.
-                chain.
-                map(&:klass)
+              reflection
+                .chain
+                .map(&:klass)
             end.uniq
           end
         end
@@ -77,6 +77,7 @@ module ActiveRecord
           source_records.each do |record|
             reflection = record.class._reflect_on_association(association)
             next if polymorphic_parent && !reflection || !record.association(association).klass
+
             (h[reflection] ||= []) << record
           end
           h
@@ -90,7 +91,8 @@ module ActiveRecord
               # For instance dependent scopes, the scope is potentially
               # different for each record. To allow this we'll group each
               # object separately into its own preloader
-              reflection_scope = reflection.join_scopes(klass.arel_table, klass.predicate_builder, klass, record).inject(&:merge!)
+              reflection_scope = reflection.join_scopes(klass.arel_table, klass.predicate_builder, klass,
+                                                        record).inject(&:merge!)
             end
 
             [klass, reflection_scope]
@@ -117,30 +119,31 @@ module ActiveRecord
         end
 
         private
-          def build_children(children)
-            Array.wrap(children).flat_map { |association|
-              Array(association).flat_map { |parent, child|
-                Branch.new(
-                  parent: self,
-                  association: parent,
-                  children: child,
-                  associate_by_default: associate_by_default,
-                  scope: scope
-                )
-              }
-            }
-          end
 
-          # Returns a class containing the logic needed to load preload the data
-          # and attach it to a relation. The class returned implements a `run` method
-          # that accepts a preloader.
-          def preloader_for(reflection)
-            if reflection.options[:through]
-              ThroughAssociation
-            else
-              Association
-            end
+        def build_children(children)
+          Array.wrap(children).flat_map { |association|
+            Array(association).flat_map { |parent, child|
+              Branch.new(
+                parent: self,
+                association: parent,
+                children: child,
+                associate_by_default: associate_by_default,
+                scope: scope
+              )
+            }
+          }
+        end
+
+        # Returns a class containing the logic needed to load preload the data
+        # and attach it to a relation. The class returned implements a `run` method
+        # that accepts a preloader.
+        def preloader_for(reflection)
+          if reflection.options[:through]
+            ThroughAssociation
+          else
+            Association
           end
+        end
       end
     end
   end

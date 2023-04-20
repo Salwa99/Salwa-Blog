@@ -15,7 +15,6 @@ require 'preload'
 require 'builder'
 
 class TestMethodCaching < Builder::Test
-
   # We can directly ask if xml object responds to the cache_me or
   # do_not_cache_me methods because xml is derived from BasicObject
   # (and repond_to? is not defined in BasicObject).
@@ -59,5 +58,4 @@ class TestMethodCaching < Builder::Test
       xml.do_not_cache_me
     end
   end
-
 end

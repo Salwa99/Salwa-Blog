@@ -28,7 +28,7 @@ module Capybara
       @registered.respond_to?(method_name) || super
     end
 
-  private
+    private
 
     def initialize
       @registered = {}

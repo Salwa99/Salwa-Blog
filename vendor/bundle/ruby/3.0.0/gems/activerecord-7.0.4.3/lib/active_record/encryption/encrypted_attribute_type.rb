@@ -50,91 +50,94 @@ module ActiveRecord
       end
 
       private
-        def previous_schemes_including_clean_text
-          previous_schemes.including((clean_text_scheme if support_unencrypted_data?)).compact
-        end
 
-        def previous_types_without_clean_text
-          @previous_types_without_clean_text ||= build_previous_types_for(previous_schemes)
-        end
+      def previous_schemes_including_clean_text
+        previous_schemes.including((clean_text_scheme if support_unencrypted_data?)).compact
+      end
 
-        def build_previous_types_for(schemes)
-          schemes.collect do |scheme|
-            EncryptedAttributeType.new(scheme: scheme, previous_type: true)
-          end
-        end
+      def previous_types_without_clean_text
+        @previous_types_without_clean_text ||= build_previous_types_for(previous_schemes)
+      end
 
-        def previous_type?
-          @previous_type
+      def build_previous_types_for(schemes)
+        schemes.collect do |scheme|
+          EncryptedAttributeType.new(scheme: scheme, previous_type: true)
         end
+      end
 
-        def decrypt(value)
-          with_context do
-            encryptor.decrypt(value, **decryption_options) unless value.nil?
-          end
+      def previous_type?
+        @previous_type
+      end
+
+      def decrypt(value)
+        with_context do
+          encryptor.decrypt(value, **decryption_options) unless value.nil?
+        end
+      rescue ActiveRecord::Encryption::Errors::Base => error
+        if previous_types_without_clean_text.blank?
+          handle_deserialize_error(error, value)
+        else
+          try_to_deserialize_with_previous_encrypted_types(value)
+        end
+      end
+
+      def try_to_deserialize_with_previous_encrypted_types(value)
+        previous_types.each.with_index do |type, index|
+          break type.deserialize(value)
         rescue ActiveRecord::Encryption::Errors::Base => error
-          if previous_types_without_clean_text.blank?
-            handle_deserialize_error(error, value)
-          else
-            try_to_deserialize_with_previous_encrypted_types(value)
-          end
+          handle_deserialize_error(error, value) if index == previous_types.length - 1
         end
+      end
 
-        def try_to_deserialize_with_previous_encrypted_types(value)
-          previous_types.each.with_index do |type, index|
-            break type.deserialize(value)
-          rescue ActiveRecord::Encryption::Errors::Base => error
-            handle_deserialize_error(error, value) if index == previous_types.length - 1
-          end
+      def handle_deserialize_error(error, value)
+        if error.is_a?(Errors::Decryption) && support_unencrypted_data?
+          value
+        else
+          raise error
         end
+      end
 
-        def handle_deserialize_error(error, value)
-          if error.is_a?(Errors::Decryption) && support_unencrypted_data?
-            value
-          else
-            raise error
-          end
-        end
+      def serialize_with_oldest?
+        @serialize_with_oldest ||= fixed? && previous_types_without_clean_text.present?
+      end
 
-        def serialize_with_oldest?
-          @serialize_with_oldest ||= fixed? && previous_types_without_clean_text.present?
-        end
+      def serialize_with_oldest(value)
+        previous_types.first.serialize(value)
+      end
 
-        def serialize_with_oldest(value)
-          previous_types.first.serialize(value)
-        end
+      def serialize_with_current(value)
+        casted_value = cast_type.serialize(value)
+        casted_value = casted_value&.downcase if downcase?
+        encrypt(casted_value.to_s) unless casted_value.nil?
+      end
 
-        def serialize_with_current(value)
-          casted_value = cast_type.serialize(value)
-          casted_value = casted_value&.downcase if downcase?
-          encrypt(casted_value.to_s) unless casted_value.nil?
+      def encrypt(value)
+        with_context do
+          encryptor.encrypt(value, **encryption_options)
         end
+      end
 
-        def encrypt(value)
-          with_context do
-            encryptor.encrypt(value, **encryption_options)
-          end
-        end
+      def encryptor
+        ActiveRecord::Encryption.encryptor
+      end
 
-        def encryptor
-          ActiveRecord::Encryption.encryptor
-        end
+      def support_unencrypted_data?
+        ActiveRecord::Encryption.config.support_unencrypted_data && !previous_type?
+      end
 
-        def support_unencrypted_data?
-          ActiveRecord::Encryption.config.support_unencrypted_data && !previous_type?
-        end
+      def encryption_options
+        @encryption_options ||= { key_provider: key_provider,
+                                  cipher_options: { deterministic: deterministic? } }.compact
+      end
 
-        def encryption_options
-          @encryption_options ||= { key_provider: key_provider, cipher_options: { deterministic: deterministic? } }.compact
-        end
+      def decryption_options
+        @decryption_options ||= { key_provider: key_provider }.compact
+      end
 
-        def decryption_options
-          @decryption_options ||= { key_provider: key_provider }.compact
-        end
-
-        def clean_text_scheme
-          @clean_text_scheme ||= ActiveRecord::Encryption::Scheme.new(downcase: downcase?, encryptor: ActiveRecord::Encryption::NullEncryptor.new)
-        end
+      def clean_text_scheme
+        @clean_text_scheme ||= ActiveRecord::Encryption::Scheme.new(downcase: downcase?,
+                                                                    encryptor: ActiveRecord::Encryption::NullEncryptor.new)
+      end
     end
   end
 end

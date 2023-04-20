@@ -270,9 +270,10 @@ module ActiveSupport
       end
 
       private
-        def registry
-          ActiveSupport::IsolatedExecutionState[:active_support_notifications_registry] ||= {}
-        end
+
+      def registry
+        ActiveSupport::IsolatedExecutionState[:active_support_notifications_registry] ||= {}
+      end
     end
 
     self.notifier = Fanout.new

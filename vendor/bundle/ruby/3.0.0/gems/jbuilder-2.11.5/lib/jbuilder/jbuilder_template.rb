@@ -64,7 +64,7 @@ class JbuilderTemplate < Jbuilder
   #   json.cache! ['v1', @person], expires_in: 10.minutes do
   #     json.extract! @person, :name, :age
   #   end
-  def cache!(key=nil, options={})
+  def cache!(key = nil, options = {})
     if @context.controller.perform_caching
       value = _cache_fragment_for(key, options) do
         _scope { yield self }
@@ -87,11 +87,11 @@ class JbuilderTemplate < Jbuilder
   #   end
   #
   #   # json.extra 'This will not work either, the root must be exclusive'
-  def cache_root!(key=nil, options={})
+  def cache_root!(key = nil, options = {})
     if @context.controller.perform_caching
       raise "cache_root! can't be used after JSON structures have been defined" if @attributes.present?
 
-      @cached_root = _cache_fragment_for([ :root, key ], options) { yield; target! }
+      @cached_root = _cache_fragment_for([:root, key], options) { yield; target! }
     else
       yield
     end
@@ -230,13 +230,13 @@ class JbuilderTemplate < Jbuilder
 
   def _set_inline_partial(name, object, options)
     value = if object.nil?
-      []
-    elsif _is_collection?(object)
-      _scope{ _render_partial_with_options options.merge(collection: object) }
-    else
-      locals = ::Hash[options[:as], object]
-      _scope{ _render_partial_with_options options.merge(locals: locals) }
-    end
+              []
+            elsif _is_collection?(object)
+              _scope { _render_partial_with_options options.merge(collection: object) }
+            else
+              locals = ::Hash[options[:as], object]
+              _scope { _render_partial_with_options options.merge(locals: locals) }
+            end
 
     set! name, value
   end

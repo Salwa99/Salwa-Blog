@@ -1,13 +1,10 @@
 require 'concurrent/thread_safe/util'
 
 module Concurrent
-
   # @!visibility private
   module ThreadSafe
-
     # @!visibility private
     module Util
-
       # A xorshift random number (positive +Fixnum+s) generator, provides
       # reasonably cheap way to generate thread local random numbers without
       # contending for the global +Kernel.rand+.

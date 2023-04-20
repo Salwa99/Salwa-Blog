@@ -3,7 +3,6 @@ require 'concurrent/atomic/atomic_reference'
 
 module Concurrent
   module Concern
-
     # Include where logging is needed
     #
     # @!visibility private
@@ -24,7 +23,7 @@ module Concurrent
         logger.call level, progname, message, &block
       rescue => error
         $stderr.puts "`Concurrent.configuration.logger` failed to log #{[level, progname, message, block]}\n" +
-          "#{error.message} (#{error.class})\n#{error.backtrace.join "\n"}"
+                     "#{error.message} (#{error.class})\n#{error.backtrace.join "\n"}"
       end
     end
   end
@@ -39,7 +38,7 @@ module Concurrent
     lambda do |severity, progname, message = nil, &block|
       return false if severity < level
 
-      message           = block ? block.call : message
+      message = block ? block.call : message
       formatted_message = case message
                           when String
                             message
@@ -67,8 +66,8 @@ module Concurrent
   # @return [Logger] Logger with provided level and output.
   # @deprecated
   def self.create_stdlib_logger(level = Logger::FATAL, output = $stderr)
-    logger           = Logger.new(output)
-    logger.level     = level
+    logger = Logger.new(output)
+    logger.level = level
     logger.formatter = lambda do |severity, datetime, progname, msg|
       formatted_message = case msg
                           when String
@@ -100,7 +99,7 @@ module Concurrent
   # TODO (pitr-ch 27-Dec-2016): remove deadlocking stdlib_logger methods
 
   # Suppresses all output when used for logging.
-  NULL_LOGGER   = lambda { |level, progname, message = nil, &block| }
+  NULL_LOGGER = lambda { |level, progname, message = nil, &block| }
 
   # @!visibility private
   GLOBAL_LOGGER = AtomicReference.new(create_simple_logger(Logger::WARN))

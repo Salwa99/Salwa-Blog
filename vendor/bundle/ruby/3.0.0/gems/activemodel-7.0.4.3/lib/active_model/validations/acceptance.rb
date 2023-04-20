@@ -15,68 +15,70 @@ module ActiveModel
       end
 
       private
-        def setup!(klass)
-          define_attributes = LazilyDefineAttributes.new(attributes)
-          klass.include(define_attributes) unless klass.included_modules.include?(define_attributes)
+
+      def setup!(klass)
+        define_attributes = LazilyDefineAttributes.new(attributes)
+        klass.include(define_attributes) unless klass.included_modules.include?(define_attributes)
+      end
+
+      def acceptable_option?(value)
+        Array(options[:accept]).include?(value)
+      end
+
+      class LazilyDefineAttributes < Module
+        def initialize(attributes)
+          @attributes = attributes.map(&:to_s)
         end
 
-        def acceptable_option?(value)
-          Array(options[:accept]).include?(value)
+        def included(klass)
+          @lock = Mutex.new
+          mod = self
+
+          define_method(:respond_to_missing?) do |method_name, include_private = false|
+            mod.define_on(klass)
+            super(method_name, include_private) || mod.matches?(method_name)
+          end
+
+          define_method(:method_missing) do |method_name, *args, &block|
+            mod.define_on(klass)
+            if mod.matches?(method_name)
+              send(method_name, *args, &block)
+            else
+              super(method_name, *args, &block)
+            end
+          end
         end
 
-        class LazilyDefineAttributes < Module
-          def initialize(attributes)
-            @attributes = attributes.map(&:to_s)
-          end
-
-          def included(klass)
-            @lock = Mutex.new
-            mod = self
-
-            define_method(:respond_to_missing?) do |method_name, include_private = false|
-              mod.define_on(klass)
-              super(method_name, include_private) || mod.matches?(method_name)
-            end
-
-            define_method(:method_missing) do |method_name, *args, &block|
-              mod.define_on(klass)
-              if mod.matches?(method_name)
-                send(method_name, *args, &block)
-              else
-                super(method_name, *args, &block)
-              end
-            end
-          end
-
-          def matches?(method_name)
-            attr_name = method_name.to_s.chomp("=")
-            attributes.any? { |name| name == attr_name }
-          end
-
-          def define_on(klass)
-            @lock&.synchronize do
-              return unless @lock
-
-              attr_readers = attributes.reject { |name| klass.attribute_method?(name) }
-              attr_writers = attributes.reject { |name| klass.attribute_method?("#{name}=") }
-
-              attr_reader(*attr_readers)
-              attr_writer(*attr_writers)
-
-              remove_method :respond_to_missing?
-              remove_method :method_missing
-
-              @lock = nil
-            end
-          end
-
-          def ==(other)
-            self.class == other.class && attributes == other.attributes
-          end
-
-          protected
-            attr_reader :attributes
+        def matches?(method_name)
+          attr_name = method_name.to_s.chomp("=")
+          attributes.any? { |name| name == attr_name }
         end
+
+        def define_on(klass)
+          @lock&.synchronize do
+            return unless @lock
+
+            attr_readers = attributes.reject { |name| klass.attribute_method?(name) }
+            attr_writers = attributes.reject { |name| klass.attribute_method?("#{name}=") }
+
+            attr_reader(*attr_readers)
+            attr_writer(*attr_writers)
+
+            remove_method :respond_to_missing?
+            remove_method :method_missing
+
+            @lock = nil
+          end
+        end
+
+        def ==(other)
+          self.class == other.class && attributes == other.attributes
+        end
+
+        protected
+
+        attr_reader :attributes
+      end
     end
 
     module HelperMethods

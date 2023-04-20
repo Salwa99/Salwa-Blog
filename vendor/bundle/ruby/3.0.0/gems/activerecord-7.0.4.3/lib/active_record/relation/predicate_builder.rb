@@ -73,92 +73,94 @@ module ActiveRecord
     end
 
     protected
-      def expand_from_hash(attributes, &block)
-        return ["1=0"] if attributes.empty?
 
-        attributes.flat_map do |key, value|
-          if value.is_a?(Hash) && !table.has_column?(key)
-            table.associated_table(key, &block)
-              .predicate_builder.expand_from_hash(value.stringify_keys)
-          elsif table.associated_with?(key)
-            # Find the foreign key when using queries such as:
-            # Post.where(author: author)
-            #
-            # For polymorphic relationships, find the foreign key and type:
-            # PriceEstimate.where(estimate_of: treasure)
-            associated_table = table.associated_table(key)
-            if associated_table.polymorphic_association?
-              value = [value] unless value.is_a?(Array)
-              klass = PolymorphicArrayValue
-            elsif associated_table.through_association?
-              next associated_table.predicate_builder.expand_from_hash(
-                associated_table.primary_key => value
-              )
+    def expand_from_hash(attributes, &block)
+      return ["1=0"] if attributes.empty?
+
+      attributes.flat_map do |key, value|
+        if value.is_a?(Hash) && !table.has_column?(key)
+          table.associated_table(key, &block)
+            .predicate_builder.expand_from_hash(value.stringify_keys)
+        elsif table.associated_with?(key)
+          # Find the foreign key when using queries such as:
+          # Post.where(author: author)
+          #
+          # For polymorphic relationships, find the foreign key and type:
+          # PriceEstimate.where(estimate_of: treasure)
+          associated_table = table.associated_table(key)
+          if associated_table.polymorphic_association?
+            value = [value] unless value.is_a?(Array)
+            klass = PolymorphicArrayValue
+          elsif associated_table.through_association?
+            next associated_table.predicate_builder.expand_from_hash(
+              associated_table.primary_key => value
+            )
+          end
+
+          klass ||= AssociationQueryValue
+          queries = klass.new(associated_table, value).queries.map! do |query|
+            # If the query produced is identical to attributes don't go any deeper.
+            # Prevents stack level too deep errors when association and foreign_key are identical.
+            query == attributes ? self[key, value] : expand_from_hash(query)
+          end
+
+          grouping_queries(queries)
+        elsif table.aggregated_with?(key)
+          mapping = table.reflect_on_aggregation(key).mapping
+          values = value.nil? ? [nil] : Array.wrap(value)
+          if mapping.length == 1 || values.empty?
+            column_name, aggr_attr = mapping.first
+            values = values.map do |object|
+              object.respond_to?(aggr_attr) ? object.public_send(aggr_attr) : object
             end
-
-            klass ||= AssociationQueryValue
-            queries = klass.new(associated_table, value).queries.map! do |query|
-              # If the query produced is identical to attributes don't go any deeper.
-              # Prevents stack level too deep errors when association and foreign_key are identical.
-              query == attributes ? self[key, value] : expand_from_hash(query)
+            self[column_name, values]
+          else
+            queries = values.map do |object|
+              mapping.map do |field_attr, aggregate_attr|
+                self[field_attr, object.try!(aggregate_attr)]
+              end
             end
 
             grouping_queries(queries)
-          elsif table.aggregated_with?(key)
-            mapping = table.reflect_on_aggregation(key).mapping
-            values = value.nil? ? [nil] : Array.wrap(value)
-            if mapping.length == 1 || values.empty?
-              column_name, aggr_attr = mapping.first
-              values = values.map do |object|
-                object.respond_to?(aggr_attr) ? object.public_send(aggr_attr) : object
-              end
-              self[column_name, values]
-            else
-              queries = values.map do |object|
-                mapping.map do |field_attr, aggregate_attr|
-                  self[field_attr, object.try!(aggregate_attr)]
-                end
-              end
-
-              grouping_queries(queries)
-            end
-          else
-            self[key, value]
           end
+        else
+          self[key, value]
         end
       end
+    end
 
     private
-      attr_reader :table
 
-      def grouping_queries(queries)
-        if queries.one?
-          queries.first
-        else
-          queries.map! { |query| query.reduce(&:and) }
-          queries = queries.reduce { |result, query| Arel::Nodes::Or.new(result, query) }
-          Arel::Nodes::Grouping.new(queries)
-        end
+    attr_reader :table
+
+    def grouping_queries(queries)
+      if queries.one?
+        queries.first
+      else
+        queries.map! { |query| query.reduce(&:and) }
+        queries = queries.reduce { |result, query| Arel::Nodes::Or.new(result, query) }
+        Arel::Nodes::Grouping.new(queries)
+      end
+    end
+
+    def convert_dot_notation_to_hash(attributes)
+      dot_notation = attributes.select do |k, v|
+        k.include?(".") && !v.is_a?(Hash)
       end
 
-      def convert_dot_notation_to_hash(attributes)
-        dot_notation = attributes.select do |k, v|
-          k.include?(".") && !v.is_a?(Hash)
-        end
+      dot_notation.each_key do |key|
+        table_name, column_name = key.split(".")
+        value = attributes.delete(key)
+        attributes[table_name] ||= {}
 
-        dot_notation.each_key do |key|
-          table_name, column_name = key.split(".")
-          value = attributes.delete(key)
-          attributes[table_name] ||= {}
-
-          attributes[table_name] = attributes[table_name].merge(column_name => value)
-        end
-
-        attributes
+        attributes[table_name] = attributes[table_name].merge(column_name => value)
       end
 
-      def handler_for(object)
-        @handlers.detect { |klass, _| klass === object }.last
-      end
+      attributes
+    end
+
+    def handler_for(object)
+      @handlers.detect { |klass, _| klass === object }.last
+    end
   end
 end

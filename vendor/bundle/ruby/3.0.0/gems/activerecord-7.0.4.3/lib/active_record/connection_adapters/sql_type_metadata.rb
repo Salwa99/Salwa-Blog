@@ -36,10 +36,11 @@ module ActiveRecord
       end
 
       private
-        def deduplicated
-          @sql_type = -sql_type
-          super
-        end
+
+      def deduplicated
+        @sql_type = -sql_type
+        super
+      end
     end
   end
 end

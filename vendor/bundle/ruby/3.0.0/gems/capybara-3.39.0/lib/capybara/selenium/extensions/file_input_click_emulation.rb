@@ -10,7 +10,7 @@ class Capybara::Selenium::Node
       raise
     end
 
-  private
+    private
 
     def visible_file_field?
       (attrs(:tagName, :type).map { |val| val&.downcase } == %w[input file]) && visible?

@@ -3,7 +3,6 @@ require 'concurrent/ivar'
 require 'concurrent/synchronization/lockable_object'
 
 module Concurrent
-
   # A mixin module that provides simple asynchronous behavior to a class,
   # turning it into a simple actor. Loosely based on Erlang's
   # [gen_server](http://www.erlang.org/doc/man/gen_server.html), but without
@@ -215,7 +214,6 @@ module Concurrent
   # @see http://www.erlang.org/doc/man/gen_server.html Erlang gen_server
   # @see http://c2.com/cgi/wiki?LetItCrash "Let It Crash" at http://c2.com/
   module Async
-
     # @!method self.new(*args, &block)
     #
     #   Instanciate a new object and ensure proper initialization of the
@@ -358,7 +356,6 @@ module Concurrent
     #
     # @!visibility private
     class AwaitDelegator
-
       # Create a new delegator object wrapping the given delegate.
       #
       # @param [AsyncDelegator] delegate the object to wrap and delegate method calls to
@@ -440,6 +437,7 @@ module Concurrent
     # @!visibility private
     def init_synchronization
       return self if defined?(@__async_initialized__) && @__async_initialized__
+
       @__async_initialized__ = true
       @__async_delegator__ = AsyncDelegator.new(self)
       @__await_delegator__ = AwaitDelegator.new(@__async_delegator__)

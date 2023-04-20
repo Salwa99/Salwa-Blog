@@ -32,7 +32,8 @@ RSpec.describe Capybara::Selector::CSS::Splitter do
 
     it 'root level comma when quotes and pseudo selectors' do
       css = 'div.class1[id="abc\\"def,ghi"]:not(.class3, .class4), span[id=\'a"c\\\'de\'], section, #abc\\,def'
-      expect(splitter.split(css)).to eq ['div.class1[id="abc\\"def,ghi"]:not(.class3, .class4)', 'span[id=\'a"c\\\'de\']', 'section', '#abc\\,def']
+      expect(splitter.split(css)).to eq ['div.class1[id="abc\\"def,ghi"]:not(.class3, .class4)',
+                                         'span[id=\'a"c\\\'de\']', 'section', '#abc\\,def']
     end
   end
 end

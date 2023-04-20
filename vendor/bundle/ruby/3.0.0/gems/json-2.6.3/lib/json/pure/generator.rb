@@ -1,4 +1,5 @@
-#frozen_string_literal: false
+# frozen_string_literal: false
+
 module JSON
   MAP = {
     "\x0" => '\u0000',
@@ -9,12 +10,12 @@ module JSON
     "\x5" => '\u0005',
     "\x6" => '\u0006',
     "\x7" => '\u0007',
-    "\b"  =>  '\b',
-    "\t"  =>  '\t',
-    "\n"  =>  '\n',
+    "\b" => '\b',
+    "\t" => '\t',
+    "\n" => '\n',
     "\xb" => '\u000b',
-    "\f"  =>  '\f',
-    "\r"  =>  '\r',
+    "\f" => '\f',
+    "\r" => '\r',
     "\xe" => '\u000e',
     "\xf" => '\u000f',
     "\x10" => '\u0010',
@@ -33,12 +34,12 @@ module JSON
     "\x1d" => '\u001d',
     "\x1e" => '\u001e',
     "\x1f" => '\u001f',
-    '"'   =>  '\"',
-    '\\'  =>  '\\\\',
+    '"' => '\"',
+    '\\' => '\\\\',
   } # :nodoc:
 
   ESCAPE_SLASH_MAP = MAP.merge(
-    '/'  =>  '\\/',
+    '/' => '\\/',
   )
 
   # Convert a UTF8 encoded Ruby string _string_ to a JSON string, encoded with
@@ -123,14 +124,14 @@ module JSON
         #   generated, otherwise an exception is thrown, if these values are
         #   encountered. This options defaults to false.
         def initialize(opts = {})
-          @indent                = ''
-          @space                 = ''
-          @space_before          = ''
-          @object_nl             = ''
-          @array_nl              = ''
-          @allow_nan             = false
-          @ascii_only            = false
-          @escape_slash          = false
+          @indent = ''
+          @space = ''
+          @space_before = ''
+          @object_nl = ''
+          @array_nl = ''
+          @allow_nan = false
+          @ascii_only = false
+          @escape_slash = false
           @buffer_initial_length = 1024
           configure opts
         end
@@ -176,6 +177,7 @@ module JSON
 
         def check_max_nesting # :nodoc:
           return if @max_nesting.zero?
+
           current_nesting = depth + 1
           current_nesting > @max_nesting and
             raise NestingError, "nesting of #{current_nesting} is too deep"
@@ -217,16 +219,16 @@ module JSON
           for key, value in opts
             instance_variable_set "@#{key}", value
           end
-          @indent                = opts[:indent] if opts.key?(:indent)
-          @space                 = opts[:space] if opts.key?(:space)
-          @space_before          = opts[:space_before] if opts.key?(:space_before)
-          @object_nl             = opts[:object_nl] if opts.key?(:object_nl)
-          @array_nl              = opts[:array_nl] if opts.key?(:array_nl)
-          @allow_nan             = !!opts[:allow_nan] if opts.key?(:allow_nan)
-          @ascii_only            = opts[:ascii_only] if opts.key?(:ascii_only)
-          @depth                 = opts[:depth] || 0
+          @indent = opts[:indent] if opts.key?(:indent)
+          @space = opts[:space] if opts.key?(:space)
+          @space_before = opts[:space_before] if opts.key?(:space_before)
+          @object_nl = opts[:object_nl] if opts.key?(:object_nl)
+          @array_nl = opts[:array_nl] if opts.key?(:array_nl)
+          @allow_nan = !!opts[:allow_nan] if opts.key?(:allow_nan)
+          @ascii_only = opts[:ascii_only] if opts.key?(:ascii_only)
+          @depth = opts[:depth] || 0
           @buffer_initial_length ||= opts[:buffer_initial_length]
-          @escape_slash          = !!opts[:escape_slash] if opts.key?(:escape_slash)
+          @escape_slash = !!opts[:escape_slash] if opts.key?(:escape_slash)
 
           if !opts.key?(:max_nesting) # defaults to 100
             @max_nesting = 100
@@ -259,7 +261,7 @@ module JSON
         def generate(obj)
           result = obj.to_json(self)
           JSON.valid_utf8?(result) or raise GeneratorError,
-            "source sequence #{result.inspect} is illegal/malformed utf-8"
+                                            "source sequence #{result.inspect} is illegal/malformed utf-8"
           result
         end
 
@@ -317,7 +319,7 @@ module JSON
             depth = state.depth += 1
             first = true
             indent = !state.object_nl.empty?
-            each { |key,value|
+            each { |key, value|
               result << delim unless first
               result << state.indent * depth if indent
               result << key.to_s.to_json(state)
@@ -447,8 +449,8 @@ module JSON
           # instead of UTF-8 strings, e. g. binary data.
           def to_json_raw_object
             {
-              JSON.create_id  => self.class.name,
-              'raw'           => self.unpack('C*'),
+              JSON.create_id => self.class.name,
+              'raw' => self.unpack('C*'),
             }
           end
 

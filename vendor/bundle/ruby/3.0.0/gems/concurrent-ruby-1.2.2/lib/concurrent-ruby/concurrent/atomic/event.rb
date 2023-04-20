@@ -2,7 +2,6 @@ require 'thread'
 require 'concurrent/synchronization/lockable_object'
 
 module Concurrent
-
   # Old school kernel-style event reminiscent of Win32 programming in C++.
   #
   # When an `Event` is created it is in the `unset` state. Threads can choose to
@@ -34,7 +33,6 @@ module Concurrent
   #   # t2 calling set
   #   # event occurred
   class Event < Synchronization::LockableObject
-
     # Creates a new `Event` in the unset state. Threads calling `#wait` on the
     # `Event` will block.
     def initialize
@@ -68,8 +66,8 @@ module Concurrent
     def reset
       synchronize do
         if @set
-          @set       = false
-          @iteration +=1
+          @set = false
+          @iteration += 1
         end
         true
       end
@@ -102,7 +100,7 @@ module Concurrent
     end
 
     def ns_initialize
-      @set       = false
+      @set = false
       @iteration = 0
     end
   end

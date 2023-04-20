@@ -63,18 +63,19 @@ module ActiveRecord
       end
 
       private
-        attr_reader :db_config, :root
 
-        def run_cmd(cmd, args, out)
-          fail run_cmd_error(cmd, args) unless Kernel.system(cmd, *args, out: out)
-        end
+      attr_reader :db_config, :root
 
-        def run_cmd_error(cmd, args)
-          msg = +"failed to execute:\n"
-          msg << "#{cmd} #{args.join(' ')}\n\n"
-          msg << "Please check the output above for any errors and make sure that `#{cmd}` is installed in your PATH and has proper permissions.\n\n"
-          msg
-        end
+      def run_cmd(cmd, args, out)
+        fail run_cmd_error(cmd, args) unless Kernel.system(cmd, *args, out: out)
+      end
+
+      def run_cmd_error(cmd, args)
+        msg = +"failed to execute:\n"
+        msg << "#{cmd} #{args.join(' ')}\n\n"
+        msg << "Please check the output above for any errors and make sure that `#{cmd}` is installed in your PATH and has proper permissions.\n\n"
+        msg
+      end
     end
   end
 end

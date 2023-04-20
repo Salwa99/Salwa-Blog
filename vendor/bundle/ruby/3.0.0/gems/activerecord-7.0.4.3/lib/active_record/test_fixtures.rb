@@ -42,8 +42,11 @@ module ActiveRecord
       def fixtures(*fixture_set_names)
         if fixture_set_names.first == :all
           raise StandardError, "No fixture path found. Please set `#{self}.fixture_path`." if fixture_path.blank?
+
           fixture_set_names = Dir[::File.join(fixture_path, "{**,*}/*.{yml}")].uniq
-          fixture_set_names.reject! { |f| f.start_with?(file_fixture_path.to_s) } if defined?(file_fixture_path) && file_fixture_path
+          fixture_set_names.reject! { |f|
+            f.start_with?(file_fixture_path.to_s)
+          } if defined?(file_fixture_path) && file_fixture_path
           fixture_set_names.map! { |f| f[fixture_path.to_s.size..-5].delete_prefix("/") }
         else
           fixture_set_names = fixture_set_names.flatten.map(&:to_s)
@@ -193,102 +196,107 @@ module ActiveRecord
     end
 
     private
-      # Shares the writing connection pool with connections on
-      # other handlers.
-      #
-      # In an application with a primary and replica the test fixtures
-      # need to share a connection pool so that the reading connection
-      # can see data in the open transaction on the writing connection.
-      def setup_shared_connection_pool
-        if ActiveRecord.legacy_connection_handling
-          writing_handler = ActiveRecord::Base.connection_handlers[ActiveRecord.writing_role]
 
-          ActiveRecord::Base.connection_handlers.values.each do |handler|
-            if handler != writing_handler
-              handler.connection_pool_names.each do |name|
-                writing_pool_manager = writing_handler.send(:owner_to_pool_manager)[name]
-                return unless writing_pool_manager
+    # Shares the writing connection pool with connections on
+    # other handlers.
+    #
+    # In an application with a primary and replica the test fixtures
+    # need to share a connection pool so that the reading connection
+    # can see data in the open transaction on the writing connection.
+    def setup_shared_connection_pool
+      if ActiveRecord.legacy_connection_handling
+        writing_handler = ActiveRecord::Base.connection_handlers[ActiveRecord.writing_role]
 
-                pool_manager = handler.send(:owner_to_pool_manager)[name]
-                @legacy_saved_pool_configs[handler][name] ||= {}
-                pool_manager.shard_names.each do |shard_name|
-                  writing_pool_config = writing_pool_manager.get_pool_config(nil, shard_name)
-                  pool_config = pool_manager.get_pool_config(nil, shard_name)
-                  next if pool_config == writing_pool_config
+        ActiveRecord::Base.connection_handlers.values.each do |handler|
+          if handler != writing_handler
+            handler.connection_pool_names.each do |name|
+              writing_pool_manager = writing_handler.send(:owner_to_pool_manager)[name]
+              return unless writing_pool_manager
 
-                  @legacy_saved_pool_configs[handler][name][shard_name] = pool_config
-                  pool_manager.set_pool_config(nil, shard_name, writing_pool_config)
-                end
-              end
-            end
-          end
-        else
-          handler = ActiveRecord::Base.connection_handler
-
-          handler.connection_pool_names.each do |name|
-            pool_manager = handler.send(:owner_to_pool_manager)[name]
-            pool_manager.shard_names.each do |shard_name|
-              writing_pool_config = pool_manager.get_pool_config(ActiveRecord.writing_role, shard_name)
-              @saved_pool_configs[name][shard_name] ||= {}
-              pool_manager.role_names.each do |role|
-                next unless pool_config = pool_manager.get_pool_config(role, shard_name)
+              pool_manager = handler.send(:owner_to_pool_manager)[name]
+              @legacy_saved_pool_configs[handler][name] ||= {}
+              pool_manager.shard_names.each do |shard_name|
+                writing_pool_config = writing_pool_manager.get_pool_config(nil, shard_name)
+                pool_config = pool_manager.get_pool_config(nil, shard_name)
                 next if pool_config == writing_pool_config
 
-                @saved_pool_configs[name][shard_name][role] = pool_config
-                pool_manager.set_pool_config(role, shard_name, writing_pool_config)
+                @legacy_saved_pool_configs[handler][name][shard_name] = pool_config
+                pool_manager.set_pool_config(nil, shard_name, writing_pool_config)
               end
+            end
+          end
+        end
+      else
+        handler = ActiveRecord::Base.connection_handler
+
+        handler.connection_pool_names.each do |name|
+          pool_manager = handler.send(:owner_to_pool_manager)[name]
+          pool_manager.shard_names.each do |shard_name|
+            writing_pool_config = pool_manager.get_pool_config(ActiveRecord.writing_role, shard_name)
+            @saved_pool_configs[name][shard_name] ||= {}
+            pool_manager.role_names.each do |role|
+              next unless pool_config = pool_manager.get_pool_config(role, shard_name)
+              next if pool_config == writing_pool_config
+
+              @saved_pool_configs[name][shard_name][role] = pool_config
+              pool_manager.set_pool_config(role, shard_name, writing_pool_config)
+            end
+          end
+        end
+      end
+    end
+
+    def teardown_shared_connection_pool
+      if ActiveRecord.legacy_connection_handling
+        @legacy_saved_pool_configs.each_pair do |handler, names|
+          names.each_pair do |name, shards|
+            shards.each_pair do |shard_name, pool_config|
+              pool_manager = handler.send(:owner_to_pool_manager)[name]
+              pool_manager.set_pool_config(nil, shard_name, pool_config)
+            end
+          end
+        end
+      else
+        handler = ActiveRecord::Base.connection_handler
+
+        @saved_pool_configs.each_pair do |name, shards|
+          pool_manager = handler.send(:owner_to_pool_manager)[name]
+          shards.each_pair do |shard_name, roles|
+            roles.each_pair do |role, pool_config|
+              next unless pool_manager.get_pool_config(role, shard_name)
+
+              pool_manager.set_pool_config(role, shard_name, pool_config)
             end
           end
         end
       end
 
-      def teardown_shared_connection_pool
-        if ActiveRecord.legacy_connection_handling
-          @legacy_saved_pool_configs.each_pair do |handler, names|
-            names.each_pair do |name, shards|
-              shards.each_pair do |shard_name, pool_config|
-                pool_manager = handler.send(:owner_to_pool_manager)[name]
-                pool_manager.set_pool_config(nil, shard_name, pool_config)
-              end
-            end
-          end
-        else
-          handler = ActiveRecord::Base.connection_handler
+      @legacy_saved_pool_configs.clear
+      @saved_pool_configs.clear
+    end
 
-          @saved_pool_configs.each_pair do |name, shards|
-            pool_manager = handler.send(:owner_to_pool_manager)[name]
-            shards.each_pair do |shard_name, roles|
-              roles.each_pair do |role, pool_config|
-                next unless pool_manager.get_pool_config(role, shard_name)
+    def load_fixtures(config)
+      ActiveRecord::FixtureSet.create_fixtures(fixture_path, fixture_table_names, fixture_class_names,
+                                               config).index_by(&:name)
+    end
 
-                pool_manager.set_pool_config(role, shard_name, pool_config)
-              end
-            end
-          end
-        end
+    def instantiate_fixtures
+      if pre_loaded_fixtures
+        raise RuntimeError,
+              "Load fixtures before instantiating them." if ActiveRecord::FixtureSet.all_loaded_fixtures.empty?
 
-        @legacy_saved_pool_configs.clear
-        @saved_pool_configs.clear
-      end
+        ActiveRecord::FixtureSet.instantiate_all_loaded_fixtures(self, load_instances?)
+      else
+        raise RuntimeError, "Load fixtures before instantiating them." if @loaded_fixtures.nil?
 
-      def load_fixtures(config)
-        ActiveRecord::FixtureSet.create_fixtures(fixture_path, fixture_table_names, fixture_class_names, config).index_by(&:name)
-      end
-
-      def instantiate_fixtures
-        if pre_loaded_fixtures
-          raise RuntimeError, "Load fixtures before instantiating them." if ActiveRecord::FixtureSet.all_loaded_fixtures.empty?
-          ActiveRecord::FixtureSet.instantiate_all_loaded_fixtures(self, load_instances?)
-        else
-          raise RuntimeError, "Load fixtures before instantiating them." if @loaded_fixtures.nil?
-          @loaded_fixtures.each_value do |fixture_set|
-            ActiveRecord::FixtureSet.instantiate_fixtures(self, fixture_set, load_instances?)
-          end
+        @loaded_fixtures.each_value do |fixture_set|
+          ActiveRecord::FixtureSet.instantiate_fixtures(self, fixture_set, load_instances?)
         end
       end
+    end
 
-      def load_instances?
-        use_instantiated_fixtures != :no_instances
-      end
+    def load_instances?
+      use_instantiated_fixtures != :no_instances
+    end
   end
 end

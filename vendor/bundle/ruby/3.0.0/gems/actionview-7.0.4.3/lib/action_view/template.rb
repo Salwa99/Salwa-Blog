@@ -121,22 +121,22 @@ module ActionView
     attr_reader :variable, :format, :variant, :locals, :virtual_path
 
     def initialize(source, identifier, handler, locals:, format: nil, variant: nil, virtual_path: nil)
-      @source            = source
-      @identifier        = identifier
-      @handler           = handler
-      @compiled          = false
-      @locals            = locals
-      @virtual_path      = virtual_path
+      @source = source
+      @identifier = identifier
+      @handler = handler
+      @compiled = false
+      @locals = locals
+      @virtual_path = virtual_path
 
       @variable = if @virtual_path
-        base = @virtual_path.end_with?("/") ? "" : ::File.basename(@virtual_path)
-        base =~ /\A_?(.*?)(?:\.\w+)*\z/
-        $1.to_sym
-      end
+                    base = @virtual_path.end_with?("/") ? "" : ::File.basename(@virtual_path)
+                    base =~ /\A_?(.*?)(?:\.\w+)*\z/
+                    $1.to_sym
+                  end
 
-      @format            = format
-      @variant           = variant
-      @compile_mutex     = Mutex.new
+      @format = format
+      @variant = variant
+      @compile_mutex = Mutex.new
     end
 
     # Returns whether the underlying handler supports streaming. If so,
@@ -222,12 +222,11 @@ module ActionView
       end
     end
 
-
     # Exceptions are marshalled when using the parallel test runner with DRb, so we need
     # to ensure that references to the template object can be marshalled as well. This means forgoing
     # the marshalling of the compiler mutex and instantiating that again on unmarshalling.
     def marshal_dump # :nodoc:
-      [ @source, @identifier, @handler, @compiled, @locals, @virtual_path, @format, @variant ]
+      [@source, @identifier, @handler, @compiled, @locals, @virtual_path, @format, @variant]
     end
 
     def marshal_load(array) # :nodoc:
@@ -236,133 +235,134 @@ module ActionView
     end
 
     private
-      # Compile a template. This method ensures a template is compiled
-      # just once and removes the source after it is compiled.
-      def compile!(view)
+
+    # Compile a template. This method ensures a template is compiled
+    # just once and removes the source after it is compiled.
+    def compile!(view)
+      return if @compiled
+
+      # Templates can be used concurrently in threaded environments
+      # so compilation and any instance variable modification must
+      # be synchronized
+      @compile_mutex.synchronize do
+        # Any thread holding this lock will be compiling the template needed
+        # by the threads waiting. So re-check the @compiled flag to avoid
+        # re-compilation
         return if @compiled
 
-        # Templates can be used concurrently in threaded environments
-        # so compilation and any instance variable modification must
-        # be synchronized
-        @compile_mutex.synchronize do
-          # Any thread holding this lock will be compiling the template needed
-          # by the threads waiting. So re-check the @compiled flag to avoid
-          # re-compilation
-          return if @compiled
+        mod = view.compiled_method_container
 
-          mod = view.compiled_method_container
-
-          instrument("!compile_template") do
-            compile(mod)
-          end
-
-          @compiled = true
+        instrument("!compile_template") do
+          compile(mod)
         end
+
+        @compiled = true
       end
+    end
 
-      # Among other things, this method is responsible for properly setting
-      # the encoding of the compiled template.
-      #
-      # If the template engine handles encodings, we send the encoded
-      # String to the engine without further processing. This allows
-      # the template engine to support additional mechanisms for
-      # specifying the encoding. For instance, ERB supports <%# encoding: %>
-      #
-      # Otherwise, after we figure out the correct encoding, we then
-      # encode the source into <tt>Encoding.default_internal</tt>.
-      # In general, this means that templates will be UTF-8 inside of Rails,
-      # regardless of the original source encoding.
-      def compile(mod)
-        source = encode!
-        code = @handler.call(self, source)
+    # Among other things, this method is responsible for properly setting
+    # the encoding of the compiled template.
+    #
+    # If the template engine handles encodings, we send the encoded
+    # String to the engine without further processing. This allows
+    # the template engine to support additional mechanisms for
+    # specifying the encoding. For instance, ERB supports <%# encoding: %>
+    #
+    # Otherwise, after we figure out the correct encoding, we then
+    # encode the source into <tt>Encoding.default_internal</tt>.
+    # In general, this means that templates will be UTF-8 inside of Rails,
+    # regardless of the original source encoding.
+    def compile(mod)
+      source = encode!
+      code = @handler.call(self, source)
 
-        # Make sure that the resulting String to be eval'd is in the
-        # encoding of the code
-        original_source = source
-        source = +<<-end_src
+      # Make sure that the resulting String to be eval'd is in the
+      # encoding of the code
+      original_source = source
+      source = +<<-end_src
           def #{method_name}(local_assigns, output_buffer)
             @virtual_path = #{@virtual_path.inspect};#{locals_code};#{code}
           end
-        end_src
+      end_src
 
-        # Make sure the source is in the encoding of the returned code
-        source.force_encoding(code.encoding)
+      # Make sure the source is in the encoding of the returned code
+      source.force_encoding(code.encoding)
 
-        # In case we get back a String from a handler that is not in
-        # BINARY or the default_internal, encode it to the default_internal
-        source.encode!
+      # In case we get back a String from a handler that is not in
+      # BINARY or the default_internal, encode it to the default_internal
+      source.encode!
 
-        # Now, validate that the source we got back from the template
-        # handler is valid in the default_internal. This is for handlers
-        # that handle encoding but screw up
-        unless source.valid_encoding?
-          raise WrongEncodingError.new(source, Encoding.default_internal)
-        end
-
-        begin
-          if Template.frozen_string_literal
-            mod.module_eval("# frozen_string_literal: true\n#{source}", identifier, -1)
-          else
-            mod.module_eval(source, identifier, 0)
-          end
-        rescue SyntaxError
-          # Account for when code in the template is not syntactically valid; e.g. if we're using
-          # ERB and the user writes <%= foo( %>, attempting to call a helper `foo` and interpolate
-          # the result into the template, but missing an end parenthesis.
-          raise SyntaxErrorInTemplate.new(self, original_source)
-        end
+      # Now, validate that the source we got back from the template
+      # handler is valid in the default_internal. This is for handlers
+      # that handle encoding but screw up
+      unless source.valid_encoding?
+        raise WrongEncodingError.new(source, Encoding.default_internal)
       end
 
-      def handle_render_error(view, e)
-        if e.is_a?(Template::Error)
-          e.sub_template_of(self)
-          raise e
+      begin
+        if Template.frozen_string_literal
+          mod.module_eval("# frozen_string_literal: true\n#{source}", identifier, -1)
         else
-          raise Template::Error.new(self)
+          mod.module_eval(source, identifier, 0)
         end
+      rescue SyntaxError
+        # Account for when code in the template is not syntactically valid; e.g. if we're using
+        # ERB and the user writes <%= foo( %>, attempting to call a helper `foo` and interpolate
+        # the result into the template, but missing an end parenthesis.
+        raise SyntaxErrorInTemplate.new(self, original_source)
+      end
+    end
+
+    def handle_render_error(view, e)
+      if e.is_a?(Template::Error)
+        e.sub_template_of(self)
+        raise e
+      else
+        raise Template::Error.new(self)
+      end
+    end
+
+    def locals_code
+      # Only locals with valid variable names get set directly. Others will
+      # still be available in local_assigns.
+      locals = @locals - Module::RUBY_RESERVED_KEYWORDS
+      deprecated_locals = locals.grep(/\A@+/)
+      if deprecated_locals.any?
+        ActiveSupport::Deprecation.warn(<<~MSG)
+          Passing instance variables to `render` is deprecated.
+          In Rails 7.1, #{deprecated_locals.to_sentence} will be ignored.
+        MSG
+        locals = locals.grep(/\A@?(?![A-Z0-9])(?:[[:alnum:]_]|[^\0-\177])+\z/)
+      else
+        locals = locals.grep(/\A(?![A-Z0-9])(?:[[:alnum:]_]|[^\0-\177])+\z/)
       end
 
-      def locals_code
-        # Only locals with valid variable names get set directly. Others will
-        # still be available in local_assigns.
-        locals = @locals - Module::RUBY_RESERVED_KEYWORDS
-        deprecated_locals = locals.grep(/\A@+/)
-        if deprecated_locals.any?
-          ActiveSupport::Deprecation.warn(<<~MSG)
-            Passing instance variables to `render` is deprecated.
-            In Rails 7.1, #{deprecated_locals.to_sentence} will be ignored.
-          MSG
-          locals = locals.grep(/\A@?(?![A-Z0-9])(?:[[:alnum:]_]|[^\0-\177])+\z/)
-        else
-          locals = locals.grep(/\A(?![A-Z0-9])(?:[[:alnum:]_]|[^\0-\177])+\z/)
-        end
+      # Assign for the same variable is to suppress unused variable warning
+      locals.each_with_object(+"") { |key, code| code << "#{key} = local_assigns[:#{key}]; #{key} = #{key};" }
+    end
 
-        # Assign for the same variable is to suppress unused variable warning
-        locals.each_with_object(+"") { |key, code| code << "#{key} = local_assigns[:#{key}]; #{key} = #{key};" }
+    def method_name
+      @method_name ||= begin
+        m = +"_#{identifier_method_name}__#{@identifier.hash}_#{__id__}"
+        m.tr!("-", "_")
+        m
       end
+    end
 
-      def method_name
-        @method_name ||= begin
-          m = +"_#{identifier_method_name}__#{@identifier.hash}_#{__id__}"
-          m.tr!("-", "_")
-          m
-        end
-      end
+    def identifier_method_name
+      short_identifier.tr("^a-z_", "_")
+    end
 
-      def identifier_method_name
-        short_identifier.tr("^a-z_", "_")
-      end
+    def instrument(action, &block) # :doc:
+      ActiveSupport::Notifications.instrument("#{action}.action_view", instrument_payload, &block)
+    end
 
-      def instrument(action, &block) # :doc:
-        ActiveSupport::Notifications.instrument("#{action}.action_view", instrument_payload, &block)
-      end
+    def instrument_render_template(&block)
+      ActiveSupport::Notifications.instrument("!render_template.action_view", instrument_payload, &block)
+    end
 
-      def instrument_render_template(&block)
-        ActiveSupport::Notifications.instrument("!render_template.action_view", instrument_payload, &block)
-      end
-
-      def instrument_payload
-        { virtual_path: @virtual_path, identifier: @identifier }
-      end
+    def instrument_payload
+      { virtual_path: @virtual_path, identifier: @identifier }
+    end
   end
 end

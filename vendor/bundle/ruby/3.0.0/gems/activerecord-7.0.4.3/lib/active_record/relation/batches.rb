@@ -67,11 +67,13 @@ module ActiveRecord
     # other processes are modifying the database.
     def find_each(start: nil, finish: nil, batch_size: 1000, error_on_ignore: nil, order: :asc, &block)
       if block_given?
-        find_in_batches(start: start, finish: finish, batch_size: batch_size, error_on_ignore: error_on_ignore, order: order) do |records|
+        find_in_batches(start: start, finish: finish, batch_size: batch_size, error_on_ignore: error_on_ignore,
+                        order: order) do |records|
           records.each(&block)
         end
       else
-        enum_for(:find_each, start: start, finish: finish, batch_size: batch_size, error_on_ignore: error_on_ignore, order: order) do
+        enum_for(:find_each, start: start, finish: finish, batch_size: batch_size, error_on_ignore: error_on_ignore,
+                             order: order) do
           relation = self
           apply_limits(relation, start, finish, order).size
         end
@@ -128,13 +130,15 @@ module ActiveRecord
     def find_in_batches(start: nil, finish: nil, batch_size: 1000, error_on_ignore: nil, order: :asc)
       relation = self
       unless block_given?
-        return to_enum(:find_in_batches, start: start, finish: finish, batch_size: batch_size, error_on_ignore: error_on_ignore, order: order) do
-          total = apply_limits(relation, start, finish, order).size
-          (total - 1).div(batch_size) + 1
-        end
+        return to_enum(:find_in_batches, start: start, finish: finish, batch_size: batch_size,
+                                         error_on_ignore: error_on_ignore, order: order) do
+                 total = apply_limits(relation, start, finish, order).size
+                 (total - 1).div(batch_size) + 1
+               end
       end
 
-      in_batches(of: batch_size, start: start, finish: finish, load: true, error_on_ignore: error_on_ignore, order: order) do |batch|
+      in_batches(of: batch_size, start: start, finish: finish, load: true, error_on_ignore: error_on_ignore,
+                 order: order) do |batch|
         yield batch.to_a
       end
     end
@@ -217,7 +221,7 @@ module ActiveRecord
 
       batch_limit = of
       if limit_value
-        remaining   = limit_value
+        remaining = limit_value
         batch_limit = remaining if remaining < batch_limit
       end
 
@@ -265,32 +269,33 @@ module ActiveRecord
     end
 
     private
-      def apply_limits(relation, start, finish, order)
-        relation = apply_start_limit(relation, start, order) if start
-        relation = apply_finish_limit(relation, finish, order) if finish
-        relation
-      end
 
-      def apply_start_limit(relation, start, order)
-        relation.where(predicate_builder[primary_key, start, order == :desc ? :lteq : :gteq])
-      end
+    def apply_limits(relation, start, finish, order)
+      relation = apply_start_limit(relation, start, order) if start
+      relation = apply_finish_limit(relation, finish, order) if finish
+      relation
+    end
 
-      def apply_finish_limit(relation, finish, order)
-        relation.where(predicate_builder[primary_key, finish, order == :desc ? :gteq : :lteq])
-      end
+    def apply_start_limit(relation, start, order)
+      relation.where(predicate_builder[primary_key, start, order == :desc ? :lteq : :gteq])
+    end
 
-      def batch_order(order)
-        table[primary_key].public_send(order)
-      end
+    def apply_finish_limit(relation, finish, order)
+      relation.where(predicate_builder[primary_key, finish, order == :desc ? :gteq : :lteq])
+    end
 
-      def act_on_ignored_order(error_on_ignore)
-        raise_error = (error_on_ignore.nil? ? ActiveRecord.error_on_ignored_order : error_on_ignore)
+    def batch_order(order)
+      table[primary_key].public_send(order)
+    end
 
-        if raise_error
-          raise ArgumentError.new(ORDER_IGNORE_MESSAGE)
-        elsif logger
-          logger.warn(ORDER_IGNORE_MESSAGE)
-        end
+    def act_on_ignored_order(error_on_ignore)
+      raise_error = (error_on_ignore.nil? ? ActiveRecord.error_on_ignored_order : error_on_ignore)
+
+      if raise_error
+        raise ArgumentError.new(ORDER_IGNORE_MESSAGE)
+      elsif logger
+        logger.warn(ORDER_IGNORE_MESSAGE)
       end
+    end
   end
 end

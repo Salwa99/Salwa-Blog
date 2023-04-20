@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   irb/ext/cb.rb -
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -6,7 +7,6 @@
 
 module IRB # :nodoc:
   class Context
-
     # Inherited from +TOPLEVEL_BINDING+.
     def home_workspace
       if defined? @home_workspace
@@ -31,7 +31,7 @@ module IRB # :nodoc:
 
       @workspace = WorkSpace.new(_main[0])
 
-      if !(class<<main;ancestors;end).include?(ExtendCommandBundle)
+      if !(class << main; ancestors; end).include?(ExtendCommandBundle)
         main.extend ExtendCommandBundle
       end
     end

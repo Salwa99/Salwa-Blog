@@ -16,6 +16,7 @@ module ActionController
 
   class RoutingError < ActionControllerError # :nodoc:
     attr_reader :failures
+
     def initialize(message, failures = [])
       super(message)
       @failures = failures
@@ -26,8 +27,8 @@ module ActionController
     attr_reader :routes, :route_name, :method_name
 
     def initialize(message, routes = nil, route_name = nil, method_name = nil)
-      @routes      = routes
-      @route_name  = route_name
+      @routes = routes
+      @route_name = route_name
       @method_name = method_name
 
       super(message)

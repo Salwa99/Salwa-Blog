@@ -101,7 +101,8 @@ module ActiveRecord
       # method.
       def while_preventing_writes(enabled = true)
         unless ActiveRecord.legacy_connection_handling
-          raise NotImplementedError, "`while_preventing_writes` is only available on the connection_handler with legacy_connection_handling"
+          raise NotImplementedError,
+                "`while_preventing_writes` is only available on the connection_handler with legacy_connection_handling"
         end
 
         original, self.prevent_writes = self.prevent_writes, enabled
@@ -123,7 +124,8 @@ module ActiveRecord
       end
       alias :connection_pools :connection_pool_list
 
-      def establish_connection(config, owner_name: Base, role: ActiveRecord::Base.current_role, shard: Base.current_shard)
+      def establish_connection(config, owner_name: Base, role: ActiveRecord::Base.current_role,
+                               shard: Base.current_shard)
         owner_name = StringConnectionOwner.new(config.to_s) if config.is_a?(Symbol)
 
         pool_config = resolve_pool_config(config, owner_name, role, shard)
@@ -232,61 +234,65 @@ module ActiveRecord
       # Retrieving the connection pool happens a lot, so we cache it in @owner_to_pool_manager.
       # This makes retrieving the connection pool O(1) once the process is warm.
       # When a connection is established or removed, we invalidate the cache.
-      def retrieve_connection_pool(owner, role: ActiveRecord::Base.current_role, shard: ActiveRecord::Base.current_shard)
+      def retrieve_connection_pool(owner, role: ActiveRecord::Base.current_role,
+                                   shard: ActiveRecord::Base.current_shard)
         pool_config = get_pool_manager(owner)&.get_pool_config(role, shard)
         pool_config&.pool
       end
 
       private
-        attr_reader :owner_to_pool_manager
 
-        # Returns the pool manager for an owner.
-        def get_pool_manager(owner)
-          owner_to_pool_manager[owner]
+      attr_reader :owner_to_pool_manager
+
+      # Returns the pool manager for an owner.
+      def get_pool_manager(owner)
+        owner_to_pool_manager[owner]
+      end
+
+      # Returns an instance of PoolConfig for a given adapter.
+      # Accepts a hash one layer deep that contains all connection information.
+      #
+      # == Example
+      #
+      #   config = { "production" => { "host" => "localhost", "database" => "foo", "adapter" => "sqlite3" } }
+      #   pool_config = Base.configurations.resolve_pool_config(:production)
+      #   pool_config.db_config.configuration_hash
+      #   # => { host: "localhost", database: "foo", adapter: "sqlite3" }
+      #
+      def resolve_pool_config(config, owner_name, role, shard)
+        db_config = Base.configurations.resolve(config)
+
+        raise(AdapterNotSpecified, "database configuration does not specify adapter") unless db_config.adapter
+
+        # Require the adapter itself and give useful feedback about
+        #   1. Missing adapter gems and
+        #   2. Adapter gems' missing dependencies.
+        path_to_adapter = "active_record/connection_adapters/#{db_config.adapter}_adapter"
+        begin
+          require path_to_adapter
+        rescue LoadError => e
+          # We couldn't require the adapter itself. Raise an exception that
+          # points out config typos and missing gems.
+          if e.path == path_to_adapter
+            # We can assume that a non-builtin adapter was specified, so it's
+            # either misspelled or missing from Gemfile.
+            raise LoadError,
+                  "Could not load the '#{db_config.adapter}' Active Record adapter. Ensure that the adapter is spelled correctly in config/database.yml and that you've added the necessary adapter gem to your Gemfile.", e.backtrace
+
+            # Bubbled up from the adapter require. Prefix the exception message
+            # with some guidance about how to address it and reraise.
+          else
+            raise LoadError,
+                  "Error loading the '#{db_config.adapter}' Active Record adapter. Missing a gem it depends on? #{e.message}", e.backtrace
+          end
         end
 
-        # Returns an instance of PoolConfig for a given adapter.
-        # Accepts a hash one layer deep that contains all connection information.
-        #
-        # == Example
-        #
-        #   config = { "production" => { "host" => "localhost", "database" => "foo", "adapter" => "sqlite3" } }
-        #   pool_config = Base.configurations.resolve_pool_config(:production)
-        #   pool_config.db_config.configuration_hash
-        #   # => { host: "localhost", database: "foo", adapter: "sqlite3" }
-        #
-        def resolve_pool_config(config, owner_name, role, shard)
-          db_config = Base.configurations.resolve(config)
-
-          raise(AdapterNotSpecified, "database configuration does not specify adapter") unless db_config.adapter
-
-          # Require the adapter itself and give useful feedback about
-          #   1. Missing adapter gems and
-          #   2. Adapter gems' missing dependencies.
-          path_to_adapter = "active_record/connection_adapters/#{db_config.adapter}_adapter"
-          begin
-            require path_to_adapter
-          rescue LoadError => e
-            # We couldn't require the adapter itself. Raise an exception that
-            # points out config typos and missing gems.
-            if e.path == path_to_adapter
-              # We can assume that a non-builtin adapter was specified, so it's
-              # either misspelled or missing from Gemfile.
-              raise LoadError, "Could not load the '#{db_config.adapter}' Active Record adapter. Ensure that the adapter is spelled correctly in config/database.yml and that you've added the necessary adapter gem to your Gemfile.", e.backtrace
-
-              # Bubbled up from the adapter require. Prefix the exception message
-              # with some guidance about how to address it and reraise.
-            else
-              raise LoadError, "Error loading the '#{db_config.adapter}' Active Record adapter. Missing a gem it depends on? #{e.message}", e.backtrace
-            end
-          end
-
-          unless ActiveRecord::Base.respond_to?(db_config.adapter_method)
-            raise AdapterNotFound, "database configuration specifies nonexistent #{db_config.adapter} adapter"
-          end
-
-          ConnectionAdapters::PoolConfig.new(owner_name, db_config, role, shard)
+        unless ActiveRecord::Base.respond_to?(db_config.adapter_method)
+          raise AdapterNotFound, "database configuration specifies nonexistent #{db_config.adapter} adapter"
         end
+
+        ConnectionAdapters::PoolConfig.new(owner_name, db_config, role, shard)
+      end
     end
   end
 end

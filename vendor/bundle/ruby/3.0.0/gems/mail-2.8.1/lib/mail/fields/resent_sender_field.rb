@@ -1,5 +1,6 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/fields/common_address_field'
 
 module Mail
@@ -27,7 +28,7 @@ module Mail
   #  mail.resent_sender.to_s  #=> 'Mikel Lindsaar <mikel@test.lindsaar.net>, ada@test.lindsaar.net'
   #  mail.resent_sender.addresses #=> ['mikel@test.lindsaar.net', 'ada@test.lindsaar.net']
   #  mail.resent_sender.formatted #=> ['Mikel Lindsaar <mikel@test.lindsaar.net>', 'ada@test.lindsaar.net']
-  class ResentSenderField < CommonAddressField #:nodoc:
+  class ResentSenderField < CommonAddressField # :nodoc:
     NAME = 'Resent-Sender'
   end
 end

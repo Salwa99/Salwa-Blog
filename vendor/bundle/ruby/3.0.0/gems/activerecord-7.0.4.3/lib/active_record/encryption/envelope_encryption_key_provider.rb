@@ -33,23 +33,24 @@ module ActiveRecord
       end
 
       private
-        def encrypt_data_key(random_secret)
-          ActiveRecord::Encryption.cipher.encrypt(random_secret, key: active_primary_key.secret)
-        end
 
-        def decrypt_data_key(encrypted_message)
-          encrypted_data_key = encrypted_message.headers.encrypted_data_key
-          key = primary_key_provider.decryption_keys(encrypted_message)&.collect(&:secret)
-          ActiveRecord::Encryption.cipher.decrypt encrypted_data_key, key: key if key
-        end
+      def encrypt_data_key(random_secret)
+        ActiveRecord::Encryption.cipher.encrypt(random_secret, key: active_primary_key.secret)
+      end
 
-        def primary_key_provider
-          @primary_key_provider ||= DerivedSecretKeyProvider.new(ActiveRecord::Encryption.config.primary_key)
-        end
+      def decrypt_data_key(encrypted_message)
+        encrypted_data_key = encrypted_message.headers.encrypted_data_key
+        key = primary_key_provider.decryption_keys(encrypted_message)&.collect(&:secret)
+        ActiveRecord::Encryption.cipher.decrypt encrypted_data_key, key: key if key
+      end
 
-        def generate_random_secret
-          ActiveRecord::Encryption.key_generator.generate_random_key
-        end
+      def primary_key_provider
+        @primary_key_provider ||= DerivedSecretKeyProvider.new(ActiveRecord::Encryption.config.primary_key)
+      end
+
+      def generate_random_secret
+        ActiveRecord::Encryption.key_generator.generate_random_key
+      end
     end
   end
 end

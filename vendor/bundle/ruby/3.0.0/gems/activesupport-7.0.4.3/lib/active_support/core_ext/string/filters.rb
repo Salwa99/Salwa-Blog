@@ -99,7 +99,8 @@ class String
     when bytesize <= truncate_at
       dup
     when omission.bytesize > truncate_at
-      raise ArgumentError, "Omission #{omission.inspect} is #{omission.bytesize}, larger than the truncation length of #{truncate_at} bytes"
+      raise ArgumentError,
+            "Omission #{omission.inspect} is #{omission.bytesize}, larger than the truncation length of #{truncate_at} bytes"
     when omission.bytesize == truncate_at
       omission.dup
     else

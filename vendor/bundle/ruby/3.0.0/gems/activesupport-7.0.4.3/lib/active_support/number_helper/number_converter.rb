@@ -122,7 +122,7 @@ module ActiveSupport
 
       def initialize(number, options)
         @number = number
-        @opts   = options.symbolize_keys
+        @opts = options.symbolize_keys
       end
 
       def execute
@@ -136,46 +136,47 @@ module ActiveSupport
       end
 
       private
-        def options
-          @options ||= format_options.merge(opts)
+
+      def options
+        @options ||= format_options.merge(opts)
+      end
+
+      def format_options
+        default_format_options.merge!(i18n_format_options)
+      end
+
+      def default_format_options
+        options = DEFAULTS[:format].dup
+        options.merge!(DEFAULTS[namespace][:format]) if namespace
+        options
+      end
+
+      def i18n_format_options
+        locale = opts[:locale]
+        options = I18n.translate(:'number.format', locale: locale, default: {}).dup
+
+        if namespace
+          options.merge!(I18n.translate(:"number.#{namespace}.format", locale: locale, default: {}))
         end
 
-        def format_options
-          default_format_options.merge!(i18n_format_options)
-        end
+        options
+      end
 
-        def default_format_options
-          options = DEFAULTS[:format].dup
-          options.merge!(DEFAULTS[namespace][:format]) if namespace
-          options
-        end
+      def translate_number_value_with_default(key, **i18n_options)
+        I18n.translate(key, **{ default: default_value(key), scope: :number }.merge!(i18n_options))
+      end
 
-        def i18n_format_options
-          locale = opts[:locale]
-          options = I18n.translate(:'number.format', locale: locale, default: {}).dup
+      def translate_in_locale(key, **i18n_options)
+        translate_number_value_with_default(key, **{ locale: options[:locale] }.merge(i18n_options))
+      end
 
-          if namespace
-            options.merge!(I18n.translate(:"number.#{namespace}.format", locale: locale, default: {}))
-          end
+      def default_value(key)
+        key.split(".").reduce(DEFAULTS) { |defaults, k| defaults[k.to_sym] }
+      end
 
-          options
-        end
-
-        def translate_number_value_with_default(key, **i18n_options)
-          I18n.translate(key, **{ default: default_value(key), scope: :number }.merge!(i18n_options))
-        end
-
-        def translate_in_locale(key, **i18n_options)
-          translate_number_value_with_default(key, **{ locale: options[:locale] }.merge(i18n_options))
-        end
-
-        def default_value(key)
-          key.split(".").reduce(DEFAULTS) { |defaults, k| defaults[k.to_sym] }
-        end
-
-        def valid_float?
-          Float(number, exception: false)
-        end
+      def valid_float?
+        Float(number, exception: false)
+      end
     end
   end
 end

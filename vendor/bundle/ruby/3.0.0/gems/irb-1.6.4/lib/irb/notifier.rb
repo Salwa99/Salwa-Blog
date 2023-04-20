@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   notifier.rb - output methods used by irb
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -14,6 +15,7 @@ module IRB
         super("undefined notifier level: #{val} is specified")
       end
     end
+
     class ErrUnrecognizedLevel < StandardError
       def initialize(val)
         super("unrecognized notifier level: #{val} is specified")
@@ -72,7 +74,7 @@ module IRB
       # See OutputMethod#puts for more detail.
       def puts(*objs)
         if notify?
-          @base_notifier.puts(*objs.collect{|obj| prefix + obj.to_s})
+          @base_notifier.puts(*objs.collect { |obj| prefix + obj.to_s })
         end
       end
 
@@ -91,7 +93,7 @@ module IRB
       # See OutputMethod#ppx for more detail.
       def ppx(prefix, *objs)
         if notify?
-          @base_notifier.ppx @prefix+prefix, *objs
+          @base_notifier.ppx @prefix + prefix, *objs
         end
       end
 
@@ -161,6 +163,7 @@ module IRB
         when Integer
           l = @notifiers[value]
           raise ErrUndefinedNotifier, value unless l
+
           @level_notifier = l
         else
           raise ErrUnrecognizedLevel, value unless l

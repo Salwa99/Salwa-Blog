@@ -20,6 +20,7 @@ module I18n
         old_mtime, old_digest = initialized && lookup(:i18n, key, :load_file)
         return if (mtime = File.mtime(filename).to_i) == old_mtime ||
                   (digest = OpenSSL::Digest::SHA256.file(filename).hexdigest) == old_digest
+
         super
         store_translations(:i18n, load_file: { key => [mtime, digest] })
       end
@@ -27,6 +28,7 @@ module I18n
       # Translate absolute filename to relative path for i18n key.
       def normalized_path(file)
         return file unless path_roots
+
         path = path_roots.find(&file.method(:start_with?)) ||
                raise(InvalidLocaleData.new(file, 'outside expected path roots'))
         file.sub(path, path_roots.index(path).to_s)

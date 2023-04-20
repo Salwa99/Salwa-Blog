@@ -9,7 +9,7 @@ module RuboCop
         self.command_name = :auto_gen_config
 
         AUTO_GENERATED_FILE = '.rubocop_todo.yml'
-        YAML_OPTIONAL_DOC_START = /\A---(\s+#|\s*\z)/.freeze
+        YAML_OPTIONAL_DOC_START = /\A---(\s+#|\s*\z)/
 
         PHASE_1 = 'Phase 1 of 2: run Layout/LineLength cop'
         PHASE_2 = 'Phase 2 of 2: run all cops'
@@ -125,8 +125,8 @@ module RuboCop
 
         def existing_configuration(config_file)
           File.read(config_file, encoding: Encoding::UTF_8)
-              .sub(/^inherit_from: *[^\n]+/, '')
-              .sub(/^inherit_from: *(\n *- *[^\n]+)+/, '')
+            .sub(/^inherit_from: *[^\n]+/, '')
+            .sub(/^inherit_from: *(\n *- *[^\n]+)+/, '')
         end
 
         def write_config_file(file_name, file_string, rubocop_yml_contents)

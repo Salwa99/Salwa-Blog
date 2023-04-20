@@ -42,40 +42,41 @@ module ActiveRecord
         extend ActiveSupport::Concern
 
         private
-          def process_encrypted_query_arguments(args, check_for_additional_values)
-            if args.is_a?(Array) && (options = args.first).is_a?(Hash)
-              self.deterministic_encrypted_attributes&.each do |attribute_name|
-                type = type_for_attribute(attribute_name)
-                if !type.previous_types.empty? && value = options[attribute_name]
-                  options[attribute_name] = process_encrypted_query_argument(value, check_for_additional_values, type)
-                end
+
+        def process_encrypted_query_arguments(args, check_for_additional_values)
+          if args.is_a?(Array) && (options = args.first).is_a?(Hash)
+            self.deterministic_encrypted_attributes&.each do |attribute_name|
+              type = type_for_attribute(attribute_name)
+              if !type.previous_types.empty? && value = options[attribute_name]
+                options[attribute_name] = process_encrypted_query_argument(value, check_for_additional_values, type)
               end
             end
           end
+        end
 
-          def process_encrypted_query_argument(value, check_for_additional_values, type)
-            return value if check_for_additional_values && value.is_a?(Array) && value.last.is_a?(AdditionalValue)
+        def process_encrypted_query_argument(value, check_for_additional_values, type)
+          return value if check_for_additional_values && value.is_a?(Array) && value.last.is_a?(AdditionalValue)
 
-            case value
-            when String, Array
-              list = Array(value)
-              list + list.flat_map do |each_value|
-                if check_for_additional_values && each_value.is_a?(AdditionalValue)
-                  each_value
-                else
-                  additional_values_for(each_value, type)
-                end
+          case value
+          when String, Array
+            list = Array(value)
+            list + list.flat_map do |each_value|
+              if check_for_additional_values && each_value.is_a?(AdditionalValue)
+                each_value
+              else
+                additional_values_for(each_value, type)
               end
-            else
-              value
             end
+          else
+            value
           end
+        end
 
-          def additional_values_for(value, type)
-            type.previous_types.collect do |additional_type|
-              AdditionalValue.new(value, additional_type)
-            end
+        def additional_values_for(value, type)
+          type.previous_types.collect do |additional_type|
+            AdditionalValue.new(value, additional_type)
           end
+        end
       end
 
       module RelationQueries
@@ -100,9 +101,10 @@ module ActiveRecord
         end
 
         private
-          def process_encrypted_query_arguments_if_needed(args)
-            process_encrypted_query_arguments(args, true) unless self.deterministic_encrypted_attributes&.empty?
-          end
+
+        def process_encrypted_query_arguments_if_needed(args)
+          process_encrypted_query_arguments(args, true) unless self.deterministic_encrypted_attributes&.empty?
+        end
       end
 
       module CoreQueries
@@ -127,9 +129,10 @@ module ActiveRecord
         end
 
         private
-          def process(value)
-            type.serialize(value)
-          end
+
+        def process(value)
+          type.serialize(value)
+        end
       end
 
       module ExtendedEncryptableType
@@ -144,7 +147,7 @@ module ActiveRecord
 
       module InWithAdditionalValues
         def proc_for_binds
-          -> value { ActiveModel::Attribute.with_cast_value(attribute.name, value, encryption_aware_type_caster) }
+          ->value { ActiveModel::Attribute.with_cast_value(attribute.name, value, encryption_aware_type_caster) }
         end
 
         def encryption_aware_type_caster

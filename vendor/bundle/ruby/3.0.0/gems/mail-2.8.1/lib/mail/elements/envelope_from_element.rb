@@ -1,10 +1,11 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/parsers/envelope_from_parser'
 require 'date'
 
 module Mail
-  class EnvelopeFromElement #:nodoc:
+  class EnvelopeFromElement # :nodoc:
     attr_reader :date_time, :address
 
     def initialize(string)

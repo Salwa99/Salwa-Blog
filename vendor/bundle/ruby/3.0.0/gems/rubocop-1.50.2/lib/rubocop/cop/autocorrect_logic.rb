@@ -72,7 +72,7 @@ module RuboCop
           node.respond_to?(:heredoc?) && node.heredoc?
         end
         heredoc_nodes.map { |node| node.source_range.join(node.loc.heredoc_end) }
-                     .find { |range| range.contains?(offense_range) }
+          .find { |range| range.contains?(offense_range) }
       end
 
       def surrounding_percent_array(offense_range)

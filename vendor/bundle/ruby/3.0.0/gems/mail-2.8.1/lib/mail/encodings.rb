@@ -3,12 +3,12 @@
 
 module Mail
   # Raised when attempting to decode an unknown encoding type
-  class UnknownEncodingType < StandardError #:nodoc:
+  class UnknownEncodingType < StandardError # :nodoc:
   end
 
   module Encodings
     include Mail::Constants
-    extend  Mail::Utilities
+    extend Mail::Utilities
 
     @transfer_encodings = {}
 
@@ -138,7 +138,7 @@ module Mail
 
     # Takes an encoded string of the format =?<encoding>?[QB]?<string>?=
     def Encodings.unquote_and_convert_to(str, to_encoding)
-      output = value_decode( str ).to_s # output is already converted to UTF-8
+      output = value_decode(str).to_s # output is already converted to UTF-8
 
       if 'utf8' == to_encoding.to_s.downcase.gsub("-", "")
         output
@@ -180,8 +180,8 @@ module Mail
         if word.ascii_only?
           word
         else
-          previous_non_ascii = i>0 && tokens[i-1] && !tokens[i-1].ascii_only?
-          if previous_non_ascii #why are we adding an extra space here?
+          previous_non_ascii = i > 0 && tokens[i - 1] && !tokens[i - 1].ascii_only?
+          if previous_non_ascii # why are we adding an extra space here?
             word = " #{word}"
           end
           Encodings.b_value_encode(word, charset)
@@ -216,6 +216,7 @@ module Mail
     #  #=> "=?UTF-8?Q?This_is_=E3=81=82_string?="
     def Encodings.q_value_encode(encoded_str, encoding = nil)
       return encoded_str if encoded_str.to_s.ascii_only?
+
       string, encoding = Utilities.q_value_encode(encoded_str, encoding)
       string.gsub!("=\r\n", '') # We already have limited the string to the length we want
       map_lines(string) do |str|
@@ -257,7 +258,7 @@ module Mail
     # Omit unencoded space after an encoded-word.
     def Encodings.collapse_adjacent_encodings(str)
       results = []
-      last_encoded = nil  # Track whether to preserve or drop whitespace
+      last_encoded = nil # Track whether to preserve or drop whitespace
 
       lines = str.split(FULL_ENCODED_VALUE)
       lines.each_slice(2) do |unencoded, encoded|

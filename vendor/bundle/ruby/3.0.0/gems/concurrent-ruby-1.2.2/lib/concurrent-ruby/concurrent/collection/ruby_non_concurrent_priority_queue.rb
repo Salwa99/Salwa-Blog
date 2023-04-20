@@ -1,12 +1,10 @@
 module Concurrent
   module Collection
-
     # @!macro priority_queue
-    # 
+    #
     # @!visibility private
     # @!macro internal_implementation_note
     class RubyNonConcurrentPriorityQueue
-
       # @!macro priority_queue_method_initialize
       def initialize(opts = {})
         order = opts.fetch(:order, :max)
@@ -24,6 +22,7 @@ module Concurrent
       # @!macro priority_queue_method_delete
       def delete(item)
         return false if empty?
+
         original_length = @length
         k = 1
         while k <= @length
@@ -64,6 +63,7 @@ module Concurrent
       # @!macro priority_queue_method_pop
       def pop
         return nil if empty?
+
         max = @queue[1]
         swap(1, @length)
         @length -= 1
@@ -77,6 +77,7 @@ module Concurrent
       # @!macro priority_queue_method_push
       def push(item)
         raise ArgumentError.new('cannot enqueue nil') if item.nil?
+
         @length += 1
         @queue << item
         swim(@length)
@@ -88,17 +89,17 @@ module Concurrent
       #   @!macro priority_queue_method_from_list
       def self.from_list(list, opts = {})
         queue = new(opts)
-        list.each{|item| queue << item }
+        list.each { |item| queue << item }
         queue
       end
 
       private
 
       # Exchange the values at the given indexes within the internal array.
-      # 
+      #
       # @param [Integer] x the first index to swap
       # @param [Integer] y the second index to swap
-      # 
+      #
       # @!visibility private
       def swap(x, y)
         temp = @queue[x]
@@ -114,23 +115,24 @@ module Concurrent
       #
       # @return [Boolean] true if the two elements are in the correct priority order
       #   else false
-      # 
+      #
       # @!visibility private
       def ordered?(x, y)
         (@queue[x] <=> @queue[y]) == @comparator
       end
 
       # Percolate down to maintain heap invariant.
-      # 
+      #
       # @param [Integer] k the index at which to start the percolation
-      # 
+      #
       # @!visibility private
       def sink(k)
         success = false
 
         while (j = (2 * k)) <= @length do
-          j += 1 if j < @length && ! ordered?(j, j+1)
+          j += 1 if j < @length && !ordered?(j, j + 1)
           break if ordered?(k, j)
+
           swap(k, j)
           success = true
           k = j
@@ -140,16 +142,16 @@ module Concurrent
       end
 
       # Percolate up to maintain heap invariant.
-      # 
+      #
       # @param [Integer] k the index at which to start the percolation
-      # 
+      #
       # @!visibility private
       def swim(k)
         success = false
 
-        while k > 1 && ! ordered?(k/2, k) do
-          swap(k, k/2)
-          k = k/2
+        while k > 1 && !ordered?(k / 2, k) do
+          swap(k, k / 2)
+          k = k / 2
           success = true
         end
 

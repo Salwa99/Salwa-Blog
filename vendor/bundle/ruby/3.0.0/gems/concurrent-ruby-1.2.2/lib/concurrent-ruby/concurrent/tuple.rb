@@ -1,7 +1,6 @@
 require 'concurrent/atomic/atomic_reference'
 
 module Concurrent
-
   # A fixed size array with volatile (synchronized, thread safe) getters/setters.
   # Mixes in Ruby's `Enumerable` module for enhanced search, sort, and traversal.
   #
@@ -42,6 +41,7 @@ module Concurrent
     # @return [Object] the value at the given index or nil if the index is out of bounds
     def get(i)
       return nil if i >= @size || i < 0
+
       @tuple[i].get
     end
     alias_method :volatile_get, :get
@@ -54,6 +54,7 @@ module Concurrent
     # @return [Object] the new value of the element at the given index or nil if the index is out of bounds
     def set(i, value)
       return nil if i >= @size || i < 0
+
       @tuple[i].set(value)
     end
     alias_method :volatile_set, :set
@@ -68,6 +69,7 @@ module Concurrent
     # @return [Boolean] true if the value at the given element was set else false
     def compare_and_set(i, old_value, new_value)
       return false if i >= @size || i < 0
+
       @tuple[i].compare_and_set(old_value, new_value)
     end
     alias_method :cas, :compare_and_set
@@ -76,7 +78,7 @@ module Concurrent
     #
     # @yieldparam [Object] ref the `Concurrent::AtomicReference` object at the current index
     def each
-      @tuple.each {|ref| yield ref.get}
+      @tuple.each { |ref| yield ref.get }
     end
   end
 end

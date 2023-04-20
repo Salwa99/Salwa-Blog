@@ -2,12 +2,10 @@ require 'concurrent/synchronization/lockable_object'
 require 'concurrent/utility/native_integer'
 
 module Concurrent
-
   # @!macro count_down_latch
   # @!visibility private
   # @!macro internal_implementation_note
   class MutexCountDownLatch < Synchronization::LockableObject
-
     # @!macro count_down_latch_method_initialize
     def initialize(count = 1)
       Utility::NativeInteger.ensure_integer_and_bounds count

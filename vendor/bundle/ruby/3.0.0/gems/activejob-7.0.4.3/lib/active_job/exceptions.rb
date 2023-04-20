@@ -59,7 +59,8 @@ module ActiveJob
         rescue_from(*exceptions) do |error|
           executions = executions_for(exceptions)
           if attempts == :unlimited || executions < attempts
-            retry_job wait: determine_delay(seconds_or_duration_or_algorithm: wait, executions: executions, jitter: jitter), queue: queue, priority: priority, error: error
+            retry_job wait: determine_delay(seconds_or_duration_or_algorithm: wait, executions: executions, jitter: jitter),
+                      queue: queue, priority: priority, error: error
           else
             if block_given?
               instrument :retry_stopped, error: error do
@@ -128,41 +129,43 @@ module ActiveJob
     end
 
     private
-      JITTER_DEFAULT = Object.new
-      private_constant :JITTER_DEFAULT
 
-      def determine_delay(seconds_or_duration_or_algorithm:, executions:, jitter: JITTER_DEFAULT)
-        jitter = jitter == JITTER_DEFAULT ? self.class.retry_jitter : (jitter || 0.0)
+    JITTER_DEFAULT = Object.new
+    private_constant :JITTER_DEFAULT
 
-        case seconds_or_duration_or_algorithm
-        when :exponentially_longer
-          delay = executions**4
-          delay_jitter = determine_jitter_for_delay(delay, jitter)
-          delay + delay_jitter + 2
-        when ActiveSupport::Duration, Integer
-          delay = seconds_or_duration_or_algorithm.to_i
-          delay_jitter = determine_jitter_for_delay(delay, jitter)
-          delay + delay_jitter
-        when Proc
-          algorithm = seconds_or_duration_or_algorithm
-          algorithm.call(executions)
-        else
-          raise "Couldn't determine a delay based on #{seconds_or_duration_or_algorithm.inspect}"
-        end
+    def determine_delay(seconds_or_duration_or_algorithm:, executions:, jitter: JITTER_DEFAULT)
+      jitter = jitter == JITTER_DEFAULT ? self.class.retry_jitter : (jitter || 0.0)
+
+      case seconds_or_duration_or_algorithm
+      when :exponentially_longer
+        delay = executions**4
+        delay_jitter = determine_jitter_for_delay(delay, jitter)
+        delay + delay_jitter + 2
+      when ActiveSupport::Duration, Integer
+        delay = seconds_or_duration_or_algorithm.to_i
+        delay_jitter = determine_jitter_for_delay(delay, jitter)
+        delay + delay_jitter
+      when Proc
+        algorithm = seconds_or_duration_or_algorithm
+        algorithm.call(executions)
+      else
+        raise "Couldn't determine a delay based on #{seconds_or_duration_or_algorithm.inspect}"
       end
+    end
 
-      def determine_jitter_for_delay(delay, jitter)
-        return 0.0 if jitter.zero?
-        Kernel.rand * delay * jitter
-      end
+    def determine_jitter_for_delay(delay, jitter)
+      return 0.0 if jitter.zero?
 
-      def executions_for(exceptions)
-        if exception_executions
-          exception_executions[exceptions.to_s] = (exception_executions[exceptions.to_s] || 0) + 1
-        else
-          # Guard against jobs that were persisted before we started having individual executions counters per retry_on
-          executions
-        end
+      Kernel.rand * delay * jitter
+    end
+
+    def executions_for(exceptions)
+      if exception_executions
+        exception_executions[exceptions.to_s] = (exception_executions[exceptions.to_s] || 0) + 1
+      else
+        # Guard against jobs that were persisted before we started having individual executions counters per retry_on
+        executions
       end
+    end
   end
 end

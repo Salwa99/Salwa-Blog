@@ -23,16 +23,17 @@ class Module
   self.attr_internal_naming_format = "@_%s"
 
   private
-    def attr_internal_ivar_name(attr)
-      Module.attr_internal_naming_format % attr
-    end
 
-    def attr_internal_define(attr_name, type)
-      internal_name = attr_internal_ivar_name(attr_name).delete_prefix("@")
-      # use native attr_* methods as they are faster on some Ruby implementations
-      public_send("attr_#{type}", internal_name)
-      attr_name, internal_name = "#{attr_name}=", "#{internal_name}=" if type == :writer
-      alias_method attr_name, internal_name
-      remove_method internal_name
-    end
+  def attr_internal_ivar_name(attr)
+    Module.attr_internal_naming_format % attr
+  end
+
+  def attr_internal_define(attr_name, type)
+    internal_name = attr_internal_ivar_name(attr_name).delete_prefix("@")
+    # use native attr_* methods as they are faster on some Ruby implementations
+    public_send("attr_#{type}", internal_name)
+    attr_name, internal_name = "#{attr_name}=", "#{internal_name}=" if type == :writer
+    alias_method attr_name, internal_name
+    remove_method internal_name
+  end
 end

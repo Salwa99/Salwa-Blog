@@ -18,6 +18,7 @@ module ActionMailer
     def any(*args, &block)
       options = args.extract_options!
       raise ArgumentError, "You have to supply at least one format" if args.empty?
+
       args.each { |type| send(type, options.dup, &block) }
     end
     alias :all :any

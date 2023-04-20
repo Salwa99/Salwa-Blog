@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   irb/completion.rb -
 #   	by Keiju ISHITSUKA(keiju@ishitsuka.com)
@@ -95,6 +96,7 @@ module IRB
               nil
             end
             next if names.empty?
+
             names.map! { |n| n.sub(/\.(rb|#{RbConfig::CONFIG['DLEXT']})\z/, '') }.sort!
             shortest << names.shift
             result.concat(names)
@@ -148,11 +150,11 @@ module IRB
       if preposing && postposing
         result = CompletionRequireProc.(target, preposing, postposing)
         unless result
-          result = retrieve_completion_data(target).compact.map{ |i| i.encode(Encoding.default_external) }
+          result = retrieve_completion_data(target).compact.map { |i| i.encode(Encoding.default_external) }
         end
         result
       else
-        retrieve_completion_data(target).compact.map{ |i| i.encode(Encoding.default_external) }
+        retrieve_completion_data(target).compact.map { |i| i.encode(Encoding.default_external) }
       end
     }
 
@@ -168,7 +170,7 @@ module IRB
         if doc_namespace
           "String.#{message}"
         else
-          candidates = String.instance_methods.collect{|m| m.to_s}
+          candidates = String.instance_methods.collect { |m| m.to_s }
           select_message(receiver, message, candidates)
         end
 
@@ -182,7 +184,7 @@ module IRB
         if doc_namespace
           "Regexp.#{message}"
         else
-          candidates = Regexp.instance_methods.collect{|m| m.to_s}
+          candidates = Regexp.instance_methods.collect { |m| m.to_s }
           select_message(receiver, message, candidates)
         end
 
@@ -194,7 +196,7 @@ module IRB
         if doc_namespace
           "Array.#{message}"
         else
-          candidates = Array.instance_methods.collect{|m| m.to_s}
+          candidates = Array.instance_methods.collect { |m| m.to_s }
           select_message(receiver, message, candidates)
         end
 
@@ -206,8 +208,8 @@ module IRB
         if doc_namespace
           ["Proc.#{message}", "Hash.#{message}"]
         else
-          proc_candidates = Proc.instance_methods.collect{|m| m.to_s}
-          hash_candidates = Hash.instance_methods.collect{|m| m.to_s}
+          proc_candidates = Proc.instance_methods.collect { |m| m.to_s }
+          hash_candidates = Hash.instance_methods.collect { |m| m.to_s }
           select_message(receiver, message, proc_candidates | hash_candidates)
         end
 
@@ -228,12 +230,12 @@ module IRB
         # Absolute Constant or class methods
         receiver = $1
 
-        candidates = Object.constants.collect{|m| m.to_s}
+        candidates = Object.constants.collect { |m| m.to_s }
 
         if doc_namespace
           candidates.find { |i| i == receiver }
         else
-          candidates.grep(/^#{receiver}/).collect{|e| "::" + e}
+          candidates.grep(/^#{receiver}/).collect { |e| "::" + e }
         end
 
       when /^([A-Z].*)::([^:.]*)$/
@@ -263,7 +265,7 @@ module IRB
         if doc_namespace
           "Symbol.#{message}"
         else
-          candidates = Symbol.instance_methods.collect{|m| m.to_s}
+          candidates = Symbol.instance_methods.collect { |m| m.to_s }
           select_message(receiver, message, candidates, sep)
         end
 
@@ -279,7 +281,7 @@ module IRB
           if doc_namespace
             "#{instance.class.name}.#{message}"
           else
-            candidates = instance.methods.collect{|m| m.to_s}
+            candidates = instance.methods.collect { |m| m.to_s }
             select_message(receiver, message, candidates, sep)
           end
         rescue Exception
@@ -301,7 +303,7 @@ module IRB
           if doc_namespace
             "#{instance.class.name}.#{message}"
           else
-            candidates = instance.methods.collect{|m| m.to_s}
+            candidates = instance.methods.collect { |m| m.to_s }
             select_message(receiver, message, candidates, sep)
           end
         rescue Exception
@@ -315,10 +317,10 @@ module IRB
       when /^(\$[^.]*)$/
         # global var
         gvar = $1
-        all_gvars = global_variables.collect{|m| m.to_s}
+        all_gvars = global_variables.collect { |m| m.to_s }
 
         if doc_namespace
-          all_gvars.find{ |i| i == gvar }
+          all_gvars.find { |i| i == gvar }
         else
           all_gvars.grep(Regexp.new(Regexp.quote(gvar)))
         end
@@ -329,10 +331,10 @@ module IRB
         sep = $2
         message = $3
 
-        gv = bind.eval_global_variables.collect{|m| m.to_s}.push("true", "false", "nil")
-        lv = bind.local_variables.collect{|m| m.to_s}
-        iv = bind.eval_instance_variables.collect{|m| m.to_s}
-        cv = bind.eval_class_constants.collect{|m| m.to_s}
+        gv = bind.eval_global_variables.collect { |m| m.to_s }.push("true", "false", "nil")
+        lv = bind.local_variables.collect { |m| m.to_s }
+        iv = bind.eval_instance_variables.collect { |m| m.to_s }
+        cv = bind.eval_class_constants.collect { |m| m.to_s }
 
         if (gv | lv | iv | cv).include?(receiver) or /^[A-Z]/ =~ receiver && /\./ !~ receiver
           # foo.func and foo is var. OR
@@ -343,9 +345,9 @@ module IRB
             candidates = []
             rec = eval(receiver, bind)
             if sep == "::" and rec.kind_of?(Module)
-              candidates = rec.constants.collect{|m| m.to_s}
+              candidates = rec.constants.collect { |m| m.to_s }
             end
-            candidates |= rec.methods.collect{|m| m.to_s}
+            candidates |= rec.methods.collect { |m| m.to_s }
           rescue Exception
             candidates = []
           end
@@ -356,7 +358,7 @@ module IRB
 
         if doc_namespace
           rec_class = rec.is_a?(Module) ? rec : rec.class
-          "#{rec_class.name}#{sep}#{candidates.find{ |i| i == message }}"
+          "#{rec_class.name}#{sep}#{candidates.find { |i| i == message }}"
         else
           select_message(receiver, message, candidates, sep)
         end
@@ -367,27 +369,31 @@ module IRB
         receiver = ""
         message = $1
 
-        candidates = String.instance_methods(true).collect{|m| m.to_s}
+        candidates = String.instance_methods(true).collect { |m| m.to_s }
 
         if doc_namespace
-          "String.#{candidates.find{ |i| i == message }}"
+          "String.#{candidates.find { |i| i == message }}"
         else
           select_message(receiver, message, candidates.sort)
         end
 
       else
         if doc_namespace
-          vars = (bind.local_variables | bind.eval_instance_variables).collect{|m| m.to_s}
-          perfect_match_var = vars.find{|m| m.to_s == input}
+          vars = (bind.local_variables | bind.eval_instance_variables).collect { |m| m.to_s }
+          perfect_match_var = vars.find { |m| m.to_s == input }
           if perfect_match_var
             eval("#{perfect_match_var}.class.name", bind)
           else
-            candidates = (bind.eval_methods | bind.eval_private_methods | bind.local_variables | bind.eval_instance_variables | bind.eval_class_constants).collect{|m| m.to_s}
+            candidates = (bind.eval_methods | bind.eval_private_methods | bind.local_variables | bind.eval_instance_variables | bind.eval_class_constants).collect { |m|
+              m.to_s
+            }
             candidates |= ReservedWords
-            candidates.find{ |i| i == input }
+            candidates.find { |i| i == input }
           end
         else
-          candidates = (bind.eval_methods | bind.eval_private_methods | bind.local_variables | bind.eval_instance_variables | bind.eval_class_constants).collect{|m| m.to_s}
+          candidates = (bind.eval_methods | bind.eval_private_methods | bind.local_variables | bind.eval_instance_variables | bind.eval_class_constants).collect { |m|
+            m.to_s
+          }
           candidates |= ReservedWords
           candidates.grep(/^#{Regexp.quote(input)}/).sort
         end
@@ -438,7 +444,7 @@ module IRB
           receiver + sep + e
         when /^[0-9]/
         when *Operators
-          #receiver + " " + e
+          # receiver + " " + e
         end
       end
     end

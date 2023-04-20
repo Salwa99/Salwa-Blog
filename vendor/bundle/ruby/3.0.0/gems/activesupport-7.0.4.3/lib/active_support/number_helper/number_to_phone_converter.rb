@@ -12,48 +12,49 @@ module ActiveSupport
       end
 
       private
-        def convert_to_phone_number(number)
-          if opts[:area_code]
-            convert_with_area_code(number)
-          else
-            convert_without_area_code(number)
-          end
-        end
 
-        def convert_with_area_code(number)
-          default_pattern = /(\d{1,3})(\d{3})(\d{4}$)/
-          number.gsub!(regexp_pattern(default_pattern),
-                       "(\\1) \\2#{delimiter}\\3")
-          number
+      def convert_to_phone_number(number)
+        if opts[:area_code]
+          convert_with_area_code(number)
+        else
+          convert_without_area_code(number)
         end
+      end
 
-        def convert_without_area_code(number)
-          default_pattern = /(\d{0,3})(\d{3})(\d{4})$/
-          number.gsub!(regexp_pattern(default_pattern),
-                       "\\1#{delimiter}\\2#{delimiter}\\3")
-          number.slice!(0, 1) if start_with_delimiter?(number)
-          number
-        end
+      def convert_with_area_code(number)
+        default_pattern = /(\d{1,3})(\d{3})(\d{4}$)/
+        number.gsub!(regexp_pattern(default_pattern),
+                     "(\\1) \\2#{delimiter}\\3")
+        number
+      end
 
-        def start_with_delimiter?(number)
-          delimiter.present? && number.start_with?(delimiter)
-        end
+      def convert_without_area_code(number)
+        default_pattern = /(\d{0,3})(\d{3})(\d{4})$/
+        number.gsub!(regexp_pattern(default_pattern),
+                     "\\1#{delimiter}\\2#{delimiter}\\3")
+        number.slice!(0, 1) if start_with_delimiter?(number)
+        number
+      end
 
-        def delimiter
-          opts[:delimiter] || "-"
-        end
+      def start_with_delimiter?(number)
+        delimiter.present? && number.start_with?(delimiter)
+      end
 
-        def country_code(code)
-          code.blank? ? "" : "+#{code}#{delimiter}"
-        end
+      def delimiter
+        opts[:delimiter] || "-"
+      end
 
-        def phone_ext(ext)
-          ext.blank? ? "" : " x #{ext}"
-        end
+      def country_code(code)
+        code.blank? ? "" : "+#{code}#{delimiter}"
+      end
 
-        def regexp_pattern(default_pattern)
-          opts.fetch :pattern, default_pattern
-        end
+      def phone_ext(ext)
+        ext.blank? ? "" : " x #{ext}"
+      end
+
+      def regexp_pattern(default_pattern)
+        opts.fetch :pattern, default_pattern
+      end
     end
   end
 end

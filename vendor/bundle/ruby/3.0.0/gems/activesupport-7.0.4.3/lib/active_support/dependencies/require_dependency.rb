@@ -12,7 +12,8 @@ module ActiveSupport::Dependencies::RequireDependency
     filename = filename.to_path if filename.respond_to?(:to_path)
 
     unless filename.is_a?(String)
-      raise ArgumentError, "the file name must be either a String or implement #to_path -- you passed #{filename.inspect}"
+      raise ArgumentError,
+            "the file name must be either a String or implement #to_path -- you passed #{filename.inspect}"
     end
 
     if abspath = ActiveSupport::Dependencies.search_for_file(filename)

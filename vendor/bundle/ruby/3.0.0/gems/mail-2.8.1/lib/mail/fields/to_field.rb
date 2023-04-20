@@ -1,5 +1,6 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/fields/common_address_field'
 
 module Mail
@@ -28,7 +29,7 @@ module Mail
   #  mail[:to].decoded   #=> 'Mikel Lindsaar <mikel@test.lindsaar.net>, ada@test.lindsaar.net'
   #  mail[:to].addresses #=> ['mikel@test.lindsaar.net', 'ada@test.lindsaar.net']
   #  mail[:to].formatted #=> ['Mikel Lindsaar <mikel@test.lindsaar.net>', 'ada@test.lindsaar.net']
-  class ToField < CommonAddressField #:nodoc:
+  class ToField < CommonAddressField # :nodoc:
     NAME = 'To'
   end
 end

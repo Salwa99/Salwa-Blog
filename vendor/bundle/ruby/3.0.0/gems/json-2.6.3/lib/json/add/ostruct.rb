@@ -1,11 +1,11 @@
-#frozen_string_literal: false
+# frozen_string_literal: false
+
 unless defined?(::JSON::JSON_LOADED) and ::JSON::JSON_LOADED
   require 'json'
 end
 require 'ostruct'
 
 class OpenStruct
-
   # Deserializes JSON string by constructing new Struct object with values
   # <tt>t</tt> serialized by <tt>to_json</tt>.
   def self.json_create(object)
@@ -19,7 +19,7 @@ class OpenStruct
     klass.to_s.empty? and raise JSON::JSONError, "Only named structs are supported!"
     {
       JSON.create_id => klass,
-      't'            => table,
+      't' => table,
     }
   end
 

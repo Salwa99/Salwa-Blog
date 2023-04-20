@@ -32,7 +32,8 @@ module ActiveModel
       ruby2_keywords(:lookup)
 
       private
-        attr_reader :registrations
+
+      attr_reader :registrations
     end
   end
 end

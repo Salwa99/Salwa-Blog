@@ -57,10 +57,12 @@ module ActiveRecord
       # accessors, mutators and query methods.
       def define_attribute_methods # :nodoc:
         return false if @attribute_methods_generated
+
         # Use a mutex; we don't want two threads simultaneously trying to define
         # attribute methods.
         generated_attribute_methods.synchronize do
           return false if @attribute_methods_generated
+
           superclass.define_attribute_methods unless base_class?
           super(attribute_names)
           @attribute_methods_generated = true
@@ -90,7 +92,8 @@ module ActiveRecord
       #   # => false
       def instance_method_already_implemented?(method_name)
         if dangerous_attribute_method?(method_name)
-          raise DangerousAttributeError, "#{method_name} is defined by Active Record. Check to make sure that you don't have an attribute or method with the same name."
+          raise DangerousAttributeError,
+                "#{method_name} is defined by Active Record. Check to make sure that you don't have an attribute or method with the same name."
         end
 
         if superclass == Base
@@ -99,7 +102,7 @@ module ActiveRecord
           # If ThisClass < ... < SomeSuperClass < ... < Base and SomeSuperClass
           # defines its own attribute method, then we don't want to override that.
           defined = method_defined_within?(method_name, superclass, Base) &&
-            ! superclass.instance_method(method_name).owner.is_a?(GeneratedAttributeMethods)
+                    !superclass.instance_method(method_name).owner.is_a?(GeneratedAttributeMethods)
           defined || super
         end
       end
@@ -161,10 +164,10 @@ module ActiveRecord
       #   # => ["id", "created_at", "updated_at", "name", "age"]
       def attribute_names
         @attribute_names ||= if !abstract_class? && table_exists?
-          attribute_types.keys
-        else
-          []
-        end.freeze
+                               attribute_types.keys
+                             else
+                               []
+                             end.freeze
       end
 
       # Returns true if the given attribute exists, otherwise false.
@@ -378,52 +381,53 @@ module ActiveRecord
     end
 
     private
-      def attribute_method?(attr_name)
-        # We check defined? because Syck calls respond_to? before actually calling initialize.
-        defined?(@attributes) && @attributes.key?(attr_name)
-      end
 
-      def attributes_with_values(attribute_names)
-        attribute_names.index_with { |name| @attributes[name] }
-      end
+    def attribute_method?(attr_name)
+      # We check defined? because Syck calls respond_to? before actually calling initialize.
+      defined?(@attributes) && @attributes.key?(attr_name)
+    end
 
-      # Filters the primary keys, readonly attributes and virtual columns from the attribute names.
-      def attributes_for_update(attribute_names)
-        attribute_names &= self.class.column_names
-        attribute_names.delete_if do |name|
-          self.class.readonly_attribute?(name) ||
-            column_for_attribute(name).virtual?
-        end
-      end
+    def attributes_with_values(attribute_names)
+      attribute_names.index_with { |name| @attributes[name] }
+    end
 
-      # Filters out the virtual columns and also primary keys, from the attribute names, when the primary
-      # key is to be generated (e.g. the id attribute has no value).
-      def attributes_for_create(attribute_names)
-        attribute_names &= self.class.column_names
-        attribute_names.delete_if do |name|
-          (pk_attribute?(name) && id.nil?) ||
-            column_for_attribute(name).virtual?
-        end
+    # Filters the primary keys, readonly attributes and virtual columns from the attribute names.
+    def attributes_for_update(attribute_names)
+      attribute_names &= self.class.column_names
+      attribute_names.delete_if do |name|
+        self.class.readonly_attribute?(name) ||
+          column_for_attribute(name).virtual?
       end
+    end
 
-      def format_for_inspect(name, value)
-        if value.nil?
-          value.inspect
-        else
-          inspected_value = if value.is_a?(String) && value.length > 50
-            "#{value[0, 50]}...".inspect
-          elsif value.is_a?(Date) || value.is_a?(Time)
-            %("#{value.to_fs(:inspect)}")
-          else
-            value.inspect
-          end
-
-          inspection_filter.filter_param(name, inspected_value)
-        end
+    # Filters out the virtual columns and also primary keys, from the attribute names, when the primary
+    # key is to be generated (e.g. the id attribute has no value).
+    def attributes_for_create(attribute_names)
+      attribute_names &= self.class.column_names
+      attribute_names.delete_if do |name|
+        (pk_attribute?(name) && id.nil?) ||
+          column_for_attribute(name).virtual?
       end
+    end
 
-      def pk_attribute?(name)
-        name == @primary_key
+    def format_for_inspect(name, value)
+      if value.nil?
+        value.inspect
+      else
+        inspected_value = if value.is_a?(String) && value.length > 50
+                            "#{value[0, 50]}...".inspect
+                          elsif value.is_a?(Date) || value.is_a?(Time)
+                            %("#{value.to_fs(:inspect)}")
+                          else
+                            value.inspect
+                          end
+
+        inspection_filter.filter_param(name, inspected_value)
       end
+    end
+
+    def pk_attribute?(name)
+      name == @primary_key
+    end
   end
 end

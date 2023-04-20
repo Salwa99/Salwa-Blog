@@ -161,9 +161,10 @@ module ActionController
     end.new
 
     private
-      def params_parsers
-        super.merge @custom_param_parsers
-      end
+
+    def params_parsers
+      super.merge @custom_param_parsers
+    end
   end
 
   class LiveTestResponse < Live::Response
@@ -219,9 +220,10 @@ module ActionController
     end
 
     private
-      def load!
-        @id
-      end
+
+    def load!
+      @id
+    end
   end
 
   # Superclass for ActionController functional tests. Functional tests allow you to
@@ -471,7 +473,8 @@ module ActionController
       # ActionDispatch::IntegrationTest for making multiple requests in the same test.
       #
       # Note that the request method is not verified.
-      def process(action, method: "GET", params: nil, session: nil, body: nil, flash: {}, format: nil, xhr: false, as: nil)
+      def process(action, method: "GET", params: nil, session: nil, body: nil, flash: {}, format: nil, xhr: false,
+                  as: nil)
         check_required_ivars
         @controller.clear_instance_variables_between_requests
 
@@ -485,8 +488,8 @@ module ActionController
         @request.set_header "HTTP_COOKIE", cookies.to_header
         @request.delete_header "action_dispatch.cookies"
 
-        @request          = TestRequest.new scrub_env!(@request.env), @request.session, @controller.class
-        @response         = build_response @response_klass
+        @request = TestRequest.new scrub_env!(@request.env), @request.session, @controller.class
+        @response = build_response @response_klass
         @response.request = @request
         @controller.recycle!
 
@@ -541,8 +544,8 @@ module ActionController
           end
         end
 
-        @request          = TestRequest.create(@controller.class)
-        @response         = build_response @response_klass
+        @request = TestRequest.create(@controller.class)
+        @response = build_response @response_klass
         @response.request = @request
 
         if @controller
@@ -564,94 +567,97 @@ module ActionController
       end
 
       private
-        def setup_request(controller_class_name, action, parameters, session, flash, xhr)
-          generated_extras = @routes.generate_extras(parameters.merge(controller: controller_class_name, action: action))
-          generated_path = generated_path(generated_extras)
-          query_string_keys = query_parameter_names(generated_extras)
 
-          @request.assign_parameters(@routes, controller_class_name, action, parameters, generated_path, query_string_keys)
+      def setup_request(controller_class_name, action, parameters, session, flash, xhr)
+        generated_extras = @routes.generate_extras(parameters.merge(controller: controller_class_name,
+                                                                    action: action))
+        generated_path = generated_path(generated_extras)
+        query_string_keys = query_parameter_names(generated_extras)
 
-          @request.session.update(session) if session
-          @request.flash.update(flash || {})
+        @request.assign_parameters(@routes, controller_class_name, action, parameters, generated_path,
+                                   query_string_keys)
+
+        @request.session.update(session) if session
+        @request.flash.update(flash || {})
+
+        if xhr
+          @request.set_header "HTTP_X_REQUESTED_WITH", "XMLHttpRequest"
+          @request.fetch_header("HTTP_ACCEPT") do |k|
+            @request.set_header k, [Mime[:js], Mime[:html], Mime[:xml], "text/xml", "*/*"].join(", ")
+          end
+        end
+
+        @request.fetch_header("SCRIPT_NAME") do |k|
+          @request.set_header k, @controller.config.relative_url_root
+        end
+      end
+
+      def wrap_execution(&block)
+        if ActionController::TestCase.executor_around_each_request && defined?(Rails.application) && Rails.application
+          Rails.application.executor.wrap(&block)
+        else
+          yield
+        end
+      end
+
+      def process_controller_response(action, cookies, xhr)
+        begin
+          @controller.recycle!
+
+          wrap_execution { @controller.dispatch(action, @request, @response) }
+        ensure
+          @request = @controller.request
+          @response = @controller.response
+
+          if @request.have_cookie_jar?
+            unless @request.cookie_jar.committed?
+              @request.cookie_jar.write(@response)
+              cookies.update(@request.cookie_jar.instance_variable_get(:@cookies))
+            end
+          end
+          @response.prepare!
+
+          if flash_value = @request.flash.to_session_value
+            @request.session["flash"] = flash_value
+          else
+            @request.session.delete("flash")
+          end
 
           if xhr
-            @request.set_header "HTTP_X_REQUESTED_WITH", "XMLHttpRequest"
-            @request.fetch_header("HTTP_ACCEPT") do |k|
-              @request.set_header k, [Mime[:js], Mime[:html], Mime[:xml], "text/xml", "*/*"].join(", ")
-            end
+            @request.delete_header "HTTP_X_REQUESTED_WITH"
+            @request.delete_header "HTTP_ACCEPT"
           end
+          @request.query_string = ""
 
-          @request.fetch_header("SCRIPT_NAME") do |k|
-            @request.set_header k, @controller.config.relative_url_root
-          end
+          @response.sent!
         end
 
-        def wrap_execution(&block)
-          if ActionController::TestCase.executor_around_each_request && defined?(Rails.application) && Rails.application
-            Rails.application.executor.wrap(&block)
-          else
-            yield
+        @response
+      end
+
+      def scrub_env!(env)
+        env.delete_if do |k, _|
+          k.start_with?("rack.request", "action_dispatch.request", "action_dispatch.rescue")
+        end
+        env["rack.input"] = StringIO.new
+        env.delete "CONTENT_LENGTH"
+        env.delete "RAW_POST_DATA"
+        env
+      end
+
+      def document_root_element
+        html_document.root
+      end
+
+      def check_required_ivars
+        # Check for required instance variables so we can give an
+        # understandable error message.
+        [:@routes, :@controller, :@request, :@response].each do |iv_name|
+          if !instance_variable_defined?(iv_name) || instance_variable_get(iv_name).nil?
+            raise "#{iv_name} is nil: make sure you set it in your test's setup method."
           end
         end
-
-        def process_controller_response(action, cookies, xhr)
-          begin
-            @controller.recycle!
-
-            wrap_execution { @controller.dispatch(action, @request, @response) }
-          ensure
-            @request = @controller.request
-            @response = @controller.response
-
-            if @request.have_cookie_jar?
-              unless @request.cookie_jar.committed?
-                @request.cookie_jar.write(@response)
-                cookies.update(@request.cookie_jar.instance_variable_get(:@cookies))
-              end
-            end
-            @response.prepare!
-
-            if flash_value = @request.flash.to_session_value
-              @request.session["flash"] = flash_value
-            else
-              @request.session.delete("flash")
-            end
-
-            if xhr
-              @request.delete_header "HTTP_X_REQUESTED_WITH"
-              @request.delete_header "HTTP_ACCEPT"
-            end
-            @request.query_string = ""
-
-            @response.sent!
-          end
-
-          @response
-        end
-
-        def scrub_env!(env)
-          env.delete_if do |k, _|
-            k.start_with?("rack.request", "action_dispatch.request", "action_dispatch.rescue")
-          end
-          env["rack.input"] = StringIO.new
-          env.delete "CONTENT_LENGTH"
-          env.delete "RAW_POST_DATA"
-          env
-        end
-
-        def document_root_element
-          html_document.root
-        end
-
-        def check_required_ivars
-          # Check for required instance variables so we can give an
-          # understandable error message.
-          [:@routes, :@controller, :@request, :@response].each do |iv_name|
-            if !instance_variable_defined?(iv_name) || instance_variable_get(iv_name).nil?
-              raise "#{iv_name} is nil: make sure you set it in your test's setup method."
-            end
-          end
-        end
+      end
     end
 
     include Behavior

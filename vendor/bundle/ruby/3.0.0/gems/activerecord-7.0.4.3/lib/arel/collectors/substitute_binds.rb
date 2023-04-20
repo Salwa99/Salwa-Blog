@@ -29,7 +29,8 @@ module Arel # :nodoc: all
       end
 
       private
-        attr_reader :quoter, :delegate
+
+      attr_reader :quoter, :delegate
     end
   end
 end

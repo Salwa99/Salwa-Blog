@@ -239,10 +239,10 @@ module ActionView
 
         tag(
           "link",
-          "rel"   => tag_options[:rel] || "alternate",
-          "type"  => tag_options[:type] || Template::Types[type].to_s,
+          "rel" => tag_options[:rel] || "alternate",
+          "type" => tag_options[:type] || Template::Types[type].to_s,
           "title" => tag_options[:title] || type.to_s.upcase,
-          "href"  => url_options.is_a?(Hash) ? url_for(url_options.merge(only_path: false)) : url_options
+          "href" => url_options.is_a?(Hash) ? url_for(url_options.merge(only_path: false)) : url_options
         )
       end
 
@@ -461,7 +461,8 @@ module ActionView
         public_poster_folder = options.delete(:poster_skip_pipeline)
         sources << options
         multiple_sources_tag_builder("video", sources) do |tag_options|
-          tag_options[:poster] = path_to_image(tag_options[:poster], skip_pipeline: public_poster_folder) if tag_options[:poster]
+          tag_options[:poster] =
+            path_to_image(tag_options[:poster], skip_pipeline: public_poster_folder) if tag_options[:poster]
           tag_options[:width], tag_options[:height] = extract_dimensions(tag_options.delete(:size)) if tag_options[:size]
         end
       end
@@ -488,97 +489,100 @@ module ActionView
       end
 
       private
-        def multiple_sources_tag_builder(type, sources)
-          options       = sources.extract_options!.symbolize_keys
-          skip_pipeline = options.delete(:skip_pipeline)
-          sources.flatten!
 
-          yield options if block_given?
+      def multiple_sources_tag_builder(type, sources)
+        options = sources.extract_options!.symbolize_keys
+        skip_pipeline = options.delete(:skip_pipeline)
+        sources.flatten!
 
-          if sources.size > 1
-            content_tag(type, options) do
-              safe_join sources.map { |source| tag("source", src: send("path_to_#{type}", source, skip_pipeline: skip_pipeline)) }
-            end
-          else
-            options[:src] = send("path_to_#{type}", sources.first, skip_pipeline: skip_pipeline)
-            content_tag(type, nil, options)
+        yield options if block_given?
+
+        if sources.size > 1
+          content_tag(type, options) do
+            safe_join sources.map { |source|
+                        tag("source", src: send("path_to_#{type}", source, skip_pipeline: skip_pipeline))
+                      }
           end
+        else
+          options[:src] = send("path_to_#{type}", sources.first, skip_pipeline: skip_pipeline)
+          content_tag(type, nil, options)
+        end
+      end
+
+      def resolve_image_source(source, skip_pipeline)
+        if source.is_a?(Symbol) || source.is_a?(String)
+          path_to_image(source, skip_pipeline: skip_pipeline)
+        else
+          polymorphic_url(source)
+        end
+      rescue NoMethodError => e
+        raise ArgumentError, "Can't resolve image into URL: #{e}"
+      end
+
+      def extract_dimensions(size)
+        size = size.to_s
+        if /\A(\d+|\d+.\d+)x(\d+|\d+.\d+)\z/.match?(size)
+          size.split("x")
+        elsif /\A(\d+|\d+.\d+)\z/.match?(size)
+          [size, size]
+        end
+      end
+
+      def check_for_image_tag_errors(options)
+        if options[:size] && (options[:height] || options[:width])
+          raise ArgumentError, "Cannot pass a :size option with a :height or :width option"
+        end
+      end
+
+      def resolve_link_as(extname, mime_type)
+        case extname
+        when "js" then "script"
+        when "css" then "style"
+        when "vtt" then "track"
+        else
+          mime_type.to_s.split("/").first.presence_in(%w(audio video font image))
+        end
+      end
+
+      MAX_HEADER_SIZE = 8_000 # Some HTTP client and proxies have a 8kiB header limit
+      def send_preload_links_header(preload_links, max_header_size: MAX_HEADER_SIZE)
+        return if preload_links.empty?
+        return if respond_to?(:response) && response&.sending?
+
+        if respond_to?(:request) && request
+          request.send_early_hints("Link" => preload_links.join("\n"))
         end
 
-        def resolve_image_source(source, skip_pipeline)
-          if source.is_a?(Symbol) || source.is_a?(String)
-            path_to_image(source, skip_pipeline: skip_pipeline)
-          else
-            polymorphic_url(source)
-          end
-        rescue NoMethodError => e
-          raise ArgumentError, "Can't resolve image into URL: #{e}"
-        end
+        if respond_to?(:response) && response
+          header = response.headers["Link"]
+          header = header ? header.dup : +""
 
-        def extract_dimensions(size)
-          size = size.to_s
-          if /\A(\d+|\d+.\d+)x(\d+|\d+.\d+)\z/.match?(size)
-            size.split("x")
-          elsif /\A(\d+|\d+.\d+)\z/.match?(size)
-            [size, size]
-          end
-        end
+          # rindex count characters not bytes, but we assume non-ascii characters
+          # are rare in urls, and we have a 192 bytes margin.
+          last_line_offset = header.rindex("\n")
+          last_line_size = if last_line_offset
+                             header.bytesize - last_line_offset
+                           else
+                             header.bytesize
+                           end
 
-        def check_for_image_tag_errors(options)
-          if options[:size] && (options[:height] || options[:width])
-            raise ArgumentError, "Cannot pass a :size option with a :height or :width option"
-          end
-        end
-
-        def resolve_link_as(extname, mime_type)
-          case extname
-          when "js"  then "script"
-          when "css" then "style"
-          when "vtt" then "track"
-          else
-            mime_type.to_s.split("/").first.presence_in(%w(audio video font image))
-          end
-        end
-
-        MAX_HEADER_SIZE = 8_000 # Some HTTP client and proxies have a 8kiB header limit
-        def send_preload_links_header(preload_links, max_header_size: MAX_HEADER_SIZE)
-          return if preload_links.empty?
-          return if respond_to?(:response) && response&.sending?
-
-          if respond_to?(:request) && request
-            request.send_early_hints("Link" => preload_links.join("\n"))
-          end
-
-          if respond_to?(:response) && response
-            header = response.headers["Link"]
-            header = header ? header.dup : +""
-
-            # rindex count characters not bytes, but we assume non-ascii characters
-            # are rare in urls, and we have a 192 bytes margin.
-            last_line_offset = header.rindex("\n")
-            last_line_size = if last_line_offset
-              header.bytesize - last_line_offset
-            else
-              header.bytesize
-            end
-
-            preload_links.each do |link|
-              if link.bytesize + last_line_size + 1 < max_header_size
-                unless header.empty?
-                  header << ","
-                  last_line_size += 1
-                end
-              else
-                header << "\n"
-                last_line_size = 0
+          preload_links.each do |link|
+            if link.bytesize + last_line_size + 1 < max_header_size
+              unless header.empty?
+                header << ","
+                last_line_size += 1
               end
-              header << link
-              last_line_size += link.bytesize
+            else
+              header << "\n"
+              last_line_size = 0
             end
-
-            response.headers["Link"] = header
+            header << link
+            last_line_size += link.bytesize
           end
+
+          response.headers["Link"] = header
         end
+      end
     end
   end
 end

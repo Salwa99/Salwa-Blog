@@ -94,7 +94,10 @@ RSpec.describe Capybara do
     end
 
     it 'should warn if not a valid URL' do
-      expect { described_class.app_host = 'www.example.com' }.to raise_error(ArgumentError, /Capybara\.app_host should be set to a url/)
+      expect {
+        described_class.app_host = 'www.example.com'
+      }.to raise_error(ArgumentError,
+                       /Capybara\.app_host should be set to a url/)
     end
 
     it 'should not warn if a valid URL' do
@@ -114,7 +117,10 @@ RSpec.describe Capybara do
     end
 
     it 'should raise if not a valid URL' do
-      expect { described_class.default_host = 'www.example.com' }.to raise_error(ArgumentError, /Capybara\.default_host should be set to a url/)
+      expect {
+        described_class.default_host = 'www.example.com'
+      }.to raise_error(ArgumentError,
+                       /Capybara\.default_host should be set to a url/)
     end
 
     it 'should not warn if a valid URL' do

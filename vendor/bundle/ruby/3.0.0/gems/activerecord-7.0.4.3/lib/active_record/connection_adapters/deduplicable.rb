@@ -21,9 +21,10 @@ module ActiveRecord
       alias :-@ :deduplicate
 
       private
-        def deduplicated
-          freeze
-        end
+
+      def deduplicated
+        freeze
+      end
     end
   end
 end

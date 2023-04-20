@@ -14,9 +14,9 @@ module ActionView
             # Dup properties so that we don't modify argument
             properties = Hash[properties]
 
-            properties[:bufvar]     ||= "@output_buffer"
-            properties[:preamble]   ||= ""
-            properties[:postamble]  ||= "#{properties[:bufvar]}.to_s"
+            properties[:bufvar] ||= "@output_buffer"
+            properties[:preamble] ||= ""
+            properties[:postamble] ||= "#{properties[:bufvar]}.to_s"
 
             properties[:escapefunc] = ""
 
@@ -27,12 +27,14 @@ module ActionView
             src = @src
             view = Class.new(ActionView::Base) {
               include action_view_erb_handler_context._routes.url_helpers
-              class_eval("define_method(:_template) { |local_assigns, output_buffer| #{src} }", defined?(@filename) ? @filename : "(erubi)", 0)
+              class_eval("define_method(:_template) { |local_assigns, output_buffer| #{src} }",
+                         defined?(@filename) ? @filename : "(erubi)", 0)
             }.empty
             view._run(:_template, nil, {}, ActionView::OutputBuffer.new)
           end
 
-        private
+          private
+
           def add_text(text)
             return if text.empty?
 

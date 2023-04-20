@@ -35,7 +35,8 @@ module ActiveRecord
         clear_text = force_encoding_if_needed(clear_text) if cipher_options[:deterministic]
 
         validate_payload_type(clear_text)
-        serialize_message build_encrypted_message(clear_text, key_provider: key_provider, cipher_options: cipher_options)
+        serialize_message build_encrypted_message(clear_text, key_provider: key_provider,
+                                                              cipher_options: cipher_options)
       end
 
       # Decrypts a +clean_text+ and returns the result as clean text
@@ -53,7 +54,9 @@ module ActiveRecord
         message = deserialize_message(encrypted_text)
         keys = key_provider.decryption_keys(message)
         raise Errors::Decryption unless keys.present?
-        uncompress_if_needed(cipher.decrypt(message, key: keys.collect(&:secret), **cipher_options), message.headers.compressed)
+
+        uncompress_if_needed(cipher.decrypt(message, key: keys.collect(&:secret), **cipher_options),
+                             message.headers.compressed)
       rescue *(ENCODING_ERRORS + DECRYPT_ERRORS)
         raise Errors::Decryption
       end
@@ -67,89 +70,92 @@ module ActiveRecord
       end
 
       private
-        DECRYPT_ERRORS = [OpenSSL::Cipher::CipherError, Errors::EncryptedContentIntegrity, Errors::Decryption]
-        ENCODING_ERRORS = [EncodingError, Errors::Encoding]
-        THRESHOLD_TO_JUSTIFY_COMPRESSION = 140.bytes
 
-        def default_key_provider
-          ActiveRecord::Encryption.key_provider
+      DECRYPT_ERRORS = [OpenSSL::Cipher::CipherError, Errors::EncryptedContentIntegrity, Errors::Decryption]
+      ENCODING_ERRORS = [EncodingError, Errors::Encoding]
+      THRESHOLD_TO_JUSTIFY_COMPRESSION = 140.bytes
+
+      def default_key_provider
+        ActiveRecord::Encryption.key_provider
+      end
+
+      def validate_payload_type(clear_text)
+        unless clear_text.is_a?(String)
+          raise ActiveRecord::Encryption::Errors::ForbiddenClass,
+                "The encryptor can only encrypt string values (#{clear_text.class})"
         end
+      end
 
-        def validate_payload_type(clear_text)
-          unless clear_text.is_a?(String)
-            raise ActiveRecord::Encryption::Errors::ForbiddenClass, "The encryptor can only encrypt string values (#{clear_text.class})"
-          end
+      def cipher
+        ActiveRecord::Encryption.cipher
+      end
+
+      def build_encrypted_message(clear_text, key_provider:, cipher_options:)
+        key = key_provider.encryption_key
+
+        clear_text, was_compressed = compress_if_worth_it(clear_text)
+        cipher.encrypt(clear_text, key: key.secret, **cipher_options).tap do |message|
+          message.headers.add(key.public_tags)
+          message.headers.compressed = true if was_compressed
         end
+      end
 
-        def cipher
-          ActiveRecord::Encryption.cipher
+      def serialize_message(message)
+        serializer.dump(message)
+      end
+
+      def deserialize_message(message)
+        raise Errors::Encoding unless message.is_a?(String)
+
+        serializer.load message
+      rescue ArgumentError, TypeError, Errors::ForbiddenClass
+        raise Errors::Encoding
+      end
+
+      def serializer
+        ActiveRecord::Encryption.message_serializer
+      end
+
+      # Under certain threshold, ZIP compression is actually worse that not compressing
+      def compress_if_worth_it(string)
+        if string.bytesize > THRESHOLD_TO_JUSTIFY_COMPRESSION
+          [compress(string), true]
+        else
+          [string, false]
         end
+      end
 
-        def build_encrypted_message(clear_text, key_provider:, cipher_options:)
-          key = key_provider.encryption_key
-
-          clear_text, was_compressed = compress_if_worth_it(clear_text)
-          cipher.encrypt(clear_text, key: key.secret, **cipher_options).tap do |message|
-            message.headers.add(key.public_tags)
-            message.headers.compressed = true if was_compressed
-          end
+      def compress(data)
+        Zlib::Deflate.deflate(data).tap do |compressed_data|
+          compressed_data.force_encoding(data.encoding)
         end
+      end
 
-        def serialize_message(message)
-          serializer.dump(message)
+      def uncompress_if_needed(data, compressed)
+        if compressed
+          uncompress(data)
+        else
+          data
         end
+      end
 
-        def deserialize_message(message)
-          raise Errors::Encoding unless message.is_a?(String)
-          serializer.load message
-        rescue ArgumentError, TypeError, Errors::ForbiddenClass
-          raise Errors::Encoding
+      def uncompress(data)
+        Zlib::Inflate.inflate(data).tap do |uncompressed_data|
+          uncompressed_data.force_encoding(data.encoding)
         end
+      end
 
-        def serializer
-          ActiveRecord::Encryption.message_serializer
+      def force_encoding_if_needed(value)
+        if forced_encoding_for_deterministic_encryption && value && value.encoding != forced_encoding_for_deterministic_encryption
+          value.encode(forced_encoding_for_deterministic_encryption, invalid: :replace, undef: :replace)
+        else
+          value
         end
+      end
 
-        # Under certain threshold, ZIP compression is actually worse that not compressing
-        def compress_if_worth_it(string)
-          if string.bytesize > THRESHOLD_TO_JUSTIFY_COMPRESSION
-            [compress(string), true]
-          else
-            [string, false]
-          end
-        end
-
-        def compress(data)
-          Zlib::Deflate.deflate(data).tap do |compressed_data|
-            compressed_data.force_encoding(data.encoding)
-          end
-        end
-
-        def uncompress_if_needed(data, compressed)
-          if compressed
-            uncompress(data)
-          else
-            data
-          end
-        end
-
-        def uncompress(data)
-          Zlib::Inflate.inflate(data).tap do |uncompressed_data|
-            uncompressed_data.force_encoding(data.encoding)
-          end
-        end
-
-        def force_encoding_if_needed(value)
-          if forced_encoding_for_deterministic_encryption && value && value.encoding != forced_encoding_for_deterministic_encryption
-            value.encode(forced_encoding_for_deterministic_encryption, invalid: :replace, undef: :replace)
-          else
-            value
-          end
-        end
-
-        def forced_encoding_for_deterministic_encryption
-          ActiveRecord::Encryption.config.forced_encoding_for_deterministic_encryption
-        end
+      def forced_encoding_for_deterministic_encryption
+        ActiveRecord::Encryption.config.forced_encoding_for_deterministic_encryption
+      end
     end
   end
 end

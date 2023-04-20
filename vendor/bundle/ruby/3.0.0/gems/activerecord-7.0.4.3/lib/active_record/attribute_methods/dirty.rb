@@ -183,62 +183,63 @@ module ActiveRecord
       end
 
       private
-        def _touch_row(attribute_names, time)
-          @_touch_attr_names = Set.new(attribute_names)
 
-          affected_rows = super
+      def _touch_row(attribute_names, time)
+        @_touch_attr_names = Set.new(attribute_names)
 
-          if @_skip_dirty_tracking ||= false
-            clear_attribute_changes(@_touch_attr_names)
-            return affected_rows
+        affected_rows = super
+
+        if @_skip_dirty_tracking ||= false
+          clear_attribute_changes(@_touch_attr_names)
+          return affected_rows
+        end
+
+        changes = {}
+        @attributes.keys.each do |attr_name|
+          next if @_touch_attr_names.include?(attr_name)
+
+          if attribute_changed?(attr_name)
+            changes[attr_name] = _read_attribute(attr_name)
+            _write_attribute(attr_name, attribute_was(attr_name))
+            clear_attribute_change(attr_name)
           end
+        end
 
-          changes = {}
-          @attributes.keys.each do |attr_name|
-            next if @_touch_attr_names.include?(attr_name)
+        changes_applied
+        changes.each { |attr_name, value| _write_attribute(attr_name, value) }
 
-            if attribute_changed?(attr_name)
-              changes[attr_name] = _read_attribute(attr_name)
-              _write_attribute(attr_name, attribute_was(attr_name))
-              clear_attribute_change(attr_name)
+        affected_rows
+      ensure
+        @_touch_attr_names, @_skip_dirty_tracking = nil, nil
+      end
+
+      def _update_record(attribute_names = attribute_names_for_partial_updates)
+        affected_rows = super
+        changes_applied
+        affected_rows
+      end
+
+      def _create_record(attribute_names = attribute_names_for_partial_inserts)
+        id = super
+        changes_applied
+        id
+      end
+
+      def attribute_names_for_partial_updates
+        partial_updates? ? changed_attribute_names_to_save : attribute_names
+      end
+
+      def attribute_names_for_partial_inserts
+        if partial_inserts?
+          changed_attribute_names_to_save
+        else
+          attribute_names.reject do |attr_name|
+            if column_for_attribute(attr_name).default_function
+              !attribute_changed?(attr_name)
             end
           end
-
-          changes_applied
-          changes.each { |attr_name, value| _write_attribute(attr_name, value) }
-
-          affected_rows
-        ensure
-          @_touch_attr_names, @_skip_dirty_tracking = nil, nil
         end
-
-        def _update_record(attribute_names = attribute_names_for_partial_updates)
-          affected_rows = super
-          changes_applied
-          affected_rows
-        end
-
-        def _create_record(attribute_names = attribute_names_for_partial_inserts)
-          id = super
-          changes_applied
-          id
-        end
-
-        def attribute_names_for_partial_updates
-          partial_updates? ? changed_attribute_names_to_save : attribute_names
-        end
-
-        def attribute_names_for_partial_inserts
-          if partial_inserts?
-            changed_attribute_names_to_save
-          else
-            attribute_names.reject do |attr_name|
-              if column_for_attribute(attr_name).default_function
-                !attribute_changed?(attr_name)
-              end
-            end
-          end
-        end
+      end
     end
   end
 end

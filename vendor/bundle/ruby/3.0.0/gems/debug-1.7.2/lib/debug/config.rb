@@ -3,58 +3,66 @@
 module DEBUGGER__
   LOG_LEVELS = {
     UNKNOWN: 0,
-    FATAL:   1,
-    ERROR:   2,
-    WARN:    3,
-    INFO:    4,
-    DEBUG:   5
+    FATAL: 1,
+    ERROR: 2,
+    WARN: 3,
+    INFO: 4,
+    DEBUG: 5
   }.freeze
 
   CONFIG_SET = {
     # UI setting
-    log_level:      ['RUBY_DEBUG_LOG_LEVEL',      "UI: Log level same as Logger",               :loglevel, "WARN"],
+    log_level: ['RUBY_DEBUG_LOG_LEVEL', "UI: Log level same as Logger", :loglevel, "WARN"],
     show_src_lines: ['RUBY_DEBUG_SHOW_SRC_LINES', "UI: Show n lines source code on breakpoint", :int, "10"],
-    show_evaledsrc: ['RUBY_DEBUG_SHOW_EVALEDSRC', "UI: Show actually evaluated source",         :bool, "false"],
-    show_frames:    ['RUBY_DEBUG_SHOW_FRAMES',    "UI: Show n frames on breakpoint",            :int, "2"],
+    show_evaledsrc: ['RUBY_DEBUG_SHOW_EVALEDSRC', "UI: Show actually evaluated source", :bool, "false"],
+    show_frames: ['RUBY_DEBUG_SHOW_FRAMES', "UI: Show n frames on breakpoint", :int, "2"],
     use_short_path: ['RUBY_DEBUG_USE_SHORT_PATH', "UI: Show shorten PATH (like $(Gem)/foo.rb)", :bool, "false"],
-    no_color:       ['RUBY_DEBUG_NO_COLOR',       "UI: Do not use colorize",                    :bool, "false"],
-    no_sigint_hook: ['RUBY_DEBUG_NO_SIGINT_HOOK', "UI: Do not suspend on SIGINT",               :bool, "false"],
-    no_reline:      ['RUBY_DEBUG_NO_RELINE',      "UI: Do not use Reline library",              :bool, "false"],
-    no_hint:        ['RUBY_DEBUG_NO_HINT',        "UI: Do not show the hint on the REPL",       :bool, "false"],
+    no_color: ['RUBY_DEBUG_NO_COLOR', "UI: Do not use colorize", :bool, "false"],
+    no_sigint_hook: ['RUBY_DEBUG_NO_SIGINT_HOOK', "UI: Do not suspend on SIGINT", :bool, "false"],
+    no_reline: ['RUBY_DEBUG_NO_RELINE', "UI: Do not use Reline library", :bool, "false"],
+    no_hint: ['RUBY_DEBUG_NO_HINT', "UI: Do not show the hint on the REPL", :bool, "false"],
 
     # control setting
-    skip_path:      ['RUBY_DEBUG_SKIP_PATH',      "CONTROL: Skip showing/entering frames for given paths", :path],
-    skip_nosrc:     ['RUBY_DEBUG_SKIP_NOSRC',     "CONTROL: Skip on no source code lines",              :bool, "false"],
-    keep_alloc_site:['RUBY_DEBUG_KEEP_ALLOC_SITE',"CONTROL: Keep allocation site and p, pp shows it",   :bool, "false"],
-    postmortem:     ['RUBY_DEBUG_POSTMORTEM',     "CONTROL: Enable postmortem debug",                   :bool, "false"],
-    fork_mode:      ['RUBY_DEBUG_FORK_MODE',      "CONTROL: Control which process activates a debugger after fork (both/parent/child)", :forkmode, "both"],
-    sigdump_sig:    ['RUBY_DEBUG_SIGDUMP_SIG',    "CONTROL: Sigdump signal", :bool, "false"],
+    skip_path: ['RUBY_DEBUG_SKIP_PATH', "CONTROL: Skip showing/entering frames for given paths", :path],
+    skip_nosrc: ['RUBY_DEBUG_SKIP_NOSRC', "CONTROL: Skip on no source code lines", :bool, "false"],
+    keep_alloc_site: ['RUBY_DEBUG_KEEP_ALLOC_SITE', "CONTROL: Keep allocation site and p, pp shows it", :bool,
+                      "false"],
+    postmortem: ['RUBY_DEBUG_POSTMORTEM', "CONTROL: Enable postmortem debug", :bool, "false"],
+    fork_mode: ['RUBY_DEBUG_FORK_MODE',
+                "CONTROL: Control which process activates a debugger after fork (both/parent/child)", :forkmode, "both"],
+    sigdump_sig: ['RUBY_DEBUG_SIGDUMP_SIG', "CONTROL: Sigdump signal", :bool, "false"],
 
     # boot setting
-    nonstop:        ['RUBY_DEBUG_NONSTOP',     "BOOT: Nonstop mode",                                                :bool, "false"],
-    stop_at_load:   ['RUBY_DEBUG_STOP_AT_LOAD',"BOOT: Stop at just loading location",                               :bool, "false"],
-    init_script:    ['RUBY_DEBUG_INIT_SCRIPT', "BOOT: debug command script path loaded at first stop"],
-    commands:       ['RUBY_DEBUG_COMMANDS',    "BOOT: debug commands invoked at first stop. Commands should be separated by `;;`"],
-    no_rc:          ['RUBY_DEBUG_NO_RC',       "BOOT: ignore loading ~/.rdbgrc(.rb)",                               :bool, "false"],
-    history_file:   ['RUBY_DEBUG_HISTORY_FILE',"BOOT: history file",               :string, "~/.rdbg_history"],
-    save_history:   ['RUBY_DEBUG_SAVE_HISTORY',"BOOT: maximum save history lines", :int, "10000"],
+    nonstop: ['RUBY_DEBUG_NONSTOP', "BOOT: Nonstop mode",
+              :bool, "false"],
+    stop_at_load: ['RUBY_DEBUG_STOP_AT_LOAD', "BOOT: Stop at just loading location",
+                   :bool, "false"],
+    init_script: ['RUBY_DEBUG_INIT_SCRIPT', "BOOT: debug command script path loaded at first stop"],
+    commands: ['RUBY_DEBUG_COMMANDS',
+               "BOOT: debug commands invoked at first stop. Commands should be separated by `;;`"],
+    no_rc: ['RUBY_DEBUG_NO_RC', "BOOT: ignore loading ~/.rdbgrc(.rb)",
+            :bool, "false"],
+    history_file: ['RUBY_DEBUG_HISTORY_FILE', "BOOT: history file", :string, "~/.rdbg_history"],
+    save_history: ['RUBY_DEBUG_SAVE_HISTORY', "BOOT: maximum save history lines", :int, "10000"],
 
     # remote setting
-    open:           ['RUBY_DEBUG_OPEN',         "REMOTE: Open remote port (same as `rdbg --open` option)"],
-    port:           ['RUBY_DEBUG_PORT',         "REMOTE: TCP/IP remote debugging: port"],
-    host:           ['RUBY_DEBUG_HOST',         "REMOTE: TCP/IP remote debugging: host", :string, "127.0.0.1"],
-    sock_path:      ['RUBY_DEBUG_SOCK_PATH',    "REMOTE: UNIX Domain Socket remote debugging: socket path"],
-    sock_dir:       ['RUBY_DEBUG_SOCK_DIR',     "REMOTE: UNIX Domain Socket remote debugging: socket directory"],
-    local_fs_map:   ['RUBY_DEBUG_LOCAL_FS_MAP', "REMOTE: Specify local fs map", :path_map],
-    skip_bp:        ['RUBY_DEBUG_SKIP_BP',      "REMOTE: Skip breakpoints if no clients are attached", :bool, 'false'],
-    cookie:         ['RUBY_DEBUG_COOKIE',       "REMOTE: Cookie for negotiation"],
-    chrome_path:    ['RUBY_DEBUG_CHROME_PATH',  "REMOTE: Platform dependent path of Chrome (For more information, See [here](https://github.com/ruby/debug/pull/334/files#diff-5fc3d0a901379a95bc111b86cf0090b03f857edfd0b99a0c1537e26735698453R55-R64))"],
+    open: ['RUBY_DEBUG_OPEN', "REMOTE: Open remote port (same as `rdbg --open` option)"],
+    port: ['RUBY_DEBUG_PORT', "REMOTE: TCP/IP remote debugging: port"],
+    host: ['RUBY_DEBUG_HOST', "REMOTE: TCP/IP remote debugging: host", :string, "127.0.0.1"],
+    sock_path: ['RUBY_DEBUG_SOCK_PATH', "REMOTE: UNIX Domain Socket remote debugging: socket path"],
+    sock_dir: ['RUBY_DEBUG_SOCK_DIR', "REMOTE: UNIX Domain Socket remote debugging: socket directory"],
+    local_fs_map: ['RUBY_DEBUG_LOCAL_FS_MAP', "REMOTE: Specify local fs map", :path_map],
+    skip_bp: ['RUBY_DEBUG_SKIP_BP', "REMOTE: Skip breakpoints if no clients are attached", :bool, 'false'],
+    cookie: ['RUBY_DEBUG_COOKIE', "REMOTE: Cookie for negotiation"],
+    chrome_path: ['RUBY_DEBUG_CHROME_PATH',
+                  "REMOTE: Platform dependent path of Chrome (For more information, See [here](https://github.com/ruby/debug/pull/334/files#diff-5fc3d0a901379a95bc111b86cf0090b03f857edfd0b99a0c1537e26735698453R55-R64))"],
 
     # obsolete
-    parent_on_fork: ['RUBY_DEBUG_PARENT_ON_FORK', "OBSOLETE: Keep debugging parent process on fork",     :bool, "false"],
+    parent_on_fork: ['RUBY_DEBUG_PARENT_ON_FORK', "OBSOLETE: Keep debugging parent process on fork", :bool,
+                     "false"],
   }.freeze
 
-  CONFIG_MAP = CONFIG_SET.map{|k, (ev, _)| [k, ev]}.to_h.freeze
+  CONFIG_MAP = CONFIG_SET.map { |k, (ev, _)| [k, ev] }.to_h.freeze
 
   class Config
     @config = nil
@@ -95,7 +103,7 @@ module DEBUGGER__
 
     def set_config(**kw)
       conf = config.dup
-      kw.each{|k, v|
+      kw.each { |k, v|
         if CONFIG_MAP[k]
           conf[k] = parse_config_value(k, v) # TODO: ractor support
         else
@@ -166,9 +174,9 @@ module DEBUGGER__
       @sigdump_sig_prev = trap(sig) do
         str = []
         str << "Simple sigdump on #{Process.pid}"
-        Thread.list.each{|th|
+        Thread.list.each { |th|
           str << "Thread: #{th}"
-          th.backtrace.each{|loc|
+          th.backtrace.each { |loc|
             str << "  #{loc}"
           }
           str << ''
@@ -231,7 +239,7 @@ module DEBUGGER__
           raise "unknown fork mode: #{sym}"
         end
       when :path # array of String
-        valstr.split(/:/).map{|e|
+        valstr.split(/:/).map { |e|
           if /\A\/(.+)\/\z/ =~ e
             Regexp.compile $1
           else
@@ -239,7 +247,7 @@ module DEBUGGER__
           end
         }
       when :path_map
-        valstr.split(',').map{|e| e.split(':')}
+        valstr.split(',').map { |e| e.split(':') }
       else
         valstr
       end
@@ -250,7 +258,7 @@ module DEBUGGER__
         mode: :start,
         no_color: (nc = ENV['NO_COLOR']) && !nc.empty?,
       }
-      CONFIG_MAP.each{|key, evname|
+      CONFIG_MAP.each { |key, evname|
         if val = ENV[evname]
           config[key] = parse_config_value(key, val)
         end
@@ -296,18 +304,17 @@ module DEBUGGER__
         end
 
         o.on('-c', '--command', 'Enable command mode.',
-                                'The first argument should be a command name in $PATH.',
-                                'Example: \'rdbg -c bundle exec rake test\'') do
+             'The first argument should be a command name in $PATH.',
+             'Example: \'rdbg -c bundle exec rake test\'') do
           config[:command] = true
         end
 
         o.separator ''
 
         o.on('-O', '--open=[FRONTEND]', 'Start remote debugging with opening the network port.',
-                                        'If TCP/IP options are not given, a UNIX domain socket will be used.',
-                                        'If FRONTEND is given, prepare for the FRONTEND.',
-                                        'Now rdbg, vscode and chrome is supported.') do |f|
-
+             'If TCP/IP options are not given, a UNIX domain socket will be used.',
+             'If FRONTEND is given, prepare for the FRONTEND.',
+             'Now rdbg, vscode and chrome is supported.') do |f|
           case f # some format patterns are not documented yet
           when nil
             config[:open] = true
@@ -419,13 +426,13 @@ module DEBUGGER__
     end
 
     def self.config_to_env_hash config
-      CONFIG_MAP.each_with_object({}){|(key, evname), env|
+      CONFIG_MAP.each_with_object({}) { |(key, evname), env|
         unless config[key].nil?
           case CONFIG_SET[key][2]
           when :path
-            valstr = config[key].map{|e| e.kind_of?(Regexp) ? e.inspect : e}.join(':')
+            valstr = config[key].map { |e| e.kind_of?(Regexp) ? e.inspect : e }.join(':')
           when :path_map
-            valstr = config[key].map{|e| e.join(':')}.join(',')
+            valstr = config[key].map { |e| e.join(':') }.join(',')
           else
             valstr = config[key].to_s
           end
@@ -505,7 +512,7 @@ module DEBUGGER__
   ## Help
 
   def self.parse_help
-    helps = Hash.new{|h, k| h[k] = []}
+    helps = Hash.new { |h, k| h[k] = [] }
     desc = cat = nil
     cmds = Hash.new
 
@@ -519,13 +526,13 @@ module DEBUGGER__
         next unless desc
 
         ws = []
-        $1.gsub(/'([a-z]+)'/){|w|
+        $1.gsub(/'([a-z]+)'/) { |w|
           ws << $1
         }
         helps[cat] << [ws, desc]
         desc = nil
-        max_w = ws.max_by{|w| w.length}
-        ws.each{|w|
+        max_w = ws.max_by { |w| w.length }
+        ws.each { |w|
           cmds[w] = max_w
         }
       when /\A\s+# (\s*\*.+)/
@@ -550,10 +557,10 @@ module DEBUGGER__
 
   def self.help
     r = []
-    self.helps.each{|cat, cmds|
+    self.helps.each { |cat, cmds|
       r << "### #{cat}"
       r << ''
-      cmds.each{|_, desc|
+      cmds.each { |_, desc|
         r << desc
       }
       r << ''

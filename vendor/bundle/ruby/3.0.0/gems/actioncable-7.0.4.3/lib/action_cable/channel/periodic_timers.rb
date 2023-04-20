@@ -8,7 +8,7 @@ module ActionCable
       included do
         class_attribute :periodic_timers, instance_reader: false, default: []
 
-        after_subscribe   :start_periodic_timers
+        after_subscribe :start_periodic_timers
         after_unsubscribe :stop_periodic_timers
       end
 
@@ -32,6 +32,7 @@ module ActionCable
           callback =
             if block_given?
               raise ArgumentError, "Pass a block or provide a callback arg, not both" if callback_or_method_name
+
               block
             else
               case callback_or_method_name
@@ -48,31 +49,32 @@ module ActionCable
             raise ArgumentError, "Expected every: to be a positive number of seconds, got #{every.inspect}"
           end
 
-          self.periodic_timers += [[ callback, every: every ]]
+          self.periodic_timers += [[callback, every: every]]
         end
       end
 
       private
-        def active_periodic_timers
-          @active_periodic_timers ||= []
-        end
 
-        def start_periodic_timers
-          self.class.periodic_timers.each do |callback, options|
-            active_periodic_timers << start_periodic_timer(callback, every: options.fetch(:every))
-          end
-        end
+      def active_periodic_timers
+        @active_periodic_timers ||= []
+      end
 
-        def start_periodic_timer(callback, every:)
-          connection.server.event_loop.timer every do
-            connection.worker_pool.async_exec self, connection: connection, &callback
-          end
+      def start_periodic_timers
+        self.class.periodic_timers.each do |callback, options|
+          active_periodic_timers << start_periodic_timer(callback, every: options.fetch(:every))
         end
+      end
 
-        def stop_periodic_timers
-          active_periodic_timers.each { |timer| timer.shutdown }
-          active_periodic_timers.clear
+      def start_periodic_timer(callback, every:)
+        connection.server.event_loop.timer every do
+          connection.worker_pool.async_exec self, connection: connection, &callback
         end
+      end
+
+      def stop_periodic_timers
+        active_periodic_timers.each { |timer| timer.shutdown }
+        active_periodic_timers.clear
+      end
     end
   end
 end

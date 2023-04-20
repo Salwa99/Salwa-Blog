@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   push-ws.rb -
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -6,7 +7,6 @@
 
 module IRB # :nodoc:
   class Context
-
     # Size of the current WorkSpace stack
     def irb_level
       workspace_stack.size
@@ -40,7 +40,7 @@ module IRB # :nodoc:
 
       workspaces.push @workspace
       @workspace = WorkSpace.new(@workspace.binding, _main[0])
-      if !(class<<main;ancestors;end).include?(ExtendCommandBundle)
+      if !(class << main; ancestors; end).include?(ExtendCommandBundle)
         main.extend ExtendCommandBundle
       end
     end

@@ -13,26 +13,27 @@ module ActiveSupport
     end
 
     private
-      def method_missing(method, *arguments, &block)
-        options = nil
-        if arguments.size == 1 && arguments.first.is_a?(Proc)
-          proc = arguments.shift
-          arguments << lambda { |*args| @options.deep_merge(proc.call(*args)) }
-        elsif arguments.last.respond_to?(:to_hash)
-          options = @options.deep_merge(arguments.pop)
-        else
-          options = @options
-        end
 
-        if options
-          @context.__send__(method, *arguments, **options, &block)
-        else
-          @context.__send__(method, *arguments, &block)
-        end
+    def method_missing(method, *arguments, &block)
+      options = nil
+      if arguments.size == 1 && arguments.first.is_a?(Proc)
+        proc = arguments.shift
+        arguments << lambda { |*args| @options.deep_merge(proc.call(*args)) }
+      elsif arguments.last.respond_to?(:to_hash)
+        options = @options.deep_merge(arguments.pop)
+      else
+        options = @options
       end
 
-      def respond_to_missing?(*arguments)
-        @context.respond_to?(*arguments)
+      if options
+        @context.__send__(method, *arguments, **options, &block)
+      else
+        @context.__send__(method, *arguments, &block)
       end
+    end
+
+    def respond_to_missing?(*arguments)
+      @context.respond_to?(*arguments)
+    end
   end
 end

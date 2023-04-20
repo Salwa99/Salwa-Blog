@@ -36,19 +36,20 @@ module ActiveRecord
     end
 
     private
-      def render_bind(attr)
-        if ActiveModel::Attribute === attr
-          value = if attr.type.binary? && attr.value
-            "<#{attr.value_for_database.to_s.bytesize} bytes of binary data>"
-          else
-            connection.type_cast(attr.value_for_database)
-          end
-        else
-          value = connection.type_cast(attr)
-          attr  = nil
-        end
 
-        [attr&.name, value]
+    def render_bind(attr)
+      if ActiveModel::Attribute === attr
+        value = if attr.type.binary? && attr.value
+                  "<#{attr.value_for_database.to_s.bytesize} bytes of binary data>"
+                else
+                  connection.type_cast(attr.value_for_database)
+                end
+      else
+        value = connection.type_cast(attr)
+        attr = nil
       end
+
+      [attr&.name, value]
+    end
   end
 end

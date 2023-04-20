@@ -6,7 +6,9 @@ module ActiveRecord
     class DeterministicKeyProvider < DerivedSecretKeyProvider
       def initialize(password)
         passwords = Array(password)
-        raise ActiveRecord::Encryption::Errors::Configuration, "Deterministic encryption keys can't be rotated" if passwords.length > 1
+        raise ActiveRecord::Encryption::Errors::Configuration,
+              "Deterministic encryption keys can't be rotated" if passwords.length > 1
+
         super(passwords)
       end
     end

@@ -5,6 +5,7 @@ require "concurrent/map"
 module ActionView
   class UnboundTemplate
     attr_reader :virtual_path, :details
+
     delegate :locale, :format, :variant, :handler, to: :@details
 
     def initialize(source, identifier, details:, virtual_path:)
@@ -36,22 +37,22 @@ module ActionView
     end
 
     private
-      def build_template(locals)
-        Template.new(
-          @source,
-          @identifier,
-          details.handler_class,
 
-          format: details.format_or_default,
-          variant: variant&.to_s,
-          virtual_path: @virtual_path,
+    def build_template(locals)
+      Template.new(
+        @source,
+        @identifier,
+        details.handler_class,
+        format: details.format_or_default,
+        variant: variant&.to_s,
+        virtual_path: @virtual_path,
 
-          locals: locals.map(&:to_s)
-        )
-      end
+        locals: locals.map(&:to_s)
+      )
+    end
 
-      def normalize_locals(locals)
-        locals.map(&:to_sym).sort!.freeze
-      end
+    def normalize_locals(locals)
+      locals.map(&:to_sym).sort!.freeze
+    end
   end
 end

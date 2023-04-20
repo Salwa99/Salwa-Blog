@@ -24,6 +24,7 @@ module ActiveRecord
 
     class << self
       attr_accessor :registry # :nodoc:
+
       delegate :add_modifier, to: :registry
 
       # Add a new type to the registry, allowing it to be referenced as a
@@ -51,9 +52,10 @@ module ActiveRecord
       end
 
       private
-        def current_adapter_name
-          adapter_name_from(ActiveRecord::Base)
-        end
+
+      def current_adapter_name
+        adapter_name_from(ActiveRecord::Base)
+      end
     end
 
     BigInteger = ActiveModel::Type::BigInteger

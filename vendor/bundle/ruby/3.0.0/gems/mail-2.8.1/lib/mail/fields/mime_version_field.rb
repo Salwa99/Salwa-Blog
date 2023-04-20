@@ -1,10 +1,11 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/fields/named_structured_field'
 require 'mail/utilities'
 
 module Mail
-  class MimeVersionField < NamedStructuredField #:nodoc:
+  class MimeVersionField < NamedStructuredField # :nodoc:
     NAME = 'Mime-Version'
 
     def self.singular?

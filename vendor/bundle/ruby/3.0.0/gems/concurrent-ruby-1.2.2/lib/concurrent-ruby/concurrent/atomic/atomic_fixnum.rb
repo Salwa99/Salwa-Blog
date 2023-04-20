@@ -3,7 +3,6 @@ require 'concurrent/utility/native_extension_loader' # load native parts first
 require 'concurrent/atomic/mutex_atomic_fixnum'
 
 module Concurrent
-
   ###################################################################
 
   # @!macro atomic_fixnum_method_initialize

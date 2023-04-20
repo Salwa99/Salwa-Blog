@@ -33,15 +33,16 @@ module ActionCable
       end
 
       private
-        def connection_gid(ids)
-          ids.map do |o|
-            if o.respond_to? :to_gid_param
-              o.to_gid_param
-            else
-              o.to_s
-            end
-          end.sort.join(":")
-        end
+
+      def connection_gid(ids)
+        ids.map do |o|
+          if o.respond_to? :to_gid_param
+            o.to_gid_param
+          else
+            o.to_s
+          end
+        end.sort.join(":")
+      end
     end
   end
 end

@@ -13,7 +13,7 @@ module ActiveSupport
     class HashBuilder
       include LibXML::XML::SaxParser::Callbacks
 
-      CONTENT_KEY   = "__content__"
+      CONTENT_KEY = "__content__"
       HASH_SIZE_KEY = "__hash_size__"
 
       attr_reader :hash
@@ -38,8 +38,8 @@ module ActiveSupport
 
         case current_hash[name]
         when Array then current_hash[name] << new_hash
-        when Hash  then current_hash[name] = [current_hash[name], new_hash]
-        when nil   then current_hash[name] = new_hash
+        when Hash then current_hash[name] = [current_hash[name], new_hash]
+        when nil then current_hash[name] = new_hash
         end
 
         @hash_stack.push(new_hash)
@@ -60,6 +60,7 @@ module ActiveSupport
     end
 
     attr_accessor :document_class
+
     self.document_class = HashBuilder
 
     def parse(data)

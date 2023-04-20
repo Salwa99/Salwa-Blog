@@ -17,27 +17,28 @@ module ActiveStorage
     end
 
     private
-      def open_tempfile(name, tmpdir = nil)
-        file = Tempfile.open(name, tmpdir)
 
-        begin
-          yield file
-        ensure
-          file.close!
-        end
-      end
+    def open_tempfile(name, tmpdir = nil)
+      file = Tempfile.open(name, tmpdir)
 
-      def download(key, file)
-        file.binmode
-        service.download(key) { |chunk| file.write(chunk) }
-        file.flush
-        file.rewind
+      begin
+        yield file
+      ensure
+        file.close!
       end
+    end
 
-      def verify_integrity_of(file, checksum:)
-        unless OpenSSL::Digest::MD5.file(file).base64digest == checksum
-          raise ActiveStorage::IntegrityError
-        end
+    def download(key, file)
+      file.binmode
+      service.download(key) { |chunk| file.write(chunk) }
+      file.flush
+      file.rewind
+    end
+
+    def verify_integrity_of(file, checksum:)
+      unless OpenSSL::Digest::MD5.file(file).base64digest == checksum
+        raise ActiveStorage::IntegrityError
       end
+    end
   end
 end

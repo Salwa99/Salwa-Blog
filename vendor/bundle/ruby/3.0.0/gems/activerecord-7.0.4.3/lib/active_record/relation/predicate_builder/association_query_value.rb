@@ -9,34 +9,35 @@ module ActiveRecord
       end
 
       def queries
-        [ associated_table.join_foreign_key => ids ]
+        [associated_table.join_foreign_key => ids]
       end
 
       private
-        attr_reader :associated_table, :value
 
-        def ids
-          case value
-          when Relation
-            value.select_values.empty? ? value.select(primary_key) : value
-          when Array
-            value.map { |v| convert_to_id(v) }
-          else
-            convert_to_id(value)
-          end
-        end
+      attr_reader :associated_table, :value
 
-        def primary_key
-          associated_table.join_primary_key
+      def ids
+        case value
+        when Relation
+          value.select_values.empty? ? value.select(primary_key) : value
+        when Array
+          value.map { |v| convert_to_id(v) }
+        else
+          convert_to_id(value)
         end
+      end
 
-        def convert_to_id(value)
-          if value.respond_to?(primary_key)
-            value.public_send(primary_key)
-          else
-            value
-          end
+      def primary_key
+        associated_table.join_primary_key
+      end
+
+      def convert_to_id(value)
+        if value.respond_to?(primary_key)
+          value.public_send(primary_key)
+        else
+          value
         end
+      end
     end
   end
 end

@@ -48,10 +48,10 @@ module Bootsnap
         Bootsnap::CompileCache::JSON.cache_dir = cache_dir
 
         @work_pool = WorkerPool.create(size: jobs, jobs: {
-          ruby: method(:precompile_ruby),
-          yaml: method(:precompile_yaml),
-          json: method(:precompile_json),
-        })
+                                         ruby: method(:precompile_ruby),
+                                         yaml: method(:precompile_yaml),
+                                         json: method(:precompile_json),
+                                       })
         @work_pool.spawn
 
         main_sources = sources.map { |d| File.expand_path(d) }

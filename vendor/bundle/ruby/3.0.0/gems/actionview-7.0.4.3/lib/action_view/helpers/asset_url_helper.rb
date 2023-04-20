@@ -241,6 +241,7 @@ module ActionView
       # nothing should be added.
       def compute_asset_extname(source, options = {})
         return if options[:extname] == false
+
         extname = options[:extname] || ASSET_EXTENSIONS[options[:type]]
         if extname && File.extname(source) != extname
           extname
@@ -251,12 +252,12 @@ module ActionView
 
       # Maps asset types to public directory.
       ASSET_PUBLIC_DIRECTORIES = {
-        audio:      "/audios",
-        font:       "/fonts",
-        image:      "/images",
+        audio: "/audios",
+        font: "/fonts",
+        image: "/images",
         javascript: "/javascripts",
         stylesheet: "/stylesheets",
-        video:      "/videos"
+        video: "/videos"
       }
 
       # Computes asset path to public directory. Plugins and

@@ -20,17 +20,18 @@ module ActiveStorage
     end
 
     private
-      def config_for(name)
-        configurations.fetch name do
-          raise "Missing configuration for the #{name.inspect} Active Storage service. Configurations available for #{configurations.keys.inspect}"
-        end
-      end
 
-      def resolve(class_name)
-        require "active_storage/service/#{class_name.to_s.underscore}_service"
-        ActiveStorage::Service.const_get(:"#{class_name.camelize}Service")
-      rescue LoadError
-        raise "Missing service adapter for #{class_name.inspect}"
+    def config_for(name)
+      configurations.fetch name do
+        raise "Missing configuration for the #{name.inspect} Active Storage service. Configurations available for #{configurations.keys.inspect}"
       end
+    end
+
+    def resolve(class_name)
+      require "active_storage/service/#{class_name.to_s.underscore}_service"
+      ActiveStorage::Service.const_get(:"#{class_name.camelize}Service")
+    rescue LoadError
+      raise "Missing service adapter for #{class_name.inspect}"
+    end
   end
 end

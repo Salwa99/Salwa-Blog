@@ -1,10 +1,8 @@
 require 'concurrent/configuration'
 
 module Concurrent
-
   # @!visibility private
   module Options
-
     # Get the requested `Executor` based on the values set in the options hash.
     #
     # @param [Hash] opts the options defining the requested executor

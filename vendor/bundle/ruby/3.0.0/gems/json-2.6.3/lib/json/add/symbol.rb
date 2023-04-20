@@ -1,4 +1,5 @@
-#frozen_string_literal: false
+# frozen_string_literal: false
+
 unless defined?(::JSON::JSON_LOADED) and ::JSON::JSON_LOADED
   require 'json'
 end
@@ -9,7 +10,7 @@ class Symbol
   def as_json(*)
     {
       JSON.create_id => self.class.name,
-      's'            => to_s,
+      's' => to_s,
     }
   end
 

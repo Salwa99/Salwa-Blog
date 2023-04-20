@@ -8,13 +8,14 @@ module ActiveStorage::SetBlob # :nodoc:
   end
 
   private
-    def set_blob
-      @blob = blob_scope.find_signed!(params[:signed_blob_id] || params[:signed_id])
-    rescue ActiveSupport::MessageVerifier::InvalidSignature
-      head :not_found
-    end
 
-    def blob_scope
-      ActiveStorage::Blob
-    end
+  def set_blob
+    @blob = blob_scope.find_signed!(params[:signed_blob_id] || params[:signed_id])
+  rescue ActiveSupport::MessageVerifier::InvalidSignature
+    head :not_found
+  end
+
+  def blob_scope
+    ActiveStorage::Blob
+  end
 end

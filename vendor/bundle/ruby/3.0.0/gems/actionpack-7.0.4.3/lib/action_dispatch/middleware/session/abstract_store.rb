@@ -11,8 +11,8 @@ module ActionDispatch
     class SessionRestoreError < StandardError # :nodoc:
       def initialize
         super("Session contains objects whose class definition isn't available.\n" \
-          "Remember to require the classes for all objects kept in the session.\n" \
-          "(Original exception: #{$!.message} [#{$!.class}])\n")
+              "Remember to require the classes for all objects kept in the session.\n" \
+              "(Original exception: #{$!.message} [#{$!.class}])\n")
         set_backtrace $!.backtrace
       end
     end
@@ -29,7 +29,8 @@ module ActionDispatch
         sid
       end
 
-    private
+      private
+
       def initialize_sid # :doc:
         @default_options.delete(:sidbits)
         @default_options.delete(:secure_random)
@@ -82,9 +83,10 @@ module ActionDispatch
       include SessionObject
 
       private
-        def set_cookie(request, response, cookie)
-          request.cookie_jar[key] = cookie
-        end
+
+      def set_cookie(request, response, cookie)
+        request.cookie_jar[key] = cookie
+      end
     end
 
     class AbstractSecureStore < Rack::Session::Abstract::PersistedSecure
@@ -97,9 +99,10 @@ module ActionDispatch
       end
 
       private
-        def set_cookie(request, response, cookie)
-          request.cookie_jar[key] = cookie
-        end
+
+      def set_cookie(request, response, cookie)
+        request.cookie_jar[key] = cookie
+      end
     end
   end
 end

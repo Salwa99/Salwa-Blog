@@ -43,36 +43,37 @@ module ActiveModel
       end
 
       private
-        def define_method_attribute=(name, owner:)
-          ActiveModel::AttributeMethods::AttrNames.define_attribute_accessor_method(
-            owner, name, writer: true,
-          ) do |temp_method_name, attr_name_expr|
-            owner.define_cached_method("#{name}=", as: temp_method_name, namespace: :active_model) do |batch|
-              batch <<
-                "def #{temp_method_name}(value)" <<
-                "  _write_attribute(#{attr_name_expr}, value)" <<
-                "end"
-            end
+
+      def define_method_attribute=(name, owner:)
+        ActiveModel::AttributeMethods::AttrNames.define_attribute_accessor_method(
+          owner, name, writer: true,
+        ) do |temp_method_name, attr_name_expr|
+          owner.define_cached_method("#{name}=", as: temp_method_name, namespace: :active_model) do |batch|
+            batch <<
+              "def #{temp_method_name}(value)" <<
+              "  _write_attribute(#{attr_name_expr}, value)" <<
+              "end"
           end
         end
+      end
 
-        NO_DEFAULT_PROVIDED = Object.new # :nodoc:
-        private_constant :NO_DEFAULT_PROVIDED
+      NO_DEFAULT_PROVIDED = Object.new # :nodoc:
+      private_constant :NO_DEFAULT_PROVIDED
 
-        def define_default_attribute(name, value, type)
-          self._default_attributes = _default_attributes.deep_dup
-          if value == NO_DEFAULT_PROVIDED
-            default_attribute = _default_attributes[name].with_type(type)
-          else
-            default_attribute = Attribute::UserProvidedDefault.new(
-              name,
-              value,
-              type,
-              _default_attributes.fetch(name.to_s) { nil },
-            )
-          end
-          _default_attributes[name] = default_attribute
+      def define_default_attribute(name, value, type)
+        self._default_attributes = _default_attributes.deep_dup
+        if value == NO_DEFAULT_PROVIDED
+          default_attribute = _default_attributes[name].with_type(type)
+        else
+          default_attribute = Attribute::UserProvidedDefault.new(
+            name,
+            value,
+            type,
+            _default_attributes.fetch(name.to_s) { nil },
+          )
         end
+        _default_attributes[name] = default_attribute
+      end
     end
 
     def initialize(*)
@@ -123,13 +124,14 @@ module ActiveModel
     end
 
     private
-      def _write_attribute(attr_name, value)
-        @attributes.write_from_user(attr_name, value)
-      end
-      alias :attribute= :_write_attribute
 
-      def attribute(attr_name)
-        @attributes.fetch_value(attr_name)
-      end
+    def _write_attribute(attr_name, value)
+      @attributes.write_from_user(attr_name, value)
+    end
+    alias :attribute= :_write_attribute
+
+    def attribute(attr_name)
+      @attributes.fetch_value(attr_name)
+    end
   end
 end

@@ -7,7 +7,6 @@ require 'concurrent/concern/observable'
 require 'concurrent/synchronization/lockable_object'
 
 module Concurrent
-
   # `Agent` is inspired by Clojure's [agent](http://clojure.org/agents)
   # function. An agent is a shared, mutable variable providing independent,
   # uncoordinated, *asynchronous* change of individual values. Best used when
@@ -286,6 +285,7 @@ module Concurrent
     #   @raise [Concurrent::Agent::Error] if the Agent is {#failed?}
     def send!(*args, &action)
       raise Error.new unless send(*args, &action)
+
       true
     end
 
@@ -301,6 +301,7 @@ module Concurrent
     # @!macro send_bang_return_and_raise
     def send_off!(*args, &action)
       raise Error.new unless send_off(*args, &action)
+
       true
     end
 
@@ -318,6 +319,7 @@ module Concurrent
     #   action is to be dispatched
     def send_via!(executor, *args, &action)
       raise Error.new unless send_via(executor, *args, &action)
+
       true
     end
 
@@ -376,6 +378,7 @@ module Concurrent
     # @!macro agent_await_warning
     def await_for!(timeout)
       raise Concurrent::TimeoutError unless wait(timeout.to_f)
+
       true
     end
 
@@ -426,8 +429,9 @@ module Concurrent
       synchronize do
         raise Error.new('agent is not failed') unless failed?
         raise ValidationError unless ns_validate(new_value)
+
         @current.value = new_value
-        @error.value   = nil
+        @error.value = nil
         @queue.clear if clear_actions
         ns_post_next_job unless @queue.empty?
       end
@@ -435,7 +439,6 @@ module Concurrent
     end
 
     class << self
-
       # Blocks the current thread (indefinitely!) until all actions dispatched
       # thus far to all the given Agents, from this thread or nested by the
       # given Agents, have occurred. Will block when any of the agents are
@@ -462,7 +465,7 @@ module Concurrent
       # @!macro agent_await_warning
       def await_for(timeout, *agents)
         end_at = Concurrent.monotonic_time + timeout.to_f
-        ok     = agents.length.times do |i|
+        ok = agents.length.times do |i|
           break false if (delay = end_at - Concurrent.monotonic_time) < 0
           break false unless agents[i].await_for(delay)
         end
@@ -481,6 +484,7 @@ module Concurrent
       # @!macro agent_await_warning
       def await_for!(timeout, *agents)
         raise Concurrent::TimeoutError unless await_for(timeout, *agents)
+
         true
       end
     end
@@ -488,7 +492,7 @@ module Concurrent
     private
 
     def ns_initialize(initial, opts)
-      @error_mode    = opts[:error_mode]
+      @error_mode = opts[:error_mode]
       @error_handler = opts[:error_handler]
 
       if @error_mode && !ERROR_MODES.include?(@error_mode)
@@ -498,17 +502,18 @@ module Concurrent
       end
 
       @error_handler ||= DEFAULT_ERROR_HANDLER
-      @validator     = opts.fetch(:validator, DEFAULT_VALIDATOR)
-      @current       = Concurrent::AtomicReference.new(initial)
-      @error         = Concurrent::AtomicReference.new(nil)
-      @caller        = Concurrent::ThreadLocalVar.new(nil)
-      @queue         = []
+      @validator = opts.fetch(:validator, DEFAULT_VALIDATOR)
+      @current = Concurrent::AtomicReference.new(initial)
+      @error = Concurrent::AtomicReference.new(nil)
+      @caller = Concurrent::ThreadLocalVar.new(nil)
+      @queue = []
 
       self.observers = Collection::CopyOnNotifyObserverSet.new
     end
 
     def enqueue_action_job(action, args, executor)
       raise ArgumentError.new('no action given') unless action
+
       job = Job.new(action, args, executor, @caller.value || Thread.current.object_id)
       synchronize { ns_enqueue_job(job) }
     end
@@ -518,7 +523,7 @@ module Concurrent
         if (index = ns_find_last_job_for_thread)
           job = Job.new(AWAIT_ACTION, [latch], Concurrent.global_immediate_executor,
                         Thread.current.object_id)
-          ns_enqueue_job(job, index+1)
+          ns_enqueue_job(job, index + 1)
         else
           latch.count_down
           true
@@ -529,6 +534,7 @@ module Concurrent
     def ns_enqueue_job(job, index = nil)
       # a non-nil index means this is an await job
       return false if index.nil? && failed?
+
       index ||= @queue.length
       @queue.insert(index, job)
       # if this is the only job, post to executor
@@ -541,11 +547,11 @@ module Concurrent
     end
 
     def execute_next_job
-      job       = synchronize { @queue.first }
+      job = synchronize { @queue.first }
       old_value = @current.value
 
       @caller.value = job.caller # for nested actions
-      new_value     = job.action.call(old_value, *job.args)
+      new_value = job.action.call(old_value, *job.args)
       @caller.value = nil
 
       return if new_value == AWAIT_FLAG

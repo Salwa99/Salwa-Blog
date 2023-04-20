@@ -52,6 +52,7 @@
 # * {ruby-vips reference}[http://www.rubydoc.info/gems/ruby-vips/Vips/Image]
 class ActiveStorage::Variant
   attr_reader :blob, :variation
+
   delegate :service, to: :blob
   delegate :content_type, to: :variation
 
@@ -101,15 +102,16 @@ class ActiveStorage::Variant
   end
 
   private
-    def processed?
-      service.exist?(key)
-    end
 
-    def process
-      blob.open do |input|
-        variation.transform(input) do |output|
-          service.upload(key, output, content_type: content_type)
-        end
+  def processed?
+    service.exist?(key)
+  end
+
+  def process
+    blob.open do |input|
+      variation.transform(input) do |output|
+        service.upload(key, output, content_type: content_type)
       end
     end
+  end
 end

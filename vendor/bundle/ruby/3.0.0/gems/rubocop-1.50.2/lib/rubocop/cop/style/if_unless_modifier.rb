@@ -135,7 +135,7 @@ module RuboCop
           corrector.replace(node, replacement)
         end
 
-        def replacement_for_modifier_form(corrector, node) # rubocop:disable Metrics/AbcSize
+        def replacement_for_modifier_form(corrector, node)
           comment = comment_on_node_line(node)
           if comment && too_long_due_to_comment_after_modifier?(node, comment)
             remove_comment(corrector, node, comment)
@@ -233,7 +233,7 @@ module RuboCop
           #   same line as this 'if' node
           while node && !node.begin_type?
             index = node.sibling_index
-            node  = node.parent
+            node = node.parent
           end
 
           node && (sibling = node.children[index + 1]) && sibling.source_range.first_line == line_no

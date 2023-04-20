@@ -1,4 +1,5 @@
-#frozen_string_literal: false
+# frozen_string_literal: false
+
 require 'json/version'
 require 'json/generic_object'
 
@@ -42,7 +43,7 @@ module JSON
     def deep_const_get(path) # :nodoc:
       path.to_s.split(/::/).inject(Object) do |p, c|
         case
-        when c.empty?                  then p
+        when c.empty? then p
         when p.const_defined?(c, true) then p.const_get(c)
         else
           begin
@@ -80,20 +81,20 @@ module JSON
 
     def create_fast_state
       State.new(
-        :indent         => '',
-        :space          => '',
-        :object_nl      => "",
-        :array_nl       => "",
-        :max_nesting    => false
+        :indent => '',
+        :space => '',
+        :object_nl => "",
+        :array_nl => "",
+        :max_nesting => false
       )
     end
 
     def create_pretty_state
       State.new(
-        :indent         => '  ',
-        :space          => ' ',
-        :object_nl      => "\n",
-        :array_nl       => "\n"
+        :indent => '  ',
+        :space => ' ',
+        :object_nl => "\n",
+        :array_nl => "\n"
       )
     end
 
@@ -127,9 +128,9 @@ module JSON
     Thread.current[CREATE_ID_TLS_KEY] || DEFAULT_CREATE_ID
   end
 
-  NaN           = 0.0/0
+  NaN = 0.0 / 0
 
-  Infinity      = 1.0/0
+  Infinity = 1.0 / 0
 
   MinusInfinity = -Infinity
 
@@ -213,7 +214,7 @@ module JSON
   #   JSON.parse('')
   #
   def parse(source, opts = {})
-    Parser.new(source, **(opts||{})).parse
+    Parser.new(source, **(opts || {})).parse
   end
 
   # :call-seq:
@@ -229,10 +230,10 @@ module JSON
   # - Option +allow_nan+, if not provided, defaults to +true+.
   def parse!(source, opts = {})
     opts = {
-      :max_nesting  => false,
-      :allow_nan    => true
+      :max_nesting => false,
+      :allow_nan => true
     }.merge(opts)
-    Parser.new(source, **(opts||{})).parse
+    Parser.new(source, **(opts || {})).parse
   end
 
   # :call-seq:
@@ -420,9 +421,9 @@ module JSON
     attr_accessor :load_default_options
   end
   self.load_default_options = {
-    :max_nesting      => false,
-    :allow_nan        => true,
-    :allow_blank       => true,
+    :max_nesting => false,
+    :allow_nan => true,
+    :allow_blank => true,
     :create_additions => true,
   }
 
@@ -597,7 +598,7 @@ module JSON
   end
   self.dump_default_options = {
     :max_nesting => false,
-    :allow_nan   => true,
+    :allow_nan => true,
     :escape_slash => false,
   }
 

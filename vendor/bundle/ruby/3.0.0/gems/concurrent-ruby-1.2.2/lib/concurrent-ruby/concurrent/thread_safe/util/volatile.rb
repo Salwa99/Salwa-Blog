@@ -1,16 +1,12 @@
 require 'concurrent/thread_safe/util'
 
 module Concurrent
-
   # @!visibility private
   module ThreadSafe
-
     # @!visibility private
     module Util
-      
       # @!visibility private
       module Volatile
-
         # Provides +volatile+ (in the JVM's sense) attribute accessors implemented
         # atop of +Concurrent::AtomicReference+.
         #
@@ -32,8 +28,9 @@ module Concurrent
         #   end
         def attr_volatile(*attr_names)
           return if attr_names.empty?
+
           include(Module.new do
-            atomic_ref_setup = attr_names.map {|attr_name| "@__#{attr_name} = Concurrent::AtomicReference.new"}
+            atomic_ref_setup = attr_names.map { |attr_name| "@__#{attr_name} = Concurrent::AtomicReference.new" }
             initialize_copy_setup = attr_names.zip(atomic_ref_setup).map do |attr_name, ref_setup|
               "#{ref_setup}(other.instance_variable_get(:@__#{attr_name}).get)"
             end

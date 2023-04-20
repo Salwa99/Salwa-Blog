@@ -8,7 +8,7 @@ module ActionText
 
     mattr_accessor :tag_name, default: "action-text-attachment"
 
-    ATTRIBUTES = %w( sgid content-type url href filename filesize width height previewable presentation caption )
+    ATTRIBUTES = %w(sgid content-type url href filename filesize width height previewable presentation caption)
 
     class << self
       def fragment_by_canonicalizing_attachments(content)
@@ -36,15 +36,16 @@ module ActionText
       end
 
       private
-        def node_from_attributes(attributes)
-          if attributes = process_attributes(attributes).presence
-            ActionText::HtmlConversion.create_element(tag_name, attributes)
-          end
-        end
 
-        def process_attributes(attributes)
-          attributes.transform_keys { |key| key.to_s.underscore.dasherize }.slice(*ATTRIBUTES)
+      def node_from_attributes(attributes)
+        if attributes = process_attributes(attributes).presence
+          ActionText::HtmlConversion.create_element(tag_name, attributes)
         end
+      end
+
+      def process_attributes(attributes)
+        attributes.transform_keys { |key| key.to_s.underscore.dasherize }.slice(*ATTRIBUTES)
+      end
     end
 
     attr_reader :node, :attachable
@@ -90,16 +91,17 @@ module ActionText
     end
 
     private
-      def node_attributes
-        @node_attributes ||= ATTRIBUTES.map { |name| [ name.underscore, node[name] ] }.to_h.compact
-      end
 
-      def attachable_attributes
-        @attachable_attributes ||= (attachable.try(:to_rich_text_attributes) || {}).stringify_keys
-      end
+    def node_attributes
+      @node_attributes ||= ATTRIBUTES.map { |name| [name.underscore, node[name]] }.to_h.compact
+    end
 
-      def sgid_attributes
-        @sgid_attributes ||= node_attributes.slice("sgid").presence || attachable_attributes.slice("sgid")
-      end
+    def attachable_attributes
+      @attachable_attributes ||= (attachable.try(:to_rich_text_attributes) || {}).stringify_keys
+    end
+
+    def sgid_attributes
+      @sgid_attributes ||= node_attributes.slice("sgid").presence || attachable_attributes.slice("sgid")
+    end
   end
 end

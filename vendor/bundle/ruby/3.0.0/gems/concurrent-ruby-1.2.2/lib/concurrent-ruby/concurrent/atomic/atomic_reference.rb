@@ -13,7 +13,6 @@ if Concurrent.on_truffleruby? && !defined?(TruffleRuby::AtomicReference)
 end
 
 module Concurrent
-
   # @!macro internal_implementation_note
   AtomicReferenceImplementation = case
                                   when Concurrent.on_cruby? && Concurrent.c_extensions_loaded?
@@ -124,7 +123,6 @@ module Concurrent
   #   @return [Object] the new value
   #   @raise [Concurrent::ConcurrentUpdateError] if the update fails
   class AtomicReference < AtomicReferenceImplementation
-
     # @return [String] Short string representation.
     def to_s
       format '%s value:%s>', super[0..-2], get

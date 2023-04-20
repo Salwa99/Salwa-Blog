@@ -1,7 +1,6 @@
 require 'concurrent/synchronization/object'
 
 module Concurrent
-
   # A `Maybe` encapsulates an optional value. A `Maybe` either contains a value
   # of (represented as `Just`), or it is empty (represented as `Nothing`). Using
   # `Maybe` is a good way to deal with errors or exceptional cases without
@@ -136,6 +135,7 @@ module Concurrent
     # @raise [ArgumentError] when no block given.
     def self.from(*args)
       raise ArgumentError.new('no block given') unless block_given?
+
       begin
         value = yield(*args)
         return new(value, NONE)
@@ -174,7 +174,7 @@ module Concurrent
     #
     # @return [Boolean] True if `Just` or false if `Nothing`.
     def just?
-      ! nothing?
+      !nothing?
     end
     alias :fulfilled? :just?
 

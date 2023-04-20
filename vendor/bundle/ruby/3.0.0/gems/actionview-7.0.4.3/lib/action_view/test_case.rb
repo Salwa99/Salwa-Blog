@@ -98,7 +98,8 @@ module ActionView
           super
         end
 
-      private
+        private
+
         def include_helper_modules!
           helper(helper_class) if helper_class
           include _helpers
@@ -178,7 +179,8 @@ module ActionView
         end
       end
 
-    private
+      private
+
       # Need to experiment if this priority is the best one: rendered => output_buffer
       def document_root_element
         Nokogiri::HTML::Document.parse(@rendered.blank? ? @output_buffer : @rendered).root

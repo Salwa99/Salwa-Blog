@@ -160,7 +160,7 @@ module ActiveRecord
     extend ActiveSupport::Autoload
 
     autoload :DatabaseTasks
-    autoload :MySQLDatabaseTasks,  "active_record/tasks/mysql_database_tasks"
+    autoload :MySQLDatabaseTasks, "active_record/tasks/mysql_database_tasks"
     autoload :PostgreSQLDatabaseTasks, "active_record/tasks/postgresql_database_tasks"
     autoload :SQLiteDatabaseTasks, "active_record/tasks/sqlite_database_tasks"
   end
@@ -227,7 +227,8 @@ module ActiveRecord
   # with the global thread pool async query executor.
   def self.global_executor_concurrency=(global_executor_concurrency)
     if self.async_query_executor.nil? || self.async_query_executor == :multi_thread_pool
-      raise ArgumentError, "`global_executor_concurrency` cannot be set when using the executor is nil or set to multi_thead_pool. For multiple thread pools, please set the concurrency in your database configuration."
+      raise ArgumentError,
+            "`global_executor_concurrency` cannot be set when using the executor is nil or set to multi_thead_pool. For multiple thread pools, please set the concurrency in your database configuration."
     end
 
     @global_executor_concurrency = global_executor_concurrency
@@ -384,4 +385,5 @@ end
 YAML.load_tags["!ruby/object:ActiveRecord::AttributeSet"] = "ActiveModel::AttributeSet"
 YAML.load_tags["!ruby/object:ActiveRecord::Attribute::FromDatabase"] = "ActiveModel::Attribute::FromDatabase"
 YAML.load_tags["!ruby/object:ActiveRecord::LazyAttributeHash"] = "ActiveModel::LazyAttributeHash"
-YAML.load_tags["!ruby/object:ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter::MysqlString"] = "ActiveRecord::Type::String"
+YAML.load_tags["!ruby/object:ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter::MysqlString"] =
+  "ActiveRecord::Type::String"

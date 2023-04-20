@@ -46,7 +46,7 @@ module Capybara
         end
       end
 
-    private
+      private
 
       def exact?
         options.fetch(:exact, session_options.exact_text)

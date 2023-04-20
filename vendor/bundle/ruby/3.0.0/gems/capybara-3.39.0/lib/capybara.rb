@@ -389,10 +389,10 @@ module Capybara
     def HTML(html) # rubocop:disable Naming/MethodName
       # Nokogiri >= 1.12.0 or Nokogumbo installed and allowed for use
       html_parser, using_html5 = if defined?(Nokogiri::HTML5) && Capybara.use_html5_parsing
-        [Nokogiri::HTML5, true]
-      else
-        [defined?(Nokogiri::HTML4) ? Nokogiri::HTML4 : Nokogiri::HTML, false]
-      end
+                                   [Nokogiri::HTML5, true]
+                                 else
+                                   [defined?(Nokogiri::HTML4) ? Nokogiri::HTML4 : Nokogiri::HTML, false]
+                                 end
 
       html_parser.parse(html).tap do |document|
         document.xpath('//template').each do |template|
@@ -410,7 +410,7 @@ module Capybara
       config.session_options
     end
 
-  private
+    private
 
     def config
       @config ||= Capybara::Config.new

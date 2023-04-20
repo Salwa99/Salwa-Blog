@@ -40,18 +40,20 @@ module ActiveRecord
       end
 
       protected
-        def include_relation_methods(delegate)
-          superclass.include_relation_methods(delegate) unless base_class?
-          delegate.include generated_relation_methods
-        end
+
+      def include_relation_methods(delegate)
+        superclass.include_relation_methods(delegate) unless base_class?
+        delegate.include generated_relation_methods
+      end
 
       private
-        def generated_relation_methods
-          @generated_relation_methods ||= GeneratedRelationMethods.new.tap do |mod|
-            const_set(:GeneratedRelationMethods, mod)
-            private_constant :GeneratedRelationMethods
-          end
+
+      def generated_relation_methods
+        @generated_relation_methods ||= GeneratedRelationMethods.new.tap do |mod|
+          const_set(:GeneratedRelationMethods, mod)
+          private_constant :GeneratedRelationMethods
         end
+      end
     end
 
     class GeneratedRelationMethods < Module # :nodoc:
@@ -102,15 +104,16 @@ module ActiveRecord
       end
 
       private
-        def method_missing(method, *args, &block)
-          if @klass.respond_to?(method)
-            @klass.generate_relation_method(method)
-            scoping { @klass.public_send(method, *args, &block) }
-          else
-            super
-          end
+
+      def method_missing(method, *args, &block)
+        if @klass.respond_to?(method)
+          @klass.generate_relation_method(method)
+          scoping { @klass.public_send(method, *args, &block) }
+        else
+          super
         end
-        ruby2_keywords(:method_missing)
+      end
+      ruby2_keywords(:method_missing)
     end
 
     module ClassMethods # :nodoc:
@@ -119,14 +122,16 @@ module ActiveRecord
       end
 
       private
-        def relation_class_for(klass)
-          klass.relation_delegate_class(self)
-        end
+
+      def relation_class_for(klass)
+        klass.relation_delegate_class(self)
+      end
     end
 
     private
-      def respond_to_missing?(method, _)
-        super || @klass.respond_to?(method)
-      end
+
+    def respond_to_missing?(method, _)
+      super || @klass.respond_to?(method)
+    end
   end
 end

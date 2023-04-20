@@ -4,7 +4,6 @@ require 'concurrent/collection/ruby_non_concurrent_priority_queue'
 
 module Concurrent
   module Collection
-
     # @!visibility private
     # @!macro internal_implementation_note
     NonConcurrentPriorityQueueImplementation = case
@@ -48,7 +47,6 @@ module Concurrent
     #
     # @!visibility private
     class NonConcurrentPriorityQueue < NonConcurrentPriorityQueueImplementation
-
       alias_method :has_priority?, :include?
 
       alias_method :size, :length

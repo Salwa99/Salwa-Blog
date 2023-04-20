@@ -10,15 +10,15 @@ module ActionView
       attr_internal :controller, :request
 
       CONTROLLER_DELEGATES = [:request_forgery_protection_token, :params,
-        :session, :cookies, :response, :headers, :flash, :action_name,
-        :controller_name, :controller_path]
+                              :session, :cookies, :response, :headers, :flash, :action_name,
+                              :controller_name, :controller_path]
 
       delegate(*CONTROLLER_DELEGATES, to: :controller)
 
       def assign_controller(controller)
         if @_controller = controller
           @_request = controller.request if controller.respond_to?(:request)
-          @_config  = controller.config.inheritable_copy if controller.respond_to?(:config)
+          @_config = controller.config.inheritable_copy if controller.respond_to?(:config)
           @_default_form_builder = controller.default_form_builder if controller.respond_to?(:default_form_builder)
         end
       end
@@ -29,6 +29,7 @@ module ActionView
 
       def respond_to?(method_name, include_private = false)
         return controller.respond_to?(method_name) if CONTROLLER_DELEGATES.include?(method_name.to_sym)
+
         super
       end
     end

@@ -3,7 +3,7 @@
 module ActiveSupport
   module RangeWithFormat
     RANGE_FORMATS = {
-      db: -> (start, stop) do
+      db: ->(start, stop) do
         case start
         when String then "BETWEEN '#{start}' AND '#{stop}'"
         else

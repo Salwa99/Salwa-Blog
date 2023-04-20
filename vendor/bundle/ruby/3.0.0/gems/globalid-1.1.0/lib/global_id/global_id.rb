@@ -1,6 +1,6 @@
-require 'active_support/core_ext/string/inflections'  # For #model_class constantize
+require 'active_support/core_ext/string/inflections' # For #model_class constantize
 require 'active_support/core_ext/array/access'
-require 'active_support/core_ext/object/try'          # For #find
+require 'active_support/core_ext/object/try' # For #find
 require 'active_support/core_ext/module/delegation'
 require 'global_id/uri/gid'
 
@@ -14,7 +14,7 @@ class GlobalID
         new URI::GID.create(app, model, params), options
       else
         raise ArgumentError, 'An app is required to create a GlobalID. ' \
-          'Pass the :app option or set the default GlobalID.app.'
+                             'Pass the :app option or set the default GlobalID.app.'
       end
     end
 
@@ -33,12 +33,14 @@ class GlobalID
     end
 
     private
-      def parse_encoded_gid(gid, options)
-        new(Base64.urlsafe_decode64(gid), options) rescue nil
-      end
+
+    def parse_encoded_gid(gid, options)
+      new(Base64.urlsafe_decode64(gid), options) rescue nil
+    end
   end
 
   attr_reader :uri
+
   delegate :app, :model_name, :model_id, :params, :to_s, :deconstruct_keys, to: :uri
 
   def initialize(gid, options = {})

@@ -47,7 +47,7 @@ module I18n
 
     # Caches the available locales list as both strings and symbols in a Set, so
     # that we can have faster lookups to do the available locales enforce check.
-    def available_locales_set #:nodoc:
+    def available_locales_set # :nodoc:
       @@available_locales_set ||= available_locales.inject(Set.new) do |set, locale|
         set << locale.to_s << locale.to_sym
       end
@@ -62,12 +62,12 @@ module I18n
 
     # Returns true if the available_locales have been initialized
     def available_locales_initialized?
-      ( !!defined?(@@available_locales) && !!@@available_locales )
+      (!!defined?(@@available_locales) && !!@@available_locales)
     end
 
     # Clears the available locales set so it can be recomputed again after I18n
     # gets reloaded.
-    def clear_available_locales_set #:nodoc:
+    def clear_available_locales_set # :nodoc:
       @@available_locales_set = nil
     end
 

@@ -1,7 +1,6 @@
 require 'concurrent/concern/logging'
 
 module Concurrent
-
   ###################################################################
 
   # @!macro executor_service_method_post

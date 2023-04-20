@@ -29,18 +29,19 @@ module ActiveRecord
       end
 
       private
-        def build_table_rows_from(table_name, fixtures)
-          now = ActiveRecord.default_timezone == :utc ? Time.now.utc : Time.now
 
-          @tables[table_name] = fixtures.map do |label, fixture|
-            TableRow.new(
-              fixture,
-              table_rows: self,
-              label: label,
-              now: now,
-            )
-          end
+      def build_table_rows_from(table_name, fixtures)
+        now = ActiveRecord.default_timezone == :utc ? Time.now.utc : Time.now
+
+        @tables[table_name] = fixtures.map do |label, fixture|
+          TableRow.new(
+            fixture,
+            table_rows: self,
+            label: label,
+            now: now,
+          )
         end
+      end
     end
   end
 end

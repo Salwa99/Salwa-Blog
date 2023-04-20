@@ -8,7 +8,8 @@ require 'rspec/shared_spec_matchers'
 
 CHROME_DRIVER = :selenium_chrome
 
-Selenium::WebDriver::Chrome.path = '/usr/bin/google-chrome-beta' if ENV.fetch('CI', nil) && ENV.fetch('CHROME_BETA', nil)
+Selenium::WebDriver::Chrome.path = '/usr/bin/google-chrome-beta' if ENV.fetch('CI',
+                                                                              nil) && ENV.fetch('CHROME_BETA', nil)
 
 browser_options = Selenium::WebDriver::Chrome::Options.new
 browser_options.add_argument('--headless') if ENV['HEADLESS']

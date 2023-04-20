@@ -7,8 +7,9 @@ module Rails
     before_action :ensure_development_env
 
     private
-      def ensure_development_env
-        head :forbidden unless Rails.env.development?
-      end
+
+    def ensure_development_env
+      head :forbidden unless Rails.env.development?
+    end
   end
 end

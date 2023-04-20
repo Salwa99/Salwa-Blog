@@ -1,5 +1,6 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/fields/named_unstructured_field'
 
 module Mail
@@ -26,7 +27,7 @@ module Mail
   #  mail.comments = "This is another comment"
   #  mail[:comments].map { |c| c.to_s }
   #  #=> ['This is a comment', "This is another comment"]
-  class CommentsField < NamedUnstructuredField #:nodoc:
+  class CommentsField < NamedUnstructuredField # :nodoc:
     NAME = 'Comments'
   end
 end

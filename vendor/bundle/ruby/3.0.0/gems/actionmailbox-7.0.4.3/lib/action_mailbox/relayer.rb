@@ -25,7 +25,7 @@ module ActionMailbox
     end
 
     CONTENT_TYPE = "message/rfc822"
-    USER_AGENT   = "Action Mailbox relayer v#{ActionMailbox.version}"
+    USER_AGENT = "Action Mailbox relayer v#{ActionMailbox.version}"
 
     attr_reader :uri, :username, :password
 
@@ -51,25 +51,26 @@ module ActionMailbox
     end
 
     private
-      def post(source)
-        client.post uri, source,
-          "Content-Type"  => CONTENT_TYPE,
-          "User-Agent"    => USER_AGENT,
-          "Authorization" => "Basic #{Base64.strict_encode64(username + ":" + password)}"
-      end
 
-      def client
-        @client ||= Net::HTTP.new(uri.host, uri.port).tap do |connection|
-          if uri.scheme == "https"
-            require "openssl"
+    def post(source)
+      client.post uri, source,
+                  "Content-Type" => CONTENT_TYPE,
+                  "User-Agent" => USER_AGENT,
+                  "Authorization" => "Basic #{Base64.strict_encode64(username + ":" + password)}"
+    end
 
-            connection.use_ssl     = true
-            connection.verify_mode = OpenSSL::SSL::VERIFY_PEER
-          end
+    def client
+      @client ||= Net::HTTP.new(uri.host, uri.port).tap do |connection|
+        if uri.scheme == "https"
+          require "openssl"
 
-          connection.open_timeout = 1
-          connection.read_timeout = 10
+          connection.use_ssl = true
+          connection.verify_mode = OpenSSL::SSL::VERIFY_PEER
         end
+
+        connection.open_timeout = 1
+        connection.read_timeout = 10
       end
+    end
   end
 end

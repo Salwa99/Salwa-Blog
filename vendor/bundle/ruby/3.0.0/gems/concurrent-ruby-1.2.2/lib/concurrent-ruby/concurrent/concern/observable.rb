@@ -3,7 +3,6 @@ require 'concurrent/collection/copy_on_write_observer_set'
 
 module Concurrent
   module Concern
-
     # The [observer pattern](http://en.wikipedia.org/wiki/Observer_pattern) is one
     # of the most useful design patterns.
     #
@@ -48,7 +47,6 @@ module Concurrent
     # threads at the same time, so it should be synchronized (using either a Mutex
     # or an AtomicFixum)
     module Observable
-
       # @!macro observable_add_observer
       #
       #   Adds an observer to this set. If a block is passed, the observer will be

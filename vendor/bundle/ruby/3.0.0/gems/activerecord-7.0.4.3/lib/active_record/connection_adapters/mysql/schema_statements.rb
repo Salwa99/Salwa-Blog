@@ -12,6 +12,7 @@ module ActiveRecord
             each_hash(result) do |row|
               if current_index != row[:Key_name]
                 next if row[:Key_name] == "PRIMARY" # skip the primary key
+
                 current_index = row[:Key_name]
 
                 mysql_index_type = row[:Index_type].downcase.to_sym
@@ -58,7 +59,7 @@ module ActiveRecord
               lengths = options.delete(:lengths)
 
               columns = index[-1].map { |name|
-                [ name.to_sym, expressions[name] || +quote_column_name(name) ]
+                [name.to_sym, expressions[name] || +quote_column_name(name)]
               }.to_h
 
               index[-1] = add_options_for_index_columns(
@@ -98,7 +99,8 @@ module ActiveRecord
         end
 
         # Maps logical Rails types to MySQL-specific data types.
-        def type_to_sql(type, limit: nil, precision: nil, scale: nil, size: limit_to_size(limit, type), unsigned: nil, **)
+        def type_to_sql(type, limit: nil, precision: nil, scale: nil, size: limit_to_size(limit, type), unsigned: nil,
+                        **)
           sql =
             case type.to_s
             when "integer"
@@ -126,164 +128,165 @@ module ActiveRecord
         end
 
         private
-          CHARSETS_OF_4BYTES_MAXLEN = ["utf8mb4", "utf16", "utf16le", "utf32"]
 
-          def row_format_dynamic_by_default?
-            if mariadb?
-              database_version >= "10.2.2"
+        CHARSETS_OF_4BYTES_MAXLEN = ["utf8mb4", "utf16", "utf16le", "utf32"]
+
+        def row_format_dynamic_by_default?
+          if mariadb?
+            database_version >= "10.2.2"
+          else
+            database_version >= "5.7.9"
+          end
+        end
+
+        def default_row_format
+          return if row_format_dynamic_by_default?
+
+          unless defined?(@default_row_format)
+            if query_value("SELECT @@innodb_file_per_table = 1 AND @@innodb_file_format = 'Barracuda'") == 1
+              @default_row_format = "ROW_FORMAT=DYNAMIC"
             else
-              database_version >= "5.7.9"
+              @default_row_format = nil
             end
           end
 
-          def default_row_format
-            return if row_format_dynamic_by_default?
+          @default_row_format
+        end
 
-            unless defined?(@default_row_format)
-              if query_value("SELECT @@innodb_file_per_table = 1 AND @@innodb_file_format = 'Barracuda'") == 1
-                @default_row_format = "ROW_FORMAT=DYNAMIC"
-              else
-                @default_row_format = nil
-              end
-            end
+        def schema_creation
+          MySQL::SchemaCreation.new(self)
+        end
 
-            @default_row_format
+        def create_table_definition(name, **options)
+          MySQL::TableDefinition.new(self, name, **options)
+        end
+
+        def default_type(table_name, field_name)
+          match = create_table_info(table_name)&.match(/`#{field_name}` (.+) DEFAULT ('|\d+|[A-z]+)/)
+          default_pre = match[2] if match
+
+          if default_pre == "'"
+            :string
+          elsif default_pre&.match?(/^\d+$/)
+            :integer
+          elsif default_pre&.match?(/^[A-z]+$/)
+            :function
+          end
+        end
+
+        def new_column_from_field(table_name, field)
+          field_name = field.fetch(:Field)
+          type_metadata = fetch_type_metadata(field[:Type], field[:Extra])
+          default, default_function = field[:Default], nil
+
+          if type_metadata.type == :datetime && /\ACURRENT_TIMESTAMP(?:\([0-6]?\))?\z/i.match?(default)
+            default = "#{default} ON UPDATE #{default}" if /on update CURRENT_TIMESTAMP/i.match?(field[:Extra])
+            default, default_function = nil, default
+          elsif type_metadata.extra == "DEFAULT_GENERATED"
+            default = +"(#{default})" unless default.start_with?("(")
+            default, default_function = nil, default
+          elsif type_metadata.type == :text && default&.start_with?("'")
+            # strip and unescape quotes
+            default = default[1...-1].gsub("\\'", "'")
+          elsif default&.match?(/\A\d/)
+            # Its a number so we can skip the query to check if it is a function
+          elsif default && default_type(table_name, field_name) == :function
+            default, default_function = nil, default
           end
 
-          def schema_creation
-            MySQL::SchemaCreation.new(self)
+          MySQL::Column.new(
+            field[:Field],
+            default,
+            type_metadata,
+            field[:Null] == "YES",
+            default_function,
+            collation: field[:Collation],
+            comment: field[:Comment].presence
+          )
+        end
+
+        def fetch_type_metadata(sql_type, extra = "")
+          MySQL::TypeMetadata.new(super(sql_type), extra: extra)
+        end
+
+        def extract_foreign_key_action(specifier)
+          super unless specifier == "RESTRICT"
+        end
+
+        def add_index_length(quoted_columns, **options)
+          lengths = options_for_index_columns(options[:length])
+          quoted_columns.each do |name, column|
+            column << "(#{lengths[name]})" if lengths[name].present?
           end
+        end
 
-          def create_table_definition(name, **options)
-            MySQL::TableDefinition.new(self, name, **options)
+        def add_options_for_index_columns(quoted_columns, **options)
+          quoted_columns = add_index_length(quoted_columns, **options)
+          super
+        end
+
+        def data_source_sql(name = nil, type: nil)
+          scope = quoted_scope(name, type: type)
+
+          sql = +"SELECT table_name FROM (SELECT table_name, table_type FROM information_schema.tables "
+          sql << " WHERE table_schema = #{scope[:schema]}) _subquery"
+          if scope[:type] || scope[:name]
+            conditions = []
+            conditions << "_subquery.table_type = #{scope[:type]}" if scope[:type]
+            conditions << "_subquery.table_name = #{scope[:name]}" if scope[:name]
+            sql << " WHERE #{conditions.join(" AND ")}"
           end
+          sql
+        end
 
-          def default_type(table_name, field_name)
-            match = create_table_info(table_name)&.match(/`#{field_name}` (.+) DEFAULT ('|\d+|[A-z]+)/)
-            default_pre = match[2] if match
+        def quoted_scope(name = nil, type: nil)
+          schema, name = extract_schema_qualified_name(name)
+          scope = {}
+          scope[:schema] = schema ? quote(schema) : "database()"
+          scope[:name] = quote(name) if name
+          scope[:type] = quote(type) if type
+          scope
+        end
 
-            if default_pre == "'"
-              :string
-            elsif default_pre&.match?(/^\d+$/)
-              :integer
-            elsif default_pre&.match?(/^[A-z]+$/)
-              :function
-            end
+        def extract_schema_qualified_name(string)
+          schema, name = string.to_s.scan(/[^`.\s]+|`[^`]*`/)
+          schema, name = nil, schema unless name
+          [schema, name]
+        end
+
+        def type_with_size_to_sql(type, size)
+          case size&.to_s
+          when nil, "tiny", "medium", "long"
+            "#{size}#{type}"
+          else
+            raise ArgumentError,
+                  "#{size.inspect} is invalid :size value. Only :tiny, :medium, and :long are allowed."
           end
+        end
 
-          def new_column_from_field(table_name, field)
-            field_name = field.fetch(:Field)
-            type_metadata = fetch_type_metadata(field[:Type], field[:Extra])
-            default, default_function = field[:Default], nil
-
-            if type_metadata.type == :datetime && /\ACURRENT_TIMESTAMP(?:\([0-6]?\))?\z/i.match?(default)
-              default = "#{default} ON UPDATE #{default}" if /on update CURRENT_TIMESTAMP/i.match?(field[:Extra])
-              default, default_function = nil, default
-            elsif type_metadata.extra == "DEFAULT_GENERATED"
-              default = +"(#{default})" unless default.start_with?("(")
-              default, default_function = nil, default
-            elsif type_metadata.type == :text && default&.start_with?("'")
-              # strip and unescape quotes
-              default = default[1...-1].gsub("\\'", "'")
-            elsif default&.match?(/\A\d/)
-              # Its a number so we can skip the query to check if it is a function
-            elsif default && default_type(table_name, field_name) == :function
-              default, default_function = nil, default
-            end
-
-            MySQL::Column.new(
-              field[:Field],
-              default,
-              type_metadata,
-              field[:Null] == "YES",
-              default_function,
-              collation: field[:Collation],
-              comment: field[:Comment].presence
-            )
-          end
-
-          def fetch_type_metadata(sql_type, extra = "")
-            MySQL::TypeMetadata.new(super(sql_type), extra: extra)
-          end
-
-          def extract_foreign_key_action(specifier)
-            super unless specifier == "RESTRICT"
-          end
-
-          def add_index_length(quoted_columns, **options)
-            lengths = options_for_index_columns(options[:length])
-            quoted_columns.each do |name, column|
-              column << "(#{lengths[name]})" if lengths[name].present?
-            end
-          end
-
-          def add_options_for_index_columns(quoted_columns, **options)
-            quoted_columns = add_index_length(quoted_columns, **options)
-            super
-          end
-
-          def data_source_sql(name = nil, type: nil)
-            scope = quoted_scope(name, type: type)
-
-            sql = +"SELECT table_name FROM (SELECT table_name, table_type FROM information_schema.tables "
-            sql << " WHERE table_schema = #{scope[:schema]}) _subquery"
-            if scope[:type] || scope[:name]
-              conditions = []
-              conditions << "_subquery.table_type = #{scope[:type]}" if scope[:type]
-              conditions << "_subquery.table_name = #{scope[:name]}" if scope[:name]
-              sql << " WHERE #{conditions.join(" AND ")}"
-            end
-            sql
-          end
-
-          def quoted_scope(name = nil, type: nil)
-            schema, name = extract_schema_qualified_name(name)
-            scope = {}
-            scope[:schema] = schema ? quote(schema) : "database()"
-            scope[:name] = quote(name) if name
-            scope[:type] = quote(type) if type
-            scope
-          end
-
-          def extract_schema_qualified_name(string)
-            schema, name = string.to_s.scan(/[^`.\s]+|`[^`]*`/)
-            schema, name = nil, schema unless name
-            [schema, name]
-          end
-
-          def type_with_size_to_sql(type, size)
-            case size&.to_s
-            when nil, "tiny", "medium", "long"
-              "#{size}#{type}"
-            else
-              raise ArgumentError,
-                "#{size.inspect} is invalid :size value. Only :tiny, :medium, and :long are allowed."
-            end
-          end
-
-          def limit_to_size(limit, type)
-            case type.to_s
-            when "text", "blob", "binary"
-              case limit
-              when 0..0xff;               "tiny"
-              when nil, 0x100..0xffff;    nil
-              when 0x10000..0xffffff;     "medium"
-              when 0x1000000..0xffffffff; "long"
-              else raise ArgumentError, "No #{type} type has byte size #{limit}"
-              end
-            end
-          end
-
-          def integer_to_sql(limit)
+        def limit_to_size(limit, type)
+          case type.to_s
+          when "text", "blob", "binary"
             case limit
-            when 1; "tinyint"
-            when 2; "smallint"
-            when 3; "mediumint"
-            when nil, 4; "int"
-            when 5..8; "bigint"
-            else raise ArgumentError, "No integer type has byte size #{limit}. Use a decimal with scale 0 instead."
+            when 0..0xff; "tiny"
+            when nil, 0x100..0xffff; nil
+            when 0x10000..0xffffff; "medium"
+            when 0x1000000..0xffffffff; "long"
+            else raise ArgumentError, "No #{type} type has byte size #{limit}"
             end
           end
+        end
+
+        def integer_to_sql(limit)
+          case limit
+          when 1; "tinyint"
+          when 2; "smallint"
+          when 3; "mediumint"
+          when nil, 4; "int"
+          when 5..8; "bigint"
+          else raise ArgumentError, "No integer type has byte size #{limit}. Use a decimal with scale 0 instead."
+          end
+        end
       end
     end
   end

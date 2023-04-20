@@ -24,10 +24,10 @@ module Capybara
         end
 
         res = if @expected_path.is_a? Regexp
-          @actual_path.to_s.match?(@expected_path)
-        else
-          ::Addressable::URI.parse(@expected_path) == ::Addressable::URI.parse(@actual_path)
-        end
+                @actual_path.to_s.match?(@expected_path)
+              else
+                ::Addressable::URI.parse(@expected_path) == ::Addressable::URI.parse(@actual_path)
+              end
 
         res && matches_filter_block?(uri)
       end
@@ -40,7 +40,7 @@ module Capybara
         failure_message_helper(' not')
       end
 
-    private
+      private
 
       def matches_filter_block?(url)
         return true unless @filter_block

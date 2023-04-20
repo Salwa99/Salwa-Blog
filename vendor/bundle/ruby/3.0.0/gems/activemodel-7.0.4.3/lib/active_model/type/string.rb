@@ -22,14 +22,15 @@ module ActiveModel
       end
 
       private
-        def cast_value(value)
-          case value
-          when ::String then ::String.new(value)
-          when true then @true
-          when false then @false
-          else value.to_s
-          end
+
+      def cast_value(value)
+        case value
+        when ::String then ::String.new(value)
+        when true then @true
+        when false then @false
+        else value.to_s
         end
+      end
     end
   end
 end

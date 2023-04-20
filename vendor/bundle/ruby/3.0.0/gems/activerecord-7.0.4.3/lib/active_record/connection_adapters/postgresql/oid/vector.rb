@@ -11,7 +11,7 @@ module ActiveRecord
           # table.  +subtype+ is derived from the `typelem` column in the
           # pg_types table.
           def initialize(delim, subtype)
-            @delim   = delim
+            @delim = delim
             @subtype = subtype
           end
 

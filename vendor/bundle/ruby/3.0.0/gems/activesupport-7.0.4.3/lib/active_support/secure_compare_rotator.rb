@@ -44,8 +44,9 @@ module ActiveSupport
     end
 
     private
-      def build_rotation(previous_value, _options)
-        self.class.new(previous_value)
-      end
+
+    def build_rotation(previous_value, _options)
+      self.class.new(previous_value)
+    end
   end
 end

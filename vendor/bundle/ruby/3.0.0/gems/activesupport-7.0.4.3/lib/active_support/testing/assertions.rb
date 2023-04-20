@@ -102,8 +102,8 @@ module ActiveSupport
         retval = _assert_nothing_raised_or_warn("assert_difference", &block)
 
         expressions.zip(exps, before) do |(code, diff), exp, before_value|
-          error  = "#{code.inspect} didn't change by #{diff}"
-          error  = "#{message}.\n#{error}" if message
+          error = "#{code.inspect} didn't change by #{diff}"
+          error = "#{message}.\n#{error}" if message
           assert_equal(before_value + diff, exp.call, error)
         end
 
@@ -246,20 +246,21 @@ module ActiveSupport
       end
 
       private
-        def _assert_nothing_raised_or_warn(assertion, &block)
-          assert_nothing_raised(&block)
-        rescue Minitest::UnexpectedError => e
-          if tagged_logger && tagged_logger.warn?
-            warning = <<~MSG
-              #{self.class} - #{name}: #{e.error.class} raised.
-              If you expected this exception, use `assert_raises` as near to the code that raises as possible.
-              Other block based assertions (e.g. `#{assertion}`) can be used, as long as `assert_raises` is inside their block.
-            MSG
-            tagged_logger.warn warning
-          end
 
-          raise
+      def _assert_nothing_raised_or_warn(assertion, &block)
+        assert_nothing_raised(&block)
+      rescue Minitest::UnexpectedError => e
+        if tagged_logger && tagged_logger.warn?
+          warning = <<~MSG
+            #{self.class} - #{name}: #{e.error.class} raised.
+            If you expected this exception, use `assert_raises` as near to the code that raises as possible.
+            Other block based assertions (e.g. `#{assertion}`) can be used, as long as `assert_raises` is inside their block.
+          MSG
+          tagged_logger.warn warning
         end
+
+        raise
+      end
     end
   end
 end

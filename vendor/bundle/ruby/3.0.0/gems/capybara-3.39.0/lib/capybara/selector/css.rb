@@ -24,9 +24,9 @@ module Capybara
 
       S = '\u{80}-\u{D7FF}\u{E000}-\u{FFFD}\u{10000}-\u{10FFFF}'
       H = /[0-9a-fA-F]/.freeze
-      UNICODE  = /\\#{H}{1,6}[ \t\r\n\f]?/.freeze
+      UNICODE = /\\#{H}{1,6}[ \t\r\n\f]?/.freeze
       NONASCII = /[#{S}]/.freeze
-      ESCAPE   = /#{UNICODE}|\\[ -~#{S}]/.freeze
+      ESCAPE = /#{UNICODE}|\\[ -~#{S}]/.freeze
       NMSTART = /[_a-zA-Z]|#{NONASCII}|#{ESCAPE}/.freeze
 
       class Splitter
@@ -56,7 +56,7 @@ module Capybara
           selectors
         end
 
-      private
+        private
 
         def parse_square(strio)
           parse_block('[', ']', strio)

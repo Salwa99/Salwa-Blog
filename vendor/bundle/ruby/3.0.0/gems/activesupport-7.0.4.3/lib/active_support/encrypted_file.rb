@@ -16,7 +16,7 @@ module ActiveSupport
       def initialize(key_path:, env_key:)
         super \
           "Missing encryption key to decrypt file with. " +
-          "Ask your team for your master key and write it to #{key_path} or put it in the ENV['#{env_key}']."
+            "Ask your team for your master key and write it to #{key_path} or put it in the ENV['#{env_key}']."
       end
     end
 
@@ -35,7 +35,6 @@ module ActiveSupport
     def self.expected_key_length # :nodoc:
       @expected_key_length ||= generate_key.length
     end
-
 
     attr_reader :content_path, :key_path, :env_key, :raise_if_missing_key
 
@@ -78,52 +77,51 @@ module ActiveSupport
       writing read, &block
     end
 
-
     private
-      def writing(contents)
-        tmp_file = "#{Process.pid}.#{content_path.basename.to_s.chomp('.enc')}"
-        tmp_path = Pathname.new File.join(Dir.tmpdir, tmp_file)
-        tmp_path.binwrite contents
 
-        yield tmp_path
+    def writing(contents)
+      tmp_file = "#{Process.pid}.#{content_path.basename.to_s.chomp('.enc')}"
+      tmp_path = Pathname.new File.join(Dir.tmpdir, tmp_file)
+      tmp_path.binwrite contents
 
-        updated_contents = tmp_path.binread
+      yield tmp_path
 
-        write(updated_contents) if updated_contents != contents
-      ensure
-        FileUtils.rm(tmp_path) if tmp_path&.exist?
-      end
+      updated_contents = tmp_path.binread
 
+      write(updated_contents) if updated_contents != contents
+    ensure
+      FileUtils.rm(tmp_path) if tmp_path&.exist?
+    end
 
-      def encrypt(contents)
-        check_key_length
-        encryptor.encrypt_and_sign contents
-      end
+    def encrypt(contents)
+      check_key_length
+      encryptor.encrypt_and_sign contents
+    end
 
-      def decrypt(contents)
-        encryptor.decrypt_and_verify contents
-      end
+    def decrypt(contents)
+      encryptor.decrypt_and_verify contents
+    end
 
-      def encryptor
-        @encryptor ||= ActiveSupport::MessageEncryptor.new([ key ].pack("H*"), cipher: CIPHER)
-      end
+    def encryptor
+      @encryptor ||= ActiveSupport::MessageEncryptor.new([key].pack("H*"), cipher: CIPHER)
+    end
 
+    def read_env_key
+      ENV[env_key].presence
+    end
 
-      def read_env_key
-        ENV[env_key].presence
-      end
+    def read_key_file
+      return @key_file_contents if defined?(@key_file_contents)
 
-      def read_key_file
-        return @key_file_contents if defined?(@key_file_contents)
-        @key_file_contents = (key_path.binread.strip if key_path.exist?)
-      end
+      @key_file_contents = (key_path.binread.strip if key_path.exist?)
+    end
 
-      def handle_missing_key
-        raise MissingKeyError.new(key_path: key_path, env_key: env_key) if raise_if_missing_key
-      end
+    def handle_missing_key
+      raise MissingKeyError.new(key_path: key_path, env_key: env_key) if raise_if_missing_key
+    end
 
-      def check_key_length
-        raise InvalidKeyLengthError if key&.length != self.class.expected_key_length
-      end
+    def check_key_length
+      raise InvalidKeyLengthError if key&.length != self.class.expected_key_length
+    end
   end
 end

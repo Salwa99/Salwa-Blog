@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Loofah
   #
   #  A RuntimeError raised when Loofah could not find an appropriate scrubber.
@@ -32,7 +33,6 @@ module Loofah
   #  Scrubber::STOP to terminate the traversal of a subtree.
   #
   class Scrubber
-
     # Top-down Scrubbers may return CONTINUE to indicate that the subtree should be traversed.
     CONTINUE = Object.new.freeze
 
@@ -67,6 +67,7 @@ module Loofah
       unless [:top_down, :bottom_up].include?(direction)
         raise ArgumentError, "direction #{direction} must be one of :top_down or :bottom_up"
       end
+
       @direction, @block = direction, block
     end
 

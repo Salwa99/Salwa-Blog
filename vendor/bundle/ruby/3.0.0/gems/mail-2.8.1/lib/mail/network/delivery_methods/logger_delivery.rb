@@ -6,7 +6,7 @@ module Mail
 
     def initialize(settings)
       @settings = settings
-      @logger   = settings.fetch(:logger) { default_logger }
+      @logger = settings.fetch(:logger) { default_logger }
       @severity = derive_severity(settings[:severity])
     end
 
@@ -15,20 +15,21 @@ module Mail
     end
 
     private
-      def default_logger
-        require 'logger'
-        ::Logger.new($stdout)
-      end
 
-      def derive_severity(severity)
-        case severity
-        when nil
-          Logger::INFO
-        when Integer
-          severity
-        else
-          Logger.const_get(severity.to_s.upcase)
-        end
+    def default_logger
+      require 'logger'
+      ::Logger.new($stdout)
+    end
+
+    def derive_severity(severity)
+      case severity
+      when nil
+        Logger::INFO
+      when Integer
+        severity
+      else
+        Logger.const_get(severity.to_s.upcase)
       end
+    end
   end
 end

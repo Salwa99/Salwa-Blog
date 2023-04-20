@@ -36,13 +36,14 @@ module ActiveRecord
       end
 
       private
-        attr_reader :predicate_builder
 
-        module NullPredicate # :nodoc:
-          def self.or(other)
-            other
-          end
+      attr_reader :predicate_builder
+
+      module NullPredicate # :nodoc:
+        def self.or(other)
+          other
         end
+      end
     end
   end
 end

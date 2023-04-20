@@ -11,14 +11,14 @@ module Arel # :nodoc: all
         @source = JoinSource.new(relation)
 
         # https://ronsavage.github.io/SQL/sql-92.bnf.html#set%20quantifier
-        @set_quantifier  = nil
+        @set_quantifier = nil
         @optimizer_hints = nil
-        @projections     = []
-        @wheres          = []
-        @groups          = []
-        @havings         = []
-        @windows         = []
-        @comment         = nil
+        @projections = []
+        @wheres = []
+        @groups = []
+        @havings = []
+        @windows = []
+        @comment = nil
       end
 
       def from
@@ -34,12 +34,12 @@ module Arel # :nodoc: all
 
       def initialize_copy(other)
         super
-        @source      = @source.clone if @source
+        @source = @source.clone if @source
         @projections = @projections.clone
-        @wheres      = @wheres.clone
-        @groups      = @groups.clone
-        @havings     = @havings.clone
-        @windows     = @windows.clone
+        @wheres = @wheres.clone
+        @groups = @groups.clone
+        @havings = @havings.clone
+        @windows = @windows.clone
       end
 
       def hash

@@ -58,37 +58,39 @@ module ActiveModel
     end
 
     protected
-      def attributes
-        unless @materialized
-          values.each_key { |key| self[key] }
-          types.each_key { |key| self[key] }
-          @materialized = true
-        end
-        @attributes
+
+    def attributes
+      unless @materialized
+        values.each_key { |key| self[key] }
+        types.each_key { |key| self[key] }
+        @materialized = true
       end
+      @attributes
+    end
 
     private
-      attr_reader :values, :types, :additional_types, :default_attributes
 
-      def default_attribute(
-        name,
-        value_present = true,
-        value = values.fetch(name) { value_present = false }
-      )
-        type = additional_types.fetch(name, types[name])
+    attr_reader :values, :types, :additional_types, :default_attributes
 
-        if value_present
-          @attributes[name] = Attribute.from_database(name, value, type, @casted_values[name])
-        elsif types.key?(name)
-          if attr = default_attributes[name]
-            @attributes[name] = attr.dup
-          else
-            @attributes[name] = Attribute.uninitialized(name, type)
-          end
+    def default_attribute(
+      name,
+      value_present = true,
+      value = values.fetch(name) { value_present = false }
+    )
+      type = additional_types.fetch(name, types[name])
+
+      if value_present
+        @attributes[name] = Attribute.from_database(name, value, type, @casted_values[name])
+      elsif types.key?(name)
+        if attr = default_attributes[name]
+          @attributes[name] = attr.dup
         else
-          Attribute.null(name)
+          @attributes[name] = Attribute.uninitialized(name, type)
         end
+      else
+        Attribute.null(name)
       end
+    end
   end
 
   class LazyAttributeHash # :nodoc:
@@ -148,35 +150,37 @@ module ActiveModel
     end
 
     protected
-      def materialize
-        unless @materialized
-          values.each_key { |key| self[key] }
-          types.each_key { |key| self[key] }
-          unless frozen?
-            @materialized = true
-          end
+
+    def materialize
+      unless @materialized
+        values.each_key { |key| self[key] }
+        types.each_key { |key| self[key] }
+        unless frozen?
+          @materialized = true
         end
-        delegate_hash
       end
+      delegate_hash
+    end
 
     private
-      attr_reader :types, :values, :additional_types, :delegate_hash, :default_attributes
 
-      def assign_default_value(name)
-        type = additional_types.fetch(name, types[name])
-        value_present = true
-        value = values.fetch(name) { value_present = false }
+    attr_reader :types, :values, :additional_types, :delegate_hash, :default_attributes
 
-        if value_present
-          delegate_hash[name] = Attribute.from_database(name, value, type)
-        elsif types.key?(name)
-          attr = default_attributes[name]
-          if attr
-            delegate_hash[name] = attr.dup
-          else
-            delegate_hash[name] = Attribute.uninitialized(name, type)
-          end
+    def assign_default_value(name)
+      type = additional_types.fetch(name, types[name])
+      value_present = true
+      value = values.fetch(name) { value_present = false }
+
+      if value_present
+        delegate_hash[name] = Attribute.from_database(name, value, type)
+      elsif types.key?(name)
+        attr = default_attributes[name]
+        if attr
+          delegate_hash[name] = attr.dup
+        else
+          delegate_hash[name] = Attribute.uninitialized(name, type)
         end
       end
+    end
   end
 end

@@ -305,7 +305,7 @@ module Capybara
         end
       end
 
-    private
+      private
 
       def find_select_or_datalist_input(from, options)
         synchronize(Capybara::Queries::BaseQuery.wait(options, session_options.default_max_wait_time)) do

@@ -15,12 +15,12 @@ module Capybara
       def add_attribute_conditions(**attributes)
         @expression = attributes.inject(expression) do |css, (name, value)|
           conditions = if name == :class
-            class_conditions(value)
-          elsif value.is_a? Regexp
-            regexp_conditions(name, value)
-          else
-            [attribute_conditions(name => value)]
-          end
+                         class_conditions(value)
+                       elsif value.is_a? Regexp
+                         regexp_conditions(name, value)
+                       else
+                         [attribute_conditions(name => value)]
+                       end
 
           ::Capybara::Selector::CSS.split(css).map do |sel|
             next sel if conditions.empty?
@@ -30,7 +30,7 @@ module Capybara
         end
       end
 
-    private
+      private
 
       def regexp_conditions(name, value)
         Selector::RegexpDisassembler.new(value).alternated_substrings.map do |strs|
@@ -44,7 +44,8 @@ module Capybara
         attributes.map do |attribute, value|
           case value
           when XPath::Expression
-            raise ArgumentError, "XPath expressions are not supported for the :#{attribute} filter with CSS based selectors"
+            raise ArgumentError,
+                  "XPath expressions are not supported for the :#{attribute} filter with CSS based selectors"
           when Regexp
             Selector::RegexpDisassembler.new(value).substrings.map do |str|
               "[#{attribute}*='#{str}'#{' i' if value.casefold?}]"

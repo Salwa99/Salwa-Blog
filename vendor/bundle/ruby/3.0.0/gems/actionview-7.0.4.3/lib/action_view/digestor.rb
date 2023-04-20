@@ -68,11 +68,12 @@ module ActionView
       end
 
       private
-        def find_template(finder, name, prefixes, partial, keys)
-          finder.disable_cache do
-            finder.find_all(name, prefixes, partial, keys).first
-          end
+
+      def find_template(finder, name, prefixes, partial, keys)
+        finder.disable_cache do
+          finder.find_all(name, prefixes, partial, keys).first
         end
+      end
     end
 
     class Node
@@ -84,10 +85,10 @@ module ActionView
       end
 
       def initialize(name, logical_name, template, children = [])
-        @name         = name
+        @name = name
         @logical_name = logical_name
-        @template     = template
-        @children     = children
+        @template = template
+        @children = children
       end
 
       def digest(finder, stack = [])
@@ -100,9 +101,9 @@ module ActionView
             false
           else
             finder.digest_cache[node.name] ||= begin
-                                                 stack.push node
-                                                 node.digest(finder, stack).tap { stack.pop }
-                                               end
+              stack.push node
+              node.digest(finder, stack).tap { stack.pop }
+            end
           end
         end.join("-")
       end

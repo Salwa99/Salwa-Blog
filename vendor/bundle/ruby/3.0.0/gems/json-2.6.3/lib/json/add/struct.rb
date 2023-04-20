@@ -1,10 +1,10 @@
-#frozen_string_literal: false
+# frozen_string_literal: false
+
 unless defined?(::JSON::JSON_LOADED) and ::JSON::JSON_LOADED
   require 'json'
 end
 
 class Struct
-
   # Deserializes JSON string by constructing new Struct object with values
   # <tt>v</tt> serialized by <tt>to_json</tt>.
   def self.json_create(object)
@@ -18,7 +18,7 @@ class Struct
     klass.to_s.empty? and raise JSON::JSONError, "Only named structs are supported!"
     {
       JSON.create_id => klass,
-      'v'            => values,
+      'v' => values,
     }
   end
 

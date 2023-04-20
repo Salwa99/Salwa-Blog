@@ -62,7 +62,8 @@ module ActiveModel
         end
       end
 
-    private
+      private
+
       def option_as_number(record, option_value, precision, scale)
         parse_as_number(option_value(record, option_value), precision, scale)
       end

@@ -599,7 +599,7 @@ module Capybara
         }).apply(this, arguments)
       JS
 
-    private
+      private
 
       def perform_click_action(keys, wait: nil, **options)
         raise ArgumentError, 'You must specify both x: and y: for a click offset' if nil ^ options[:x] ^ options[:y]

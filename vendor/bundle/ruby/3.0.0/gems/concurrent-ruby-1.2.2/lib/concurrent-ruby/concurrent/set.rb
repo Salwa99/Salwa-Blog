@@ -3,7 +3,6 @@ require 'concurrent/thread_safe/util'
 require 'set'
 
 module Concurrent
-
   # @!macro concurrent_set
   #
   #   A thread-safe subclass of Set. This version locks against the object
@@ -61,4 +60,3 @@ module Concurrent
   class Set < SetImplementation
   end
 end
-

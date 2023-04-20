@@ -35,7 +35,7 @@ module I18n
       end
 
       # Receives a string and escape the default separator.
-      def self.escape_default_separator(key) #:nodoc:
+      def self.escape_default_separator(key) # :nodoc:
         key.to_s.tr(FLATTEN_SEPARATOR, SEPARATOR_ESCAPE_CHAR)
       end
 
@@ -56,7 +56,7 @@ module I18n
       #   >> { "a" => { "b" => { "c" => "d", "e" => "f" }, "g" => "h" }, "i" => "j"}.wind
       #   => { "a.b.c" => "d", "a.b.e" => "f", "a.g" => "h", "i" => "j" }
       #
-      def flatten_keys(hash, escape, prev_key=nil, &block)
+      def flatten_keys(hash, escape, prev_key = nil, &block)
         hash.each_pair do |key, value|
           key = escape_default_separator(key) if escape
           curr_key = [prev_key, key].compact.join(FLATTEN_SEPARATOR).to_sym
@@ -86,33 +86,32 @@ module I18n
 
       protected
 
-        def store_link(locale, key, link)
-          links[locale.to_sym][key.to_s] = link.to_s
+      def store_link(locale, key, link)
+        links[locale.to_sym][key.to_s] = link.to_s
+      end
+
+      def resolve_link(locale, key)
+        key, locale = key.to_s, locale.to_sym
+        links = self.links[locale]
+
+        if links.key?(key)
+          links[key]
+        elsif link = find_link(locale, key)
+          store_link(locale, key, key.gsub(*link))
+        else
+          key
         end
+      end
 
-        def resolve_link(locale, key)
-          key, locale = key.to_s, locale.to_sym
-          links = self.links[locale]
+      def find_link(locale, key) # :nodoc:
+        links[locale].each_pair do |from, to|
+          return [from, to] if key[0, from.length] == from
+        end && nil
+      end
 
-          if links.key?(key)
-            links[key]
-          elsif link = find_link(locale, key)
-            store_link(locale, key, key.gsub(*link))
-          else
-            key
-          end
-        end
-
-        def find_link(locale, key) #:nodoc:
-          links[locale].each_pair do |from, to|
-            return [from, to] if key[0, from.length] == from
-          end && nil
-        end
-
-        def escape_default_separator(key) #:nodoc:
-          I18n::Backend::Flatten.escape_default_separator(key)
-        end
-
+      def escape_default_separator(key) # :nodoc:
+        I18n::Backend::Flatten.escape_default_separator(key)
+      end
     end
   end
 end

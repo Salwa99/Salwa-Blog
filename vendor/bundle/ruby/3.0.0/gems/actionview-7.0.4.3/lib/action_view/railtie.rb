@@ -91,10 +91,10 @@ module ActionView
 
     config.after_initialize do |app|
       enable_caching = if app.config.action_view.cache_template_loading.nil?
-        app.config.cache_classes
-      else
-        app.config.action_view.cache_template_loading
-      end
+                         app.config.cache_classes
+                       else
+                         app.config.action_view.cache_template_loading
+                       end
 
       unless enable_caching
         app.executor.register_hook ActionView::CacheExpiry::Executor.new(watcher: app.config.file_watcher)

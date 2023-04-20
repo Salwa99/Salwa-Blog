@@ -22,23 +22,24 @@ module ActiveRecord
       end
 
       private
-        def set_defaults
-          self.store_key_references = false
-          self.support_unencrypted_data = false
-          self.encrypt_fixtures = false
-          self.validate_column_size = true
-          self.add_to_filter_parameters = true
-          self.excluded_from_filter_parameters = []
-          self.previous_schemes = []
-          self.forced_encoding_for_deterministic_encryption = Encoding::UTF_8
 
-          # TODO: Setting to false for now as the implementation is a bit experimental
-          self.extend_queries = false
-        end
+      def set_defaults
+        self.store_key_references = false
+        self.support_unencrypted_data = false
+        self.encrypt_fixtures = false
+        self.validate_column_size = true
+        self.add_to_filter_parameters = true
+        self.excluded_from_filter_parameters = []
+        self.previous_schemes = []
+        self.forced_encoding_for_deterministic_encryption = Encoding::UTF_8
 
-        def add_previous_scheme(**properties)
-          previous_schemes << ActiveRecord::Encryption::Scheme.new(**properties)
-        end
+        # TODO: Setting to false for now as the implementation is a bit experimental
+        self.extend_queries = false
+      end
+
+      def add_previous_scheme(**properties)
+        previous_schemes << ActiveRecord::Encryption::Scheme.new(**properties)
+      end
     end
   end
 end

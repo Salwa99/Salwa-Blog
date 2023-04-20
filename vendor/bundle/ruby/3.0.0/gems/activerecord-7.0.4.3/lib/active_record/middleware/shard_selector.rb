@@ -46,15 +46,16 @@ module ActiveRecord
       end
 
       private
-        def selected_shard(request)
-          resolver.call(request)
-        end
 
-        def set_shard(shard, &block)
-          ActiveRecord::Base.connected_to(shard: shard.to_sym) do
-            ActiveRecord::Base.prohibit_shard_swapping(options.fetch(:lock, true), &block)
-          end
+      def selected_shard(request)
+        resolver.call(request)
+      end
+
+      def set_shard(shard, &block)
+        ActiveRecord::Base.connected_to(shard: shard.to_sym) do
+          ActiveRecord::Base.prohibit_shard_swapping(options.fetch(:lock, true), &block)
         end
+      end
     end
   end
 end

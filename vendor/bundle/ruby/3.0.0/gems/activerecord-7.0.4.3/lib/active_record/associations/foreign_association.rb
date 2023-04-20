@@ -18,16 +18,17 @@ module ActiveRecord::Associations
     end
 
     private
-      # Sets the owner attributes on the given record
-      def set_owner_attributes(record)
-        return if options[:through]
 
-        key = owner._read_attribute(reflection.join_foreign_key)
-        record._write_attribute(reflection.join_primary_key, key)
+    # Sets the owner attributes on the given record
+    def set_owner_attributes(record)
+      return if options[:through]
 
-        if reflection.type
-          record._write_attribute(reflection.type, owner.class.polymorphic_name)
-        end
+      key = owner._read_attribute(reflection.join_foreign_key)
+      record._write_attribute(reflection.join_primary_key, key)
+
+      if reflection.type
+        record._write_attribute(reflection.type, owner.class.polymorphic_name)
       end
+    end
   end
 end

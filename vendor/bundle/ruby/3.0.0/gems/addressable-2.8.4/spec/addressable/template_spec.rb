@@ -14,7 +14,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-
 require "spec_helper"
 
 require "bigdecimal"
@@ -104,7 +103,7 @@ end
 
 describe "Level 1:" do
   subject {
-    {:var => "value", :hello => "Hello World!"}
+    { :var => "value", :hello => "Hello World!" }
   }
   it_behaves_like 'expands', {
     '{var}' => 'value',
@@ -205,7 +204,7 @@ describe "Level 4" do
       :path => "/foo/bar",
       :semi => ";",
       :list => %w(red green blue),
-      :keys => {"semi" => ';', "dot" => '.', :comma => ','}
+      :keys => { "semi" => ';', "dot" => '.', :comma => ',' }
     }
   }
   context "Expansion with value modifiers" do
@@ -313,20 +312,20 @@ describe "Expansion" do
     {
       :count => ["one", "two", "three"],
       :dom => ["example", "com"],
-      :dub   => "me/too",
+      :dub => "me/too",
       :hello => "Hello World!",
-      :half  => "50%",
-      :var   => "value",
-      :who   => "fred",
-      :base  => "http://example.com/home/",
-      :path  => "/foo/bar",
-      :list  => ["red", "green", "blue"],
-      :keys  => {"semi" => ";","dot" => ".",:comma => ","},
-      :v     => "6",
-      :x     => "1024",
-      :y     => "768",
+      :half => "50%",
+      :var => "value",
+      :who => "fred",
+      :base => "http://example.com/home/",
+      :path => "/foo/bar",
+      :list => ["red", "green", "blue"],
+      :keys => { "semi" => ";", "dot" => ".", :comma => "," },
+      :v => "6",
+      :x => "1024",
+      :y => "768",
       :empty => "",
-      :empty_keys  => {},
+      :empty_keys => {},
       :undef => nil
     }
   }
@@ -482,7 +481,7 @@ describe "Expansion" do
     }
   end
   context "non-string key in match data" do
-    subject {Addressable::Template.new("http://example.com/{one}")}
+    subject { Addressable::Template.new("http://example.com/{one}") }
 
     it "raises TypeError" do
       expect { subject.expand(Object.new => "1") }.to raise_error TypeError
@@ -493,20 +492,25 @@ end
 class ExampleTwoProcessor
   def self.restore(name, value)
     return value.gsub(/-/, " ") if name == "query"
+
     return value
   end
 
   def self.match(name)
     return ".*?" if name == "first"
+
     return ".*"
   end
+
   def self.validate(name, value)
     return !!(value =~ /^[\w ]+$/) if name == "query"
+
     return true
   end
 
   def self.transform(name, value)
     return value.gsub(/ /, "+") if name == "query"
+
     return value
   end
 end
@@ -534,21 +538,21 @@ describe Addressable::Template do
   end
 
   describe "Matching" do
-    let(:uri){
+    let(:uri) {
       Addressable::URI.parse(
         "http://example.com/search/an-example-search-query/"
       )
     }
-    let(:uri2){
+    let(:uri2) {
       Addressable::URI.parse("http://example.com/a/b/c/")
     }
-    let(:uri3){
+    let(:uri3) {
       Addressable::URI.parse("http://example.com/;a=1;b=2;c=3;first=foo")
     }
-    let(:uri4){
+    let(:uri4) {
       Addressable::URI.parse("http://example.com/?a=1&b=2&c=3&first=foo")
     }
-    let(:uri5){
+    let(:uri5) {
       "http://example.com/foo"
     }
     context "first uri with ExampleTwoProcessor" do
@@ -557,8 +561,8 @@ describe Addressable::Template do
           "http://example.com/search/{query}/"
         ).match(uri, ExampleTwoProcessor)
       }
-      its(:variables){ should == ["query"] }
-      its(:captures){ should == ["an example search query"] }
+      its(:variables) { should == ["query"] }
+      its(:captures) { should == ["an example search query"] }
     end
 
     context "second uri with ExampleTwoProcessor" do
@@ -567,8 +571,8 @@ describe Addressable::Template do
           "http://example.com/{first}/{+second}/"
         ).match(uri2, ExampleTwoProcessor)
       }
-      its(:variables){ should == ["first", "second"] }
-      its(:captures){ should == ["a", "b/c"] }
+      its(:variables) { should == ["first", "second"] }
+      its(:captures) { should == ["a", "b/c"] }
     end
 
     context "second uri with DumbProcessor" do
@@ -577,8 +581,8 @@ describe Addressable::Template do
           "http://example.com/{first}/{+second}/"
         ).match(uri2, DumbProcessor)
       }
-      its(:variables){ should == ["first", "second"] }
-      its(:captures){ should == ["a", "b/c"] }
+      its(:variables) { should == ["first", "second"] }
+      its(:captures) { should == ["a", "b/c"] }
     end
 
     context "second uri" do
@@ -587,8 +591,8 @@ describe Addressable::Template do
           "http://example.com/{first}{/second*}/"
         ).match(uri2)
       }
-      its(:variables){ should == ["first", "second"] }
-      its(:captures){ should == ["a", ["b","c"]] }
+      its(:variables) { should == ["first", "second"] }
+      its(:captures) { should == ["a", ["b", "c"]] }
     end
     context "third uri" do
       subject {
@@ -596,9 +600,12 @@ describe Addressable::Template do
           "http://example.com/{;hash*,first}"
         ).match(uri3)
       }
-      its(:variables){ should == ["hash", "first"] }
-      its(:captures){ should == [
-        {"a" => "1", "b" => "2", "c" => "3", "first" => "foo"}, nil] }
+      its(:variables) { should == ["hash", "first"] }
+      its(:captures) {
+        should == [
+          { "a" => "1", "b" => "2", "c" => "3", "first" => "foo" }, nil
+        ]
+      }
     end
     # Note that this expansion is impossible to revert deterministically - the
     # * operator means first could have been a key of hash or a separate key.
@@ -609,9 +616,12 @@ describe Addressable::Template do
           "http://example.com/{?hash*,first}"
         ).match(uri4)
       }
-      its(:variables){ should == ["hash", "first"] }
-      its(:captures){ should == [
-        {"a" => "1", "b" => "2", "c" => "3", "first"=> "foo"}, nil] }
+      its(:variables) { should == ["hash", "first"] }
+      its(:captures) {
+        should == [
+          { "a" => "1", "b" => "2", "c" => "3", "first" => "foo" }, nil
+        ]
+      }
     end
     context "fifth uri" do
       subject {
@@ -619,8 +629,8 @@ describe Addressable::Template do
           "http://example.com/{path}{?hash*,first}"
         ).match(uri5)
       }
-      its(:variables){ should == ["path", "hash", "first"] }
-      its(:captures){ should == ["foo", nil, nil] }
+      its(:variables) { should == ["path", "hash", "first"] }
+      its(:captures) { should == ["foo", nil, nil] }
     end
   end
 
@@ -645,27 +655,27 @@ describe Addressable::Template do
         "http://{host}{/segments*}/{?one,two,bogus}{#fragment}"
       )
     }
-    let(:uri){ "http://example.com/a/b/c/?one=1&two=2#foo" }
-    let(:uri2){ "http://example.com/a/b/c/#foo" }
+    let(:uri) { "http://example.com/a/b/c/?one=1&two=2#foo" }
+    let(:uri2) { "http://example.com/a/b/c/#foo" }
     it "should be able to extract with queries" do
       expect(template.extract(uri)).to eq({
-        "host" => "example.com",
-        "segments" => %w(a b c),
-        "one" => "1",
-        "bogus" => nil,
-        "two" => "2",
-        "fragment" => "foo"
-      })
+                                            "host" => "example.com",
+                                            "segments" => %w(a b c),
+                                            "one" => "1",
+                                            "bogus" => nil,
+                                            "two" => "2",
+                                            "fragment" => "foo"
+                                          })
     end
     it "should be able to extract without queries" do
       expect(template.extract(uri2)).to eq({
-        "host" => "example.com",
-        "segments" => %w(a b c),
-        "one" => nil,
-        "bogus" => nil,
-        "two" => nil,
-        "fragment" => "foo"
-      })
+                                             "host" => "example.com",
+                                             "segments" => %w(a b c),
+                                             "one" => nil,
+                                             "bogus" => nil,
+                                             "two" => nil,
+                                             "fragment" => "foo"
+                                           })
     end
 
     context "issue #137" do
@@ -807,7 +817,7 @@ describe Addressable::Template do
       end
 
       it "does not normalize unicode when byte semantics requested" do
-        template = subject.partial_expand({"query" => "Cafe\u0301"}, nil, false)
+        template = subject.partial_expand({ "query" => "Cafe\u0301" }, nil, false)
         expect(template.pattern).to eq(
           "http://example.com/{resource}/Cafe%CC%81/"
         )
@@ -887,15 +897,15 @@ describe Addressable::Template do
         Addressable::Template.new("http://example.com/search/{query}/")
       }
       it "processes spaces" do
-        expect(subject.expand({"query" => "an example search query"},
-                      ExampleTwoProcessor).to_str).to eq(
-          "http://example.com/search/an+example+search+query/"
-        )
+        expect(subject.expand({ "query" => "an example search query" },
+                              ExampleTwoProcessor).to_str).to eq(
+                                "http://example.com/search/an+example+search+query/"
+                              )
       end
       it "validates" do
-        expect{
-          subject.expand({"query" => "Bogus!"},
-                      ExampleTwoProcessor).to_str
+        expect {
+          subject.expand({ "query" => "Bogus!" },
+                         ExampleTwoProcessor).to_str
         }.to raise_error(Addressable::Template::InvalidTemplateValueError)
       end
     end
@@ -1149,7 +1159,7 @@ describe Addressable::Template do
       it 'should parse in a reasonable time' do
         expect do
           Timeout.timeout(0.1) do
-            expect(subject).not_to match("0"*25 + "!")
+            expect(subject).not_to match("0" * 25 + "!")
           end
         end.not_to raise_error
       end

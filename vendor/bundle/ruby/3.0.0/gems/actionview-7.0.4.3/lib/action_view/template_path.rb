@@ -43,8 +43,8 @@ module ActionView
     end
 
     def initialize(name, prefix, partial, virtual)
-      @name    = name
-      @prefix  = prefix
+      @name = name
+      @prefix = prefix
       @partial = partial
       @virtual = virtual
     end

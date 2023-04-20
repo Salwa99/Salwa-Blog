@@ -462,14 +462,15 @@ module ActiveModel
     end
 
     private
-      def normalize_arguments(attribute, type, **options)
-        # Evaluate proc first
-        if type.respond_to?(:call)
-          type = type.call(@base, options)
-        end
 
-        [attribute.to_sym, type, options]
+    def normalize_arguments(attribute, type, **options)
+      # Evaluate proc first
+      if type.respond_to?(:call)
+        type = type.call(@base, options)
       end
+
+      [attribute.to_sym, type, options]
+    end
   end
 
   # Raised when a validation cannot be corrected by end users and are considered

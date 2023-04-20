@@ -23,50 +23,51 @@ module ActionView
         end
 
         private
-          def select_type
-            self.class.select_type
-          end
 
-          def datetime_selector(options, html_options)
-            datetime = options.fetch(:selected) { value || default_datetime(options) }
-            @auto_index ||= nil
+        def select_type
+          self.class.select_type
+        end
 
-            options = options.dup
-            options[:field_name]           = @method_name
-            options[:include_position]     = true
-            options[:prefix]             ||= @object_name
-            options[:index]                = @auto_index if @auto_index && !options.has_key?(:index)
+        def datetime_selector(options, html_options)
+          datetime = options.fetch(:selected) { value || default_datetime(options) }
+          @auto_index ||= nil
 
-            DateTimeSelector.new(datetime, options, html_options)
-          end
+          options = options.dup
+          options[:field_name] = @method_name
+          options[:include_position] = true
+          options[:prefix] ||= @object_name
+          options[:index] = @auto_index if @auto_index && !options.has_key?(:index)
 
-          def default_datetime(options)
-            return if options[:include_blank] || options[:prompt]
+          DateTimeSelector.new(datetime, options, html_options)
+        end
 
-            case options[:default]
-            when nil
-              Time.current
-            when Date, Time
-              options[:default]
-            else
-              default = options[:default].dup
+        def default_datetime(options)
+          return if options[:include_blank] || options[:prompt]
 
-              # Rename :minute and :second to :min and :sec
-              default[:min] ||= default[:minute]
-              default[:sec] ||= default[:second]
+          case options[:default]
+          when nil
+            Time.current
+          when Date, Time
+            options[:default]
+          else
+            default = options[:default].dup
 
-              time = Time.current
+            # Rename :minute and :second to :min and :sec
+            default[:min] ||= default[:minute]
+            default[:sec] ||= default[:second]
 
-              [:year, :month, :day, :hour, :min, :sec].each do |key|
-                default[key] ||= time.public_send(key)
-              end
+            time = Time.current
 
-              Time.utc(
-                default[:year], default[:month], default[:day],
-                default[:hour], default[:min], default[:sec]
-              )
+            [:year, :month, :day, :hour, :min, :sec].each do |key|
+              default[key] ||= time.public_send(key)
             end
+
+            Time.utc(
+              default[:year], default[:month], default[:day],
+              default[:hour], default[:min], default[:sec]
+            )
           end
+        end
       end
     end
   end

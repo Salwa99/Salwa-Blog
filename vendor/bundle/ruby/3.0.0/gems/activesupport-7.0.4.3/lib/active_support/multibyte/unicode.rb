@@ -32,6 +32,7 @@ module ActiveSupport
         def tidy_bytes(string, force = false)
           return string if string.empty? || string.ascii_only?
           return recode_windows1252_chars(string) if force
+
           string.scrub { |bad| recode_windows1252_chars(bad) }
         end
       else
@@ -52,6 +53,7 @@ module ActiveSupport
             reader.primitive_convert(source, out)
             _, _, _, error_bytes, _ = reader.primitive_errinfo
             break if error_bytes.nil?
+
             out << error_bytes.encode(Encoding::UTF_16LE, Encoding::Windows_1252, invalid: :replace, undef: :replace)
           end
 
@@ -62,9 +64,10 @@ module ActiveSupport
       end
 
       private
-        def recode_windows1252_chars(string)
-          string.encode(Encoding::UTF_8, Encoding::Windows_1252, invalid: :replace, undef: :replace)
-        end
+
+      def recode_windows1252_chars(string)
+        string.encode(Encoding::UTF_8, Encoding::Windows_1252, invalid: :replace, undef: :replace)
+      end
     end
   end
 end

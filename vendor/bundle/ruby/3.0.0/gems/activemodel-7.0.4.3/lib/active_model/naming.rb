@@ -10,8 +10,8 @@ module ActiveModel
     include Comparable
 
     attr_accessor :singular, :plural, :element, :collection,
-      :singular_route_key, :route_key, :param_key, :i18n_key,
-      :name
+                  :singular_route_key, :route_key, :param_key, :i18n_key,
+                  :name
 
     alias_method :cache_key, :collection
 
@@ -166,20 +166,21 @@ module ActiveModel
     def initialize(klass, namespace = nil, name = nil, locale = :en)
       @name = name || klass.name
 
-      raise ArgumentError, "Class name cannot be blank. You need to supply a name argument when anonymous class given" if @name.blank?
+      raise ArgumentError,
+            "Class name cannot be blank. You need to supply a name argument when anonymous class given" if @name.blank?
 
       @unnamespaced = @name.delete_prefix("#{namespace.name}::") if namespace
-      @klass        = klass
-      @singular     = _singularize(@name)
-      @plural       = ActiveSupport::Inflector.pluralize(@singular, locale)
-      @uncountable  = @plural == @singular
-      @element      = ActiveSupport::Inflector.underscore(ActiveSupport::Inflector.demodulize(@name))
-      @human        = ActiveSupport::Inflector.humanize(@element)
-      @collection   = ActiveSupport::Inflector.tableize(@name)
-      @param_key    = (namespace ? _singularize(@unnamespaced) : @singular)
-      @i18n_key     = @name.underscore.to_sym
+      @klass = klass
+      @singular = _singularize(@name)
+      @plural = ActiveSupport::Inflector.pluralize(@singular, locale)
+      @uncountable = @plural == @singular
+      @element = ActiveSupport::Inflector.underscore(ActiveSupport::Inflector.demodulize(@name))
+      @human = ActiveSupport::Inflector.humanize(@element)
+      @collection = ActiveSupport::Inflector.tableize(@name)
+      @param_key = (namespace ? _singularize(@unnamespaced) : @singular)
+      @i18n_key = @name.underscore.to_sym
 
-      @route_key          = (namespace ? ActiveSupport::Inflector.pluralize(@param_key, locale) : @plural.dup)
+      @route_key = (namespace ? ActiveSupport::Inflector.pluralize(@param_key, locale) : @plural.dup)
       @singular_route_key = ActiveSupport::Inflector.singularize(@route_key, locale)
       @route_key << "_index" if @uncountable
     end
@@ -214,9 +215,10 @@ module ActiveModel
     end
 
     private
-      def _singularize(string)
-        ActiveSupport::Inflector.underscore(string).tr("/", "_")
-      end
+
+    def _singularize(string)
+      ActiveSupport::Inflector.underscore(string).tr("/", "_")
+    end
   end
 
   # == Active \Model \Naming

@@ -130,6 +130,7 @@ module ActiveSupport
         false
       else
         return false if base < self
+
         @_dependencies.each { |dep| base.include(dep) }
         super
         base.extend const_get(:ClassMethods) if const_defined?(:ClassMethods)
@@ -143,6 +144,7 @@ module ActiveSupport
         false
       else
         return false if base < self
+
         @_dependencies.each { |dep| base.prepend(dep) }
         super
         base.singleton_class.prepend const_get(:ClassMethods) if const_defined?(:ClassMethods)

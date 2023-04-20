@@ -49,15 +49,15 @@ module ActiveStorage
   mattr_accessor :queues, default: {}
 
   mattr_accessor :previewers, default: []
-  mattr_accessor :analyzers,  default: []
+  mattr_accessor :analyzers, default: []
 
   mattr_accessor :paths, default: {}
 
-  mattr_accessor :variable_content_types,           default: []
-  mattr_accessor :web_image_content_types,          default: []
-  mattr_accessor :binary_content_type,              default: "application/octet-stream"
+  mattr_accessor :variable_content_types, default: []
+  mattr_accessor :web_image_content_types, default: []
+  mattr_accessor :binary_content_type, default: "application/octet-stream"
   mattr_accessor :content_types_to_serve_as_binary, default: []
-  mattr_accessor :content_types_allowed_inline,     default: []
+  mattr_accessor :content_types_allowed_inline, default: []
 
   mattr_accessor :supported_image_processing_methods, default: [
     "adaptive_blur",

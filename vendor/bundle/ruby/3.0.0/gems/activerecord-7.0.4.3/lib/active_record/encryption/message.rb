@@ -23,11 +23,12 @@ module ActiveRecord
       end
 
       private
-        def validate_payload_type(payload)
-          unless payload.is_a?(String) || payload.nil?
-            raise ActiveRecord::Encryption::Errors::ForbiddenClass, "Only string payloads allowed"
-          end
+
+      def validate_payload_type(payload)
+        unless payload.is_a?(String) || payload.nil?
+          raise ActiveRecord::Encryption::Errors::ForbiddenClass, "Only string payloads allowed"
         end
+      end
     end
   end
 end

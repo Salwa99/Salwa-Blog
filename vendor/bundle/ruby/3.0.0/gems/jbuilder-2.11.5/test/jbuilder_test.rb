@@ -47,7 +47,6 @@ class RelationMock
   end
 end
 
-
 class JbuilderTest < ActiveSupport::TestCase
   teardown do
     Jbuilder.send :class_variable_set, '@@key_formatter', nil
@@ -111,7 +110,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'extracting from hash' do
-    person = {:name => 'Jim', :age => 34}
+    person = { :name => 'Jim', :age => 34 }
 
     result = jbuild do |json|
       json.extract! person, :name, :age
@@ -125,7 +124,7 @@ class JbuilderTest < ActiveSupport::TestCase
     result = jbuild do |json|
       json.author do
         json.name 'David'
-        json.age  32
+        json.age 32
       end
     end
 
@@ -151,7 +150,7 @@ class JbuilderTest < ActiveSupport::TestCase
       end
 
       json.author do
-        json.age  32
+        json.age 32
       end
     end
 
@@ -249,11 +248,11 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     assert_equal 'David', result['author']['name']
-    assert_equal 32,      result['author']['age']
+    assert_equal 32, result['author']['age']
   end
 
   test 'nesting multiple children from array' do
-    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
+    comments = [Comment.new('hello', 1), Comment.new('world', 2)]
 
     result = jbuild do |json|
       json.comments comments, :content
@@ -277,7 +276,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'nesting multiple children from array with inline loop' do
-    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
+    comments = [Comment.new('hello', 1), Comment.new('world', 2)]
 
     result = jbuild do |json|
       json.comments comments do |comment|
@@ -301,7 +300,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'nesting multiple children from a non-Enumerable that responds to #map' do
-    comments = NonEnumerable.new([ Comment.new('hello', 1), Comment.new('world', 2) ])
+    comments = NonEnumerable.new([Comment.new('hello', 1), Comment.new('world', 2)])
 
     result = jbuild do |json|
       json.comments comments, :content
@@ -313,7 +312,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'nesting multiple children from a non-Enumerable that responds to #map with inline loop' do
-    comments = NonEnumerable.new([ Comment.new('hello', 1), Comment.new('world', 2) ])
+    comments = NonEnumerable.new([Comment.new('hello', 1), Comment.new('world', 2)])
 
     result = jbuild do |json|
       json.comments comments do |comment|
@@ -337,7 +336,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'nesting multiple children from array with inline loop on root' do
-    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
+    comments = [Comment.new('hello', 1), Comment.new('world', 2)]
 
     result = jbuild do |json|
       json.call(comments) do |comment|
@@ -353,7 +352,7 @@ class JbuilderTest < ActiveSupport::TestCase
     result = jbuild do |json|
       json.author do
         json.name 'David'
-        json.age  32
+        json.age 32
 
         json.comments do
           json.child! { json.content 'hello' }
@@ -383,7 +382,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'directly set an array nested in another array' do
-    data = [ { :department => 'QA', :not_in_json => 'hello', :names => ['John', 'David'] } ]
+    data = [{ :department => 'QA', :not_in_json => 'hello', :names => ['John', 'David'] }]
 
     result = jbuild do |json|
       json.array! data do |object|
@@ -399,31 +398,31 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'nested jbuilder objects' do
-    to_nest = Jbuilder.new{ |json| json.nested_value 'Nested Test' }
+    to_nest = Jbuilder.new { |json| json.nested_value 'Nested Test' }
 
     result = jbuild do |json|
       json.value 'Test'
       json.nested to_nest
     end
 
-    expected = {'value' => 'Test', 'nested' => {'nested_value' => 'Nested Test'}}
+    expected = { 'value' => 'Test', 'nested' => { 'nested_value' => 'Nested Test' } }
     assert_equal expected, result
   end
 
   test 'nested jbuilder object via set!' do
-    to_nest = Jbuilder.new{ |json| json.nested_value 'Nested Test' }
+    to_nest = Jbuilder.new { |json| json.nested_value 'Nested Test' }
 
     result = jbuild do |json|
       json.value 'Test'
       json.set! :nested, to_nest
     end
 
-    expected = {'value' => 'Test', 'nested' => {'nested_value' => 'Nested Test'}}
+    expected = { 'value' => 'Test', 'nested' => { 'nested_value' => 'Nested Test' } }
     assert_equal expected, result
   end
 
   test 'top-level array' do
-    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
+    comments = [Comment.new('hello', 1), Comment.new('world', 2)]
 
     result = jbuild do |json|
       json.array! comments do |comment|
@@ -436,10 +435,11 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'it allows using next in array block to skip value' do
-    comments = [ Comment.new('hello', 1), Comment.new('skip', 2), Comment.new('world', 3) ]
+    comments = [Comment.new('hello', 1), Comment.new('skip', 2), Comment.new('world', 3)]
     result = jbuild do |json|
       json.array! comments do |comment|
         next if comment.id == 2
+
         json.content comment.content
       end
     end
@@ -450,16 +450,16 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'extract attributes directly from array' do
-    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
+    comments = [Comment.new('hello', 1), Comment.new('world', 2)]
 
     result = jbuild do |json|
       json.array! comments, :content, :id
     end
 
     assert_equal 'hello', result.first['content']
-    assert_equal       1, result.first['id']
+    assert_equal 1, result.first['id']
     assert_equal 'world', result.second['content']
-    assert_equal       2, result.second['id']
+    assert_equal 2, result.second['id']
   end
 
   test 'empty top-level array' do
@@ -495,7 +495,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'dynamically sets a collection' do
-    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
+    comments = [Comment.new('hello', 1), Comment.new('world', 2)]
 
     result = jbuild do |json|
       json.set! :comments, comments, :content
@@ -518,8 +518,8 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'initialize via options hash' do
     jbuilder = Jbuilder.new(key_formatter: 1, ignore_nil: 2)
-    assert_equal 1, jbuilder.instance_eval{ @key_formatter }
-    assert_equal 2, jbuilder.instance_eval{ @ignore_nil }
+    assert_equal 1, jbuilder.instance_eval { @key_formatter }
+    assert_equal 2, jbuilder.instance_eval { @ignore_nil }
   end
 
   test 'key_format! with parameter' do
@@ -585,7 +585,7 @@ class JbuilderTest < ActiveSupport::TestCase
       json.key_format! camelize: :lower
 
       json.level_one do
-        json.array! [{value: 'two'}] do |object|
+        json.array! [{ value: 'two' }] do |object|
           json.key_format! :upcase
           json.value object[:value]
         end
@@ -616,7 +616,7 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'key_format! with lambda/proc' do
     result = jbuild do |json|
-      json.key_format! ->(key){ key + ' and friends' }
+      json.key_format! ->(key) { key + ' and friends' }
       json.oats 'foo'
     end
 
@@ -757,7 +757,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'deep key_format! is applied to hash extracted from hash' do
-    comment = {author: { first_name: 'camel', last_name: 'case' }}
+    comment = { author: { first_name: 'camel', last_name: 'case' } }
     result = jbuild do |json|
       json.key_format! camelize: :lower
       json.deep_format_keys!
@@ -780,13 +780,13 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'default key_format!' do
     Jbuilder.key_format camelize: :lower
-    result = jbuild{ |json| json.camel_style 'for JS' }
+    result = jbuild { |json| json.camel_style 'for JS' }
     assert_equal ['camelStyle'], result.keys
   end
 
   test 'do not use default key formatter directly' do
     Jbuilder.key_format
-    jbuild{ |json| json.key 'value' }
+    jbuild { |json| json.key 'value' }
     formatter = Jbuilder.send(:class_variable_get, '@@key_formatter')
     cache = formatter.instance_variable_get('@cache')
     assert_empty cache

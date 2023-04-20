@@ -13,7 +13,7 @@ module ActiveSupport
 
     def initialize(config_path:, key_path:, env_key:, raise_if_missing_key:)
       super content_path: config_path, key_path: key_path,
-        env_key: env_key, raise_if_missing_key: raise_if_missing_key
+            env_key: env_key, raise_if_missing_key: raise_if_missing_key
     end
 
     # Allow a config to be started without a file present
@@ -34,23 +34,24 @@ module ActiveSupport
     end
 
     private
-      def deep_transform(hash)
-        return hash unless hash.is_a?(Hash)
 
-        h = ActiveSupport::InheritableOptions.new
-        hash.each do |k, v|
-          h[k] = deep_transform(v)
-        end
-        h
-      end
+    def deep_transform(hash)
+      return hash unless hash.is_a?(Hash)
 
-      def options
-        @options ||= ActiveSupport::InheritableOptions.new(deep_transform(config))
+      h = ActiveSupport::InheritableOptions.new
+      hash.each do |k, v|
+        h[k] = deep_transform(v)
       end
+      h
+    end
 
-      def deserialize(config)
-        doc = YAML.respond_to?(:unsafe_load) ? YAML.unsafe_load(config) : YAML.load(config)
-        doc.presence || {}
-      end
+    def options
+      @options ||= ActiveSupport::InheritableOptions.new(deep_transform(config))
+    end
+
+    def deserialize(config)
+      doc = YAML.respond_to?(:unsafe_load) ? YAML.unsafe_load(config) : YAML.load(config)
+      doc.presence || {}
+    end
   end
 end

@@ -2,13 +2,10 @@ require 'thread'
 require 'concurrent/collection/map/non_concurrent_map_backend'
 
 module Concurrent
-
   # @!visibility private
   module Collection
-
     # @!visibility private
     class MriMapBackend < NonConcurrentMapBackend
-
       def initialize(options = nil, &default_proc)
         super(options, &default_proc)
         @write_lock = Mutex.new

@@ -33,7 +33,6 @@ module RuboCop
           branch.begin_type? ? Array(branch).last : branch
         end
 
-        # rubocop:disable Metrics/AbcSize
         def lhs(node)
           case node.type
           when :send
@@ -50,7 +49,6 @@ module RuboCop
             node.source
           end
         end
-        # rubocop:enable Metrics/AbcSize
 
         def indent(cop, source)
           conf = cop.config.for_cop(END_ALIGNMENT)

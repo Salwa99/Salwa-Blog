@@ -1,5 +1,6 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/fields/common_date_field'
 
 module Mail
@@ -23,7 +24,7 @@ module Mail
   #  mail[:date]     #=> '#<Mail::Field:0x180e5e8 @field=#<Mail::DateField:0x180e1c4
   #  mail['date']    #=> '#<Mail::Field:0x180e5e8 @field=#<Mail::DateField:0x180e1c4
   #  mail['Date']    #=> '#<Mail::Field:0x180e5e8 @field=#<Mail::DateField:0x180e1c4
-  class DateField < CommonDateField #:nodoc:
+  class DateField < CommonDateField # :nodoc:
     NAME = 'Date'
   end
 end

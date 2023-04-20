@@ -19,9 +19,10 @@ module ActiveSupport
       end
 
       private
-        def tagged_logger
-          @tagged_logger ||= (defined?(Rails.logger) && Rails.logger)
-        end
+
+      def tagged_logger
+        @tagged_logger ||= (defined?(Rails.logger) && Rails.logger)
+      end
     end
   end
 end

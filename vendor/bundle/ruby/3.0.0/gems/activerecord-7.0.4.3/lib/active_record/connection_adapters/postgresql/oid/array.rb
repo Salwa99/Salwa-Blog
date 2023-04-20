@@ -10,6 +10,7 @@ module ActiveRecord
           Data = Struct.new(:encoder, :values) # :nodoc:
 
           attr_reader :subtype, :delimiter
+
           delegate :type, :user_input_in_time_zone, :limit, :precision, :scale, to: :subtype
 
           def initialize(subtype, delimiter = ",")
@@ -61,6 +62,7 @@ module ActiveRecord
 
           def type_cast_for_schema(value)
             return super unless value.is_a?(::Array)
+
             "[" + value.map { |v| subtype.type_cast_for_schema(v) }.join(", ") + "]"
           end
 
@@ -77,13 +79,14 @@ module ActiveRecord
           end
 
           private
-            def type_cast_array(value, method)
-              if value.is_a?(::Array)
-                value.map { |item| type_cast_array(item, method) }
-              else
-                @subtype.public_send(method, value)
-              end
+
+          def type_cast_array(value, method)
+            if value.is_a?(::Array)
+              value.map { |item| type_cast_array(item, method) }
+            else
+              @subtype.public_send(method, value)
             end
+          end
         end
       end
     end

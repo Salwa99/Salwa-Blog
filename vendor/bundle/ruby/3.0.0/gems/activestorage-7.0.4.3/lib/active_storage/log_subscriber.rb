@@ -25,7 +25,8 @@ module ActiveStorage
     end
 
     def service_exist(event)
-      debug event, color("Checked if file exists at key: #{key_in(event)} (#{event.payload[:exist] ? "yes" : "no"})", BLUE)
+      debug event,
+            color("Checked if file exists at key: #{key_in(event)} (#{event.payload[:exist] ? "yes" : "no"})", BLUE)
     end
 
     def service_url(event)
@@ -43,21 +44,22 @@ module ActiveStorage
     end
 
     private
-      def info(event, colored_message)
-        super log_prefix_for_service(event) + colored_message
-      end
 
-      def debug(event, colored_message)
-        super log_prefix_for_service(event) + colored_message
-      end
+    def info(event, colored_message)
+      super log_prefix_for_service(event) + colored_message
+    end
 
-      def log_prefix_for_service(event)
-        color "  #{event.payload[:service]} Storage (#{event.duration.round(1)}ms) ", CYAN
-      end
+    def debug(event, colored_message)
+      super log_prefix_for_service(event) + colored_message
+    end
 
-      def key_in(event)
-        event.payload[:key]
-      end
+    def log_prefix_for_service(event)
+      color "  #{event.payload[:service]} Storage (#{event.duration.round(1)}ms) ", CYAN
+    end
+
+    def key_in(event)
+      event.payload[:key]
+    end
   end
 end
 

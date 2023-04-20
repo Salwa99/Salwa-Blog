@@ -104,6 +104,7 @@ module AbstractController
       # +key+ exists (see +expire_fragment+ for acceptable formats).
       def fragment_exist?(key, options = nil)
         return unless cache_configured?
+
         key = combined_fragment_cache_key(key)
 
         instrument_fragment_cache :exist_fragment?, key do
@@ -131,6 +132,7 @@ module AbstractController
       # method (or <tt>delete_matched</tt>, for Regexp keys).
       def expire_fragment(key, options = nil)
         return unless cache_configured?
+
         key = combined_fragment_cache_key(key) unless key.is_a?(Regexp)
 
         instrument_fragment_cache :expire_fragment, key do

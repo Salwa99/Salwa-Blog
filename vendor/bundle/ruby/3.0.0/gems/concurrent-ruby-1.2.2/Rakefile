@@ -3,7 +3,7 @@ require_relative 'lib/concurrent-ruby-edge/concurrent/edge/version'
 require_relative 'lib/concurrent-ruby/concurrent/utility/engine'
 
 core_gemspec = Gem::Specification.load File.join(__dir__, 'concurrent-ruby.gemspec')
-ext_gemspec  = Gem::Specification.load File.join(__dir__, 'concurrent-ruby-ext.gemspec')
+ext_gemspec = Gem::Specification.load File.join(__dir__, 'concurrent-ruby-ext.gemspec')
 edge_gemspec = Gem::Specification.load File.join(__dir__, 'concurrent-ruby-edge.gemspec')
 
 require 'rake/javaextensiontask'
@@ -19,11 +19,11 @@ unless Concurrent.on_jruby? || Concurrent.on_truffleruby?
   require 'rake/extensiontask'
 
   Rake::ExtensionTask.new('concurrent_ruby_ext', ext_gemspec) do |ext|
-    ext.ext_dir        = 'ext/concurrent-ruby-ext'
-    ext.lib_dir        = 'lib/concurrent-ruby/concurrent'
+    ext.ext_dir = 'ext/concurrent-ruby-ext'
+    ext.lib_dir = 'lib/concurrent-ruby/concurrent'
     ext.source_pattern = '*.{c,h}'
 
-    ext.cross_compile  = true
+    ext.cross_compile = true
     ext.cross_platform = ['x86-mingw32', 'x64-mingw32']
   end
 end
@@ -47,7 +47,8 @@ namespace :repackage do
           "bundle install --local && bundle exec rake native:#{plat} gem --trace",
           platform: plat,
           options: ['--privileged'], # otherwise the directory in the image is empty
-          runas: false)
+          runas: false
+        )
       end
     end
   end
@@ -63,7 +64,8 @@ Gem::PackageTask.new(edge_gemspec) {} if edge_gemspec
 CLEAN.include(
   'lib/concurrent-ruby/concurrent/concurrent_ruby_ext.*',
   'lib/concurrent-ruby/concurrent/2.*',
-  'lib/concurrent-ruby/concurrent/*.jar')
+  'lib/concurrent-ruby/concurrent/*.jar'
+)
 
 begin
   require 'rspec'
@@ -74,7 +76,7 @@ begin
   namespace :spec do
     desc '* Configured for ci'
     RSpec::Core::RakeTask.new(:ci) do |t|
-      options      = %w[ --color
+      options = %w[ --color
                     --backtrace
                     --order defined
                     --format documentation ]
@@ -106,6 +108,7 @@ begin
     env = { 'ISOLATED' => 'true' }
     Dir[glob].each do |spec|
       next if from and from != spec
+
       from = nil if from == spec
 
       sh env, 'rspec', spec
@@ -138,7 +141,6 @@ begin
   task :yard => ['yard:signpost', 'yard:master']
 
   namespace :yard do
-
     desc '* eval markdown files'
     task :eval_md do
       Dir.chdir File.join(__dir__, 'docs-source') do
@@ -148,8 +150,8 @@ begin
 
     task :update_readme do
       Dir.chdir __dir__ do
-        content = File.read(File.join('README.md')).
-          gsub(/\[([\w ]+)\]\(http:\/\/ruby-concurrency\.github\.io\/concurrent-ruby\/master\/.*\)/) do |_|
+        content = File.read(File.join('README.md'))
+          .gsub(/\[([\w ]+)\]\(http:\/\/ruby-concurrency\.github\.io\/concurrent-ruby\/master\/.*\)/) do |_|
           case $1
           when 'LockFreeLinkedSet'
             "{Concurrent::Edge::#{$1} #{$1}}"
@@ -166,7 +168,7 @@ begin
       end
     end
 
-    define_yard_task = -> name do
+    define_yard_task = ->name do
       output_dir = "docs/#{name}"
 
       removal_name = "remove.#{name}"
@@ -181,7 +183,8 @@ begin
         yard.options.push(
           '--output-dir', output_dir,
           '--main', 'tmp/README.md',
-          *common_yard_options)
+          *common_yard_options
+        )
         yard.files = ['./lib/concurrent-ruby/**/*.rb',
                       './lib/concurrent-ruby-edge/**/*.rb',
                       './ext/concurrent_ruby_ext/**/*.c',
@@ -205,11 +208,11 @@ begin
       yard.options.push(
         '--output-dir', 'docs',
         '--main', 'docs-source/signpost.md',
-        *common_yard_options)
+        *common_yard_options
+      )
       yard.files = ['no-lib']
     end
   end
-
 rescue LoadError => e
   puts 'YARD is not installed, skipping documentation task definitions: ' + e.message
 end
@@ -234,7 +237,7 @@ namespace :release do
       end
       sh 'git fetch'
       sh 'test $(git show-ref --verify --hash refs/heads/master) = ' +
-           '$(git show-ref --verify --hash refs/remotes/origin/master)' do |ok, res|
+         '$(git show-ref --verify --hash refs/remotes/origin/master)' do |ok, res|
         unless ok
           begin
             STDOUT.puts 'Local master branch is not pushed to origin.', 'Continue? (y/n)'

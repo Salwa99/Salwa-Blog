@@ -8,17 +8,17 @@ module Arel # :nodoc: all
 
       def initialize(relation = nil)
         super()
-        @cores          = [SelectCore.new(relation)]
-        @orders         = []
-        @limit          = nil
-        @lock           = nil
-        @offset         = nil
-        @with           = nil
+        @cores = [SelectCore.new(relation)]
+        @orders = []
+        @limit = nil
+        @lock = nil
+        @offset = nil
+        @with = nil
       end
 
       def initialize_copy(other)
         super
-        @cores  = @cores.map { |x| x.clone }
+        @cores = @cores.map { |x| x.clone }
         @orders = @orders.map { |x| x.clone }
       end
 

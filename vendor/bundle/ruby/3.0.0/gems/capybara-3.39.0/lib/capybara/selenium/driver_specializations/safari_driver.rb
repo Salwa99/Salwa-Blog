@@ -13,7 +13,7 @@ module Capybara::Selenium::Driver::SafariDriver
     handles.tap(&:pop).each { |fh| browser.switch_to.frame(fh.native) }
   end
 
-private
+  private
 
   def build_node(native_node, initial_cache = {})
     ::Capybara::Selenium::SafariNode.new(self, native_node, initial_cache)

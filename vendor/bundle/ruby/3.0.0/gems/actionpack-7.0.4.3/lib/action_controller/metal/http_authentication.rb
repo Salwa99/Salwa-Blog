@@ -75,8 +75,13 @@ module ActionController
           # See ActionController::HttpAuthentication::Basic for example usage.
           def http_basic_authenticate_with(name:, password:, realm: nil, **options)
             raise ArgumentError, "Expected name: to be a String, got #{name.class}" unless name.is_a?(String)
-            raise ArgumentError, "Expected password: to be a String, got #{password.class}" unless password.is_a?(String)
-            before_action(options) { http_basic_authenticate_or_request_with name: name, password: password, realm: realm }
+
+            raise ArgumentError,
+                  "Expected password: to be a String, got #{password.class}" unless password.is_a?(String)
+
+            before_action(options) {
+              http_basic_authenticate_or_request_with name: name, password: password, realm: realm
+            }
           end
         end
 
@@ -90,7 +95,8 @@ module ActionController
         end
 
         def authenticate_or_request_with_http_basic(realm = nil, message = nil, &login_procedure)
-          authenticate_with_http_basic(&login_procedure) || request_http_basic_authentication(realm || "Application", message)
+          authenticate_with_http_basic(&login_procedure) || request_http_basic_authentication(realm || "Application",
+                                                                                              message)
         end
 
         def authenticate_with_http_basic(&login_procedure)
@@ -191,7 +197,8 @@ module ActionController
         #
         # See ActionController::HttpAuthentication::Digest for example usage.
         def authenticate_or_request_with_http_digest(realm = "Application", message = nil, &password_procedure)
-          authenticate_with_http_digest(realm, &password_procedure) || request_http_digest_authentication(realm, message)
+          authenticate_with_http_digest(realm,
+                                        &password_procedure) || request_http_digest_authentication(realm, message)
         end
 
         # Authenticate using an HTTP \Digest. Returns true if authentication is
@@ -216,7 +223,7 @@ module ActionController
       # First try the password as a ha1 digest password. If this fails, then try it as a plain
       # text password.
       def validate_digest_response(request, realm, &password_procedure)
-        secret_key  = secret_token(request)
+        secret_key = secret_token(request)
         credentials = decode_credentials_header(request)
         valid_nonce = validate_nonce(secret_key, request, credentials[:nonce])
 
@@ -225,7 +232,7 @@ module ActionController
           return false unless password
 
           method = request.get_header("rack.methodoverride.original_method") || request.get_header("REQUEST_METHOD")
-          uri    = credentials[:uri]
+          uri = credentials[:uri]
 
           [true, false].any? do |trailing_question_mark|
             [true, false].any? do |password_is_ha1|
@@ -243,7 +250,8 @@ module ActionController
       def expected_response(http_method, uri, credentials, password, password_is_ha1 = true)
         ha1 = password_is_ha1 ? password : ha1(credentials, password)
         ha2 = OpenSSL::Digest::MD5.hexdigest([http_method.to_s.upcase, uri].join(":"))
-        OpenSSL::Digest::MD5.hexdigest([ha1, credentials[:nonce], credentials[:nc], credentials[:cnonce], credentials[:qop], ha2].join(":"))
+        OpenSSL::Digest::MD5.hexdigest([ha1, credentials[:nonce], credentials[:nc], credentials[:cnonce],
+                                        credentials[:qop], ha2].join(":"))
       end
 
       def ha1(credentials, password)
@@ -251,7 +259,8 @@ module ActionController
       end
 
       def encode_credentials(http_method, credentials, password, password_is_ha1)
-        credentials[:response] = expected_response(http_method, credentials[:uri], credentials, password, password_is_ha1)
+        credentials[:response] =
+          expected_response(http_method, credentials[:uri], credentials, password, password_is_ha1)
         "Digest " + credentials.sort_by { |x| x[0].to_s }.map { |v| "#{v[0]}='#{v[1]}'" }.join(", ")
       end
 
@@ -270,7 +279,8 @@ module ActionController
         secret_key = secret_token(controller.request)
         nonce = self.nonce(secret_key)
         opaque = opaque(secret_key)
-        controller.headers["WWW-Authenticate"] = %(Digest realm="#{realm}", qop="auth", algorithm=MD5, nonce="#{nonce}", opaque="#{opaque}")
+        controller.headers["WWW-Authenticate"] =
+          %(Digest realm="#{realm}", qop="auth", algorithm=MD5, nonce="#{nonce}", opaque="#{opaque}")
       end
 
       def authentication_request(controller, realm, message = nil)
@@ -281,7 +291,7 @@ module ActionController
       end
 
       def secret_token(request)
-        key_generator  = request.key_generator
+        key_generator = request.key_generator
         http_auth_salt = request.http_auth_salt
         key_generator.generate_key(http_auth_salt)
       end
@@ -332,6 +342,7 @@ module ActionController
       # username and password.
       def validate_nonce(secret_key, request, value, seconds_to_timeout = 5 * 60)
         return false if value.nil?
+
         t = ::Base64.decode64(value).split(":").first.to_i
         nonce(secret_key, t) == value && (t - Time.now.to_i).abs <= seconds_to_timeout
       end

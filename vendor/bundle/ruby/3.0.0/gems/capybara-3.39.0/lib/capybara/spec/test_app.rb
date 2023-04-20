@@ -226,7 +226,8 @@ class TestApp < Sinatra::Base
   end
 
   get '/csp' do
-    response.headers['Content-Security-Policy'] = "default-src 'none'; connect-src 'self'; base-uri 'none'; font-src 'self'; img-src 'self' data:; object-src 'none'; script-src 'self' 'nonce-jAviMuMisoTisVXjgLoWdA=='; style-src 'self' 'nonce-jAviMuMisoTisVXjgLoWdA=='; form-action 'self';"
+    response.headers['Content-Security-Policy'] =
+      "default-src 'none'; connect-src 'self'; base-uri 'none'; font-src 'self'; img-src 'self' data:; object-src 'none'; script-src 'self' 'nonce-jAviMuMisoTisVXjgLoWdA=='; style-src 'self' 'nonce-jAviMuMisoTisVXjgLoWdA=='; form-action 'self';"
     <<-HTML
       <!DOCTYPE html>
       <html lang="en">

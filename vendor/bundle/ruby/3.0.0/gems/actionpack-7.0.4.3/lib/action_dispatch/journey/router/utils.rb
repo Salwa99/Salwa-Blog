@@ -31,22 +31,22 @@ module ActionDispatch
         # URI path and fragment escaping
         # https://tools.ietf.org/html/rfc3986
         class UriEncoder # :nodoc:
-          ENCODE   = "%%%02X"
+          ENCODE = "%%%02X"
           US_ASCII = Encoding::US_ASCII
-          UTF_8    = Encoding::UTF_8
-          EMPTY    = (+"").force_encoding(US_ASCII).freeze
-          DEC2HEX  = (0..255).map { |i| (ENCODE % i).force_encoding(US_ASCII) }
+          UTF_8 = Encoding::UTF_8
+          EMPTY = (+"").force_encoding(US_ASCII).freeze
+          DEC2HEX = (0..255).map { |i| (ENCODE % i).force_encoding(US_ASCII) }
 
           ALPHA = "a-zA-Z"
           DIGIT = "0-9"
           UNRESERVED = "#{ALPHA}#{DIGIT}\\-\\._~"
           SUB_DELIMS = "!\\$&'\\(\\)\\*\\+,;="
 
-          ESCAPED  = /%[a-zA-Z0-9]{2}/.freeze
+          ESCAPED = /%[a-zA-Z0-9]{2}/.freeze
 
           FRAGMENT = /[^#{UNRESERVED}#{SUB_DELIMS}:@\/?]/.freeze
-          SEGMENT  = /[^#{UNRESERVED}#{SUB_DELIMS}:@]/.freeze
-          PATH     = /[^#{UNRESERVED}#{SUB_DELIMS}:@\/]/.freeze
+          SEGMENT = /[^#{UNRESERVED}#{SUB_DELIMS}:@]/.freeze
+          PATH = /[^#{UNRESERVED}#{SUB_DELIMS}:@\/]/.freeze
 
           def escape_fragment(fragment)
             escape(fragment, FRAGMENT)
@@ -66,15 +66,16 @@ module ActionDispatch
           end
 
           private
-            def escape(component, pattern)
-              component.gsub(pattern) { |unsafe| percent_encode(unsafe) }.force_encoding(US_ASCII)
-            end
 
-            def percent_encode(unsafe)
-              safe = EMPTY.dup
-              unsafe.each_byte { |b| safe << DEC2HEX[b] }
-              safe
-            end
+          def escape(component, pattern)
+            component.gsub(pattern) { |unsafe| percent_encode(unsafe) }.force_encoding(US_ASCII)
+          end
+
+          def percent_encode(unsafe)
+            safe = EMPTY.dup
+            unsafe.each_byte { |b| safe << DEC2HEX[b] }
+            safe
+          end
         end
 
         ENCODER = UriEncoder.new

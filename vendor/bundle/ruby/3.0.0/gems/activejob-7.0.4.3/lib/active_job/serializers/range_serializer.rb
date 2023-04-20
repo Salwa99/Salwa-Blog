@@ -15,9 +15,10 @@ module ActiveJob
       end
 
       private
-        def klass
-          ::Range
-        end
+
+      def klass
+        ::Range
+      end
     end
   end
 end

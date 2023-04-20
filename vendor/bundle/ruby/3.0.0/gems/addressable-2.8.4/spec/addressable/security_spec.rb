@@ -14,13 +14,12 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-
 require "spec_helper"
 
 require "addressable/uri"
 
 describe Addressable::URI, "when created with a URI known to cause crashes " +
-    "in certain browsers" do
+                           "in certain browsers" do
   it "should parse correctly" do
     uri = Addressable::URI.parse('%%30%30')
     expect(uri.path).to eq('%%30%30')
@@ -35,7 +34,7 @@ describe Addressable::URI, "when created with a URI known to cause crashes " +
 end
 
 describe Addressable::URI, "when created with a URI known to cause crashes " +
-    "in certain browsers" do
+                           "in certain browsers" do
   it "should parse correctly" do
     uri = Addressable::URI.parse('لُصّبُلُلصّبُررً ॣ ॣh ॣ ॣ 冗')
     expect(uri.path).to eq('لُصّبُلُلصّبُررً ॣ ॣh ॣ ॣ 冗')

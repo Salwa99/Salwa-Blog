@@ -41,18 +41,18 @@ end
 
 namespace "tags" do
   desc "Generate an Emacs TAGS file"
-   task :emacs, [:all] => Tags::FILES do |t, args|
+  task :emacs, [:all] => Tags::FILES do |t, args|
     puts "Making Emacs TAGS file"
     verbose(true) do
       Tags.run(Tags::PROJECT_DIR)
       Tags.run(Tags::RAKEFILES,
-        :language_force => "ruby",
-        :append => true)
+               :language_force => "ruby",
+               :append => true)
       if args.all
         Tags::SYSTEM_DIRS.each do |dir|
           Tags.run(dir,
-            :language_force => "ruby",
-            :append => true)
+                   :language_force => "ruby",
+                   :append => true)
         end
       end
     end

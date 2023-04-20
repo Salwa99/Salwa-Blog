@@ -3,7 +3,6 @@ require 'concurrent/synchronization/abstract_struct'
 require 'concurrent/synchronization/lockable_object'
 
 module Concurrent
-
   # An thread-safe, write-once variation of Ruby's standard `Struct`.
   # Each member can have its value set at most once, either at construction
   # or any time thereafter. Attempting to assign a value to a member
@@ -54,18 +53,21 @@ module Concurrent
     # @!macro struct_each
     def each(&block)
       return enum_for(:each) unless block_given?
+
       synchronize { ns_each(&block) }
     end
 
     # @!macro struct_each_pair
     def each_pair(&block)
       return enum_for(:each_pair) unless block_given?
+
       synchronize { ns_each_pair(&block) }
     end
 
     # @!macro struct_select
     def select(&block)
       return enum_for(:select) unless block_given?
+
       synchronize { ns_select(&block) }
     end
 
@@ -78,10 +80,12 @@ module Concurrent
         if member >= length
           raise IndexError.new("offset #{member} too large for struct(size:#{length})")
         end
+
         synchronize do
           unless @values[member].nil?
             raise Concurrent::ImmutabilityError.new('struct member has already been set')
           end
+
           @values[member] = value
         end
       else
@@ -109,13 +113,15 @@ module Concurrent
       elsif args.length > 0 && args.first.is_a?(String)
         clazz_name = args.shift
       end
+
       FACTORY.define_struct(clazz_name, args, &block)
     end
 
     FACTORY = Class.new(Synchronization::LockableObject) do
       def define_struct(name, members, &block)
         synchronize do
-          clazz = Synchronization::AbstractStruct.define_struct_class(SettableStruct, Synchronization::LockableObject, name, members, &block)
+          clazz = Synchronization::AbstractStruct.define_struct_class(SettableStruct, Synchronization::LockableObject,
+                                                                      name, members, &block)
           members.each_with_index do |member, index|
             clazz.send :remove_method, member if clazz.instance_methods.include? member
             clazz.send(:define_method, member) do
@@ -126,6 +132,7 @@ module Concurrent
                 unless @values[index].nil?
                   raise Concurrent::ImmutabilityError.new('struct member has already been set')
                 end
+
                 @values[index] = value
               end
             end

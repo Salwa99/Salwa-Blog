@@ -90,10 +90,9 @@ module ActiveRecord
 
       # :nodoc:
       def combine_signed_id_purposes(purpose)
-        [ base_class.name.underscore, purpose.to_s ].compact_blank.join("/")
+        [base_class.name.underscore, purpose.to_s].compact_blank.join("/")
       end
     end
-
 
     # Returns a signed id that's generated using a preconfigured +ActiveSupport::MessageVerifier+ instance.
     # This signed id is tamper proof, so it's safe to send in an email or otherwise share with the outside world.
@@ -110,7 +109,8 @@ module ActiveRecord
     # And you then change your +find_signed+ calls to require this new purpose. Any old signed ids that were not
     # created with the purpose will no longer find the record.
     def signed_id(expires_in: nil, purpose: nil)
-      self.class.signed_id_verifier.generate id, expires_in: expires_in, purpose: self.class.combine_signed_id_purposes(purpose)
+      self.class.signed_id_verifier.generate id, expires_in: expires_in,
+                                                 purpose: self.class.combine_signed_id_purposes(purpose)
     end
   end
 end

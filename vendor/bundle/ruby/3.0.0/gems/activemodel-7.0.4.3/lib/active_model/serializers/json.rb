@@ -95,10 +95,10 @@ module ActiveModel
       #   #                     "title" => "So I was thinking" } ] }
       def as_json(options = nil)
         root = if options && options.key?(:root)
-          options[:root]
-        else
-          include_root_in_json
-        end
+                 options[:root]
+               else
+                 include_root_in_json
+               end
 
         hash = serializable_hash(options).as_json
         if root

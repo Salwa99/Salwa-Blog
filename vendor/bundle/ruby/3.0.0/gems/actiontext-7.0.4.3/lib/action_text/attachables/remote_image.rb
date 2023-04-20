@@ -13,16 +13,17 @@ module ActionText
         end
 
         private
-          def content_type_is_image?(content_type)
-            content_type.to_s.match?(/^image(\/.+|$)/)
-          end
 
-          def attributes_from_node(node)
-            { url: node["url"],
-              content_type: node["content-type"],
-              width: node["width"],
-              height: node["height"] }
-          end
+        def content_type_is_image?(content_type)
+          content_type.to_s.match?(/^image(\/.+|$)/)
+        end
+
+        def attributes_from_node(node)
+          { url: node["url"],
+            content_type: node["content-type"],
+            width: node["width"],
+            height: node["height"] }
+        end
       end
 
       attr_reader :url, :content_type, :width, :height

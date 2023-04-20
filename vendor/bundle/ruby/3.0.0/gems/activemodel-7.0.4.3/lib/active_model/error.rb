@@ -51,14 +51,14 @@ module ActiveModel
 
       attr_name = attribute.tr(".", "_").humanize
       attr_name = base_class.human_attribute_name(attribute, {
-        default: attr_name,
-        base: base,
-      })
+                                                    default: attr_name,
+                                                    base: base,
+                                                  })
 
       I18n.t(defaults.shift,
-        default:  defaults,
-        attribute: attr_name,
-        message:   message)
+             default: defaults,
+             attribute: attr_name,
+             message: message)
     end
 
     def self.generate_message(attribute, type, base, options) # :nodoc:
@@ -77,8 +77,8 @@ module ActiveModel
         attribute = attribute.to_s.remove(/\[\d+\]/)
 
         defaults = base.class.lookup_ancestors.flat_map do |klass|
-          [ :"#{i18n_scope}.errors.models.#{klass.model_name.i18n_key}.attributes.#{attribute}.#{type}",
-            :"#{i18n_scope}.errors.models.#{klass.model_name.i18n_key}.#{type}" ]
+          [:"#{i18n_scope}.errors.models.#{klass.model_name.i18n_key}.attributes.#{attribute}.#{type}",
+           :"#{i18n_scope}.errors.models.#{klass.model_name.i18n_key}.#{type}"]
         end
         defaults << :"#{i18n_scope}.errors.messages.#{type}"
 
@@ -200,8 +200,9 @@ module ActiveModel
     end
 
     protected
-      def attributes_for_hash
-        [@base, @attribute, @raw_type, @options.except(*CALLBACKS_OPTIONS)]
-      end
+
+    def attributes_for_hash
+      [@base, @attribute, @raw_type, @options.except(*CALLBACKS_OPTIONS)]
+    end
   end
 end

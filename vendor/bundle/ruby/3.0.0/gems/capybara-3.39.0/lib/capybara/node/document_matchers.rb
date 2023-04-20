@@ -55,7 +55,7 @@ module Capybara
         make_predicate(options) { assert_no_title(title, **options) }
       end
 
-    private
+      private
 
       def _verify_title(title, options)
         query = Capybara::Queries::TitleQuery.new(title, **options)

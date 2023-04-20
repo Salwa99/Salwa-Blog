@@ -4,13 +4,14 @@ module ActiveSupport
   module EnumerableCoreExt # :nodoc:
     module Constants
       private
-        def const_missing(name)
-          if name == :SoleItemExpectedError
-            ::ActiveSupport::EnumerableCoreExt::SoleItemExpectedError
-          else
-            super
-          end
+
+      def const_missing(name)
+        if name == :SoleItemExpectedError
+          ::ActiveSupport::EnumerableCoreExt::SoleItemExpectedError
+        else
+          super
         end
+      end
     end
   end
 end
@@ -256,8 +257,8 @@ module Enumerable
   #   { a: 1, b: 2 }.sole # => Enumerable::SoleItemExpectedError: multiple items found
   def sole
     case count
-    when 1   then return first # rubocop:disable Style/RedundantReturn
-    when 0   then raise ActiveSupport::EnumerableCoreExt::SoleItemExpectedError, "no item found"
+    when 1 then return first # rubocop:disable Style/RedundantReturn
+    when 0 then raise ActiveSupport::EnumerableCoreExt::SoleItemExpectedError, "no item found"
     when 2.. then raise ActiveSupport::EnumerableCoreExt::SoleItemExpectedError, "multiple items found"
     end
   end

@@ -1,5 +1,5 @@
-
 # frozen_string_literal: true
+
 require "mail/utilities"
 require "mail/parser_tools"
 
@@ -654,7 +654,7 @@ begin
                     # Use quoted string value if one exists, otherwise use parameter value
                     value = qstr || chars(data, param_val_s, p - 1)
 
-                    content_disposition.parameters << {param_attr => value}
+                    content_disposition.parameters << { param_attr => value }
                     param_attr = nil
                     qstr = nil
                   end
@@ -712,7 +712,7 @@ begin
                     # Use quoted string value if one exists, otherwise use parameter value
                     value = qstr || chars(data, param_val_s, p - 1)
 
-                    content_disposition.parameters << {param_attr => value}
+                    content_disposition.parameters << { param_attr => value }
                     param_attr = nil
                     qstr = nil
                   end
@@ -742,7 +742,7 @@ begin
                     # Use quoted string value if one exists, otherwise use parameter value
                     value = qstr || chars(data, param_val_s, p - 1)
 
-                    content_disposition.parameters << {param_attr => value}
+                    content_disposition.parameters << { param_attr => value }
                     param_attr = nil
                     qstr = nil
                   end
@@ -799,7 +799,7 @@ begin
                     # Use quoted string value if one exists, otherwise use parameter value
                     value = qstr || chars(data, param_val_s, p - 1)
 
-                    content_disposition.parameters << {param_attr => value}
+                    content_disposition.parameters << { param_attr => value }
                     param_attr = nil
                     qstr = nil
                   end
@@ -823,7 +823,7 @@ begin
                     # Use quoted string value if one exists, otherwise use parameter value
                     value = qstr || chars(data, param_val_s, p - 1)
 
-                    content_disposition.parameters << {param_attr => value}
+                    content_disposition.parameters << { param_attr => value }
                     param_attr = nil
                     qstr = nil
                   end
@@ -857,7 +857,7 @@ begin
                     # Use quoted string value if one exists, otherwise use parameter value
                     value = qstr || chars(data, param_val_s, p - 1)
 
-                    content_disposition.parameters << {param_attr => value}
+                    content_disposition.parameters << { param_attr => value }
                     param_attr = nil
                     qstr = nil
                   end
@@ -875,7 +875,7 @@ begin
                     # Use quoted string value if one exists, otherwise use parameter value
                     value = qstr || chars(data, param_val_s, p - 1)
 
-                    content_disposition.parameters << {param_attr => value}
+                    content_disposition.parameters << { param_attr => value }
                     param_attr = nil
                     qstr = nil
                   end

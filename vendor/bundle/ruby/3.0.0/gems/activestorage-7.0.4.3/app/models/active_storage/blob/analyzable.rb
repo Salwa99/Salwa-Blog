@@ -47,15 +47,16 @@ module ActiveStorage::Blob::Analyzable
   end
 
   private
-    def extract_metadata_via_analyzer
-      analyzer.metadata.merge(analyzed: true)
-    end
 
-    def analyzer
-      analyzer_class.new(self)
-    end
+  def extract_metadata_via_analyzer
+    analyzer.metadata.merge(analyzed: true)
+  end
 
-    def analyzer_class
-      ActiveStorage.analyzers.detect { |klass| klass.accept?(self) } || ActiveStorage::Analyzer::NullAnalyzer
-    end
+  def analyzer
+    analyzer_class.new(self)
+  end
+
+  def analyzer_class
+    ActiveStorage.analyzers.detect { |klass| klass.accept?(self) } || ActiveStorage::Analyzer::NullAnalyzer
+  end
 end

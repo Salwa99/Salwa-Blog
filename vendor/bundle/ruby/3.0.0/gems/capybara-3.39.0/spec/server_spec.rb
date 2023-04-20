@@ -20,7 +20,8 @@ RSpec.describe Capybara::Server do
 
   it 'should bind to the specified host' do
     # TODO: travis with jruby in container mode has an issue with this test
-    skip 'This platform has an issue with this test' if (ENV.fetch('TRAVIS', nil) && (RUBY_ENGINE == 'jruby')) || Gem.win_platform?
+    skip 'This platform has an issue with this test' if (ENV.fetch('TRAVIS',
+                                                                   nil) && (RUBY_ENGINE == 'jruby')) || Gem.win_platform?
 
     begin
       app = proc { |_env| [200, {}, ['Hello Server!']] }
@@ -286,7 +287,8 @@ RSpec.describe Capybara::Server do
       end
       response = Net::HTTPSuccess.allocate
       allow(response).to receive(:body).and_return app.object_id.to_s
-      allow(Net::HTTP).to receive(:start).with(anything, anything, hash_including(use_ssl: true)).and_return(response).once
+      allow(Net::HTTP).to receive(:start).with(anything, anything,
+                                               hash_including(use_ssl: true)).and_return(response).once
       described_class.new(app).boot
       expect(Net::HTTP).to have_received(:start).exactly(3).times
     end

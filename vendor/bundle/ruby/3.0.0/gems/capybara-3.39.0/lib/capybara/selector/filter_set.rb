@@ -84,7 +84,7 @@ module Capybara
         end
       end
 
-    protected
+      protected
 
       def undeclared_descriptions
         @descriptions[:undeclared]
@@ -98,7 +98,7 @@ module Capybara
         @descriptions[:expression_filters]
       end
 
-    private
+      private
 
       def options_with_defaults(options)
         expression_filters

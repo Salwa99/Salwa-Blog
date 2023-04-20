@@ -51,7 +51,8 @@ class Capybara::Selenium::Driver < Capybara::Driver::Base
     rescue LoadError => e
       raise e unless e.message.include?('selenium-webdriver')
 
-      raise LoadError, "Capybara's selenium driver is unable to load `selenium-webdriver`, please install the gem and add `gem 'selenium-webdriver'` to your Gemfile if you are using bundler."
+      raise LoadError,
+            "Capybara's selenium driver is unable to load `selenium-webdriver`, please install the gem and add `gem 'selenium-webdriver'` to your Gemfile if you are using bundler."
     end
 
     attr_reader :specializations
@@ -77,11 +78,11 @@ class Capybara::Selenium::Driver < Capybara::Driver::Base
       @browser = if options[:browser] == :firefox &&
                     RUBY_VERSION >= '3.0' &&
                     Capybara::Selenium::Driver.selenium_webdriver_version <= Gem::Version.new('4.0.0.alpha1')
-        # selenium-webdriver 3.x doesn't correctly pass options through for Firefox with Ruby 3 so workaround that
-        Selenium::WebDriver::Firefox::Driver.new(**processed_options)
-      else
-        Selenium::WebDriver.for(options[:browser], processed_options)
-      end
+                   # selenium-webdriver 3.x doesn't correctly pass options through for Firefox with Ruby 3 so workaround that
+                   Selenium::WebDriver::Firefox::Driver.new(**processed_options)
+                 else
+                   Selenium::WebDriver.for(options[:browser], processed_options)
+                 end
 
       specialize_driver
       setup_exit_handler
@@ -333,7 +334,7 @@ class Capybara::Selenium::Driver < Capybara::Driver::Base
     Selenium::WebDriver::Error::NoSuchWindowError
   end
 
-private
+  private
 
   def selenium_4?
     defined?(Selenium::WebDriver::VERSION) && (Selenium::WebDriver::VERSION.to_f >= 4)

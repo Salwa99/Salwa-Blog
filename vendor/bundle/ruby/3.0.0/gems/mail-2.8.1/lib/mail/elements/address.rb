@@ -1,5 +1,6 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/parsers/address_lists_parser'
 require 'mail/constants'
 require 'mail/utilities'
@@ -96,7 +97,7 @@ module Mail
     #  a.address = 'mikel@test.lindsaar.net'
     #  a.display_name = 'Mikel Lindsaar'
     #  a.format #=> 'Mikel Lindsaar <mikel@test.lindsaar.net>'
-    def display_name=( str )
+    def display_name=(str)
       @display_name = str.nil? ? nil : str.dup # in case frozen
     end
 
@@ -236,7 +237,7 @@ module Mail
 
     def format_comments
       if comments
-        comment_text = comments.map {|c| Utilities.escape_paren(c) }.join(Constants::SPACE).squeeze(Constants::SPACE)
+        comment_text = comments.map { |c| Utilities.escape_paren(c) }.join(Constants::SPACE).squeeze(Constants::SPACE)
         @format_comments ||= "(#{comment_text})"
       else
         nil

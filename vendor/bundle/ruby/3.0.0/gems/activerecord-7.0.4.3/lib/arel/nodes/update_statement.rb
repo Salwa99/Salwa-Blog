@@ -8,14 +8,14 @@ module Arel # :nodoc: all
       def initialize(relation = nil)
         super()
         @relation = relation
-        @wheres   = []
-        @values   = []
-        @groups   = []
-        @havings  = []
-        @orders   = []
-        @limit    = nil
-        @offset   = nil
-        @key      = nil
+        @wheres = []
+        @values = []
+        @groups = []
+        @havings = []
+        @orders = []
+        @limit = nil
+        @offset = nil
+        @key = nil
       end
 
       def initialize_copy(other)

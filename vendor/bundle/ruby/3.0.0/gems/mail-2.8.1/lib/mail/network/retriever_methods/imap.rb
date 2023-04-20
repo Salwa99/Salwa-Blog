@@ -29,7 +29,7 @@ module Mail
   #   order:   order of emails returned. Possible values are :asc or :desc. Default value is :asc.
   #   count:   number of emails to retrieve. The default value is 10. A value of 1 returns an
   #            instance of Message, not an array of Message instances.
-  #   keys:    are passed as criteria to the SEARCH command.  They can either be a string holding the entire search string, 
+  #   keys:    are passed as criteria to the SEARCH command.  They can either be a string holding the entire search string,
   #            or a single-dimension array of search keywords and arguments.  Refer to  [IMAP] section 6.4.4 for a full list
   #            The default is 'ALL'
   #
@@ -38,15 +38,15 @@ module Mail
   #
   class IMAP < Retriever
     require 'net/imap' unless defined?(Net::IMAP)
-    
+
     def initialize(values)
-      self.settings = { :address              => "localhost",
-                        :port                 => 143,
-                        :user_name            => nil,
-                        :password             => nil,
-                        :authentication       => nil,
-                        :enable_ssl           => false,
-                        :enable_starttls      => false }.merge!(values)
+      self.settings = { :address => "localhost",
+                        :port => 143,
+                        :user_name => nil,
+                        :password => nil,
+                        :authentication => nil,
+                        :enable_ssl => false,
+                        :enable_starttls => false }.merge!(values)
     end
 
     attr_accessor :settings
@@ -65,12 +65,12 @@ module Mail
     #              This is helpful when you don't want your messages to be set to read automatically. Default is false.
     #   delete_after_find: flag for whether to delete each retreived email after find. Default
     #           is false. Use #find_and_delete if you would like this to default to true.
-    #   keys:   are passed as criteria to the SEARCH command.  They can either be a string holding the entire search string, 
+    #   keys:   are passed as criteria to the SEARCH command.  They can either be a string holding the entire search string,
     #           or a single-dimension array of search keywords and arguments.  Refer to  [IMAP] section 6.4.4 for a full list
     #           The default is 'ALL'
     #   search_charset: charset to pass to IMAP server search. Omitted by default. Example: 'UTF-8' or 'ASCII'.
     #
-    def find(options=nil, &block)
+    def find(options = nil, &block)
       options = validate_options(options)
 
       start do |imap|
@@ -79,7 +79,7 @@ module Mail
         uids.reverse! if options[:what].to_sym == :last
         uids = uids.first(options[:count]) if options[:count].is_a?(Integer)
         uids.reverse! if (options[:what].to_sym == :last && options[:order].to_sym == :asc) ||
-                                (options[:what].to_sym != :last && options[:order].to_sym == :desc)
+                         (options[:what].to_sym != :last && options[:order].to_sym == :desc)
 
         if block_given?
           uids.each do |uid|
@@ -96,7 +96,8 @@ module Mail
               yield new_message
             end
 
-            imap.uid_store(uid, "+FLAGS", [Net::IMAP::DELETED]) if options[:delete_after_find] && new_message.is_marked_for_delete?
+            imap.uid_store(uid, "+FLAGS",
+                           [Net::IMAP::DELETED]) if options[:delete_after_find] && new_message.is_marked_for_delete?
             break unless options[:uid].nil?
           end
           imap.expunge if options[:delete_after_find]
@@ -116,7 +117,7 @@ module Mail
     end
 
     # Delete all emails from a IMAP mailbox
-    def delete_all(mailbox='INBOX')
+    def delete_all(mailbox = 'INBOX')
       mailbox ||= 'INBOX'
       mailbox = Net::IMAP.encode_utf7(mailbox)
 
@@ -140,48 +141,48 @@ module Mail
 
     private
 
-      # Set default options
-      def validate_options(options)
-        options = options ? Hash[options] : {}
-        options[:mailbox] ||= 'INBOX'
-        options[:count]   ||= 10
-        options[:order]   ||= :asc
-        options[:what]    ||= :first
-        options[:keys]    ||= 'ALL'
-        options[:uid]     ||= nil
-        options[:delete_after_find] ||= false
-        options[:mailbox] = Net::IMAP.encode_utf7(options[:mailbox])
-        options[:read_only] ||= false
+    # Set default options
+    def validate_options(options)
+      options = options ? Hash[options] : {}
+      options[:mailbox] ||= 'INBOX'
+      options[:count] ||= 10
+      options[:order] ||= :asc
+      options[:what] ||= :first
+      options[:keys] ||= 'ALL'
+      options[:uid] ||= nil
+      options[:delete_after_find] ||= false
+      options[:mailbox] = Net::IMAP.encode_utf7(options[:mailbox])
+      options[:read_only] ||= false
 
-        options
+      options
+    end
+
+    # Start an IMAP session and ensures that it will be closed in any case.
+    def start(config = Mail::Configuration.instance, &block)
+      raise ArgumentError.new("Mail::Retrievable#imap_start takes a block") unless block_given?
+
+      if settings[:enable_starttls] && settings[:enable_ssl]
+        raise ArgumentError,
+              ":enable_starttls and :enable_ssl are mutually exclusive. Set :enable_ssl if you're on an IMAPS connection. Set :enable_starttls if you're on an IMAP connection and using STARTTLS for secure TLS upgrade."
       end
 
-      # Start an IMAP session and ensures that it will be closed in any case.
-      def start(config=Mail::Configuration.instance, &block)
-        raise ArgumentError.new("Mail::Retrievable#imap_start takes a block") unless block_given?
+      imap = Net::IMAP.new(settings[:address], settings[:port], settings[:enable_ssl], nil, false)
 
-        if settings[:enable_starttls] && settings[:enable_ssl]
-          raise ArgumentError, ":enable_starttls and :enable_ssl are mutually exclusive. Set :enable_ssl if you're on an IMAPS connection. Set :enable_starttls if you're on an IMAP connection and using STARTTLS for secure TLS upgrade."
-        end
+      imap.starttls if settings[:enable_starttls]
 
-        imap = Net::IMAP.new(settings[:address], settings[:port], settings[:enable_ssl], nil, false)
-
-        imap.starttls if settings[:enable_starttls]
-
-        if settings[:authentication].nil?
-          imap.login(settings[:user_name], settings[:password])
-        else
-          # Note that Net::IMAP#authenticate('LOGIN', ...) is not equal with Net::IMAP#login(...)!
-          # (see also http://www.ensta.fr/~diam/ruby/online/ruby-doc-stdlib/libdoc/net/imap/rdoc/classes/Net/IMAP.html#M000718)
-          imap.authenticate(settings[:authentication], settings[:user_name], settings[:password])
-        end
-
-        yield imap
-      ensure
-        if defined?(imap) && imap && !imap.disconnected?
-          imap.disconnect
-        end
+      if settings[:authentication].nil?
+        imap.login(settings[:user_name], settings[:password])
+      else
+        # Note that Net::IMAP#authenticate('LOGIN', ...) is not equal with Net::IMAP#login(...)!
+        # (see also http://www.ensta.fr/~diam/ruby/online/ruby-doc-stdlib/libdoc/net/imap/rdoc/classes/Net/IMAP.html#M000718)
+        imap.authenticate(settings[:authentication], settings[:user_name], settings[:password])
       end
 
+      yield imap
+    ensure
+      if defined?(imap) && imap && !imap.disconnected?
+        imap.disconnect
+      end
+    end
   end
 end

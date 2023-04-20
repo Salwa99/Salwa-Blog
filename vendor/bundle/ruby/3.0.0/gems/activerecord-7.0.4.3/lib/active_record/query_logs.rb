@@ -72,7 +72,7 @@ module ActiveRecord
   #    config.active_record.cache_query_log_tags = true
   module QueryLogs
     mattr_accessor :taggings, instance_accessor: false, default: {}
-    mattr_accessor :tags, instance_accessor: false, default: [ :application ]
+    mattr_accessor :tags, instance_accessor: false, default: [:application]
     mattr_accessor :prepend_comment, instance_accessor: false, default: false
     mattr_accessor :cache_query_log_tags, instance_accessor: false, default: false
     thread_mattr_accessor :cached_comment, instance_accessor: false
@@ -93,57 +93,58 @@ module ActiveRecord
       ActiveSupport::ExecutionContext.after_change { ActiveRecord::QueryLogs.clear_cache }
 
       private
-        # Returns an SQL comment +String+ containing the query log tags.
-        # Sets and returns a cached comment if <tt>cache_query_log_tags</tt> is +true+.
-        def comment
-          if cache_query_log_tags
-            self.cached_comment ||= uncached_comment
-          else
-            uncached_comment
-          end
+
+      # Returns an SQL comment +String+ containing the query log tags.
+      # Sets and returns a cached comment if <tt>cache_query_log_tags</tt> is +true+.
+      def comment
+        if cache_query_log_tags
+          self.cached_comment ||= uncached_comment
+        else
+          uncached_comment
         end
+      end
 
-        def uncached_comment
-          content = tag_content
-          if content.present?
-            "/*#{escape_sql_comment(content)}*/"
-          end
+      def uncached_comment
+        content = tag_content
+        if content.present?
+          "/*#{escape_sql_comment(content)}*/"
         end
+      end
 
-        def escape_sql_comment(content)
-          # Sanitize a string to appear within a SQL comment
-          # For compatibility, this also surrounding "/*+", "/*", and "*/"
-          # charcacters, possibly with single surrounding space.
-          # Then follows that by replacing any internal "*/" or "/ *" with
-          # "* /" or "/ *"
-          comment = content.to_s.dup
-          comment.gsub!(%r{\A\s*/\*\+?\s?|\s?\*/\s*\Z}, "")
-          comment.gsub!("*/", "* /")
-          comment.gsub!("/*", "/ *")
-          comment
-        end
+      def escape_sql_comment(content)
+        # Sanitize a string to appear within a SQL comment
+        # For compatibility, this also surrounding "/*+", "/*", and "*/"
+        # charcacters, possibly with single surrounding space.
+        # Then follows that by replacing any internal "*/" or "/ *" with
+        # "* /" or "/ *"
+        comment = content.to_s.dup
+        comment.gsub!(%r{\A\s*/\*\+?\s?|\s?\*/\s*\Z}, "")
+        comment.gsub!("*/", "* /")
+        comment.gsub!("/*", "/ *")
+        comment
+      end
 
-        def tag_content
-          context = ActiveSupport::ExecutionContext.to_h
+      def tag_content
+        context = ActiveSupport::ExecutionContext.to_h
 
-          tags.flat_map { |i| [*i] }.filter_map do |tag|
-            key, handler = tag
-            handler ||= taggings[key]
+        tags.flat_map { |i| [*i] }.filter_map do |tag|
+          key, handler = tag
+          handler ||= taggings[key]
 
-            val = if handler.nil?
-              context[key]
-            elsif handler.respond_to?(:call)
-              if handler.arity == 0
-                handler.call
-              else
-                handler.call(context)
-              end
-            else
-              handler
-            end
-            "#{key}:#{val}" unless val.nil?
-          end.join(",")
-        end
+          val = if handler.nil?
+                  context[key]
+                elsif handler.respond_to?(:call)
+                  if handler.arity == 0
+                    handler.call
+                  else
+                    handler.call(context)
+                  end
+                else
+                  handler
+                end
+          "#{key}:#{val}" unless val.nil?
+        end.join(",")
+      end
     end
   end
 end

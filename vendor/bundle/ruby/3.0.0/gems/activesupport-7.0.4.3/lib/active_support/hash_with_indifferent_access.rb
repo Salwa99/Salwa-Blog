@@ -318,26 +318,31 @@ module ActiveSupport
 
     def select(*args, &block)
       return to_enum(:select) unless block_given?
+
       dup.tap { |hash| hash.select!(*args, &block) }
     end
 
     def reject(*args, &block)
       return to_enum(:reject) unless block_given?
+
       dup.tap { |hash| hash.reject!(*args, &block) }
     end
 
     def transform_values(*args, &block)
       return to_enum(:transform_values) unless block_given?
+
       dup.tap { |hash| hash.transform_values!(*args, &block) }
     end
 
     def transform_keys(*args, &block)
       return to_enum(:transform_keys) unless block_given?
+
       dup.tap { |hash| hash.transform_keys!(*args, &block) }
     end
 
     def transform_keys!
       return enum_for(:transform_keys!) { size } unless block_given?
+
       keys.each do |key|
         self[yield(key)] = delete(key)
       end
@@ -370,53 +375,54 @@ module ActiveSupport
     end
 
     private
-      if Symbol.method_defined?(:name)
-        def convert_key(key)
-          key.kind_of?(Symbol) ? key.name : key
+
+    if Symbol.method_defined?(:name)
+      def convert_key(key)
+        key.kind_of?(Symbol) ? key.name : key
+      end
+    else
+      def convert_key(key)
+        key.kind_of?(Symbol) ? key.to_s : key
+      end
+    end
+
+    def convert_value(value, conversion: nil)
+      if value.is_a? Hash
+        if conversion == :to_hash
+          value.to_hash
+        else
+          value.nested_under_indifferent_access
         end
+      elsif value.is_a?(Array)
+        if conversion != :assignment || value.frozen?
+          value = value.dup
+        end
+        value.map! { |e| convert_value(e, conversion: conversion) }
       else
-        def convert_key(key)
-          key.kind_of?(Symbol) ? key.to_s : key
-        end
+        value
       end
+    end
 
-      def convert_value(value, conversion: nil)
-        if value.is_a? Hash
-          if conversion == :to_hash
-            value.to_hash
-          else
-            value.nested_under_indifferent_access
-          end
-        elsif value.is_a?(Array)
-          if conversion != :assignment || value.frozen?
-            value = value.dup
-          end
-          value.map! { |e| convert_value(e, conversion: conversion) }
-        else
-          value
-        end
+    def set_defaults(target)
+      if default_proc
+        target.default_proc = default_proc.dup
+      else
+        target.default = default
       end
+    end
 
-      def set_defaults(target)
-        if default_proc
-          target.default_proc = default_proc.dup
-        else
-          target.default = default
-        end
-      end
-
-      def update_with_single_argument(other_hash, block)
-        if other_hash.is_a? HashWithIndifferentAccess
-          regular_update(other_hash, &block)
-        else
-          other_hash.to_hash.each_pair do |key, value|
-            if block && key?(key)
-              value = block.call(convert_key(key), self[key], value)
-            end
-            regular_writer(convert_key(key), convert_value(value))
+    def update_with_single_argument(other_hash, block)
+      if other_hash.is_a? HashWithIndifferentAccess
+        regular_update(other_hash, &block)
+      else
+        other_hash.to_hash.each_pair do |key, value|
+          if block && key?(key)
+            value = block.call(convert_key(key), self[key], value)
           end
+          regular_writer(convert_key(key), convert_value(value))
         end
       end
+    end
   end
 end
 

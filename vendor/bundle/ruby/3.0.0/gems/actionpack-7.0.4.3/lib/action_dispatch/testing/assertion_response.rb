@@ -35,12 +35,13 @@ module ActionDispatch
     end
 
     private
-      def code_from_name(name)
-        GENERIC_RESPONSE_CODES[name] || Rack::Utils::SYMBOL_TO_STATUS_CODE[name]
-      end
 
-      def name_from_code(code)
-        GENERIC_RESPONSE_CODES.invert[code] || Rack::Utils::HTTP_STATUS_CODES[code]
-      end
+    def code_from_name(name)
+      GENERIC_RESPONSE_CODES[name] || Rack::Utils::SYMBOL_TO_STATUS_CODE[name]
+    end
+
+    def name_from_code(code)
+      GENERIC_RESPONSE_CODES.invert[code] || Rack::Utils::HTTP_STATUS_CODES[code]
+    end
   end
 end

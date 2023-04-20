@@ -14,7 +14,8 @@ module ActiveRecord
     #
     # See +Properties::DEFAULT_PROPERTIES+, Key, Message
     class Properties
-      ALLOWED_VALUE_CLASSES = [String, ActiveRecord::Encryption::Message, Numeric, TrueClass, FalseClass, Symbol, NilClass]
+      ALLOWED_VALUE_CLASSES = [String, ActiveRecord::Encryption::Message, Numeric, TrueClass, FalseClass, Symbol,
+                               NilClass]
 
       delegate_missing_to :data
       delegate :==, to: :data
@@ -49,13 +50,15 @@ module ActiveRecord
       # It will raise an +EncryptedContentIntegrity+ if the value exists
       def []=(key, value)
         raise Errors::EncryptedContentIntegrity, "Properties can't be overridden: #{key}" if key?(key)
+
         validate_value_type(value)
         data[key] = value
       end
 
       def validate_value_type(value)
         unless ALLOWED_VALUE_CLASSES.find { |klass| value.is_a?(klass) }
-          raise ActiveRecord::Encryption::Errors::ForbiddenClass, "Can't store a #{value.class}, only properties of type #{ALLOWED_VALUE_CLASSES.inspect} are allowed"
+          raise ActiveRecord::Encryption::Errors::ForbiddenClass,
+                "Can't store a #{value.class}, only properties of type #{ALLOWED_VALUE_CLASSES.inspect} are allowed"
         end
       end
 
@@ -70,7 +73,8 @@ module ActiveRecord
       end
 
       private
-        attr_reader :data
+
+      attr_reader :data
     end
   end
 end

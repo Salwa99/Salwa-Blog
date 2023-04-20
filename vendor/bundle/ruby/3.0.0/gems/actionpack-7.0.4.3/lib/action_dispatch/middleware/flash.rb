@@ -48,6 +48,7 @@ module ActionDispatch
       def flash
         flash = flash_hash
         return flash if flash
+
         self.flash = Flash::FlashHash.from_session_value(session["flash"])
       end
 
@@ -134,13 +135,14 @@ module ActionDispatch
       def to_session_value # :nodoc:
         flashes_to_keep = @flashes.except(*@discard)
         return nil if flashes_to_keep.empty?
+
         { "discard" => [], "flashes" => flashes_to_keep }
       end
 
       def initialize(flashes = {}, discard = []) # :nodoc:
         @discard = Set.new(stringify_array(discard))
         @flashes = flashes.stringify_keys
-        @now     = nil
+        @now = nil
       end
 
       def initialize_copy(other)
@@ -278,16 +280,18 @@ module ActionDispatch
       end
 
       protected
-        def now_is_loaded?
-          @now
-        end
+
+      def now_is_loaded?
+        @now
+      end
 
       private
-        def stringify_array(array) # :doc:
-          array.map do |item|
-            item.kind_of?(Symbol) ? item.to_s : item
-          end
+
+      def stringify_array(array) # :doc:
+        array.map do |item|
+          item.kind_of?(Symbol) ? item.to_s : item
         end
+      end
     end
 
     def self.new(app) app; end

@@ -2,7 +2,6 @@ require 'concurrent/synchronization/full_memory_barrier'
 
 module Concurrent
   module Synchronization
-
     # @!visibility private
     # @!macro internal_implementation_note
     #

@@ -11,8 +11,8 @@ namespace :gem do
 
     s.files = PKG_FILES.to_a
 
-    s.extra_rdoc_files = %w( README.md )
-    s.rdoc_options.concat ["--main",  "README.md"]
+    s.extra_rdoc_files = %w(README.md)
+    s.rdoc_options.concat ["--main", "README.md"]
 
     if !s.respond_to?(:add_development_dependency)
       puts "Cannot build Gem with this version of RubyGems."
@@ -63,7 +63,7 @@ namespace :gem do
   task :uninstall do
     installed_list = Gem.source_index.find_name(PKG_NAME)
     if installed_list &&
-        (installed_list.collect { |s| s.version.to_s}.include?(PKG_VERSION))
+       (installed_list.collect { |s| s.version.to_s }.include?(PKG_VERSION))
       sh(
         "#{SUDO} gem uninstall --version '#{PKG_VERSION}' " +
         "--ignore-dependencies --executables #{PKG_NAME}"

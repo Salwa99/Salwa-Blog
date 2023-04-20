@@ -3,7 +3,6 @@ require 'concurrent/atomic_reference/numeric_cas_wrapper'
 require 'concurrent/synchronization/safe_initialization'
 
 module Concurrent
-
   # @!visibility private
   # @!macro internal_implementation_note
   class MutexAtomicReference

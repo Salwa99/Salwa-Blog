@@ -89,28 +89,28 @@ class ActiveStorage::Preview
   end
 
   private
-    def processed?
-      image.attached?
-    end
 
-    def process
-      previewer.preview(service_name: blob.service_name) do |attachable|
-        ActiveRecord::Base.connected_to(role: ActiveRecord.writing_role) do
-          image.attach(attachable)
-        end
+  def processed?
+    image.attached?
+  end
+
+  def process
+    previewer.preview(service_name: blob.service_name) do |attachable|
+      ActiveRecord::Base.connected_to(role: ActiveRecord.writing_role) do
+        image.attach(attachable)
       end
     end
+  end
 
-    def variant
-      image.variant(variation).processed
-    end
+  def variant
+    image.variant(variation).processed
+  end
 
+  def previewer
+    previewer_class.new(blob)
+  end
 
-    def previewer
-      previewer_class.new(blob)
-    end
-
-    def previewer_class
-      ActiveStorage.previewers.detect { |klass| klass.accept?(blob) }
-    end
+  def previewer_class
+    ActiveStorage.previewers.detect { |klass| klass.accept?(blob) }
+  end
 end

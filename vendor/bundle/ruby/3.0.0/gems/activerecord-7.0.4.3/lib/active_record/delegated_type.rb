@@ -209,42 +209,43 @@ module ActiveRecord
     end
 
     private
-      def define_delegated_type_methods(role, types:, options:)
-        primary_key = options[:primary_key] || "id"
-        role_type = "#{role}_type"
-        role_id   = options[:foreign_key] || "#{role}_id"
 
-        define_method "#{role}_class" do
-          public_send("#{role}_type").constantize
+    def define_delegated_type_methods(role, types:, options:)
+      primary_key = options[:primary_key] || "id"
+      role_type = "#{role}_type"
+      role_id = options[:foreign_key] || "#{role}_id"
+
+      define_method "#{role}_class" do
+        public_send("#{role}_type").constantize
+      end
+
+      define_method "#{role}_name" do
+        public_send("#{role}_class").model_name.singular.inquiry
+      end
+
+      define_method "build_#{role}" do |*params|
+        public_send("#{role}=", public_send("#{role}_class").new(*params))
+      end
+
+      types.each do |type|
+        scope_name = type.tableize.tr("/", "_")
+        singular = scope_name.singularize
+        query = "#{singular}?"
+
+        scope scope_name, -> { where(role_type => type) }
+
+        define_method query do
+          public_send(role_type) == type
         end
 
-        define_method "#{role}_name" do
-          public_send("#{role}_class").model_name.singular.inquiry
+        define_method singular do
+          public_send(role) if public_send(query)
         end
 
-        define_method "build_#{role}" do |*params|
-          public_send("#{role}=", public_send("#{role}_class").new(*params))
-        end
-
-        types.each do |type|
-          scope_name = type.tableize.tr("/", "_")
-          singular   = scope_name.singularize
-          query      = "#{singular}?"
-
-          scope scope_name, -> { where(role_type => type) }
-
-          define_method query do
-            public_send(role_type) == type
-          end
-
-          define_method singular do
-            public_send(role) if public_send(query)
-          end
-
-          define_method "#{singular}_#{primary_key}" do
-            public_send(role_id) if public_send(query)
-          end
+        define_method "#{singular}_#{primary_key}" do
+          public_send(role_id) if public_send(query)
         end
       end
+    end
   end
 end

@@ -24,9 +24,9 @@ module IRB
       def execute(*arg, grep: nil)
         o = Output.new(grep: grep)
 
-        obj    = arg.empty? ? irb_context.workspace.main : arg.first
+        obj = arg.empty? ? irb_context.workspace.main : arg.first
         locals = arg.empty? ? irb_context.workspace.binding.local_variables : []
-        klass  = (obj.class == Class || obj.class == Module ? obj : obj.class)
+        klass = (obj.class == Class || obj.class == Module ? obj : obj.class)
 
         o.dump("constants", obj.constants) if obj.respond_to?(:constants)
         dump_methods(o, klass, obj)
@@ -40,7 +40,8 @@ module IRB
         singleton_class = begin obj.singleton_class; rescue TypeError; nil end
         dumped_mods = Array.new
         # singleton_class' ancestors should be at the front
-        maps = class_method_map(singleton_class&.ancestors || [], dumped_mods) + class_method_map(klass.ancestors, dumped_mods)
+        maps = class_method_map(singleton_class&.ancestors || [],
+                                dumped_mods) + class_method_map(klass.ancestors, dumped_mods)
         maps.each do |mod, methods|
           name = mod == singleton_class ? "#{klass}.methods" : "#{mod}#methods"
           o.dump(name, methods)

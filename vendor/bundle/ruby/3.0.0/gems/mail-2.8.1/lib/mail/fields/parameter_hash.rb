@@ -1,5 +1,6 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/constants'
 require 'mail/indifferent_hash'
 require 'mail/encodings'
@@ -12,13 +13,13 @@ module Mail
   # to make that happen
   #
   # Parameters are defined in RFC2045. Split keys are in RFC2231.
-  class ParameterHash < IndifferentHash #:nodoc:
+  class ParameterHash < IndifferentHash # :nodoc:
     def [](key_name)
       key_pattern = Regexp.escape(key_name.to_s)
       pairs = []
       exact = nil
 
-      each do |k,v|
+      each do |k, v|
         if k =~ /^#{key_pattern}(\*|$)/i
           if $1 == Constants::ASTERISK
             pairs << [k, v]
@@ -31,7 +32,7 @@ module Mail
       if pairs.empty? # Just dealing with a single value pair
         super(exact || key_name)
       else # Dealing with a multiple value pair or a single encoded value pair
-        string = pairs.sort { |a,b| a.first.to_s <=> b.first.to_s }.map { |v| v.last }.join('')
+        string = pairs.sort { |a, b| a.first.to_s <=> b.first.to_s }.map { |v| v.last }.join('')
         if mt = string.match(/([\w\-]+)?'(\w\w)?'(.*)/)
           string = mt[3]
           encoding = mt[1]

@@ -50,13 +50,14 @@ module ActiveRecord
           end
 
           private
-            def number_for_point(number)
-              number.to_s.delete_suffix(".0")
-            end
 
-            def build_point(x, y)
-              ActiveRecord::Point.new(Float(x), Float(y))
-            end
+          def number_for_point(number)
+            number.to_s.delete_suffix(".0")
+          end
+
+          def build_point(x, y)
+            ActiveRecord::Point.new(Float(x), Float(y))
+          end
         end
       end
     end

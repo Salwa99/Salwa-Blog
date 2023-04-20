@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   irb.rb - irb main module
 #       by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -368,12 +369,10 @@ require_relative "irb/easter-egg"
 #   # quit irb
 #   irb(main):010:0> exit
 module IRB
-
   # An exception raised by IRB.irb_abort
-  class Abort < Exception;end
+  class Abort < Exception; end
 
   @CONF = {}
-
 
   # Displays current configuration.
   #
@@ -495,7 +494,7 @@ module IRB
         end
       ensure
         trap("SIGINT", prev_trap)
-        conf[:AT_EXIT].each{|hook| hook.call}
+        conf[:AT_EXIT].each { |hook| hook.call }
       end
     end
 
@@ -508,8 +507,7 @@ module IRB
     def eval_input
       exc = nil
 
-      @scanner.set_prompt do
-        |ltype, indent, continue, line_no|
+      @scanner.set_prompt do |ltype, indent, continue, line_no|
         if ltype
           f = @context.prompt_s
         elsif continue
@@ -529,7 +527,7 @@ module IRB
           unless ltype
             prompt_i = @context.prompt_i.nil? ? "" : @context.prompt_i
             ind = prompt(prompt_i, ltype, indent, line_no)[/.*\z/].size +
-              indent * 2 - p.size
+                  indent * 2 - p.size
             ind += 2 if continue
             @context.io.prompt = p + " " * ind if ind > 0
           end
@@ -567,7 +565,7 @@ module IRB
             is_assignment = assignment_expression?(line)
             if IRB.conf[:MEASURE] && !IRB.conf[:MEASURE_CALLBACKS].empty?
               result = nil
-              last_proc = proc{ result = @context.evaluate(line, line_no, exception: exc) }
+              last_proc = proc { result = @context.evaluate(line, line_no, exception: exc) }
               IRB.conf[:MEASURE_CALLBACKS].inject(last_proc) { |chain, item|
                 _name, callback, arg = item
                 proc {
@@ -607,7 +605,7 @@ module IRB
     def convert_invalid_byte_sequence(str, enc)
       str.force_encoding(enc)
       str.scrub { |c|
-        c.bytes.map{ |b| "\\x#{b.to_s(16).upcase}" }.join
+        c.bytes.map { |b| "\\x#{b.to_s(16).upcase}" }.join
       }
     end
 
@@ -657,8 +655,9 @@ module IRB
           order = :top
         end
         message = convert_invalid_byte_sequence(message, exc.message.encoding)
-        message = encode_with_invalid_byte_sequence(message, IRB.conf[:LC_MESSAGES].encoding) unless message.encoding.to_s.casecmp?(IRB.conf[:LC_MESSAGES].encoding.to_s)
-        message = message.gsub(/((?:^\t.+$\n)+)/)  { |m|
+        message = encode_with_invalid_byte_sequence(message,
+                                                    IRB.conf[:LC_MESSAGES].encoding) unless message.encoding.to_s.casecmp?(IRB.conf[:LC_MESSAGES].encoding.to_s)
+        message = message.gsub(/((?:^\t.+$\n)+)/) { |m|
           case order
           when :top
             lines = m.split("\n")
@@ -674,10 +673,12 @@ module IRB
             end
           end
           lines = lines.reverse if order == :bottom
-          lines.map{ |l| l + "\n" }.join
+          lines.map { |l| l + "\n" }.join
         }
         # The "<top (required)>" in "(irb)" may be the top level of IRB so imitate the main object.
-        message = message.gsub(/\(irb\):(?<num>\d+):in `<(?<frame>top \(required\))>'/)  { "(irb):#{$~[:num]}:in `<main>'" }
+        message = message.gsub(/\(irb\):(?<num>\d+):in `<(?<frame>top \(required\))>'/) {
+          "(irb):#{$~[:num]}:in `<main>'"
+        }
         puts message
       end
       print "Maybe IRB bug!\n" if irb_bug
@@ -720,11 +721,11 @@ module IRB
     # for more information.
     def suspend_input_method(input_method)
       back_io = @context.io
-      @context.instance_eval{@io = input_method}
+      @context.instance_eval { @io = input_method }
       begin
         yield back_io
       ensure
-        @context.instance_eval{@io = back_io}
+        @context.instance_eval { @io = back_io }
       end
     end
 
@@ -897,14 +898,13 @@ module IRB
     IRB.version unless self[:VERSION]
 
     array = []
-    for k, v in sort{|a1, a2| a1[0].id2name <=> a2[0].id2name}
+    for k, v in sort { |a1, a2| a1[0].id2name <=> a2[0].id2name }
       case k
       when :MAIN_CONTEXT, :__TMP__EHV__
         array.push format("CONF[:%s]=...myself...", k.id2name)
       when :PROMPT
-        s = v.collect{
-          |kk, vv|
-          ss = vv.collect{|kkk, vvv| ":#{kkk.id2name}=>#{vvv.inspect}"}
+        s = v.collect { |kk, vv|
+          ss = vv.collect { |kkk, vvv| ":#{kkk.id2name}=>#{vvv.inspect}" }
           format(":%s=>{%s}", kk.id2name, ss.join(", "))
         }
         array.push format("CONF[:%s]={%s}", k.id2name, s.join(", "))

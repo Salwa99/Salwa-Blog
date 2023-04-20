@@ -1,5 +1,6 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/fields/common_address_field'
 
 module Mail
@@ -28,7 +29,7 @@ module Mail
   #  mail[:sender].decoded   #=> 'Mikel Lindsaar <mikel@test.lindsaar.net>'
   #  mail[:sender].addresses #=> ['mikel@test.lindsaar.net']
   #  mail[:sender].formatted #=> ['Mikel Lindsaar <mikel@test.lindsaar.net>']
-  class SenderField < CommonAddressField #:nodoc:
+  class SenderField < CommonAddressField # :nodoc:
     NAME = 'Sender'
 
     def self.singular?

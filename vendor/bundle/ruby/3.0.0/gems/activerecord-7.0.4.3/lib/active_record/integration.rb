@@ -150,8 +150,8 @@ module ActiveRecord
         else
           define_method :to_param do
             if (default = super()) &&
-                 (result = send(method_name).to_s).present? &&
-                   (param = result.squish.parameterize.truncate(20, separator: /-/, omission: "")).present?
+               (result = send(method_name).to_s).present? &&
+               (param = result.squish.parameterize.truncate(20, separator: /-/, omission: "")).present?
               "#{default}-#{param}"
             else
               default
@@ -166,41 +166,42 @@ module ActiveRecord
     end
 
     private
-      # Detects if the value before type cast
-      # can be used to generate a cache_version.
-      #
-      # The fast cache version only works with a
-      # string value directly from the database.
-      #
-      # We also must check if the timestamp format has been changed
-      # or if the timezone is not set to UTC then
-      # we cannot apply our transformations correctly.
-      def can_use_fast_cache_version?(timestamp)
-        timestamp.is_a?(String) &&
-          cache_timestamp_format == :usec &&
-          ActiveRecord.default_timezone == :utc &&
-          !updated_at_came_from_user?
-      end
 
-      # Converts a raw database string to `:usec`
-      # format.
-      #
-      # Example:
-      #
-      #   timestamp = "2018-10-15 20:02:15.266505"
-      #   raw_timestamp_to_cache_version(timestamp)
-      #   # => "20181015200215266505"
-      #
-      # PostgreSQL truncates trailing zeros,
-      # https://github.com/postgres/postgres/commit/3e1beda2cde3495f41290e1ece5d544525810214
-      # to account for this we pad the output with zeros
-      def raw_timestamp_to_cache_version(timestamp)
-        key = timestamp.delete("- :.")
-        if key.length < 20
-          key.ljust(20, "0")
-        else
-          key
-        end
+    # Detects if the value before type cast
+    # can be used to generate a cache_version.
+    #
+    # The fast cache version only works with a
+    # string value directly from the database.
+    #
+    # We also must check if the timestamp format has been changed
+    # or if the timezone is not set to UTC then
+    # we cannot apply our transformations correctly.
+    def can_use_fast_cache_version?(timestamp)
+      timestamp.is_a?(String) &&
+        cache_timestamp_format == :usec &&
+        ActiveRecord.default_timezone == :utc &&
+        !updated_at_came_from_user?
+    end
+
+    # Converts a raw database string to `:usec`
+    # format.
+    #
+    # Example:
+    #
+    #   timestamp = "2018-10-15 20:02:15.266505"
+    #   raw_timestamp_to_cache_version(timestamp)
+    #   # => "20181015200215266505"
+    #
+    # PostgreSQL truncates trailing zeros,
+    # https://github.com/postgres/postgres/commit/3e1beda2cde3495f41290e1ece5d544525810214
+    # to account for this we pad the output with zeros
+    def raw_timestamp_to_cache_version(timestamp)
+      key = timestamp.delete("- :.")
+      if key.length < 20
+        key.ljust(20, "0")
+      else
+        key
       end
+    end
   end
 end

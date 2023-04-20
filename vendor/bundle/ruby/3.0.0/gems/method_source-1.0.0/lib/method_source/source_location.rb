@@ -22,9 +22,9 @@ module MethodSource
         end
       else
 
-
         def trace_func(event, file, line, id, binding, classname)
           return unless event == 'call'
+
           set_trace_func nil
 
           @file, @line = file, line
@@ -39,7 +39,7 @@ module MethodSource
         #   method definition is found.
         def source_location
           if @file.nil?
-            args =[*(1..(arity<-1 ? -arity-1 : arity ))]
+            args = [*(1..(arity < -1 ? -arity - 1 : arity))]
 
             set_trace_func method(:trace_func).to_proc
             call(*args) rescue nil
@@ -93,7 +93,6 @@ module MethodSource
 
       else
 
-
         # Return the source location of an instance method for Ruby 1.8.
         # @return [Array] A two element array. First element is the
         #   file, second element is the line in the file where the
@@ -124,7 +123,6 @@ module MethodSource
           begin
             Object.instance_method(:method).bind(klass.allocate).call(name).source_location
           rescue TypeError
-
             # Assume we are dealing with a Singleton Class:
             # 1. Get the instance object
             # 2. Forward the source_location lookup to the instance

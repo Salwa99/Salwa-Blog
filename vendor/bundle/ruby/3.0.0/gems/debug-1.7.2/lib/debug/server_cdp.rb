@@ -37,43 +37,43 @@ module DEBUGGER__
           case res['id']
           when 1
             target_info = res.dig('result', 'targetInfos')
-            page = target_info.find{|t| t['type'] == 'page'}
+            page = target_info.find { |t| t['type'] == 'page' }
             ws_client.send id: 2, method: 'Target.attachToTarget',
-                          params: {
-                            targetId: page['targetId'],
-                            flatten: true
-                          }
+                           params: {
+                             targetId: page['targetId'],
+                             flatten: true
+                           }
           when 2
             s_id = res.dig('result', 'sessionId')
             # TODO: change id
             ws_client.send sessionId: s_id, id: 100, method: 'Network.enable'
             ws_client.send sessionId: s_id, id: 3,
-                          method: 'Page.enable'
+                           method: 'Page.enable'
           when 3
             s_id = res['sessionId']
             ws_client.send sessionId: s_id, id: 4,
-                          method: 'Page.getFrameTree'
+                           method: 'Page.getFrameTree'
           when 4
             s_id = res['sessionId']
             f_id = res.dig('result', 'frameTree', 'frame', 'id')
             ws_client.send sessionId: s_id, id: 5,
-                          method: 'Page.navigate',
-                          params: {
-                            url: "devtools://devtools/bundled/inspector.html?v8only=true&panel=sources&ws=#{addr}/#{uuid}",
-                            frameId: f_id
-                          }
+                           method: 'Page.navigate',
+                           params: {
+                             url: "devtools://devtools/bundled/inspector.html?v8only=true&panel=sources&ws=#{addr}/#{uuid}",
+                             frameId: f_id
+                           }
           when 101
             break
           else
             if res['method'] == 'Network.webSocketWillSendHandshakeRequest'
               s_id = res['sessionId']
               # Display the console by entering ESC key
-              ws_client.send sessionId: s_id, id: 101,  # TODO: change id
-                            method:"Input.dispatchKeyEvent",
-                            params: {
-                              type:"keyDown",
-                              windowsVirtualKeyCode:27 # ESC key
-                            }
+              ws_client.send sessionId: s_id, id: 101, # TODO: change id
+                             method: "Input.dispatchKeyEvent",
+                             params: {
+                               type: "keyDown",
+                               windowsVirtualKeyCode: 27 # ESC key
+                             }
             end
           end
         end
@@ -95,7 +95,8 @@ module DEBUGGER__
         case RbConfig::CONFIG['host_os']
         when /mswin|msys|mingw|cygwin|emc/
           if path.nil?
-            candidates = ['C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe', 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe']
+            candidates = ['C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+                          'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe']
             path = get_chrome_path candidates
           end
           # The path is based on https://github.com/sindresorhus/open/blob/v8.4.0/index.js#L128.
@@ -108,7 +109,7 @@ module DEBUGGER__
           stderr.close
           port, path = get_devtools_endpoint(tf.path)
 
-          at_exit{
+          at_exit {
             DEBUGGER__.skip_all
 
             stdin, stdout, stderr, wait_thr = *Open3.popen3("#{ENV['SystemRoot']}\\System32\\WindowsPowerShell\\v1.0\\powershell")
@@ -136,7 +137,7 @@ module DEBUGGER__
             path = $2
           end
 
-          at_exit{
+          at_exit {
             DEBUGGER__.skip_all
             FileUtils.rm_rf dir
           }
@@ -163,7 +164,7 @@ module DEBUGGER__
             path = $2
           end
 
-          at_exit{
+          at_exit {
             DEBUGGER__.skip_all
             FileUtils.rm_rf dir
           }
@@ -175,7 +176,7 @@ module DEBUGGER__
       end
 
       def get_chrome_path candidates
-        candidates.each{|c|
+        candidates.each { |c|
           if File.exist? c
             return c
           end
@@ -258,7 +259,7 @@ module DEBUGGER__
           when String
             @b << obj.b
           when Enumerable
-            obj.each{|e| self << e}
+            obj.each { |e| self << e }
           end
         end
 
@@ -318,11 +319,11 @@ module DEBUGGER__
         if bytesize < 126
           payload_len = bytesize
           frame.char mask + payload_len
-        elsif bytesize < 2 ** 16
+        elsif bytesize < 2**16
           payload_len = 0b01111110
           frame.char mask + payload_len
           frame.uint16 bytesize
-        elsif bytesize < 2 ** 64
+        elsif bytesize < 2**64
           payload_len = 0b01111111
           frame.char mask + payload_len
           frame.ulonglong bytesize
@@ -330,7 +331,7 @@ module DEBUGGER__
           raise 'Bytesize is too big.'
         end
 
-        masking_key = 4.times.map{
+        masking_key = 4.times.map {
           key = rand(1..255)
           frame.char key
           key
@@ -346,12 +347,14 @@ module DEBUGGER__
         first_group = @sock.getbyte
         fin = first_group & 0b10000000 != 128
         raise 'Unsupported' if fin
+
         opcode = first_group & 0b00001111
         raise "Unsupported: #{opcode}" unless opcode == 1
 
         second_group = @sock.getbyte
         mask = second_group & 0b10000000 == 128
         raise 'The server must not mask any frames' if mask
+
         payload_len = second_group & 0b01111111
         # TODO: Support other payload_lengths
         if payload_len == 126
@@ -401,11 +404,11 @@ module DEBUGGER__
         if bytesize < 126
           payload_len = bytesize
           frame.char mask + payload_len
-        elsif bytesize < 2 ** 16
+        elsif bytesize < 2**16
           payload_len = 0b01111110
           frame.char mask + payload_len
           frame.uint16 bytesize
-        elsif bytesize < 2 ** 64
+        elsif bytesize < 2**64
           payload_len = 0b01111111
           frame.char mask + payload_len
           frame.ulonglong bytesize
@@ -429,6 +432,7 @@ module DEBUGGER__
         second_group = @sock.getbyte
         mask = second_group & 0b10000000 == 128
         raise 'The client must mask all frames' unless mask
+
         payload_len = second_group & 0b01111111
         # TODO: Support other payload_lengths
         if payload_len == 126
@@ -479,11 +483,11 @@ module DEBUGGER__
         when 'Runtime.enable'
           send_response req
           send_event 'Runtime.executionContextCreated',
-                      context: {
-                        id: SecureRandom.hex(16),
-                        origin: "http://#{@local_addr.inspect_sockaddr}",
-                        name: ''
-                      }
+                     context: {
+                       id: SecureRandom.hex(16),
+                       origin: "http://#{@local_addr.inspect_sockaddr}",
+                       name: ''
+                     }
         when 'Runtime.getIsolateId'
           send_response req,
                         id: SecureRandom.hex
@@ -509,8 +513,8 @@ module DEBUGGER__
             @q_msg << 'n'
           rescue PostmortemError
             send_fail_response req,
-                              code: INVALID_REQUEST,
-                              message: "'stepOver' is not supported while postmortem mode"
+                               code: INVALID_REQUEST,
+                               message: "'stepOver' is not supported while postmortem mode"
           ensure
             @q_msg << req
           end
@@ -522,8 +526,8 @@ module DEBUGGER__
             @q_msg << 's'
           rescue PostmortemError
             send_fail_response req,
-                              code: INVALID_REQUEST,
-                              message: "'stepInto' is not supported while postmortem mode"
+                               code: INVALID_REQUEST,
+                               message: "'stepInto' is not supported while postmortem mode"
           ensure
             @q_msg << req
           end
@@ -535,8 +539,8 @@ module DEBUGGER__
             @q_msg << 'fin'
           rescue PostmortemError
             send_fail_response req,
-                              code: INVALID_REQUEST,
-                              message: "'stepOut' is not supported while postmortem mode"
+                               code: INVALID_REQUEST,
+                               message: "'stepOut' is not supported while postmortem mode"
           ensure
             @q_msg << req
           end
@@ -573,7 +577,7 @@ module DEBUGGER__
               send_response req,
                             breakpointId: b_id,
                             locations: []
-            end            
+            end
           else
             if hash = req.dig('params', 'scriptHash')
               b_id = "#{line}:#{hash}"
@@ -626,7 +630,7 @@ module DEBUGGER__
       line = req.dig('params', 'lineNumber')
       src = get_source_code path
       end_line = src.lines.count
-      line = end_line  if line > end_line
+      line = end_line if line > end_line
       if cond != ''
         SESSION.add_line_breakpoint(path, line + 1, cond: cond)
       else
@@ -643,7 +647,7 @@ module DEBUGGER__
       return bps unless idx = bps[k]
 
       bps.delete k
-      bps.each_key{|i| bps[i] -= 1 if bps[i] > idx}
+      bps.each_key { |i| bps[i] -= 1 if bps[i] > idx }
       @q_msg << "del #{idx}"
       bps
     end
@@ -657,7 +661,7 @@ module DEBUGGER__
     end
 
     def activate_bp bps
-      bps.each_key{|k|
+      bps.each_key { |k|
         if k.match /^\d+:(\d+):(.*)/
           line = $1
           path = $2
@@ -689,7 +693,7 @@ module DEBUGGER__
       yield $stderr
     end
 
-    def puts result=''
+    def puts result = ''
       # STDERR.puts "puts: #{result}"
       # send_event 'output', category: 'stderr', output: "PUTS!!: " + result.to_s
     end
@@ -805,7 +809,7 @@ module DEBUGGER__
         if src = @src_map[s_id]
           lineno = req.dig('params', 'start', 'lineNumber')
           end_line = src.lines.count
-          lineno = end_line  if lineno > end_line
+          lineno = end_line if lineno > end_line
           @ui.respond req,
                       locations: [{
                         scriptId: s_id,
@@ -825,8 +829,8 @@ module DEBUGGER__
           @ui.respond req,
                       breakpointId: b_id,
                       locations: [{
-                          scriptId: s_id,
-                          lineNumber: lineno
+                        scriptId: s_id,
+                        lineNumber: lineno
                       }]
         else
           fail_response req,
@@ -862,16 +866,16 @@ module DEBUGGER__
           frame[:location][:scriptId] = s_id
           frame[:functionLocation][:scriptId] = s_id
           @ui.fire_event 'Debugger.scriptParsed',
-                          scriptId: s_id,
-                          url: frame[:url],
-                          startLine: 0,
-                          startColumn: 0,
-                          endLine: lineno,
-                          endColumn: 0,
-                          executionContextId: 1,
-                          hash: src.hash.inspect
+                         scriptId: s_id,
+                         url: frame[:url],
+                         startLine: 0,
+                         startColumn: 0,
+                         endLine: lineno,
+                         endColumn: 0,
+                         executionContextId: 1,
+                         hash: src.hash.inspect
 
-          frame[:scopeChain].each {|s|
+          frame[:scopeChain].each { |s|
             oid = s.dig(:object, :objectId)
             @obj_map[oid] = [s[:type], frame_id]
           }
@@ -893,16 +897,16 @@ module DEBUGGER__
           @src_map[s_id] = src
           lineno = src.lines.count
           @ui.fire_event 'Debugger.scriptParsed',
-                            scriptId: s_id,
-                            url: '',
-                            startLine: 0,
-                            startColumn: 0,
-                            endLine: lineno,
-                            endColumn: 0,
-                            executionContextId: 1,
-                            hash: src.hash.inspect
+                         scriptId: s_id,
+                         url: '',
+                         startLine: 0,
+                         startColumn: 0,
+                         endLine: lineno,
+                         endColumn: 0,
+                         executionContextId: 1,
+                         hash: src.hash.inspect
           if exc = result.dig(:response, :exceptionDetails)
-            exc[:stackTrace][:callFrames].each{|frame|
+            exc[:stackTrace][:callFrames].each { |frame|
               if frame[:url].empty?
                 frame[:scriptId] = s_id
               else
@@ -919,7 +923,7 @@ module DEBUGGER__
             end
           end
           rs = result.dig(:response, :result)
-          [rs].each{|obj|
+          [rs].each { |obj|
             if oid = obj[:objectId]
               @obj_map[oid] = ['properties']
             end
@@ -929,25 +933,25 @@ module DEBUGGER__
           out = result[:output]
           if out && !out.empty?
             @ui.fire_event 'Runtime.consoleAPICalled',
-                            type: 'log',
-                            args: [
-                              type: out.class,
-                              value: out
-                            ],
-                            executionContextId: 1, # Change this number if something goes wrong.
-                            timestamp: Time.now.to_f
+                           type: 'log',
+                           args: [
+                             type: out.class,
+                             value: out
+                           ],
+                           executionContextId: 1, # Change this number if something goes wrong.
+                           timestamp: Time.now.to_f
           end
         end
       when :scope
-        result.each{|obj|
+        result.each { |obj|
           if oid = obj.dig(:value, :objectId)
             @obj_map[oid] = ['properties']
           end
         }
         @ui.respond req, result: result
       when :properties
-        result.each_value{|v|
-          v.each{|obj|
+        result.each_value { |v|
+          v.each { |obj|
             if oid = obj.dig(:value, :objectId)
               @obj_map[oid] = ['properties']
             end
@@ -970,7 +974,7 @@ module DEBUGGER__
         exception = nil
         result = {
           reason: 'other',
-          callFrames: @target_frames.map.with_index{|frame, i|
+          callFrames: @target_frames.map.with_index { |frame, i|
             exception = frame.raised_exception if frame == current_frame && frame.has_raised_exception
 
             path = frame.realpath || frame.path
@@ -1036,7 +1040,7 @@ module DEBUGGER__
 
         if frame && (b = frame.eval_binding)
           special_local_variables frame do |name, var|
-            b.local_variable_set(name, var) if /\%/ !~name
+            b.local_variable_set(name, var) if /\%/ !~ name
           end
 
           result = nil
@@ -1046,7 +1050,7 @@ module DEBUGGER__
             case expr
             # Chrome doesn't read instance variables
             when /\A\$\S/
-              safe_global_variables.each{|gvar|
+              safe_global_variables.each { |gvar|
                 if gvar.to_s == expr
                   result = eval(gvar.to_s)
                   break false
@@ -1093,7 +1097,7 @@ module DEBUGGER__
         fid = args.shift
         frame = @target_frames[fid]
         if b = frame.binding
-          vars = b.local_variables.map{|name|
+          vars = b.local_variables.map { |name|
             v = b.local_variable_get(name)
             variable(name, v)
           }
@@ -1102,7 +1106,7 @@ module DEBUGGER__
           end
           vars.unshift variable('%self', b.receiver)
         elsif lvars = frame.local_variables
-          vars = lvars.map{|var, val|
+          vars = lvars.map { |var, val|
             variable(var, val)
           }
         else
@@ -1120,15 +1124,15 @@ module DEBUGGER__
         if obj = @obj_map[oid]
           case obj
           when Array
-            result = obj.map.with_index{|o, i|
+            result = obj.map.with_index { |o, i|
               variable i.to_s, o
             }
           when Hash
-            result = obj.map{|k, v|
+            result = obj.map { |k, v|
               variable(k, v)
             }
           when Struct
-            result = obj.members.map{|m|
+            result = obj.members.map { |m|
               variable(m, obj[m])
             }
           when String
@@ -1137,7 +1141,7 @@ module DEBUGGER__
               internalProperty('#encoding', obj.encoding)
             ]
           when Class, Module
-            result = obj.instance_variables.map{|iv|
+            result = obj.instance_variables.map { |iv|
               variable(iv, obj.instance_variable_get(iv))
             }
             prop = [internalProperty('%ancestors', obj.ancestors[1..])]
@@ -1148,7 +1152,7 @@ module DEBUGGER__
             ]
           end
 
-          result += M_INSTANCE_VARIABLES.bind_call(obj).map{|iv|
+          result += M_INSTANCE_VARIABLES.bind_call(obj).map { |iv|
             variable(iv, M_INSTANCE_VARIABLE_GET.bind_call(obj, iv))
           }
           prop += [internalProperty('#class', M_CLASS.bind_call(obj))]
@@ -1175,6 +1179,7 @@ module DEBUGGER__
       ]
       exc.backtrace_locations&.each do |loc|
         break if loc.path == __FILE__
+
         path = loc.absolute_path || loc.path
         frames << {
           columnNumber: 0,
@@ -1197,8 +1202,8 @@ module DEBUGGER__
 
     def search_const b, expr
       cs = expr.delete_prefix('::').split('::')
-      [Object, *b.eval('::Module.nesting')].reverse_each{|mod|
-        if cs.all?{|c|
+      [Object, *b.eval('::Module.nesting')].reverse_each { |mod|
+        if cs.all? { |c|
              if mod.const_defined?(c)
                begin
                  mod = mod.const_get(c)
@@ -1241,7 +1246,7 @@ module DEBUGGER__
           objectId: oid
         },
         configurable: true, # TODO: Change these parts because
-        enumerable: true    #       they are not necessarily `true`.
+        enumerable: true #       they are not necessarily `true`.
       }
 
       if type == 'object'
@@ -1257,7 +1262,7 @@ module DEBUGGER__
       # The reason for not using "map" method is to prevent the object overriding it from causing bugs.
       # https://github.com/ruby/debug/issues/781
       props = []
-      hash.each{|k, v|
+      hash.each { |k, v|
         pd = propertyDescriptor k, v
         props << {
           name: pd[:name],
@@ -1279,14 +1284,14 @@ module DEBUGGER__
       case obj
       when Array
         pd[:value][:preview] = preview name, obj
-        obj.each_with_index{|item, idx|
+        obj.each_with_index { |item, idx|
           if valuePreview = preview(idx.to_s, item)
             pd[:value][:preview][:properties][idx][:valuePreview] = valuePreview
           end
         }
       when Hash
         pd[:value][:preview] = preview name, obj
-        obj.each_with_index{|item, idx|
+        obj.each_with_index { |item, idx|
           key, val = item
           if valuePreview = preview(key, val)
             pd[:value][:preview][:properties][idx][:valuePreview] = valuePreview
@@ -1305,7 +1310,7 @@ module DEBUGGER__
           obj = obj[0..99]
           overflow = true
         end
-        hash = obj.each_with_index.to_h{|o, i| [i.to_s, o]}
+        hash = obj.each_with_index.to_h { |o, i| [i.to_s, o] }
         preview_ pd[:value], hash, overflow
       when Hash
         pd = propertyDescriptor name, obj
@@ -1339,6 +1344,7 @@ module DEBUGGER__
         if log = obj.backtrace_locations
           log.each do |loc|
             break if loc.path == __FILE__
+
             bt += "    #{loc}\n"
           end
         end

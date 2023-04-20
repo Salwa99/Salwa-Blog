@@ -8,9 +8,10 @@ module ActionText
       end
 
       private
-        def cache_digest
-          OpenSSL::Digest::SHA256.hexdigest(node.to_s)
-        end
+
+      def cache_digest
+        OpenSSL::Digest::SHA256.hexdigest(node.to_s)
+      end
     end
   end
 end

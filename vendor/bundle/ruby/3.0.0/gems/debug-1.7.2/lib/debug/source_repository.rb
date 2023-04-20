@@ -95,7 +95,7 @@ module DEBUGGER__
 
       private def all_iseq iseq, rs = []
         rs << iseq
-        iseq.each_child{|ci|
+        iseq.each_child { |ci|
           all_iseq(ci, rs)
         }
         rs
@@ -107,8 +107,8 @@ module DEBUGGER__
           src = ("\n" * (line - 1)) + src
         end
 
-        si = SrcInfo.new(src.each_line.map{|l| l.chomp})
-        all_iseq(iseq).each{|e|
+        si = SrcInfo.new(src.each_line.map { |l| l.chomp })
+        all_iseq(iseq).each { |e|
           e.instance_variable_set(:@debugger_si, si)
           e.freeze
         }

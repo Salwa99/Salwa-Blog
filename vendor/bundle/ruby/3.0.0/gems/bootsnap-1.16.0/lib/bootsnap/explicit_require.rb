@@ -2,9 +2,9 @@
 
 module Bootsnap
   module ExplicitRequire
-    ARCHDIR    = RbConfig::CONFIG["archdir"]
+    ARCHDIR = RbConfig::CONFIG["archdir"]
     RUBYLIBDIR = RbConfig::CONFIG["rubylibdir"]
-    DLEXT      = RbConfig::CONFIG["DLEXT"]
+    DLEXT = RbConfig::CONFIG["DLEXT"]
 
     def self.from_self(feature)
       require_relative("../#{feature}")

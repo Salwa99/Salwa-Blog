@@ -13,7 +13,7 @@ module IRB
       def execute
         Class.new {
           def inspect
-            str  = "Ruby version: #{RUBY_VERSION}\n"
+            str = "Ruby version: #{RUBY_VERSION}\n"
             str += "IRB version: #{IRB.version}\n"
             str += "InputMethod: #{IRB.CurrentContext.io.inspect}\n"
             str += ".irbrc path: #{IRB.rc_file}\n" if File.exist?(IRB.rc_file)

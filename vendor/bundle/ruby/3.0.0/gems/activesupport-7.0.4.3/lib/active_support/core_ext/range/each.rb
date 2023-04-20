@@ -15,9 +15,10 @@ module ActiveSupport
     end
 
     private
-      def ensure_iteration_allowed
-        raise TypeError, "can't iterate from #{first.class}" if first.is_a?(TimeWithZone)
-      end
+
+    def ensure_iteration_allowed
+      raise TypeError, "can't iterate from #{first.class}" if first.is_a?(TimeWithZone)
+    end
   end
 end
 

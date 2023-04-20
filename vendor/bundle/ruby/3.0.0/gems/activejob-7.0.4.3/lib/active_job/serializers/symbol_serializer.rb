@@ -12,9 +12,10 @@ module ActiveJob
       end
 
       private
-        def klass
-          Symbol
-        end
+
+      def klass
+        Symbol
+      end
     end
   end
 end

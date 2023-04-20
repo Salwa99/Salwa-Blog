@@ -30,6 +30,7 @@ module ActionView # :nodoc:
       # and should return the rendered template as a String.
       def register_template_handler(*extensions, handler)
         raise(ArgumentError, "Extension is required") if extensions.empty?
+
         extensions.each do |extension|
           @@template_handlers[extension.to_sym] = handler
         end

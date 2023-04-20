@@ -13,9 +13,10 @@ module ActiveRecord
       delegate :reset, :collect, :collect=, :collect?, :queries, to: :instance
 
       private
-        def instance
-          ActiveSupport::IsolatedExecutionState[:active_record_explain_registry] ||= new
-        end
+
+      def instance
+        ActiveSupport::IsolatedExecutionState[:active_record_explain_registry] ||= new
+      end
     end
 
     attr_accessor :collect

@@ -1,38 +1,37 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 module Mail
-  
   # = Body
-  # 
+  #
   # The body is where the text of the email is stored.  Mail treats the body
   # as a single object.  The body itself has no information about boundaries
   # used in the MIME standard, it just looks at its content as either a single
   # block of text, or (if it is a multipart message) as an array of blocks of text.
-  # 
+  #
   # A body has to be told to split itself up into a multipart message by calling
   # #split with the correct boundary.  This is because the body object has no way
   # of knowing what the correct boundary is for itself (there could be many
   # boundaries in a body in the case of a nested MIME text).
-  # 
+  #
   # Once split is called, Mail::Body will slice itself up on this boundary,
   # assigning anything that appears before the first part to the preamble, and
   # anything that appears after the closing boundary to the epilogue, then
   # each part gets initialized into a Mail::Part object.
-  # 
+  #
   # The boundary that is used to split up the Body is also stored in the Body
-  # object for use on encoding itself back out to a string.  You can 
+  # object for use on encoding itself back out to a string.  You can
   # overwrite this if it needs to be changed.
-  # 
+  #
   # On encoding, the body will return the preamble, then each part joined by
   # the boundary, followed by a closing boundary string and then the epilogue.
   class Body
-
     def initialize(string = '')
       @boundary = nil
       @preamble = nil
       @epilogue = nil
-      @charset  = nil
-      @part_sort_order = [ "text/plain", "text/enriched", "text/html", "multipart/alternative" ]
+      @charset = nil
+      @part_sort_order = ["text/plain", "text/enriched", "text/html", "multipart/alternative"]
       @parts = Mail::PartsList.new
       if Utilities.blank?(string)
         @raw_source = ''
@@ -57,15 +56,15 @@ module Mail
 
     # Matches this body with another body.  Also matches the decoded value of this
     # body with a string.
-    # 
+    #
     # Examples:
-    # 
+    #
     #   body = Mail::Body.new('The body')
     #   body == body #=> true
-    #   
+    #
     #   body = Mail::Body.new('The body')
     #   body == 'The body' #=> true
-    #   
+    #
     #   body = Mail::Body.new("VGhlIGJvZHk=\n")
     #   body.encoding = 'base64'
     #   body == "The body" #=> true
@@ -76,28 +75,28 @@ module Mail
         super
       end
     end
-    
+
     # Accepts a string and performs a regular expression against the decoded text
-    # 
+    #
     # Examples:
-    # 
+    #
     #   body = Mail::Body.new('The body')
     #   body =~ /The/ #=> 0
-    #   
+    #
     #   body = Mail::Body.new("VGhlIGJvZHk=\n")
     #   body.encoding = 'base64'
     #   body =~ /The/ #=> 0
     def =~(regexp)
       self.decoded =~ regexp
     end
-    
+
     # Accepts a string and performs a regular expression against the decoded text
-    # 
+    #
     # Examples:
-    # 
+    #
     #   body = Mail::Body.new('The body')
     #   body.match(/The/) #=> #<MatchData "The">
-    #   
+    #
     #   body = Mail::Body.new("VGhlIGJvZHk=\n")
     #   body.encoding = 'base64'
     #   body.match(/The/) #=> #<MatchData "The">
@@ -125,7 +124,7 @@ module Mail
     def set_sort_order(order)
       @part_sort_order = order
     end
-    
+
     # Allows you to sort the parts according to the default sort order, or the sort order you
     # set with :set_sort_order.
     #
@@ -137,7 +136,7 @@ module Mail
       end
       @parts.sort!(@part_sort_order)
     end
-    
+
     def negotiate_best_encoding(message_encoding, allowed_encodings = nil)
       Mail::Encodings::TransferEncoding.negotiate(message_encoding, encoding, raw_source, allowed_encodings)
     end
@@ -164,7 +163,7 @@ module Mail
           # Cannot decode, so skip normalization
           raw_source
         else
-          # Decode then encode to normalize and allow transforming 
+          # Decode then encode to normalize and allow transforming
           # from base64 to Q-P and vice versa
           decoded = dec.decode(raw_source)
           if defined?(Encoding) && charset && charset != "US-ASCII"
@@ -183,7 +182,7 @@ module Mail
         Encodings.get_encoding(encoding).decode(raw_source)
       end
     end
-    
+
     def to_s
       decoded
     end
@@ -196,7 +195,7 @@ module Mail
       end
     end
 
-    def encoding=( val )
+    def encoding=(val)
       @encoding =
         if val == "text" || Utilities.blank?(val)
           default_encoding
@@ -230,7 +229,7 @@ module Mail
       true unless parts.empty?
     end
 
-    def <<( val )
+    def <<(val)
       if @parts
         @parts << val
       else
@@ -289,11 +288,11 @@ module Mail
       end
       parts.map(&:first)
     end
-    
+
     def crlf_boundary
       "\r\n--#{boundary}\r\n"
     end
-    
+
     def end_boundary
       "\r\n--#{boundary}--\r\n"
     end

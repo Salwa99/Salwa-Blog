@@ -29,12 +29,13 @@ module DateAndTime
     end
 
     private
-      def time_with_zone(time, zone)
-        if time
-          ActiveSupport::TimeWithZone.new(time.utc? ? time : time.getutc, zone)
-        else
-          ActiveSupport::TimeWithZone.new(nil, zone, to_time(:utc))
-        end
+
+    def time_with_zone(time, zone)
+      if time
+        ActiveSupport::TimeWithZone.new(time.utc? ? time : time.getutc, zone)
+      else
+        ActiveSupport::TimeWithZone.new(nil, zone, to_time(:utc))
       end
+    end
   end
 end

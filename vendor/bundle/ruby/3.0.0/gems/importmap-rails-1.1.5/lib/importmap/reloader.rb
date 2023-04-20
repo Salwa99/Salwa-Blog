@@ -6,15 +6,16 @@ class Importmap::Reloader
   end
 
   private
-    def updater
-      @updater ||= config.file_watcher.new(import_map_paths) { reload! }
-    end
 
-    def import_map_paths
-      config.importmap.paths
-    end
+  def updater
+    @updater ||= config.file_watcher.new(import_map_paths) { reload! }
+  end
 
-    def config
-      Rails.application.config
-    end
+  def import_map_paths
+    config.importmap.paths
+  end
+
+  def config
+    Rails.application.config
+  end
 end

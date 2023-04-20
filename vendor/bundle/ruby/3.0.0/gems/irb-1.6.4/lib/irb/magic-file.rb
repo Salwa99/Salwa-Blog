@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 module IRB
   class << (MagicFile = Object.new)
     # see parser_magic_comment in parse.y
@@ -7,7 +8,7 @@ module IRB
     def open(path)
       io = File.open(path, 'rb')
       line = io.gets
-      line = io.gets if line[0,2] == "#!"
+      line = io.gets if line[0, 2] == "#!"
       encoding = detect_encoding(line)
       internal_encoding = encoding
       encoding ||= IRB.default_src_encoding
@@ -26,11 +27,14 @@ module IRB
     end
 
     private
+
     def detect_encoding(line)
       return unless line[0] == ?#
+
       line = line[1..-1]
       line = $1 if line[/-\*-\s*(.*?)\s*-*-$/]
       return nil unless ENCODING_SPEC_RE =~ line
+
       encoding = $1
       return encoding.sub(/-(?:mac|dos|unix)/i, '')
     end

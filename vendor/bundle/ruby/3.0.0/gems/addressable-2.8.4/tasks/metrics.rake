@@ -9,11 +9,12 @@ namespace :metrics do
         lines += 1
         next if line =~ /^\s*$/
         next if line =~ /^\s*#/
+
         codelines += 1
       end
       puts "L: #{sprintf("%4d", lines)}, " +
-        "LOC #{sprintf("%4d", codelines)} | #{file_name}"
-      total_lines     += lines
+           "LOC #{sprintf("%4d", codelines)} | #{file_name}"
+      total_lines += lines
       total_codelines += codelines
 
       lines, codelines = 0, 0

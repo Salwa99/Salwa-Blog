@@ -141,14 +141,15 @@ module ActiveRecord
       end
 
       private
-        def schema_file_type(format)
-          case format
-          when :ruby
-            "schema.rb"
-          when :sql
-            "structure.sql"
-          end
+
+      def schema_file_type(format)
+        case format
+        when :ruby
+          "schema.rb"
+        when :sql
+          "structure.sql"
         end
+      end
     end
   end
 end

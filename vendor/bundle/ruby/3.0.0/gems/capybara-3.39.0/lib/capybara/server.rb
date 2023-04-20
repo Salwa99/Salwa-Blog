@@ -92,7 +92,7 @@ module Capybara
       "http#{'s' if using_ssl?}://#{host}:#{port}"
     end
 
-  private
+    private
 
     def middleware
       @middleware ||= Middleware.new(app, @reportable_errors, @extra_middleware)

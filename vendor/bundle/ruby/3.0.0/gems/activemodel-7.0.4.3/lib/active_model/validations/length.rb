@@ -3,14 +3,15 @@
 module ActiveModel
   module Validations
     class LengthValidator < EachValidator # :nodoc:
-      MESSAGES  = { is: :wrong_length, minimum: :too_short, maximum: :too_long }.freeze
-      CHECKS    = { is: :==, minimum: :>=, maximum: :<= }.freeze
+      MESSAGES = { is: :wrong_length, minimum: :too_short, maximum: :too_long }.freeze
+      CHECKS = { is: :==, minimum: :>=, maximum: :<= }.freeze
 
       RESERVED_OPTIONS = [:minimum, :maximum, :within, :is, :too_short, :too_long]
 
       def initialize(options)
         if range = (options.delete(:in) || options.delete(:within))
           raise ArgumentError, ":in and :within must be a Range" unless range.is_a?(Range)
+
           options[:minimum], options[:maximum] = range.min, range.max
         end
 
@@ -64,9 +65,10 @@ module ActiveModel
       end
 
       private
-        def skip_nil_check?(key)
-          key == :maximum && options[:allow_nil].nil? && options[:allow_blank].nil?
-        end
+
+      def skip_nil_check?(key)
+        key == :maximum && options[:allow_nil].nil? && options[:allow_blank].nil?
+      end
     end
 
     module HelperMethods

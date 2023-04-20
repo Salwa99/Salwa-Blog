@@ -110,22 +110,23 @@ module ActionText
     end
 
     private
-      def attachment_nodes
-        @attachment_nodes ||= fragment.find_all(ActionText::Attachment.tag_name)
-      end
 
-      def attachment_gallery_nodes
-        @attachment_gallery_nodes ||= ActionText::AttachmentGallery.find_attachment_gallery_nodes(fragment)
-      end
+    def attachment_nodes
+      @attachment_nodes ||= fragment.find_all(ActionText::Attachment.tag_name)
+    end
 
-      def attachment_for_node(node, with_full_attributes: true)
-        attachment = ActionText::Attachment.from_node(node)
-        with_full_attributes ? attachment.with_full_attributes : attachment
-      end
+    def attachment_gallery_nodes
+      @attachment_gallery_nodes ||= ActionText::AttachmentGallery.find_attachment_gallery_nodes(fragment)
+    end
 
-      def attachment_gallery_for_node(node)
-        ActionText::AttachmentGallery.from_node(node)
-      end
+    def attachment_for_node(node, with_full_attributes: true)
+      attachment = ActionText::Attachment.from_node(node)
+      with_full_attributes ? attachment.with_full_attributes : attachment
+    end
+
+    def attachment_gallery_for_node(node)
+      ActionText::AttachmentGallery.from_node(node)
+    end
   end
 end
 

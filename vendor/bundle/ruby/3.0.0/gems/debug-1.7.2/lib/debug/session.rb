@@ -9,7 +9,7 @@ if $0.end_with?('bin/bundle') && ARGV.first == 'exec'
     trace_var(:$0, nil)
     if /-r (#{Regexp.escape(__dir__)}\S+)/ =~ ENV['RUBYOPT']
       lib = $1
-      $LOADED_FEATURES.delete_if{|path| path.start_with?(__dir__)}
+      $LOADED_FEATURES.delete_if { |path| path.start_with?(__dir__) }
       ENV['RUBY_DEBUG_INITIAL_SUSPEND_PATH'] = file
       require lib
       ENV['RUBY_DEBUG_INITIAL_SUSPEND_PATH'] = nil
@@ -47,7 +47,7 @@ class RubyVM::InstructionSequence
   def traceable_lines_norec lines
     code = self.to_a[13]
     line = 0
-    code.each{|e|
+    code.each { |e|
       case e
       when Integer
         line = e
@@ -60,7 +60,7 @@ class RubyVM::InstructionSequence
   end
 
   def traceable_lines_rec lines
-    self.each_child{|ci| ci.traceable_lines_rec(lines)}
+    self.each_child { |ci| ci.traceable_lines_rec(lines) }
     traceable_lines_norec lines
   end
 
@@ -99,11 +99,11 @@ module DEBUGGER__
       @ui = nil
       @sr = SourceRepository.new
       @bps = {} # bp.key => bp
-                #   [file, line] => LineBreakpoint
-                #   "Error" => CatchBreakpoint
-                #   "Foo#bar" => MethodBreakpoint
-                #   [:watch, ivar] => WatchIVarBreakpoint
-                #   [:check, expr] => CheckBreakpoint
+      #   [file, line] => LineBreakpoint
+      #   "Error" => CatchBreakpoint
+      #   "Foo#bar" => MethodBreakpoint
+      #   [:watch, ivar] => WatchIVarBreakpoint
+      #   [:check, expr] => CheckBreakpoint
       #
       @tracers = {}
       @th_clients = {} # {Thread => ThreadClient}
@@ -121,8 +121,8 @@ module DEBUGGER__
       @subsession_id = 0
 
       @frame_map = {} # for DAP: {id => [threadId, frame_depth]} and CDP: {id => frame_depth}
-      @var_map   = {1 => [:globals], } # {id => ...} for DAP
-      @src_map   = {} # {id => src}
+      @var_map = { 1 => [:globals], } # {id => ...} for DAP
+      @src_map = {} # {id => src}
 
       @scr_id_map = {} # for CDP
       @obj_map = {} # { object_id => ... } for CDP
@@ -135,7 +135,7 @@ module DEBUGGER__
 
       @has_keep_script_lines = RubyVM.respond_to? :keep_script_lines
 
-      @tp_load_script = TracePoint.new(:script_compiled){|tp|
+      @tp_load_script = TracePoint.new(:script_compiled) { |tp|
         eval_script = tp.eval_script unless @has_keep_script_lines
         ThreadClient.current.on_load tp.instruction_sequence, eval_script
       }
@@ -217,9 +217,9 @@ module DEBUGGER__
       @tp_load_script.disable
       @tp_thread_begin.disable
       @tp_thread_end.disable
-      @bps.each_value{|bp| bp.disable}
-      @th_clients.each_value{|thc| thc.close}
-      @tracers.values.each{|t| t.disable}
+      @bps.each_value { |bp| bp.disable }
+      @th_clients.each_value { |thc| thc.close }
+      @tracers.values.each { |t| t.disable }
       @q_evt.close
       @ui&.deactivate
       @ui = nil
@@ -260,7 +260,7 @@ module DEBUGGER__
       # variable `@internal_info` is only used for test
       tc, output, ev, @internal_info, *ev_args = evt
 
-      output.each{|str| @ui.puts str} if ev != :suspend
+      output.each { |str| @ui.puts str } if ev != :suspend
 
       # special event, tc is nil
       # and we don't want to set @tc to the newly created thread's ThreadClient
@@ -286,14 +286,14 @@ module DEBUGGER__
 
       when :trace
         trace_id, msg = ev_args
-        if t = @tracers.values.find{|t| t.object_id == trace_id}
+        if t = @tracers.values.find { |t| t.object_id == trace_id }
           t.puts msg
         end
         request_tc :continue
 
       when :suspend
         enter_subsession if ev_args.first != :replay
-        output.each{|str| @ui.puts str} unless @ui.ignore_output_on_suspend?
+        output.each { |str| @ui.puts str } unless @ui.ignore_output_on_suspend?
 
         case ev_args.first
         when :breakpoint
@@ -324,7 +324,7 @@ module DEBUGGER__
           failed_results = ev_args[1]
           if failed_results.size > 0
             i, _msg = failed_results.last
-            if i+1 == @displays.size
+            if i + 1 == @displays.size
               @ui.puts "canceled: #{@displays.pop}"
             end
           end
@@ -355,8 +355,8 @@ module DEBUGGER__
     end
 
     def add_preset_commands name, cmds, kick: true, continue: true
-      cs = cmds.map{|c|
-        c.each_line.map{|line|
+      cs = cmds.map { |c|
+        c.each_line.map { |line|
           line = line.strip.gsub(/\A\s*\#.*/, '').strip
           line unless line.empty?
         }.compact
@@ -443,7 +443,7 @@ module DEBUGGER__
                                  &b
       cmd = SessionCommand.new(b, repeat, unsafe, cancel_auto_continue, postmortem)
 
-      names.each{|name|
+      names.each { |name|
         @commands[name] = cmd
       }
     end
@@ -499,7 +499,6 @@ module DEBUGGER__
                        repeat: true,
                        cancel_auto_continue: true,
                        postmortem: false do |arg|
-
         step_command :until, arg
       end
 
@@ -564,10 +563,9 @@ module DEBUGGER__
           end
 
           leave_subsession :continue
-
         rescue Exception => e
           @ui.puts "Exception: #{e}"
-          @ui.puts e.backtrace.map{|line| "  #{e}"}
+          @ui.puts e.backtrace.map { |line| "  #{e}" }
           next :retry
         end
       end
@@ -707,11 +705,11 @@ module DEBUGGER__
       register_command 'l', 'list', repeat: true, unsafe: false do |arg|
         case arg ? arg.strip : nil
         when /\A(\d+)\z/
-          request_tc [:show, :list, {start_line: arg.to_i - 1}]
+          request_tc [:show, :list, { start_line: arg.to_i - 1 }]
         when /\A-\z/
-          request_tc [:show, :list, {dir: -1}]
+          request_tc [:show, :list, { dir: -1 }]
         when /\A(\d+)-(\d+)\z/
-          request_tc [:show, :list, {start_line: $1.to_i - 1, end_line: $2.to_i}]
+          request_tc [:show, :list, { start_line: $1.to_i - 1, end_line: $2.to_i }]
         when nil
           request_tc [:show, :list]
         else
@@ -788,13 +786,13 @@ module DEBUGGER__
 
         if sub && !info_subcommands
           info_subcommands = {
-            locals: %w[ locals local_variables ],
-            ivars:  %w[ ivars instance_variables ],
-            consts: %w[ consts constants ],
-            globals:%w[ globals global_variables ],
-            threads:%w[ threads ],
-            breaks: %w[ breakpoints ],
-            watchs: %w[ watchpoints ],
+            locals: %w[locals local_variables],
+            ivars: %w[ivars instance_variables],
+            consts: %w[consts constants],
+            globals: %w[globals global_variables],
+            threads: %w[threads],
+            breaks: %w[breakpoints],
+            watchs: %w[watchpoints],
           }
 
           require_relative 'abbrev_command'
@@ -964,7 +962,7 @@ module DEBUGGER__
         case arg
         when nil
           @ui.puts 'Tracers:'
-          @tracers.values.each_with_index{|t, i|
+          @tracers.values.each_with_index { |t, i|
             @ui.puts "* \##{i} #{t}"
           }
           @ui.puts
@@ -983,7 +981,7 @@ module DEBUGGER__
           :retry
 
         when /\Aobject\s+(.+)/
-          request_tc [:trace, :object, $1.strip, {pattern: pattern, into: into}]
+          request_tc [:trace, :object, $1.strip, { pattern: pattern, into: into }]
 
         when /\Aoff\s+(\d+)\z/
           if t = @tracers.values[$1.to_i]
@@ -995,7 +993,7 @@ module DEBUGGER__
           :retry
 
         when /\Aoff(\s+(line|call|exception|object))?\z/
-          @tracers.values.each{|t|
+          @tracers.values.each { |t|
             if $2.nil? || t.type == $2
               t.disable
               @ui.puts "Disable #{t.to_s}"
@@ -1138,9 +1136,9 @@ module DEBUGGER__
       cmd_name, cmd_arg = $1, $2
 
       if cmd = @commands[cmd_name]
-        check_postmortem      if !cmd.postmortem
-        check_unsafe          if cmd.unsafe
-        cancel_auto_continue  if cmd.cancel_auto_continue
+        check_postmortem if !cmd.postmortem
+        check_unsafe if cmd.unsafe
+        cancel_auto_continue if cmd.cancel_auto_continue
         @repl_prev_line = nil if !cmd.repeat
 
         cmd.block.call(cmd_arg)
@@ -1150,7 +1148,6 @@ module DEBUGGER__
 
         request_eval :pp, line
       end
-
     rescue Interrupt
       return :retry
     rescue SystemExit
@@ -1160,7 +1157,7 @@ module DEBUGGER__
       return :retry
     rescue Exception => e
       @ui.puts "[REPL ERROR] #{e.inspect}"
-      @ui.puts e.backtrace.map{|e| '  ' + e}
+      @ui.puts e.backtrace.map { |e| '  ' + e }
       return :retry
     end
 
@@ -1270,7 +1267,6 @@ module DEBUGGER__
       end
     end
 
-
     def cancel_auto_continue
       if @preset_command&.auto_continue
         @preset_command.auto_continue = false
@@ -1282,6 +1278,7 @@ module DEBUGGER__
       print_instructions = proc do |desc|
         desc.split("\n").each do |line|
           next if line.start_with?(" ") # workaround for step back
+
           formatted_line = line.gsub(/[\[\]\*]/, "").strip
           instructions.each do |inst|
             if formatted_line.start_with?("`#{inst}")
@@ -1340,7 +1337,7 @@ module DEBUGGER__
     def iterate_bps
       deleted_bps = []
       i = 0
-      @bps.each{|key, bp|
+      @bps.each { |key, bp|
         if !bp.deleted?
           yield key, bp, i
           i += 1
@@ -1349,7 +1346,7 @@ module DEBUGGER__
         end
       }
     ensure
-      deleted_bps.each{|bp| @bps.delete bp}
+      deleted_bps.each { |bp| @bps.delete bp }
     end
 
     def show_bps specific_bp = nil
@@ -1370,13 +1367,13 @@ module DEBUGGER__
     def rehash_bps
       bps = @bps.values
       @bps.clear
-      bps.each{|bp|
+      bps.each { |bp|
         add_bp bp
       }
     end
 
     def clean_bps
-      @bps.delete_if{|_k, bp|
+      @bps.delete_if { |_k, bp|
         bp.deleted?
       }
     end
@@ -1399,11 +1396,11 @@ module DEBUGGER__
     def delete_bp arg = nil
       case arg
       when nil
-        @bps.each{|key, bp| bp.delete}
+        @bps.each { |key, bp| bp.delete }
         @bps.clear
       else
         del_bp = nil
-        iterate_bps{|key, bp, i| del_bp = bp if i == arg}
+        iterate_bps { |key, bp, i| del_bp = bp if i == arg }
         if del_bp
           del_bp.delete
           @bps.delete del_bp.key
@@ -1416,16 +1413,16 @@ module DEBUGGER__
 
     private def parse_break type, arg
       mode = :sig
-      expr = Hash.new{|h, k| h[k] = []}
-      arg.split(' ').each{|w|
-        if BREAK_KEYWORDS.any?{|pat| w == pat}
+      expr = Hash.new { |h, k| h[k] = [] }
+      arg.split(' ').each { |w|
+        if BREAK_KEYWORDS.any? { |pat| w == pat }
           mode = w[0..-2].to_sym
         else
           expr[mode] << w
         end
       }
       expr.default_proc = nil
-      expr = expr.transform_values{|v| v.join(' ')}
+      expr = expr.transform_values { |v| v.join(' ') }
 
       if (path = expr[:path]) && path =~ /\A\/(.*)\/\z/
         expr[:path] = Regexp.compile($1)
@@ -1442,7 +1439,7 @@ module DEBUGGER__
     def repl_add_breakpoint arg
       expr = parse_break 'break', arg.strip
       cond = expr[:if]
-      cmd  = expr[:cmd]
+      cmd = expr[:cmd]
       path = expr[:path]
 
       case expr[:sig]
@@ -1465,7 +1462,7 @@ module DEBUGGER__
     def repl_add_catch_breakpoint arg
       expr = parse_break 'catch', arg.strip
       cond = expr[:if]
-      cmd  = expr[:cmd]
+      cmd = expr[:cmd]
       path = expr[:path]
 
       bp = CatchBreakpoint.new(expr[:sig], cond: cond, command: cmd, path: path)
@@ -1475,7 +1472,7 @@ module DEBUGGER__
     def repl_add_watch_breakpoint arg
       expr = parse_break 'watch', arg.strip
       cond = expr[:if]
-      cmd  = expr[:cmd]
+      cmd = expr[:cmd]
       path = Regexp.compile(expr[:path]) if expr[:path]
 
       request_tc [:breakpoint, :watch, expr[:sig], cond, cmd, path]
@@ -1525,7 +1522,7 @@ module DEBUGGER__
     end
 
     def clear_all_breakpoints
-      clear_breakpoints{true}
+      clear_breakpoints { true }
     end
 
     def add_iseq_breakpoint iseq, **kw
@@ -1552,7 +1549,7 @@ module DEBUGGER__
       thcs = []
       unmanaged = []
 
-      list.each{|th|
+      list.each { |th|
         if thc = @th_clients[th]
           if !thc.management?
             thcs << thc
@@ -1562,18 +1559,18 @@ module DEBUGGER__
         end
       }
 
-      return thcs.sort_by{|thc| thc.id}, unmanaged
+      return thcs.sort_by { |thc| thc.id }, unmanaged
     end
 
     def thread_list
       thcs, unmanaged_ths = update_thread_list
-      thcs.each_with_index{|thc, i|
+      thcs.each_with_index { |thc, i|
         @ui.puts "#{@tc == thc ? "--> " : "    "}\##{i} #{thc}"
       }
 
       if !unmanaged_ths.empty?
         @ui.puts "The following threads are not managed yet by the debugger:"
-        unmanaged_ths.each{|th|
+        unmanaged_ths.each { |th|
           @ui.puts "     " + th.to_s
         }
       end
@@ -1601,7 +1598,7 @@ module DEBUGGER__
       prev_clients = @th_clients
       @th_clients = {}
 
-      Thread.list.each{|th|
+      Thread.list.each { |th|
         if tc = prev_clients[th]
           @th_clients[th] = tc
         else
@@ -1621,6 +1618,7 @@ module DEBUGGER__
     private def create_thread_client th
       # TODO: Ractor support
       raise "Only session_server can create thread_client" unless Thread.current == @session_server
+
       @th_clients[th] = ThreadClient.new((@tc_id += 1), @q_evt, Queue.new, th)
     end
 
@@ -1648,17 +1646,19 @@ module DEBUGGER__
     end
 
     private def running_thread_clients_count
-      @th_clients.count{|th, tc|
+      @th_clients.count { |th, tc|
         next if tc.management?
         next unless tc.running?
+
         true
       }
     end
 
     private def waiting_thread_clients
-      @th_clients.map{|th, tc|
+      @th_clients.map { |th, tc|
         next if tc.management?
         next unless tc.waiting?
+
         tc
       }.compact
     end
@@ -1686,8 +1686,9 @@ module DEBUGGER__
       stopper = @thread_stopper
       stopper.disable if stopper.enabled?
 
-      waiting_thread_clients.each{|tc|
+      waiting_thread_clients.each { |tc|
         next if @tc == tc
+
         tc << :continue
       }
     end
@@ -1695,9 +1696,9 @@ module DEBUGGER__
     private def enter_subsession
       @subsession_id += 1
       if !@subsession_stack.empty?
-        DEBUGGER__.debug{ "Enter subsession (nested #{@subsession_stack.size})" }
+        DEBUGGER__.debug { "Enter subsession (nested #{@subsession_stack.size})" }
       else
-        DEBUGGER__.debug{ "Enter subsession" }
+        DEBUGGER__.debug { "Enter subsession" }
         stop_all_threads
         @process_group.lock
       end
@@ -1707,14 +1708,15 @@ module DEBUGGER__
 
     private def leave_subsession type
       raise '[BUG] leave_subsession: not entered' if @subsession_stack.empty?
+
       @subsession_stack.pop
 
       if @subsession_stack.empty?
-        DEBUGGER__.debug{ "Leave subsession" }
+        DEBUGGER__.debug { "Leave subsession" }
         @process_group.unlock
         restart_all_threads
       else
-        DEBUGGER__.debug{ "Leave subsession (nested #{@subsession_stack.size})" }
+        DEBUGGER__.debug { "Leave subsession (nested #{@subsession_stack.size})" }
       end
 
       request_tc type if type
@@ -1784,7 +1786,7 @@ module DEBUGGER__
         mid = b.local_variable_get(var_name)
         resolved = true
 
-        @bps.each{|k, bp|
+        @bps.each { |k, bp|
           case bp
           when MethodBreakpoint
             if bp.method.nil?
@@ -1871,15 +1873,15 @@ module DEBUGGER__
     end
 
     def capture_exception_frames *exclude_path
-      postmortem_hook = TracePoint.new(:raise){|tp|
+      postmortem_hook = TracePoint.new(:raise) { |tp|
         exc = tp.raised_exception
         frames = DEBUGGER__.capture_frames(__dir__)
 
-        exclude_path.each{|ex|
+        exclude_path.each { |ex|
           if Regexp === ex
-            frames.delete_if{|e| ex =~ e.path}
+            frames.delete_if { |e| ex =~ e.path }
           else
-            frames.delete_if{|e| e.path.start_with? ex.to_s}
+            frames.delete_if { |e| e.path.start_with? ex.to_s }
           end
         }
         exc.instance_variable_set(:@__debugger_postmortem_frames, frames)
@@ -1903,19 +1905,19 @@ module DEBUGGER__
     def postmortem=(is_enable)
       if is_enable
         unless @postmortem_hook
-          @postmortem_hook = TracePoint.new(:raise){|tp|
+          @postmortem_hook = TracePoint.new(:raise) { |tp|
             exc = tp.raised_exception
             frames = DEBUGGER__.capture_frames(__dir__)
             exc.instance_variable_set(:@__debugger_postmortem_frames, frames)
           }
-          at_exit{
+          at_exit {
             @postmortem_hook.disable
             if CONFIG[:postmortem] && (exc = $!) != nil
               exc = exc.cause while exc.cause
 
               begin
                 @ui.puts "Enter postmortem mode with #{exc.inspect}"
-                @ui.puts exc.backtrace.map{|e| '  ' + e}
+                @ui.puts exc.backtrace.map { |e| '  ' + e }
                 @ui.puts "\n"
 
                 enter_postmortem_session exc
@@ -2060,12 +2062,14 @@ module DEBUGGER__
 
     private def lock_level_up
       raise unless @m.owned?
+
       @lock_level += 1
     end
 
     private def lock_level_down
       raise unless @m.owned?
       raise "@lock_level underflow: #{@lock_level}" if @lock_level < 1
+
       @lock_level -= 1
     end
 
@@ -2110,6 +2114,7 @@ module DEBUGGER__
     def unlock
       @m.synchronize do
         raise "lock file is not opened (#{@lock_file.inspect})" if @lock_file.closed?
+
         lock_level_down
         @lock_file.flock(File::LOCK_UN) unless locked?
         info "Unlocked"
@@ -2184,7 +2189,7 @@ module DEBUGGER__
     else
       unless defined? SESSION
         require_relative 'local'
-        initialize_session{ UI_LocalConsole.new }
+        initialize_session { UI_LocalConsole.new }
       end
       setup_initial_suspend unless nonstop
     end
@@ -2208,7 +2213,7 @@ module DEBUGGER__
     if defined? SESSION
       SESSION.reset_ui UI_TcpServer.new(host: host, port: port)
     else
-      initialize_session{ UI_TcpServer.new(host: host, port: port) }
+      initialize_session { UI_TcpServer.new(host: host, port: port) }
     end
 
     setup_initial_suspend unless nonstop
@@ -2221,7 +2226,7 @@ module DEBUGGER__
     if defined? SESSION
       SESSION.reset_ui UI_UnixDomainServer.new(sock_dir: sock_dir, sock_path: sock_path)
     else
-      initialize_session{ UI_UnixDomainServer.new(sock_dir: sock_dir, sock_path: sock_path) }
+      initialize_session { UI_UnixDomainServer.new(sock_dir: sock_dir, sock_path: sock_path) }
     end
 
     setup_initial_suspend unless nonstop
@@ -2272,8 +2277,7 @@ module DEBUGGER__
     [[File.expand_path('~/.rdbgrc'), true],
      [File.expand_path('~/.rdbgrc.rb'), true],
      # ['./.rdbgrc', true], # disable because of security concern
-     [CONFIG[:init_script], false],
-     ].each{|(path, rc)|
+     [CONFIG[:init_script], false],].each { |(path, rc)|
       next unless path
       next if rc && CONFIG[:no_rc] # ignore rc
 
@@ -2300,7 +2304,7 @@ module DEBUGGER__
   SHORT_INSPECT_LENGTH = 40
 
   class LimitedPP
-    def self.pp(obj, max=80)
+    def self.pp(obj, max = 80)
       out = self.new(max)
       catch out do
         PP.singleline_pp(obj, out)
@@ -2427,6 +2431,7 @@ module DEBUGGER__
     else
       def fork(&given_block)
         return super unless defined?(SESSION) && SESSION.active?
+
         parent_hook, child_hook = __fork_setup_for_debugger
 
         if given_block
@@ -2435,7 +2440,7 @@ module DEBUGGER__
             child_hook.call
             given_block.call
           }
-          super(&new_block).tap{|pid| parent_hook.call(pid)}
+          super(&new_block).tap { |pid| parent_hook.call(pid) }
         else
           super.tap do |pid|
             if pid
@@ -2478,7 +2483,7 @@ module DEBUGGER__
       # before fork
       case fork_mode
       when :parent
-        parent_hook = -> child_pid {
+        parent_hook = ->child_pid {
           # Do nothing
         }
         child_hook = -> {
@@ -2488,7 +2493,7 @@ module DEBUGGER__
       when :child
         SESSION.before_fork false
 
-        parent_hook = -> child_pid {
+        parent_hook = ->child_pid {
           DEBUGGER__.info "Detaching after fork from parent process #{Process.pid}"
           SESSION.after_fork_parent
           SESSION.deactivate
@@ -2500,7 +2505,7 @@ module DEBUGGER__
       when :both
         SESSION.before_fork
 
-        parent_hook = -> child_pid {
+        parent_hook = ->child_pid {
           SESSION.process_group.after_fork
           SESSION.after_fork_parent
         }
@@ -2540,6 +2545,7 @@ module DEBUGGER__
     module ::Kernel
       prepend TrapInterceptor
     end
+
     module ::Signal
       class << self
         prepend TrapInterceptor
@@ -2590,11 +2596,12 @@ module Kernel
 
     if ::DEBUGGER__::SESSION.in_subsession?
       if cmds
-        commands = [*cmds[1], *cmds[2]].map{|c| c.split(';;').join("\n")}
+        commands = [*cmds[1], *cmds[2]].map { |c| c.split(';;').join("\n") }
         ::DEBUGGER__::SESSION.add_preset_commands cmds[0], commands, kick: false, continue: false
       end
     else
-      loc = caller_locations(up_level, 1).first; ::DEBUGGER__.add_line_breakpoint loc.path, loc.lineno + 1, oneshot: true, command: cmds
+      loc = caller_locations(up_level, 1).first;
+      ::DEBUGGER__.add_line_breakpoint loc.path, loc.lineno + 1, oneshot: true, command: cmds
     end
     self
   end

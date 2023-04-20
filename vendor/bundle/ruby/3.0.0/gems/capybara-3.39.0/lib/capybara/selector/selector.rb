@@ -103,7 +103,7 @@ module Capybara
       end.new(expr)
     end
 
-  private
+    private
 
     def locator_description
       locator_types.group_by { |lt| lt.is_a? Symbol }.map do |symbol, types_or_methods|

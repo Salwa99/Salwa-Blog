@@ -56,7 +56,7 @@ module Arel # :nodoc: all
       end
 
       def proc_for_binds
-        -> value { ActiveModel::Attribute.with_cast_value(attribute.name, value, attribute.type_caster) }
+        ->value { ActiveModel::Attribute.with_cast_value(attribute.name, value, attribute.type_caster) }
       end
 
       def fetch_attribute(&block)
@@ -68,9 +68,10 @@ module Arel # :nodoc: all
       end
 
       protected
-        def ivars
-          [@attribute, @values, @type]
-        end
+
+      def ivars
+        [@attribute, @values, @type]
+      end
     end
   end
 end

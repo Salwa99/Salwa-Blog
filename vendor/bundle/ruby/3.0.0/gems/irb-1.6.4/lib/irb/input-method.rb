@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   irb/input-method.rb - input methods used irb
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -13,7 +14,6 @@ require 'reline'
 module IRB
   STDIN_FILE_NAME = "(line)" # :nodoc:
   class InputMethod
-
     # Creates a new input method object
     def initialize(file = STDIN_FILE_NAME)
       @file_name = file
@@ -61,7 +61,8 @@ module IRB
       @line_no = 0
       @line = []
       @stdin = IO.open(STDIN.to_i, :external_encoding => IRB.conf[:LC_MESSAGES].encoding, :internal_encoding => "-")
-      @stdout = IO.open(STDOUT.to_i, 'w', :external_encoding => IRB.conf[:LC_MESSAGES].encoding, :internal_encoding => "-")
+      @stdout = IO.open(STDOUT.to_i, 'w', :external_encoding => IRB.conf[:LC_MESSAGES].encoding,
+                                          :internal_encoding => "-")
     end
 
     # Reads the next line from this input method.
@@ -191,7 +192,8 @@ module IRB
         @eof = false
 
         @stdin = IO.open(STDIN.to_i, :external_encoding => IRB.conf[:LC_MESSAGES].encoding, :internal_encoding => "-")
-        @stdout = IO.open(STDOUT.to_i, 'w', :external_encoding => IRB.conf[:LC_MESSAGES].encoding, :internal_encoding => "-")
+        @stdout = IO.open(STDOUT.to_i, 'w', :external_encoding => IRB.conf[:LC_MESSAGES].encoding,
+                                            :internal_encoding => "-")
 
         if Readline.respond_to?("basic_word_break_characters=")
           Readline.basic_word_break_characters = IRB::InputCompletor::BASIC_WORD_BREAK_CHARACTERS
@@ -269,7 +271,8 @@ module IRB
       @eof = false
 
       @stdin = ::IO.open(STDIN.to_i, :external_encoding => IRB.conf[:LC_MESSAGES].encoding, :internal_encoding => "-")
-      @stdout = ::IO.open(STDOUT.to_i, 'w', :external_encoding => IRB.conf[:LC_MESSAGES].encoding, :internal_encoding => "-")
+      @stdout = ::IO.open(STDOUT.to_i, 'w', :external_encoding => IRB.conf[:LC_MESSAGES].encoding,
+                                            :internal_encoding => "-")
 
       if Reline.respond_to?("basic_word_break_characters=")
         Reline.basic_word_break_characters = IRB::InputCompletor::BASIC_WORD_BREAK_CHARACTERS
@@ -279,8 +282,9 @@ module IRB
       Reline.completion_proc = IRB::InputCompletor::CompletionProc
       Reline.output_modifier_proc =
         if IRB.conf[:USE_COLORIZE]
-          proc do |output, complete: |
+          proc do |output, complete:|
             next unless IRB::Color.colorable?
+
             lvars = IRB.CurrentContext&.local_variables || []
             IRB::Color.colorize_code(output, complete: complete, local_variables: lvars)
           end
@@ -325,8 +329,10 @@ module IRB
       if just_cursor_moving and completion_journey_data.nil?
         return nil
       end
+
       cursor_pos_to_render, result, pointer, autocomplete_dialog = context.pop(4)
       return nil if result.nil? or pointer.nil? or pointer < 0
+
       name = result[pointer]
       name = IRB::InputCompletor.retrieve_completion_data(name, doc_namespace: true)
 
@@ -368,6 +374,7 @@ module IRB
         end
       end
       return nil if doc.nil?
+
       width = 40
 
       right_x = cursor_pos_to_render.x + autocomplete_dialog.width

@@ -12,10 +12,10 @@ module ActionDispatch
 
     def html_document
       @html_document ||= if @response.media_type&.end_with?("xml")
-        Nokogiri::XML::Document.parse(@response.body)
-      else
-        Nokogiri::HTML::Document.parse(@response.body)
-      end
+                           Nokogiri::XML::Document.parse(@response.body)
+                         else
+                           Nokogiri::HTML::Document.parse(@response.body)
+                         end
     end
   end
 end

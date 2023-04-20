@@ -76,13 +76,15 @@ module ActiveSupport
       # Because parallelization presents an overhead, it is only enabled when the
       # number of tests to run is above the +threshold+ param. The default value is
       # 50, and it's configurable via +config.active_support.test_parallelization_threshold+.
-      def parallelize(workers: :number_of_processors, with: :processes, threshold: ActiveSupport.test_parallelization_threshold)
+      def parallelize(workers: :number_of_processors, with: :processes,
+                      threshold: ActiveSupport.test_parallelization_threshold)
         workers = Concurrent.physical_processor_count if workers == :number_of_processors
         workers = ENV["PARALLEL_WORKERS"].to_i if ENV["PARALLEL_WORKERS"]
 
         return if workers <= 1
 
-        Minitest.parallel_executor = ActiveSupport::Testing::ParallelizeExecutor.new(size: workers, with: with, threshold: threshold)
+        Minitest.parallel_executor = ActiveSupport::Testing::ParallelizeExecutor.new(size: workers, with: with,
+                                                                                     threshold: threshold)
       end
 
       # Set up hook for parallel testing. This can be used if you have multiple

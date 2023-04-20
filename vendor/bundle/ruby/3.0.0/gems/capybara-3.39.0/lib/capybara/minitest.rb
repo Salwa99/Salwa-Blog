@@ -362,7 +362,7 @@ module Capybara
         alias_method "refute_matches_#{selector_type}", "assert_not_matches_#{selector_type}"
       end
 
-    private
+      private
 
       def determine_subject(args)
         case args.first

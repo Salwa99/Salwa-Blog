@@ -27,22 +27,21 @@ module ActionDispatch
     include Rack::Request::Env
 
     autoload :Session, "action_dispatch/request/session"
-    autoload :Utils,   "action_dispatch/request/utils"
+    autoload :Utils, "action_dispatch/request/utils"
 
-    LOCALHOST   = Regexp.union [/^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/, /^::1$/, /^0:0:0:0:0:0:0:1(%.*)?$/]
+    LOCALHOST = Regexp.union [/^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/, /^::1$/, /^0:0:0:0:0:0:0:1(%.*)?$/]
 
     ENV_METHODS = %w[ AUTH_TYPE GATEWAY_INTERFACE
-        PATH_TRANSLATED REMOTE_HOST
-        REMOTE_IDENT REMOTE_USER REMOTE_ADDR
-        SERVER_NAME SERVER_PROTOCOL
-        ORIGINAL_SCRIPT_NAME
+                      PATH_TRANSLATED REMOTE_HOST
+                      REMOTE_IDENT REMOTE_USER REMOTE_ADDR
+                      SERVER_NAME SERVER_PROTOCOL
+                      ORIGINAL_SCRIPT_NAME
 
-        HTTP_ACCEPT HTTP_ACCEPT_CHARSET HTTP_ACCEPT_ENCODING
-        HTTP_ACCEPT_LANGUAGE HTTP_CACHE_CONTROL HTTP_FROM
-        HTTP_NEGOTIATE HTTP_PRAGMA HTTP_CLIENT_IP
-        HTTP_X_FORWARDED_FOR HTTP_ORIGIN HTTP_VERSION
-        HTTP_X_CSRF_TOKEN HTTP_X_REQUEST_ID HTTP_X_FORWARDED_HOST
-        ].freeze
+                      HTTP_ACCEPT HTTP_ACCEPT_CHARSET HTTP_ACCEPT_ENCODING
+                      HTTP_ACCEPT_LANGUAGE HTTP_CACHE_CONTROL HTTP_FROM
+                      HTTP_NEGOTIATE HTTP_PRAGMA HTTP_CLIENT_IP
+                      HTTP_X_FORWARDED_FOR HTTP_ORIGIN HTTP_VERSION
+                      HTTP_X_CSRF_TOKEN HTTP_X_REQUEST_ID HTTP_X_FORWARDED_HOST].freeze
 
     ENV_METHODS.each do |env|
       class_eval <<-METHOD, __FILE__, __LINE__ + 1
@@ -59,12 +58,12 @@ module ActionDispatch
 
     def initialize(env)
       super
-      @method            = nil
-      @request_method    = nil
-      @remote_ip         = nil
+      @method = nil
+      @request_method = nil
+      @remote_ip = nil
       @original_fullpath = nil
-      @fullpath          = nil
-      @ip                = nil
+      @fullpath = nil
+      @ip = nil
     end
 
     def commit_cookie_jar! # :nodoc:
@@ -118,7 +117,8 @@ module ActionDispatch
     # PATCH Method for HTTP (https://www.ietf.org/rfc/rfc5789.txt)
     RFC2616 = %w(OPTIONS GET HEAD POST PUT DELETE TRACE CONNECT)
     RFC2518 = %w(PROPFIND PROPPATCH MKCOL COPY MOVE LOCK UNLOCK)
-    RFC3253 = %w(VERSION-CONTROL REPORT CHECKOUT CHECKIN UNCHECKOUT MKWORKSPACE UPDATE LABEL MERGE BASELINE-CONTROL MKACTIVITY)
+    RFC3253 = %w(VERSION-CONTROL REPORT CHECKOUT CHECKIN UNCHECKOUT MKWORKSPACE UPDATE LABEL MERGE BASELINE-CONTROL
+                 MKACTIVITY)
     RFC3648 = %w(ORDERPATCH)
     RFC3744 = %w(ACL)
     RFC5323 = %w(SEARCH)
@@ -402,10 +402,10 @@ module ActionDispatch
     # Returns the authorization header regardless of whether it was specified directly or through one of the
     # proxy alternatives.
     def authorization
-      get_header("HTTP_AUTHORIZATION")   ||
-      get_header("X-HTTP_AUTHORIZATION") ||
-      get_header("X_HTTP_AUTHORIZATION") ||
-      get_header("REDIRECT_X_HTTP_AUTHORIZATION")
+      get_header("HTTP_AUTHORIZATION") ||
+        get_header("X-HTTP_AUTHORIZATION") ||
+        get_header("X_HTTP_AUTHORIZATION") ||
+        get_header("REDIRECT_X_HTTP_AUTHORIZATION")
     end
 
     # True if the request came from localhost, 127.0.0.1, or ::1.
@@ -415,6 +415,7 @@ module ActionDispatch
 
     def request_parameters=(params)
       raise if params.nil?
+
       set_header("action_dispatch.request.request_parameters", params)
     end
 
@@ -430,14 +431,16 @@ module ActionDispatch
     end
 
     private
-      def check_method(name)
-        HTTP_METHOD_LOOKUP[name] || raise(ActionController::UnknownHttpMethod, "#{name}, accepted HTTP methods are #{HTTP_METHODS[0...-1].join(', ')}, and #{HTTP_METHODS[-1]}")
-        name
-      end
 
-      def default_session
-        Session.disabled(self)
-      end
+    def check_method(name)
+      HTTP_METHOD_LOOKUP[name] || raise(ActionController::UnknownHttpMethod,
+                                        "#{name}, accepted HTTP methods are #{HTTP_METHODS[0...-1].join(', ')}, and #{HTTP_METHODS[-1]}")
+      name
+    end
+
+    def default_session
+      Session.disabled(self)
+    end
   end
 end
 

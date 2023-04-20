@@ -66,6 +66,7 @@ module ActiveRecord
     #   # returns an Array of the required fields.
     def find(*args)
       return super if block_given?
+
       find_with_ids(*args)
     end
 
@@ -388,199 +389,200 @@ module ActiveRecord
     end
 
     private
-      def construct_relation_for_exists(conditions)
-        conditions = sanitize_forbidden_attributes(conditions)
 
-        if distinct_value && offset_value
-          relation = except(:order).limit!(1)
-        else
-          relation = except(:select, :distinct, :order)._select!(ONE_AS_ONE).limit!(1)
+    def construct_relation_for_exists(conditions)
+      conditions = sanitize_forbidden_attributes(conditions)
+
+      if distinct_value && offset_value
+        relation = except(:order).limit!(1)
+      else
+        relation = except(:select, :distinct, :order)._select!(ONE_AS_ONE).limit!(1)
+      end
+
+      case conditions
+      when Array, Hash
+        relation.where!(conditions) unless conditions.empty?
+      else
+        relation.where!(primary_key => conditions) unless conditions == :none
+      end
+
+      relation
+    end
+
+    def apply_join_dependency(eager_loading: group_values.empty?)
+      join_dependency = construct_join_dependency(
+        eager_load_values | includes_values, Arel::Nodes::OuterJoin
+      )
+      relation = except(:includes, :eager_load, :preload).joins!(join_dependency)
+
+      if eager_loading && has_limit_or_offset? && !(
+          using_limitable_reflections?(join_dependency.reflections) &&
+          using_limitable_reflections?(
+            construct_join_dependency(
+              select_association_list(joins_values).concat(
+                select_association_list(left_outer_joins_values)
+              ), nil
+            ).reflections
+          )
+        )
+        relation = skip_query_cache_if_necessary do
+          klass.connection.distinct_relation_for_primary_key(relation)
         end
+      end
 
-        case conditions
-        when Array, Hash
-          relation.where!(conditions) unless conditions.empty?
-        else
-          relation.where!(primary_key => conditions) unless conditions == :none
-        end
-
+      if block_given?
+        yield relation, join_dependency
+      else
         relation
       end
+    end
 
-      def apply_join_dependency(eager_loading: group_values.empty?)
-        join_dependency = construct_join_dependency(
-          eager_load_values | includes_values, Arel::Nodes::OuterJoin
-        )
-        relation = except(:includes, :eager_load, :preload).joins!(join_dependency)
+    def using_limitable_reflections?(reflections)
+      reflections.none?(&:collection?)
+    end
 
-        if eager_loading && has_limit_or_offset? && !(
-            using_limitable_reflections?(join_dependency.reflections) &&
-            using_limitable_reflections?(
-              construct_join_dependency(
-                select_association_list(joins_values).concat(
-                  select_association_list(left_outer_joins_values)
-                ), nil
-              ).reflections
-            )
-          )
-          relation = skip_query_cache_if_necessary do
-            klass.connection.distinct_relation_for_primary_key(relation)
-          end
-        end
+    def find_with_ids(*ids)
+      raise UnknownPrimaryKey.new(@klass) if primary_key.nil?
 
-        if block_given?
-          yield relation, join_dependency
-        else
-          relation
-        end
+      expects_array = ids.first.kind_of?(Array)
+      return [] if expects_array && ids.first.empty?
+
+      ids = ids.flatten.compact.uniq
+
+      model_name = @klass.name
+
+      case ids.size
+      when 0
+        error_message = "Couldn't find #{model_name} without an ID"
+        raise RecordNotFound.new(error_message, model_name, primary_key)
+      when 1
+        result = find_one(ids.first)
+        expects_array ? [result] : result
+      else
+        find_some(ids)
       end
+    end
 
-      def using_limitable_reflections?(reflections)
-        reflections.none?(&:collection?)
-      end
-
-      def find_with_ids(*ids)
-        raise UnknownPrimaryKey.new(@klass) if primary_key.nil?
-
-        expects_array = ids.first.kind_of?(Array)
-        return [] if expects_array && ids.first.empty?
-
-        ids = ids.flatten.compact.uniq
-
-        model_name = @klass.name
-
-        case ids.size
-        when 0
-          error_message = "Couldn't find #{model_name} without an ID"
-          raise RecordNotFound.new(error_message, model_name, primary_key)
-        when 1
-          result = find_one(ids.first)
-          expects_array ? [ result ] : result
-        else
-          find_some(ids)
-        end
-      end
-
-      def find_one(id)
-        if ActiveRecord::Base === id
-          raise ArgumentError, <<-MSG.squish
+    def find_one(id)
+      if ActiveRecord::Base === id
+        raise ArgumentError, <<-MSG.squish
             You are passing an instance of ActiveRecord::Base to `find`.
             Please pass the id of the object by calling `.id`.
-          MSG
-        end
-
-        relation = where(primary_key => id)
-        record = relation.take
-
-        raise_record_not_found_exception!(id, 0, 1) unless record
-
-        record
+        MSG
       end
 
-      def find_some(ids)
-        return find_some_ordered(ids) unless order_values.present?
+      relation = where(primary_key => id)
+      record = relation.take
 
-        result = where(primary_key => ids).to_a
+      raise_record_not_found_exception!(id, 0, 1) unless record
 
-        expected_size =
-          if limit_value && ids.size > limit_value
-            limit_value
-          else
-            ids.size
-          end
+      record
+    end
 
-        # 11 ids with limit 3, offset 9 should give 2 results.
-        if offset_value && (ids.size - offset_value < expected_size)
-          expected_size = ids.size - offset_value
-        end
+    def find_some(ids)
+      return find_some_ordered(ids) unless order_values.present?
 
-        if result.size == expected_size
-          result
+      result = where(primary_key => ids).to_a
+
+      expected_size =
+        if limit_value && ids.size > limit_value
+          limit_value
         else
-          raise_record_not_found_exception!(ids, result.size, expected_size)
+          ids.size
         end
+
+      # 11 ids with limit 3, offset 9 should give 2 results.
+      if offset_value && (ids.size - offset_value < expected_size)
+        expected_size = ids.size - offset_value
       end
 
-      def find_some_ordered(ids)
-        ids = ids.slice(offset_value || 0, limit_value || ids.size) || []
+      if result.size == expected_size
+        result
+      else
+        raise_record_not_found_exception!(ids, result.size, expected_size)
+      end
+    end
 
-        result = except(:limit, :offset).where(primary_key => ids).records
+    def find_some_ordered(ids)
+      ids = ids.slice(offset_value || 0, limit_value || ids.size) || []
 
-        if result.size == ids.size
-          result.in_order_of(:id, ids.map { |id| @klass.type_for_attribute(primary_key).cast(id) })
+      result = except(:limit, :offset).where(primary_key => ids).records
+
+      if result.size == ids.size
+        result.in_order_of(:id, ids.map { |id| @klass.type_for_attribute(primary_key).cast(id) })
+      else
+        raise_record_not_found_exception!(ids, result.size, ids.size)
+      end
+    end
+
+    def find_take
+      if loaded?
+        records.first
+      else
+        @take ||= limit(1).records.first
+      end
+    end
+
+    def find_take_with_limit(limit)
+      if loaded?
+        records.take(limit)
+      else
+        limit(limit).to_a
+      end
+    end
+
+    def find_nth(index)
+      @offsets ||= {}
+      @offsets[index] ||= find_nth_with_limit(index, 1).first
+    end
+
+    def find_nth_with_limit(index, limit)
+      if loaded?
+        records[index, limit] || []
+      else
+        relation = ordered_relation
+
+        if limit_value
+          limit = [limit_value - index, limit].min
+        end
+
+        if limit > 0
+          relation = relation.offset((offset_value || 0) + index) unless index.zero?
+          relation.limit(limit).to_a
         else
-          raise_record_not_found_exception!(ids, result.size, ids.size)
+          []
         end
       end
+    end
 
-      def find_take
-        if loaded?
-          records.first
+    def find_nth_from_last(index)
+      if loaded?
+        records[-index]
+      else
+        relation = ordered_relation
+
+        if equal?(relation) || has_limit_or_offset?
+          relation.records[-index]
         else
-          @take ||= limit(1).records.first
+          relation.last(index)[-index]
         end
       end
+    end
 
-      def find_take_with_limit(limit)
-        if loaded?
-          records.take(limit)
+    def find_last(limit)
+      limit ? records.last(limit) : records.last
+    end
+
+    def ordered_relation
+      if order_values.empty? && (implicit_order_column || primary_key)
+        if implicit_order_column && primary_key && implicit_order_column != primary_key
+          order(table[implicit_order_column].asc, table[primary_key].asc)
         else
-          limit(limit).to_a
+          order(table[implicit_order_column || primary_key].asc)
         end
+      else
+        self
       end
-
-      def find_nth(index)
-        @offsets ||= {}
-        @offsets[index] ||= find_nth_with_limit(index, 1).first
-      end
-
-      def find_nth_with_limit(index, limit)
-        if loaded?
-          records[index, limit] || []
-        else
-          relation = ordered_relation
-
-          if limit_value
-            limit = [limit_value - index, limit].min
-          end
-
-          if limit > 0
-            relation = relation.offset((offset_value || 0) + index) unless index.zero?
-            relation.limit(limit).to_a
-          else
-            []
-          end
-        end
-      end
-
-      def find_nth_from_last(index)
-        if loaded?
-          records[-index]
-        else
-          relation = ordered_relation
-
-          if equal?(relation) || has_limit_or_offset?
-            relation.records[-index]
-          else
-            relation.last(index)[-index]
-          end
-        end
-      end
-
-      def find_last(limit)
-        limit ? records.last(limit) : records.last
-      end
-
-      def ordered_relation
-        if order_values.empty? && (implicit_order_column || primary_key)
-          if implicit_order_column && primary_key && implicit_order_column != primary_key
-            order(table[implicit_order_column].asc, table[primary_key].asc)
-          else
-            order(table[implicit_order_column || primary_key].asc)
-          end
-        else
-          self
-        end
-      end
+    end
   end
 end

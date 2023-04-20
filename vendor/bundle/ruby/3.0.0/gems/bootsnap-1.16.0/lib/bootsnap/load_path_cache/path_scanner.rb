@@ -10,10 +10,10 @@ module Bootsnap
       ALTERNATIVE_NATIVE_EXTENSIONS_PATTERN = /\.(o|bundle|dylib)\z/.freeze
 
       BUNDLE_PATH = if Bootsnap.bundler?
-        (Bundler.bundle_path.cleanpath.to_s << LoadPathCache::SLASH).freeze
-      else
-        ""
-      end
+                      (Bundler.bundle_path.cleanpath.to_s << LoadPathCache::SLASH).freeze
+                    else
+                      ""
+                    end
 
       @ignored_directories = %w(node_modules)
 

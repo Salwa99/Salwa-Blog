@@ -110,7 +110,7 @@ module Bootsnap
       end
 
       def default_data
-        {VERSION_KEY => CURRENT_VERSION}
+        { VERSION_KEY => CURRENT_VERSION }
       end
 
       def mkdir_p(path)

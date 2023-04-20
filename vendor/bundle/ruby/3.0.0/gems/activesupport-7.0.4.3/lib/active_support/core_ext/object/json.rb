@@ -164,16 +164,16 @@ class Hash
   def as_json(options = nil) # :nodoc:
     # create a subset of the hash by applying :only or :except
     subset = if options
-      if attrs = options[:only]
-        slice(*Array(attrs))
-      elsif attrs = options[:except]
-        except(*Array(attrs))
-      else
-        self
-      end
-    else
-      self
-    end
+               if attrs = options[:only]
+                 slice(*Array(attrs))
+               elsif attrs = options[:except]
+                 except(*Array(attrs))
+               else
+                 self
+               end
+             else
+               self
+             end
 
     result = {}
     subset.each do |k, v|

@@ -223,7 +223,7 @@ module ActionView
     def initialize(lookup_context, options)
       super(lookup_context)
       @options = options
-      @locals  = @options[:locals] || {}
+      @locals = @options[:locals] || {}
       @details = extract_details(@options)
     end
 
@@ -238,29 +238,30 @@ module ActionView
     end
 
     private
-      def template_keys(_)
-        @locals.keys
-      end
 
-      def render_partial_template(view, locals, template, layout, block)
-        ActiveSupport::Notifications.instrument(
-          "render_partial.action_view",
-          identifier: template.identifier,
-          layout: layout && layout.virtual_path
-        ) do |payload|
-          content = template.render(view, locals, add_to_stack: !block) do |*name|
-            view._layout_for(*name, &block)
-          end
+    def template_keys(_)
+      @locals.keys
+    end
 
-          content = layout.render(view, locals) { content } if layout
-          payload[:cache_hit] = view.view_renderer.cache_hits[template.virtual_path]
-          build_rendered_template(content, template)
+    def render_partial_template(view, locals, template, layout, block)
+      ActiveSupport::Notifications.instrument(
+        "render_partial.action_view",
+        identifier: template.identifier,
+        layout: layout && layout.virtual_path
+      ) do |payload|
+        content = template.render(view, locals, add_to_stack: !block) do |*name|
+          view._layout_for(*name, &block)
         end
-      end
 
-      def find_template(path, locals)
-        prefixes = path.include?(?/) ? [] : @lookup_context.prefixes
-        @lookup_context.find_template(path, prefixes, true, locals, @details)
+        content = layout.render(view, locals) { content } if layout
+        payload[:cache_hit] = view.view_renderer.cache_hits[template.virtual_path]
+        build_rendered_template(content, template)
       end
+    end
+
+    def find_template(path, locals)
+      prefixes = path.include?(?/) ? [] : @lookup_context.prefixes
+      @lookup_context.find_template(path, prefixes, true, locals, @details)
+    end
   end
 end

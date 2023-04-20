@@ -8,7 +8,7 @@
 module I18n
   module Locale
     module Tag
-      RFC4646_SUBTAGS = [ :language, :script, :region, :variant, :extension, :privateuse, :grandfathered ]
+      RFC4646_SUBTAGS = [:language, :script, :region, :variant, :extension, :privateuse, :grandfathered]
       RFC4646_FORMATS = { :language => :downcase, :script => :capitalize, :region => :upcase, :variant => :downcase }
 
       class Rfc4646 < Struct.new(*RFC4646_SUBTAGS)
@@ -62,7 +62,7 @@ module I18n
           class << self
             def match(tag)
               c = PATTERN.match(tag.to_s).captures
-              c[0..4] << (c[5].nil? ? c[6] : c[5])  << c[7] # TODO c[7] is grandfathered, throw a NotImplemented exception here?
+              c[0..4] << (c[5].nil? ? c[6] : c[5]) << c[7] # TODO c[7] is grandfathered, throw a NotImplemented exception here?
             rescue
               false
             end

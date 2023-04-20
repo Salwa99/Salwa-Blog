@@ -10,7 +10,7 @@ class Hash
   def slice!(*keys)
     omit = slice(*self.keys - keys)
     hash = slice(*keys)
-    hash.default      = default
+    hash.default = default
     hash.default_proc = default_proc if default_proc
     replace(hash)
     omit

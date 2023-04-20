@@ -102,7 +102,8 @@ module ActiveRecord
       def self.connection_handlers
         if ActiveRecord.legacy_connection_handling
         else
-          raise NotImplementedError, "The new connection handling does not support accessing multiple connection handlers."
+          raise NotImplementedError,
+                "The new connection handling does not support accessing multiple connection handlers."
         end
 
         @@connection_handlers ||= {}
@@ -225,6 +226,7 @@ module ActiveRecord
 
         until klass == Base
           break if klass.connection_class?
+
           klass = klass.superclass
         end
 
@@ -435,19 +437,20 @@ module ActiveRecord
       end
 
       private
-        def relation
-          relation = Relation.create(self)
 
-          if finder_needs_type_condition? && !ignore_default_scope?
-            relation.where!(type_condition)
-          else
-            relation
-          end
-        end
+      def relation
+        relation = Relation.create(self)
 
-        def table_metadata
-          TableMetadata.new(self, arel_table)
+        if finder_needs_type_condition? && !ignore_default_scope?
+          relation.where!(type_condition)
+        else
+          relation
         end
+      end
+
+      def table_metadata
+        TableMetadata.new(self, arel_table)
+      end
     end
 
     # New objects can be instantiated as either empty (pass no construction parameter) or pre-set with
@@ -542,9 +545,9 @@ module ActiveRecord
 
       _run_initialize_callbacks
 
-      @new_record               = true
-      @previously_new_record    = false
-      @destroyed                = false
+      @new_record = true
+      @previously_new_record = false
+      @destroyed = false
       @_start_transaction_state = nil
 
       super
@@ -580,8 +583,8 @@ module ActiveRecord
     def ==(comparison_object)
       super ||
         comparison_object.instance_of?(self.class) &&
-        !id.nil? &&
-        comparison_object.id == id
+          !id.nil? &&
+          comparison_object.id == id
     end
     alias :eql? :==
 
@@ -688,14 +691,14 @@ module ActiveRecord
       # We check defined?(@attributes) not to issue warnings if the object is
       # allocated but not initialized.
       inspection = if defined?(@attributes) && @attributes
-        self.class.attribute_names.filter_map do |name|
-          if _has_attribute?(name)
-            "#{name}: #{attribute_for_inspect(name)}"
-          end
-        end.join(", ")
-      else
-        "not initialized"
-      end
+                     self.class.attribute_names.filter_map do |name|
+                       if _has_attribute?(name)
+                         "#{name}: #{attribute_for_inspect(name)}"
+                       end
+                     end.join(", ")
+                   else
+                     "not initialized"
+                   end
 
       "#<#{self.class} #{inspection}>"
     end
@@ -704,6 +707,7 @@ module ActiveRecord
     # when pp is required.
     def pretty_print(pp)
       return super if custom_inspect_method_defined?
+
       pp.object_address_group(self) do
         if defined?(@attributes) && @attributes
           attr_names = self.class.attribute_names.select { |name| _has_attribute?(name) }
@@ -736,51 +740,52 @@ module ActiveRecord
     end
 
     private
-      # +Array#flatten+ will call +#to_ary+ (recursively) on each of the elements of
-      # the array, and then rescues from the possible +NoMethodError+. If those elements are
-      # +ActiveRecord::Base+'s, then this triggers the various +method_missing+'s that we have,
-      # which significantly impacts upon performance.
-      #
-      # So we can avoid the +method_missing+ hit by explicitly defining +#to_ary+ as +nil+ here.
-      #
-      # See also https://tenderlovemaking.com/2011/06/28/til-its-ok-to-return-nil-from-to_ary.html
-      def to_ary
-        nil
+
+    # +Array#flatten+ will call +#to_ary+ (recursively) on each of the elements of
+    # the array, and then rescues from the possible +NoMethodError+. If those elements are
+    # +ActiveRecord::Base+'s, then this triggers the various +method_missing+'s that we have,
+    # which significantly impacts upon performance.
+    #
+    # So we can avoid the +method_missing+ hit by explicitly defining +#to_ary+ as +nil+ here.
+    #
+    # See also https://tenderlovemaking.com/2011/06/28/til-its-ok-to-return-nil-from-to_ary.html
+    def to_ary
+      nil
+    end
+
+    def init_internals
+      @readonly = false
+      @previously_new_record = false
+      @destroyed = false
+      @marked_for_destruction = false
+      @destroyed_by_association = nil
+      @_start_transaction_state = nil
+
+      klass = self.class
+
+      @primary_key = klass.primary_key
+      @strict_loading = klass.strict_loading_by_default
+      @strict_loading_mode = :all
+
+      klass.define_attribute_methods
+    end
+
+    def initialize_internals_callback
+    end
+
+    def custom_inspect_method_defined?
+      self.class.instance_method(:inspect).owner != ActiveRecord::Base.instance_method(:inspect).owner
+    end
+
+    class InspectionMask < DelegateClass(::String)
+      def pretty_print(pp)
+        pp.text __getobj__
       end
+    end
+    private_constant :InspectionMask
 
-      def init_internals
-        @readonly                 = false
-        @previously_new_record    = false
-        @destroyed                = false
-        @marked_for_destruction   = false
-        @destroyed_by_association = nil
-        @_start_transaction_state = nil
-
-        klass = self.class
-
-        @primary_key         = klass.primary_key
-        @strict_loading      = klass.strict_loading_by_default
-        @strict_loading_mode = :all
-
-        klass.define_attribute_methods
-      end
-
-      def initialize_internals_callback
-      end
-
-      def custom_inspect_method_defined?
-        self.class.instance_method(:inspect).owner != ActiveRecord::Base.instance_method(:inspect).owner
-      end
-
-      class InspectionMask < DelegateClass(::String)
-        def pretty_print(pp)
-          pp.text __getobj__
-        end
-      end
-      private_constant :InspectionMask
-
-      def inspection_filter
-        self.class.inspection_filter
-      end
+    def inspection_filter
+      self.class.inspection_filter
+    end
   end
 end

@@ -18,14 +18,14 @@ module DEBUGGER__
   module SkipPathHelper
     def skip_path?(path)
       !path ||
-      DEBUGGER__.skip? ||
-      ThreadClient.current.management? ||
-      skip_internal_path?(path) ||
-      skip_config_skip_path?(path)
+        DEBUGGER__.skip? ||
+        ThreadClient.current.management? ||
+        skip_internal_path?(path) ||
+        skip_config_skip_path?(path)
     end
 
     def skip_config_skip_path?(path)
-      (skip_paths = CONFIG[:skip_path]) && skip_paths.any?{|skip_path| path.match?(skip_path)}
+      (skip_paths = CONFIG[:skip_path]) && skip_paths.any? { |skip_path| path.match?(skip_path) }
     end
 
     def skip_internal_path?(path)
@@ -41,7 +41,7 @@ module DEBUGGER__
   module GlobalVariablesHelper
     SKIP_GLOBAL_LIST = %i[$= $KCODE $-K $SAFE].freeze
     def safe_global_variables
-      global_variables.reject{|name| SKIP_GLOBAL_LIST.include? name }
+      global_variables.reject { |name| SKIP_GLOBAL_LIST.include? name }
     end
   end
 
@@ -201,7 +201,7 @@ module DEBUGGER__
       when nil
         @output << "\n"
       when Array
-        str.each{|s| puts s}
+        str.each { |s| puts s }
       else
         @output << "#{prefix}#{str.chomp}\n"
       end
@@ -265,6 +265,7 @@ module DEBUGGER__
 
     def suspend event, tp = nil, bp: nil, sig: nil, postmortem_frames: nil, replay_frames: nil, postmortem_exc: nil
       return if management?
+
       debug_suspend(event)
 
       @current_frame_index = 0
@@ -328,7 +329,7 @@ module DEBUGGER__
     ## control all
 
     begin
-      TracePoint.new(:raise){}.enable(target_thread: Thread.current)
+      TracePoint.new(:raise) {}.enable(target_thread: Thread.current)
       SUPPORT_TARGET_THREAD = true
     rescue ArgumentError
       SUPPORT_TARGET_THREAD = false
@@ -341,7 +342,7 @@ module DEBUGGER__
       subsession_id = SESSION.subsession_id
 
       if SUPPORT_TARGET_THREAD
-        @step_tp = TracePoint.new(*events){|tp|
+        @step_tp = TracePoint.new(*events) { |tp|
           if SESSION.stop_stepping? tp.path, tp.lineno, subsession_id
             tp.disable
             next
@@ -349,6 +350,7 @@ module DEBUGGER__
           next if !yield(tp)
           next if tp.path.start_with?(__dir__)
           next if tp.path.start_with?('<internal:trace_point>')
+
           next unless File.exist?(tp.path) if CONFIG[:skip_nosrc]
           loc = caller_locations(1, 1).first
           next if skip_location?(loc)
@@ -359,8 +361,9 @@ module DEBUGGER__
         }
         @step_tp.enable(target_thread: thread)
       else
-        @step_tp = TracePoint.new(*events){|tp|
+        @step_tp = TracePoint.new(*events) { |tp|
           next if thread != Thread.current
+
           if SESSION.stop_stepping? tp.path, tp.lineno, subsession_id
             tp.disable
             next
@@ -368,6 +371,7 @@ module DEBUGGER__
           next if !yield(tp)
           next if tp.path.start_with?(__dir__)
           next if tp.path.start_with?('<internal:trace_point>')
+
           next unless File.exist?(tp.path) if CONFIG[:skip_nosrc]
           loc = caller_locations(1, 1).first
           next if skip_location?(loc)
@@ -429,7 +433,7 @@ module DEBUGGER__
 
     SPECIAL_LOCAL_VARS = [
       [:raised_exception, "_raised"],
-      [:return_value,     "_return"],
+      [:return_value, "_return"],
     ]
 
     def frame_eval src, re_raise: false, binding_location: false
@@ -445,7 +449,6 @@ module DEBUGGER__
 
       @success_last_eval = true
       result
-
     rescue SystemExit
       raise
     rescue Exception => e
@@ -455,6 +458,7 @@ module DEBUGGER__
 
       e.backtrace_locations&.each do |loc|
         break if loc.path == __FILE__
+
         puts "  #{loc}"
       end
       raise if re_raise
@@ -470,7 +474,7 @@ module DEBUGGER__
 
         lines = file_lines.map.with_index do |e, i|
           cur = i == frame_line ? '=>' : '  '
-          line = colorize_dim('%4d|' % (i+1))
+          line = colorize_dim('%4d|' % (i + 1))
           "#{cur}#{line} #{e}"
         end
 
@@ -483,7 +487,7 @@ module DEBUGGER__
               start_line = [end_line - max_lines, 0].max
             end
           else
-            start_line = [frame_line - max_lines/2, 0].max
+            start_line = [frame_line - max_lines / 2, 0].max
           end
         end
 
@@ -503,7 +507,8 @@ module DEBUGGER__
       exit!
     end
 
-    def show_src(frame_index: @current_frame_index, update_line: false, ignore_show_line: false, max_lines: CONFIG[:show_src_lines], **options)
+    def show_src(frame_index: @current_frame_index, update_line: false, ignore_show_line: false,
+                 max_lines: CONFIG[:show_src_lines], **options)
       if frame = get_frame(frame_index)
         begin
           if ignore_show_line
@@ -518,7 +523,7 @@ module DEBUGGER__
               frame.show_line = end_line
             end
 
-            puts "[#{start_line+1}, #{end_line}] in #{frame.pretty_path}" if !update_line && max_lines != 1
+            puts "[#{start_line + 1}, #{end_line}] in #{frame.pretty_path}" if !update_line && max_lines != 1
             puts lines[start_line...end_line]
           else
             puts "# No sourcefile available for #{frame.path}"
@@ -552,7 +557,7 @@ module DEBUGGER__
       end
 
       if vars = frame&.local_variables
-        vars.each{|var, val|
+        vars.each { |var, val|
           locals << [var, val]
         }
       end
@@ -565,6 +570,7 @@ module DEBUGGER__
     def special_local_variables frame
       SPECIAL_LOCAL_VARS.each do |mid, name|
         next unless frame&.send("has_#{mid}")
+
         name = name.sub('_', '%') if frame.eval_binding.local_variable_defined?(name)
         yield name, frame.send(mid)
       end
@@ -585,7 +591,7 @@ module DEBUGGER__
       end
 
       if _self
-        M_INSTANCE_VARIABLES.bind_call(_self).sort.each{|iv|
+        M_INSTANCE_VARIABLES.bind_call(_self).sort.each { |iv|
           value = M_INSTANCE_VARIABLE_GET.bind_call(_self, iv)
           puts_variable_info iv, value, pat
         }
@@ -593,8 +599,9 @@ module DEBUGGER__
     end
 
     def iter_consts c, names = {}
-      c.constants(false).sort.each{|name|
+      c.constants(false).sort.each { |name|
         next if names.has_key? name
+
         names[name] = nil
         begin
           value = c.const_get(name)
@@ -624,15 +631,15 @@ module DEBUGGER__
         end
 
         unless only_self
-          _self.ancestors.each{|c| break if c == Object; cs[c] = :ancestors}
+          _self.ancestors.each { |c| break if c == Object; cs[c] = :ancestors }
           if b = current_frame&.binding
-            b.eval('::Module.nesting').each{|c| cs[c] = :nesting unless cs.has_key? c}
+            b.eval('::Module.nesting').each { |c| cs[c] = :nesting unless cs.has_key? c }
           end
         end
 
         names = {}
 
-        cs.each{|c, _|
+        cs.each { |c, _|
           iter_consts c, names, &block
         }
       end
@@ -645,7 +652,7 @@ module DEBUGGER__
     end
 
     def show_globals pat
-      safe_global_variables.sort.each{|name|
+      safe_global_variables.sort.each { |name|
         next if SKIP_GLOBAL_LIST.include? name
 
         value = eval(name.to_s)
@@ -669,7 +676,7 @@ module DEBUGGER__
         maximum_value_width = w - "#{label} = ".length
         valstr = truncate(inspected, width: maximum_value_width)
       else
-        valstr = colored_inspect(obj, width: 2 ** 30)
+        valstr = colored_inspect(obj, width: 2**30)
         valstr = inspected if valstr.lines.size > 1
       end
 
@@ -680,9 +687,9 @@ module DEBUGGER__
 
     def truncate(string, width:)
       if string.start_with?("#<")
-        string[0 .. (width-5)] + '...>'
+        string[0..(width - 5)] + '...>'
       else
-        string[0 .. (width-4)] + '...'
+        string[0..(width - 4)] + '...'
       end
     end
 
@@ -716,7 +723,7 @@ module DEBUGGER__
     def show_frames max = nil, pattern = nil
       if @target_frames && (max ||= @target_frames.size) > 0
         frames = []
-        @target_frames.each_with_index{|f, i|
+        @target_frames.each_with_index { |f, i|
           # we need to use FrameInfo#matchable_location because #location_str is for display
           # and it may change based on configs (e.g. use_short_path)
           next if pattern && !(f.name.match?(pattern) || f.matchable_location.match?(pattern))
@@ -727,8 +734,9 @@ module DEBUGGER__
         }
 
         size = frames.size
-        max.times{|i|
+        max.times { |i|
           break unless frames[i]
+
           index, frame = frames[i]
           puts frame_str(index, frame: frame)
         }
@@ -736,7 +744,7 @@ module DEBUGGER__
       end
     end
 
-    def show_frame i=0
+    def show_frame i = 0
       puts frame_str(i)
     end
 
@@ -817,7 +825,8 @@ module DEBUGGER__
       case args.first
       when :method
         klass_name, op, method_name, cond, cmd, path = args[1..]
-        bp = MethodBreakpoint.new(current_frame&.eval_binding || TOPLEVEL_BINDING, klass_name, op, method_name, cond: cond, command: cmd, path: path)
+        bp = MethodBreakpoint.new(current_frame&.eval_binding || TOPLEVEL_BINDING, klass_name, op, method_name,
+                                  cond: cond, command: cmd, path: path)
         begin
           bp.enable
         rescue NameError => e
@@ -910,7 +919,7 @@ module DEBUGGER__
 
             if frame.iseq
               frame.iseq.traceable_lines_norec(lines = {})
-              next_line = lines.keys.bsearch{|e| e > line}
+              next_line = lines.keys.bsearch { |e| e > line }
               if !next_line && (last_line = frame.iseq.last_line) > line
                 next_line = last_line
               end
@@ -960,18 +969,19 @@ module DEBUGGER__
             when nil, /\A(?:(.+):)?(\d+)\z/
               no_loc = !location
               file = $1 || frame.location.path
-              line = ($2 ||  frame.location.lineno + 1).to_i
+              line = ($2 || frame.location.lineno + 1).to_i
 
               step_tp nil, [:line, :return] do |tp|
                 if tp.event == :line
                   next false if no_loc && depth < DEBUGGER__.frame_depth - 3
                   next false unless tp.path.end_with?(file)
                   next false unless tp.lineno >= line
+
                   true
                 else
                   true if depth >= DEBUGGER__.frame_depth - 3 &&
                           caller_locations(2, 1).first.label == target_location_label
-                          # TODO: imcomplete condition
+                  # TODO: imcomplete condition
                 end
               end
             else
@@ -987,7 +997,7 @@ module DEBUGGER__
                 else # :return, :b_return
                   true if depth >= DEBUGGER__.frame_depth - 3 &&
                           caller_locations(2, 1).first.label == target_location_label
-                          # TODO: imcomplete condition
+                  # TODO: imcomplete condition
                 end
               end
             end
@@ -1025,7 +1035,7 @@ module DEBUGGER__
           case eval_type
           when :p
             result = frame_eval(eval_src)
-            puts "=> " + color_pp(result, 2 ** 30)
+            puts "=> " + color_pp(result, 2**30)
             if alloc_path = ObjectSpace.allocation_sourcefile(result)
               puts "allocated at #{alloc_path}:#{ObjectSpace.allocation_sourceline(result)}"
             end
@@ -1047,8 +1057,8 @@ module DEBUGGER__
             end
           when :display, :try_display
             failed_results = []
-            eval_src.each_with_index{|src, i|
-              result = frame_eval(src){|e|
+            eval_src.each_with_index { |src, i|
+              result = frame_eval(src) { |e|
                 failed_results << [i, e.message]
                 "<error: #{e.message}>"
               }
@@ -1115,7 +1125,7 @@ module DEBUGGER__
           when :default
             pat = args.shift
             show_locals pat
-            show_ivars  pat
+            show_ivars pat
             show_consts pat, only_self: true
 
           when :locals
@@ -1226,15 +1236,14 @@ module DEBUGGER__
           raise [cmd, *args].inspect
         end
       end
-
     rescue SuspendReplay, SystemExit, Interrupt
       raise
     rescue Exception => e
       STDERR.puts e.cause.inspect
       STDERR.puts e.inspect
-      Thread.list.each{|th|
+      Thread.list.each { |th|
         STDERR.puts "@@@ #{th}"
-        th.backtrace.each{|b|
+        th.backtrace.each { |b|
           STDERR.puts " > #{b}"
         }
       }
@@ -1245,20 +1254,20 @@ module DEBUGGER__
     end
 
     def debug_event(ev, args)
-      DEBUGGER__.debug{
+      DEBUGGER__.debug {
         args = args.map { |arg| DEBUGGER__.safe_inspect(arg) }
         "#{inspect} sends Event { type: #{ev.inspect}, args: #{args} } to Session"
       }
     end
 
     def debug_mode(old_mode, new_mode)
-      DEBUGGER__.debug{
+      DEBUGGER__.debug {
         "#{inspect} changes mode (#{old_mode} -> #{new_mode})"
       }
     end
 
     def debug_cmd(cmds)
-      DEBUGGER__.debug{
+      DEBUGGER__.debug {
         cmd, *args = *cmds
         args = args.map { |arg| DEBUGGER__.safe_inspect(arg) }
         "#{inspect} receives Cmd { type: #{cmd.inspect}, args: #{args} } from Session"
@@ -1266,7 +1275,7 @@ module DEBUGGER__
     end
 
     def debug_suspend(event)
-      DEBUGGER__.debug{
+      DEBUGGER__.debug {
         "#{inspect} is suspended for #{event.inspect}"
       }
     end
@@ -1283,18 +1292,19 @@ module DEBUGGER__
         @backup_frames = nil
         thread = Thread.current
 
-        @tp_recorder ||= TracePoint.new(:line){|tp|
+        @tp_recorder ||= TracePoint.new(:line) { |tp|
           next unless Thread.current == thread
           # can't be replaced by skip_location
           next if skip_internal_path?(tp.path)
+
           loc = caller_locations(1, 1).first
           next if skip_location?(loc)
 
           frames = DEBUGGER__.capture_frames(__dir__)
-          frames.each{|frame|
+          frames.each { |frame|
             if b = frame.binding
               frame.binding = nil
-              frame._local_variables = b.local_variables.map{|name|
+              frame._local_variables = b.local_variables.map { |name|
                 [name, b.local_variable_get(name)]
               }.to_h
               frame._callee = b.eval('__callee__')
@@ -1368,7 +1378,7 @@ module DEBUGGER__
       def current_position
         puts "INDEX: #{@index}"
         li = log_index
-        @log.each_with_index{|frame, i|
+        @log.each_with_index { |frame, i|
           loc = frame.first&.location
           prefix = i == li ? "=> " : '   '
           puts "#{prefix} #{loc}"

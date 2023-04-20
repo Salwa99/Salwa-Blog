@@ -1,4 +1,5 @@
-#frozen_string_literal: false
+# frozen_string_literal: false
+
 require 'strscan'
 
 module JSON
@@ -6,15 +7,15 @@ module JSON
     # This class implements the JSON parser that is used to parse a JSON string
     # into a Ruby data structure.
     class Parser < StringScanner
-      STRING                = /" ((?:[^\x0-\x1f"\\] |
+      STRING = /" ((?:[^\x0-\x1f"\\] |
                                    # escaped special characters:
                                   \\["\\\/bfnrt] |
                                   \\u[0-9a-fA-F]{4} |
                                    # match all but escaped special characters:
                                   \\[\x20-\x21\x23-\x2e\x30-\x5b\x5d-\x61\x63-\x65\x67-\x6d\x6f-\x71\x73\x75-\xff])*)
                               "/nx
-      INTEGER               = /(-?0|-?[1-9]\d*)/
-      FLOAT                 = /(-?
+      INTEGER = /(-?0|-?[1-9]\d*)/
+      FLOAT = /(-?
                                 (?:0|[1-9]\d*)
                                 (?:
                                   \.\d+(?i:e[+-]?\d+) |
@@ -22,19 +23,19 @@ module JSON
                                   (?i:e[+-]?\d+)
                                 )
                                 )/x
-      NAN                   = /NaN/
-      INFINITY              = /Infinity/
-      MINUS_INFINITY        = /-Infinity/
-      OBJECT_OPEN           = /\{/
-      OBJECT_CLOSE          = /\}/
-      ARRAY_OPEN            = /\[/
-      ARRAY_CLOSE           = /\]/
-      PAIR_DELIMITER        = /:/
-      COLLECTION_DELIMITER  = /,/
-      TRUE                  = /true/
-      FALSE                 = /false/
-      NULL                  = /null/
-      IGNORE                = %r(
+      NAN = /NaN/
+      INFINITY = /Infinity/
+      MINUS_INFINITY = /-Infinity/
+      OBJECT_OPEN = /\{/
+      OBJECT_CLOSE = /\}/
+      ARRAY_OPEN = /\[/
+      ARRAY_CLOSE = /\]/
+      PAIR_DELIMITER = /:/
+      COLLECTION_DELIMITER = /,/
+      TRUE = /true/
+      FALSE = /false/
+      NULL = /null/
+      IGNORE = %r(
         (?:
          //[^\n\r]*[\n\r]| # line comments
          /\*               # c-style comments
@@ -95,11 +96,11 @@ module JSON
           @create_additions = false
         end
         @symbolize_names && @create_additions and raise ArgumentError,
-          'options :symbolize_names and :create_additions cannot be used '\
-          'in conjunction'
+                                                        'options :symbolize_names and :create_additions cannot be used ' \
+                                                        'in conjunction'
         @create_id = @create_additions ? JSON.create_id : nil
         @object_class = opts[:object_class] || Hash
-        @array_class  = opts[:array_class] || Array
+        @array_class = opts[:array_class] || Array
         @decimal_class = opts[:decimal_class]
         @match_string = opts[:match_string]
       end
@@ -122,9 +123,10 @@ module JSON
         else
           obj = parse_value
           UNPARSED.equal?(obj) and raise ParserError,
-            "source is not valid JSON!"
+                                         "source is not valid JSON!"
           obj.freeze if @freeze
         end
+
         while !eos? && skip(IGNORE) do end
         eos? or raise ParserError, "source is not valid JSON!"
         obj
@@ -137,7 +139,7 @@ module JSON
           source = source.to_str
         else
           raise TypeError,
-            "#{source.inspect} is not like a string"
+                "#{source.inspect} is not like a string"
         end
         if source.encoding != ::Encoding::ASCII_8BIT
           source = source.encode(::Encoding::UTF_8)
@@ -149,16 +151,16 @@ module JSON
       # Unescape characters in strings.
       UNESCAPE_MAP = Hash.new { |h, k| h[k] = k.chr }
       UNESCAPE_MAP.update({
-        ?"  => '"',
-        ?\\ => '\\',
-        ?/  => '/',
-        ?b  => "\b",
-        ?f  => "\f",
-        ?n  => "\n",
-        ?r  => "\r",
-        ?t  => "\t",
-        ?u  => nil,
-      })
+                            ?" => '"',
+                            ?\\ => '\\',
+                            ?/ => '/',
+                            ?b => "\b",
+                            ?f => "\f",
+                            ?n => "\n",
+                            ?r => "\r",
+                            ?t => "\t",
+                            ?u => nil,
+                          })
 
       EMPTY_8BIT_STRING = ''
       if ::String.method_defined?(:encode)
@@ -169,6 +171,7 @@ module JSON
       def parse_string
         if scan(STRING)
           return '' if self[1].empty?
+
           string = self[1].gsub(%r((?:\\[\\bfnrt"/]|(?:\\u(?:[A-Fa-f\d]{4}))+|\\[\x20-\xff]))n) do |c|
             if u = UNESCAPE_MAP[$&[1]]
               u
@@ -254,6 +257,7 @@ module JSON
       def parse_array
         raise NestingError, "nesting of #@current_nesting is too deep" if
           @max_nesting.nonzero? && @current_nesting > @max_nesting
+
         result = @array_class.new
         delim = false
         loop do
@@ -275,6 +279,7 @@ module JSON
             if delim
               raise ParserError, "expected next element in array at '#{peek(20)}'!"
             end
+
             break
           when skip(IGNORE)
             ;
@@ -288,6 +293,7 @@ module JSON
       def parse_object
         raise NestingError, "nesting of #@current_nesting is too deep" if
           @max_nesting.nonzero? && @current_nesting > @max_nesting
+
         result = @object_class.new
         delim = false
         loop do
@@ -299,6 +305,7 @@ module JSON
             unless scan(PAIR_DELIMITER)
               raise ParserError, "expected ':' in object at '#{peek(20)}'!"
             end
+
             skip(IGNORE)
             unless UNPARSED.equal?(value = parse_value)
               result[@symbolize_names ? string.to_sym : string] = value
@@ -318,9 +325,11 @@ module JSON
             if delim
               raise ParserError, "expected next name, value pair in object at '#{peek(20)}'!"
             end
+
             if @create_additions and klassname = result[@create_id]
               klass = JSON.deep_const_get klassname
               break unless klass and klass.json_creatable?
+
               result = klass.json_create(result)
             end
             break

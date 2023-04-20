@@ -670,7 +670,8 @@ RSpec.shared_examples Capybara::RSpecMatchers do |session, _mode|
     end
 
     it 'gives proper description for a given value' do
-      expect(have_field('Text field', with: 'some value').description).to eq('have visible field "Text field" that is not disabled with value "some value"')
+      expect(have_field('Text field',
+                        with: 'some value').description).to eq('have visible field "Text field" that is not disabled with value "some value"')
     end
 
     it 'passes if there is such a field' do
@@ -813,7 +814,8 @@ RSpec.shared_examples Capybara::RSpecMatchers do |session, _mode|
     end
 
     it 'gives proper description for a given selected value' do
-      expect(have_select('Select Box', selected: 'some value').description).to eq('have visible select box "Select Box" that is not disabled with "some value" selected')
+      expect(have_select('Select Box',
+                         selected: 'some value').description).to eq('have visible select box "Select Box" that is not disabled with "some value" selected')
     end
 
     it 'passes if there is such a select' do
@@ -836,7 +838,8 @@ RSpec.shared_examples Capybara::RSpecMatchers do |session, _mode|
 
     it 'gives proper description' do
       expect(have_table('Lovely table').description).to eq('have visible table "Lovely table"')
-      expect(have_table('Lovely table', caption: 'my caption').description).to eq('have visible table "Lovely table" with caption "my caption"')
+      expect(have_table('Lovely table',
+                        caption: 'my caption').description).to eq('have visible table "Lovely table" with caption "my caption"')
     end
 
     it 'gives proper description when :visible option passed' do
@@ -887,7 +890,8 @@ RSpec.shared_examples Capybara::RSpecMatchers do |session, _mode|
           expect(Benchmark.realtime do
             expect do
               expect(el).to have_text('waiting to be reloaded').and(have_text('has been reloaded'))
-            end.to raise_error RSpec::Expectations::ExpectationNotMetError, /expected to find text "waiting to be reloaded" in "has been reloaded"/
+            end.to raise_error RSpec::Expectations::ExpectationNotMetError,
+                               /expected to find text "waiting to be reloaded" in "has been reloaded"/
           end).to be_between(2, 3)
         end
       end

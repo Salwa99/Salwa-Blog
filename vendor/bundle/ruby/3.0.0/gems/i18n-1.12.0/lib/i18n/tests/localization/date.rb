@@ -96,21 +96,22 @@ module I18n
 
         protected
 
-          def setup_date_translations
-            I18n.backend.store_translations :de, {
-              :date => {
-                :formats => {
-                  :default => "%d.%m.%Y",
-                  :short => "%d. %b",
-                  :long => "%d. %B %Y",
-                },
-                :day_names => %w(Sonntag Montag Dienstag Mittwoch Donnerstag Freitag Samstag),
-                :abbr_day_names => %w(So Mo Di Mi Do Fr  Sa),
-                :month_names => %w(Januar Februar März April Mai Juni Juli August September Oktober November Dezember).unshift(nil),
-                :abbr_month_names => %w(Jan Feb Mär Apr Mai Jun Jul Aug Sep Okt Nov Dez).unshift(nil)
-              }
+        def setup_date_translations
+          I18n.backend.store_translations :de, {
+            :date => {
+              :formats => {
+                :default => "%d.%m.%Y",
+                :short => "%d. %b",
+                :long => "%d. %B %Y",
+              },
+              :day_names => %w(Sonntag Montag Dienstag Mittwoch Donnerstag Freitag Samstag),
+              :abbr_day_names => %w(So Mo Di Mi Do Fr Sa),
+              :month_names => %w(Januar Februar März April Mai Juni Juli August September Oktober November
+                                 Dezember).unshift(nil),
+              :abbr_month_names => %w(Jan Feb Mär Apr Mai Jun Jul Aug Sep Okt Nov Dez).unshift(nil)
             }
-          end
+          }
+        end
       end
     end
   end

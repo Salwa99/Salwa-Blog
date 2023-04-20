@@ -1,5 +1,6 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/fields/common_field'
 require 'mail/utilities'
 
@@ -16,7 +17,7 @@ module Mail
   #     field bodies are simply to be treated as a single line of characters
   #     with no further processing (except for header "folding" and
   #     "unfolding" as described in section 2.2.3).
-  class UnstructuredField < CommonField #:nodoc:
+  class UnstructuredField < CommonField # :nodoc:
     def initialize(name, value, charset = nil)
       if value.is_a?(Array)
         # Probably has arrived here from a failed parse of an AddressList Field
@@ -100,9 +101,9 @@ module Mail
     end
 
     def fold(prepend = 0) # :nodoc:
-      encoding       = normalized_encoding
+      encoding = normalized_encoding
       decoded_string = decoded.to_s
-      should_encode  = !decoded_string.ascii_only?
+      should_encode = !decoded_string.ascii_only?
       if should_encode
         first = true
         words = decoded_string.split(/[ \t]/).map do |word|
@@ -121,7 +122,7 @@ module Mail
         words = decoded_string.split(/[ \t]/)
       end
 
-      folded_lines   = []
+      folded_lines = []
       while !words.empty?
         limit = 78 - prepend
         limit = limit - 7 - encoding.length if should_encode
@@ -145,6 +146,7 @@ module Mail
           # (The fix, it seems, would be to use encoded-word encoding on it, because that way you can break it across multiple lines and
           # the linebreak will be ignored)
           break if !line.empty? && (line.length + word.length + 1 > limit)
+
           # Remove the word from the queue ...
           words.shift
           # Add word separator
@@ -168,12 +170,12 @@ module Mail
 
     def encode(value)
       value = [value].pack(Constants::CAPITAL_M).gsub(Constants::EQUAL_LF, Constants::EMPTY)
-      value.gsub!(/"/,  '=22')
+      value.gsub!(/"/, '=22')
       value.gsub!(/\(/, '=28')
       value.gsub!(/\)/, '=29')
       value.gsub!(/\?/, '=3F')
-      value.gsub!(/_/,  '=5F')
-      value.gsub!(/ /,  '_')
+      value.gsub!(/_/, '=5F')
+      value.gsub!(/ /, '_')
       value
     end
 

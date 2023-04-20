@@ -2,13 +2,10 @@ require 'concurrent/thread_safe/util'
 require 'concurrent/thread_safe/util/striped64'
 
 module Concurrent
-
   # @!visibility private
   module ThreadSafe
-    
     # @!visibility private
     module Util
-
       # A Ruby port of the Doug Lea's jsr166e.LondAdder class version 1.8
       # available in public domain.
       #
@@ -28,16 +25,18 @@ module Concurrent
       # characteristics. But under high contention, expected throughput of
       # this class is significantly higher, at the expense of higher space
       # consumption.
-      # 
+      #
       # @!visibility private
       class Adder < Striped64
         # Adds the given value.
         def add(x)
-          if (current_cells = cells) || !cas_base_computed {|current_base| current_base + x}
+          if (current_cells = cells) || !cas_base_computed { |current_base| current_base + x }
             was_uncontended = true
-            hash            = hash_code
-            unless current_cells && (cell = current_cells.volatile_get_by_hash(hash)) && (was_uncontended = cell.cas_computed {|current_value| current_value + x})
-              retry_update(x, hash, was_uncontended) {|current_value| current_value + x}
+            hash = hash_code
+            unless current_cells && (cell = current_cells.volatile_get_by_hash(hash)) && (was_uncontended = cell.cas_computed { |current_value|
+                                                                                            current_value + x
+                                                                                          })
+              retry_update(x, hash, was_uncontended) { |current_value| current_value + x }
             end
           end
         end

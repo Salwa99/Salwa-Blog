@@ -2,7 +2,6 @@ require 'concurrent/synchronization/safe_initialization'
 require 'concurrent/utility/native_integer'
 
 module Concurrent
-
   # @!macro atomic_fixnum
   # @!visibility private
   # @!macro internal_implementation_note

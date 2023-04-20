@@ -51,12 +51,15 @@ end
 
 skipped_tests = %i[response_headers status_code trigger download]
 
-Capybara::SpecHelper.run_specs TestSessions::RemoteFirefox, FIREFOX_REMOTE_DRIVER.to_s, capybara_skip: skipped_tests do |example|
+Capybara::SpecHelper.run_specs TestSessions::RemoteFirefox, FIREFOX_REMOTE_DRIVER.to_s,
+                               capybara_skip: skipped_tests do |example|
   case example.metadata[:full_description]
   when 'Capybara::Session selenium_firefox_remote node #click should allow multiple modifiers'
     skip "Firefox doesn't generate an event for shift+control+click" if firefox_gte?(62, @session)
   when 'Capybara::Session selenium_firefox_remote #accept_prompt should accept the prompt with a blank response when there is a default'
-    pending "Geckodriver doesn't set a blank response in FF < 63 - https://bugzilla.mozilla.org/show_bug.cgi?id=1486485" if firefox_lt?(63, @session)
+    pending "Geckodriver doesn't set a blank response in FF < 63 - https://bugzilla.mozilla.org/show_bug.cgi?id=1486485" if firefox_lt?(
+      63, @session
+    )
   when 'Capybara::Session selenium_firefox_remote #attach_file with multipart form should fire change once when uploading multiple files from empty'
     pending "FF < 62 doesn't support setting all files at once" if firefox_lt?(62, @session)
   when 'Capybara::Session selenium_firefox_remote #reset_session! removes ALL cookies'

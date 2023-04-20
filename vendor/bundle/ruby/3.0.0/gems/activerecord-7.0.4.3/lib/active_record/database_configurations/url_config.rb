@@ -39,15 +39,16 @@ module ActiveRecord
       end
 
       private
-        # Return a Hash that can be merged into the main config that represents
-        # the passed in url
-        def build_url_hash
-          if url.nil? || url.start_with?("jdbc:", "http:", "https:")
-            { url: url }
-          else
-            ConnectionUrlResolver.new(url).to_hash
-          end
+
+      # Return a Hash that can be merged into the main config that represents
+      # the passed in url
+      def build_url_hash
+        if url.nil? || url.start_with?("jdbc:", "http:", "https:")
+          { url: url }
+        else
+          ConnectionUrlResolver.new(url).to_hash
         end
+      end
     end
   end
 end

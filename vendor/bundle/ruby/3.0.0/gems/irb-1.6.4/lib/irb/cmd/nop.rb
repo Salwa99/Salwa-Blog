@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   nop.rb -
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -48,7 +49,7 @@ module IRB
       end
 
       def execute(*opts)
-        #nop
+        # nop
       end
     end
   end

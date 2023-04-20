@@ -435,12 +435,13 @@ module ActionView
 
         case record
         when String, Symbol
-          model       = nil
+          model = nil
           object_name = record
         else
-          model       = convert_to_model(record)
-          object      = _object_for_form_builder(record)
+          model = convert_to_model(record)
+          object = _object_for_form_builder(record)
           raise ArgumentError, "First argument in form cannot contain nil or be empty" unless object
+
           object_name = options[:as] || model_name_from_record_or_class(object).param_key
           apply_form_for_options!(object, options)
         end
@@ -451,11 +452,11 @@ module ActionView
           options[:authenticity_token] = false
         end
 
-        options[:model]                               = model
-        options[:scope]                               = object_name
-        options[:local]                               = !remote
-        options[:skip_default_ids]                    = false
-        options[:allow_method_names_outside_object]   = options.fetch(:allow_method_names_outside_object, false)
+        options[:model] = model
+        options[:scope] = object_name
+        options[:local] = !remote
+        options[:skip_default_ids] = false
+        options[:allow_method_names_outside_object] = options.fetch(:allow_method_names_outside_object, false)
 
         form_with(**options, &block)
       end
@@ -468,8 +469,8 @@ module ActionView
         action = object.respond_to?(:persisted?) && object.persisted? ? :edit : :new
         options[:html] ||= {}
         options[:html].reverse_merge!(
-          class:  as ? "#{action}_#{as}" : dom_class(object, action),
-          id:     (as ? [namespace, action, as] : [namespace, dom_id(object, action)]).compact.join("_").presence,
+          class: as ? "#{action}_#{as}" : dom_class(object, action),
+          id: (as ? [namespace, action, as] : [namespace, dom_id(object, action)]).compact.join("_").presence,
         )
       end
       private :apply_form_for_options!
@@ -752,20 +753,21 @@ module ActionView
       #     form_with(**options.merge(builder: LabellingFormBuilder), &block)
       #   end
       def form_with(model: nil, scope: nil, url: nil, format: nil, **options, &block)
-        options = { allow_method_names_outside_object: true, skip_default_ids: !form_with_generates_ids }.merge!(options)
+        options = { allow_method_names_outside_object: true,
+                    skip_default_ids: !form_with_generates_ids }.merge!(options)
 
         if model
           if url != false
             url ||= polymorphic_path(model, format: format)
           end
 
-          model   = _object_for_form_builder(model)
+          model = _object_for_form_builder(model)
           scope ||= model_name_from_record_or_class(model).param_key
         end
 
         if block_given?
           builder = instantiate_builder(scope, model, options)
-          output  = capture(builder, &block)
+          output = capture(builder, &block)
           options[:multipart] ||= builder.multipart?
 
           html_options = html_options_for_form_with(url, model, **options)
@@ -1019,7 +1021,8 @@ module ActionView
       # can pass <tt>include_id: false</tt> to prevent fields_for from
       # rendering it automatically.
       def fields_for(record_name, record_object = nil, options = {}, &block)
-        options = { model: record_object, allow_method_names_outside_object: false, skip_default_ids: false }.merge!(options)
+        options = { model: record_object, allow_method_names_outside_object: false,
+                    skip_default_ids: false }.merge!(options)
 
         fields(record_name, **options, &block)
       end
@@ -1070,10 +1073,11 @@ module ActionView
       # to work with an object as a base, like
       # FormOptionsHelper#collection_select and DateHelper#datetime_select.
       def fields(scope = nil, model: nil, **options, &block)
-        options = { allow_method_names_outside_object: true, skip_default_ids: !form_with_generates_ids }.merge!(options)
+        options = { allow_method_names_outside_object: true,
+                    skip_default_ids: !form_with_generates_ids }.merge!(options)
 
         if model
-          model   = _object_for_form_builder(model)
+          model = _object_for_form_builder(model)
           scope ||= model_name_from_record_or_class(model).param_key
         end
 
@@ -1575,39 +1579,40 @@ module ActionView
       end
 
       private
-        def html_options_for_form_with(url_for_options = nil, model = nil, html: {}, local: !form_with_generates_remote_forms,
-          skip_enforcing_utf8: nil, **options)
-          html_options = options.slice(:id, :class, :multipart, :method, :data, :authenticity_token).merge!(html)
-          html_options[:remote] = html.delete(:remote) || !local
-          html_options[:method] ||= :patch if model.respond_to?(:persisted?) && model.persisted?
-          if skip_enforcing_utf8.nil?
-            if options.key?(:enforce_utf8)
-              html_options[:enforce_utf8] = options[:enforce_utf8]
-            end
-          else
-            html_options[:enforce_utf8] = !skip_enforcing_utf8
+
+      def html_options_for_form_with(url_for_options = nil, model = nil, html: {}, local: !form_with_generates_remote_forms,
+                                     skip_enforcing_utf8: nil, **options)
+        html_options = options.slice(:id, :class, :multipart, :method, :data, :authenticity_token).merge!(html)
+        html_options[:remote] = html.delete(:remote) || !local
+        html_options[:method] ||= :patch if model.respond_to?(:persisted?) && model.persisted?
+        if skip_enforcing_utf8.nil?
+          if options.key?(:enforce_utf8)
+            html_options[:enforce_utf8] = options[:enforce_utf8]
           end
-          html_options_for_form(url_for_options.nil? ? {} : url_for_options, html_options)
+        else
+          html_options[:enforce_utf8] = !skip_enforcing_utf8
+        end
+        html_options_for_form(url_for_options.nil? ? {} : url_for_options, html_options)
+      end
+
+      def instantiate_builder(record_name, record_object, options)
+        case record_name
+        when String, Symbol
+          object = record_object
+          object_name = record_name
+        else
+          object = record_name
+          object_name = model_name_from_record_or_class(object).param_key if object
         end
 
-        def instantiate_builder(record_name, record_object, options)
-          case record_name
-          when String, Symbol
-            object = record_object
-            object_name = record_name
-          else
-            object = record_name
-            object_name = model_name_from_record_or_class(object).param_key if object
-          end
+        builder = options[:builder] || default_form_builder_class
+        builder.new(object_name, object, self, options)
+      end
 
-          builder = options[:builder] || default_form_builder_class
-          builder.new(object_name, object, self, options)
-        end
-
-        def default_form_builder_class
-          builder = default_form_builder || ActionView::Base.default_form_builder
-          builder.respond_to?(:constantize) ? builder.constantize : builder
-        end
+      def default_form_builder_class
+        builder = default_form_builder || ActionView::Base.default_form_builder
+        builder.respond_to?(:constantize) ? builder.constantize : builder
+      end
     end
 
     # A +FormBuilder+ object is associated with a particular model object and
@@ -1700,7 +1705,8 @@ module ActionView
       def initialize(object_name, object, template, options)
         @nested_child_index = {}
         @object_name, @object, @template, @options = object_name, object, template, options
-        @default_options = @options ? @options.slice(:index, :namespace, :skip_default_ids, :allow_method_names_outside_object) : {}
+        @default_options = @options ? @options.slice(:index, :namespace, :skip_default_ids,
+                                                     :allow_method_names_outside_object) : {}
         @default_html_options = @default_options.except(:skip_default_ids, :allow_method_names_outside_object)
 
         convert_to_legacy_options(@options)
@@ -1709,7 +1715,8 @@ module ActionView
           if (object ||= @template.instance_variable_get("@#{@object_name[0..-3]}")) && object.respond_to?(:to_param)
             @auto_index = object.to_param
           else
-            raise ArgumentError, "object[] naming but object param and @object var don't exist or don't respond to to_param: #{object.inspect}"
+            raise ArgumentError,
+                  "object[] naming but object param and @object var don't exist or don't respond to to_param: #{object.inspect}"
           end
         end
 
@@ -2001,7 +2008,8 @@ module ActionView
       #
       # Please refer to the documentation of the base helper for details.
 
-      (field_helpers - [:label, :check_box, :radio_button, :fields_for, :fields, :hidden_field, :file_field]).each do |selector|
+      (field_helpers - [:label, :check_box, :radio_button, :fields_for, :fields, :hidden_field,
+                        :file_field]).each do |selector|
         class_eval <<-RUBY_EVAL, __FILE__, __LINE__ + 1
           def #{selector}(method, options = {})  # def text_field(method, options = {})
             @template.public_send(               #   @template.public_send(
@@ -2255,7 +2263,8 @@ module ActionView
       # hidden field is not needed and you can pass <tt>include_id: false</tt>
       # to prevent fields_for from rendering it automatically.
       def fields_for(record_name, record_object = nil, fields_options = {}, &block)
-        fields_options, record_object = record_object, nil if record_object.is_a?(Hash) && record_object.extractable_options?
+        fields_options, record_object = record_object,
+nil if record_object.is_a?(Hash) && record_object.extractable_options?
         fields_options[:builder] ||= options[:builder]
         fields_options[:namespace] = options[:namespace]
         fields_options[:parent_builder] = self
@@ -2267,24 +2276,24 @@ module ActionView
           end
         else
           record_object = @template._object_for_form_builder(record_name)
-          record_name   = model_name_from_record_or_class(record_object).param_key
+          record_name = model_name_from_record_or_class(record_object).param_key
         end
 
         object_name = @object_name
         index = if options.has_key?(:index)
-          options[:index]
-        elsif defined?(@auto_index)
-          object_name = object_name.to_s.delete_suffix("[]")
-          @auto_index
-        end
+                  options[:index]
+                elsif defined?(@auto_index)
+                  object_name = object_name.to_s.delete_suffix("[]")
+                  @auto_index
+                end
 
         record_name = if index
-          "#{object_name}[#{index}][#{record_name}]"
-        elsif record_name.end_with?("[]")
-          "#{object_name}[#{record_name[0..-3]}][#{record_object.id}]"
-        else
-          "#{object_name}[#{record_name}]"
-        end
+                        "#{object_name}[#{index}][#{record_name}]"
+                      elsif record_name.end_with?("[]")
+                        "#{object_name}[#{record_name[0..-3]}][#{record_object.id}]"
+                      else
+                        "#{object_name}[#{record_name}]"
+                      end
         fields_options[:child_index] = index
 
         @template.fields_for(record_name, record_object, fields_options, &block)
@@ -2637,95 +2646,97 @@ module ActionView
       end
 
       private
-        def objectify_options(options)
-          result = @default_options.merge(options)
-          result[:object] = @object
-          result
+
+      def objectify_options(options)
+        result = @default_options.merge(options)
+        result[:object] = @object
+        result
+      end
+
+      def submit_default_value
+        object = convert_to_model(@object)
+        key = object ? (object.persisted? ? :update : :create) : :submit
+
+        model = if object.respond_to?(:model_name)
+                  object.model_name.human
+                else
+                  @object_name.to_s.humanize
+                end
+
+        defaults = []
+        # Object is a model and it is not overwritten by as and scope option.
+        if object.respond_to?(:model_name) && object_name.to_s == model.downcase
+          defaults << :"helpers.submit.#{object.model_name.i18n_key}.#{key}"
+        else
+          defaults << :"helpers.submit.#{object_name}.#{key}"
+        end
+        defaults << :"helpers.submit.#{key}"
+        defaults << "#{key.to_s.humanize} #{model}"
+
+        I18n.t(defaults.shift, model: model, default: defaults)
+      end
+
+      def nested_attributes_association?(association_name)
+        @object.respond_to?("#{association_name}_attributes=")
+      end
+
+      def fields_for_with_nested_attributes(association_name, association, options, block)
+        name = "#{object_name}[#{association_name}_attributes]"
+        association = convert_to_model(association)
+
+        if association.respond_to?(:persisted?)
+          association = [association] if @object.public_send(association_name).respond_to?(:to_ary)
+        elsif !association.respond_to?(:to_ary)
+          association = @object.public_send(association_name)
         end
 
-        def submit_default_value
-          object = convert_to_model(@object)
-          key    = object ? (object.persisted? ? :update : :create) : :submit
-
-          model = if object.respond_to?(:model_name)
-            object.model_name.human
-          else
-            @object_name.to_s.humanize
-          end
-
-          defaults = []
-          # Object is a model and it is not overwritten by as and scope option.
-          if object.respond_to?(:model_name) && object_name.to_s == model.downcase
-            defaults << :"helpers.submit.#{object.model_name.i18n_key}.#{key}"
-          else
-            defaults << :"helpers.submit.#{object_name}.#{key}"
-          end
-          defaults << :"helpers.submit.#{key}"
-          defaults << "#{key.to_s.humanize} #{model}"
-
-          I18n.t(defaults.shift, model: model, default: defaults)
-        end
-
-        def nested_attributes_association?(association_name)
-          @object.respond_to?("#{association_name}_attributes=")
-        end
-
-        def fields_for_with_nested_attributes(association_name, association, options, block)
-          name = "#{object_name}[#{association_name}_attributes]"
-          association = convert_to_model(association)
-
-          if association.respond_to?(:persisted?)
-            association = [association] if @object.public_send(association_name).respond_to?(:to_ary)
-          elsif !association.respond_to?(:to_ary)
-            association = @object.public_send(association_name)
-          end
-
-          if association.respond_to?(:to_ary)
-            explicit_child_index = options[:child_index]
-            output = ActiveSupport::SafeBuffer.new
-            association.each do |child|
-              if explicit_child_index
-                options[:child_index] = explicit_child_index.call if explicit_child_index.respond_to?(:call)
-              else
-                options[:child_index] = nested_child_index(name)
-              end
-              if content = fields_for_nested_model("#{name}[#{options[:child_index]}]", child, options, block)
-                output << content
-              end
+        if association.respond_to?(:to_ary)
+          explicit_child_index = options[:child_index]
+          output = ActiveSupport::SafeBuffer.new
+          association.each do |child|
+            if explicit_child_index
+              options[:child_index] = explicit_child_index.call if explicit_child_index.respond_to?(:call)
+            else
+              options[:child_index] = nested_child_index(name)
             end
-            output
-          elsif association
-            fields_for_nested_model(name, association, options, block)
+            if content = fields_for_nested_model("#{name}[#{options[:child_index]}]", child, options, block)
+              output << content
+            end
           end
+          output
+        elsif association
+          fields_for_nested_model(name, association, options, block)
         end
+      end
 
-        def fields_for_nested_model(name, object, fields_options, block)
-          object = convert_to_model(object)
-          emit_hidden_id = object.persisted? && fields_options.fetch(:include_id) {
-            options.fetch(:include_id, true)
-          }
+      def fields_for_nested_model(name, object, fields_options, block)
+        object = convert_to_model(object)
+        emit_hidden_id = object.persisted? && fields_options.fetch(:include_id) {
+          options.fetch(:include_id, true)
+        }
 
-          @template.fields_for(name, object, fields_options) do |f|
-            output = @template.capture(f, &block)
-            output.concat f.hidden_field(:id) if output && emit_hidden_id && !f.emitted_hidden_id?
-            output
-          end
+        @template.fields_for(name, object, fields_options) do |f|
+          output = @template.capture(f, &block)
+          output.concat f.hidden_field(:id) if output && emit_hidden_id && !f.emitted_hidden_id?
+          output
         end
+      end
 
-        def nested_child_index(name)
-          @nested_child_index[name] ||= -1
-          @nested_child_index[name] += 1
-        end
+      def nested_child_index(name)
+        @nested_child_index[name] ||= -1
+        @nested_child_index[name] += 1
+      end
 
-        def convert_to_legacy_options(options)
-          if options.key?(:skip_id)
-            options[:include_id] = !options.delete(:skip_id)
-          end
+      def convert_to_legacy_options(options)
+        if options.key?(:skip_id)
+          options[:include_id] = !options.delete(:skip_id)
         end
+      end
     end
   end
 
   ActiveSupport.on_load(:action_view) do
-    cattr_accessor :default_form_builder, instance_writer: false, instance_reader: false, default: ::ActionView::Helpers::FormBuilder
+    cattr_accessor :default_form_builder, instance_writer: false, instance_reader: false,
+                                          default: ::ActionView::Helpers::FormBuilder
   end
 end

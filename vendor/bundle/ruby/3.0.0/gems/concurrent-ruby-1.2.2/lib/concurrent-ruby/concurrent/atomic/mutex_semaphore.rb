@@ -2,12 +2,10 @@ require 'concurrent/synchronization/lockable_object'
 require 'concurrent/utility/native_integer'
 
 module Concurrent
-
   # @!macro semaphore
   # @!visibility private
   # @!macro internal_implementation_note
   class MutexSemaphore < Synchronization::LockableObject
-
     # @!macro semaphore_method_initialize
     def initialize(count)
       Utility::NativeInteger.ensure_integer_and_bounds count

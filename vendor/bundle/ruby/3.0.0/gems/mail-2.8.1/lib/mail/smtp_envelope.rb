@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Mail
-  class SmtpEnvelope #:nodoc:
+  class SmtpEnvelope # :nodoc:
     # Reasonable cap on address length to avoid SMTP line length
     # overflow on old SMTP servers.
     MAX_ADDRESS_BYTESIZE = 2000
@@ -40,18 +40,18 @@ module Mail
       @message = message
     end
 
-
     private
-      def validate_addr(addr_name, addr)
-        if addr.bytesize > MAX_ADDRESS_BYTESIZE
-          raise ArgumentError, "SMTP #{addr_name} address may not exceed #{MAX_ADDRESS_BYTESIZE} bytes: #{addr.inspect}"
-        end
 
-        if /[\r\n]/ =~ addr
-          raise ArgumentError, "SMTP #{addr_name} address may not contain CR or LF line breaks: #{addr.inspect}"
-        end
-
-        addr
+    def validate_addr(addr_name, addr)
+      if addr.bytesize > MAX_ADDRESS_BYTESIZE
+        raise ArgumentError, "SMTP #{addr_name} address may not exceed #{MAX_ADDRESS_BYTESIZE} bytes: #{addr.inspect}"
       end
+
+      if /[\r\n]/ =~ addr
+        raise ArgumentError, "SMTP #{addr_name} address may not contain CR or LF line breaks: #{addr.inspect}"
+      end
+
+      addr
+    end
   end
 end

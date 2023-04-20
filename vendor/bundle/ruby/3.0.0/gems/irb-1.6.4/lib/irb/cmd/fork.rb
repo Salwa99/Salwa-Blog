@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   fork.rb -
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)

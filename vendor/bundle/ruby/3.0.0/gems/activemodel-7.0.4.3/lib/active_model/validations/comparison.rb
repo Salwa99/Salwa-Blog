@@ -9,8 +9,8 @@ module ActiveModel
 
       def check_validity!
         unless (options.keys & COMPARE_CHECKS.keys).any?
-          raise ArgumentError, "Expected one of :greater_than, :greater_than_or_equal_to, "\
-          ":equal_to, :less_than, :less_than_or_equal_to, or :other_than option to be supplied."
+          raise ArgumentError, "Expected one of :greater_than, :greater_than_or_equal_to, " \
+                               ":equal_to, :less_than, :less_than_or_equal_to, or :other_than option to be supplied."
         end
       end
 

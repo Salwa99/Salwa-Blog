@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Mail
   module Encodings
     class UnixToUnix < TransferEncoding

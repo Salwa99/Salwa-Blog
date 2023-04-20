@@ -84,7 +84,7 @@ class Capybara::Selenium::FirefoxNode < Capybara::Selenium::Node
     end
   end
 
-private
+  private
 
   def native_displayed?
     (driver.options[:native_displayed] != false) && !ENV['DISABLE_CAPYBARA_SELENIUM_OPTIMIZATIONS']

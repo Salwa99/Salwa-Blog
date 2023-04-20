@@ -30,9 +30,9 @@ module Marcel
     def self.add(type, options)
       extensions = [options[:extensions]].flatten.compact
       TYPES[type] = [extensions,
-                    [options[:parents]].flatten.compact,
-                    options[:comment]]
-      extensions.each {|ext| EXTENSIONS[ext] = type }
+                     [options[:parents]].flatten.compact,
+                     options[:comment]]
+      extensions.each { |ext| EXTENSIONS[ext] = type }
       MAGIC.unshift [type, options[:magic]] if options[:magic]
     end
 
@@ -40,8 +40,8 @@ module Marcel
     # you're seeing impossible conflicts (for instance, application/x-gmc-link).
     # * <i>type</i>: The mime type to remove.  All associated extensions and magic are removed too.
     def self.remove(type)
-      EXTENSIONS.delete_if {|ext, t| t == type }
-      MAGIC.delete_if {|t, m| t == type }
+      EXTENSIONS.delete_if { |ext, t| t == type }
+      MAGIC.delete_if { |t, m| t == type }
       TYPES.delete(type)
     end
 
@@ -110,7 +110,7 @@ module Marcel
     alias == eql?
 
     def self.child?(child, parent)
-      child == parent || TYPES.key?(child) && TYPES[child][1].any? {|p| child?(p, parent) }
+      child == parent || TYPES.key?(child) && TYPES[child][1].any? { |p| child?(p, parent) }
     end
 
     def self.magic_match(io, method)

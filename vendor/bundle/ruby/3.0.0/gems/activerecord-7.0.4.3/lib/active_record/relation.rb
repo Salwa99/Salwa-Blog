@@ -3,9 +3,9 @@
 module ActiveRecord
   # = Active Record \Relation
   class Relation
-    MULTI_VALUE_METHODS  = [:includes, :eager_load, :preload, :select, :group,
-                            :order, :joins, :left_outer_joins, :references,
-                            :extending, :unscope, :optimizer_hints, :annotate]
+    MULTI_VALUE_METHODS = [:includes, :eager_load, :preload, :select, :group,
+                           :order, :joins, :left_outer_joins, :references,
+                           :extending, :unscope, :optimizer_hints, :annotate]
 
     SINGLE_VALUE_METHODS = [:limit, :offset, :lock, :readonly, :reordering, :strict_loading,
                             :reverse_order, :distinct, :create_with, :skip_query_cache]
@@ -25,8 +25,8 @@ module ActiveRecord
     alias :locked? :lock_value
 
     def initialize(klass, table: klass.arel_table, predicate_builder: klass.predicate_builder, values: {})
-      @klass  = klass
-      @table  = table
+      @klass = klass
+      @table = table
       @values = values
       @loaded = false
       @predicate_builder = predicate_builder
@@ -277,12 +277,14 @@ module ActiveRecord
     # Returns true if there are no records.
     def none?
       return super if block_given?
+
       empty?
     end
 
     # Returns true if there are any records.
     def any?
       return super if block_given?
+
       !empty?
     end
 
@@ -290,6 +292,7 @@ module ActiveRecord
     def one?
       return super if block_given?
       return records.one? if loaded?
+
       limited_count == 1
     end
 
@@ -297,6 +300,7 @@ module ActiveRecord
     def many?
       return super if block_given?
       return records.many? if loaded?
+
       limited_count > 1
     end
 
@@ -466,8 +470,8 @@ module ActiveRecord
 
       if updates.is_a?(Hash)
         if klass.locking_enabled? &&
-            !updates.key?(klass.locking_column) &&
-            !updates.key?(klass.locking_column.to_sym)
+           !updates.key?(klass.locking_column) &&
+           !updates.key?(klass.locking_column.to_sym)
           attr = table[klass.locking_column]
           updates[attr.name] = _increment_attribute(attr)
         end
@@ -723,14 +727,14 @@ module ActiveRecord
     #   # => SELECT "users".* FROM "users"  WHERE "users"."name" = 'Oscar'
     def to_sql
       @to_sql ||= if eager_loading?
-        apply_join_dependency do |relation, join_dependency|
-          relation = join_dependency.apply_column_aliases(relation)
-          relation.to_sql
-        end
-      else
-        conn = klass.connection
-        conn.unprepared_statement { conn.to_sql(arel) }
-      end
+                    apply_join_dependency do |relation, join_dependency|
+                      relation = join_dependency.apply_column_aliases(relation)
+                      relation.to_sql
+                    end
+                  else
+                    conn = klass.connection
+                    conn.unprepared_statement { conn.to_sql(arel) }
+                  end
     end
 
     # Returns a hash of where conditions.
@@ -832,163 +836,167 @@ module ActiveRecord
     end
 
     protected
-      def load_records(records)
-        @records = records.freeze
-        @loaded = true
-      end
 
-      def null_relation? # :nodoc:
-        is_a?(NullRelation)
-      end
+    def load_records(records)
+      @records = records.freeze
+      @loaded = true
+    end
+
+    def null_relation? # :nodoc:
+      is_a?(NullRelation)
+    end
 
     private
-      def already_in_scope?(registry)
-        @delegate_to_klass && registry.current_scope(klass, true)
-      end
 
-      def global_scope?(registry)
-        registry.global_current_scope(klass, true)
-      end
+    def already_in_scope?(registry)
+      @delegate_to_klass && registry.current_scope(klass, true)
+    end
 
-      def current_scope_restoring_block(&block)
-        current_scope = klass.current_scope(true)
-        -> record do
-          klass.current_scope = current_scope
-          yield record if block_given?
+    def global_scope?(registry)
+      registry.global_current_scope(klass, true)
+    end
+
+    def current_scope_restoring_block(&block)
+      current_scope = klass.current_scope(true)
+      ->record do
+        klass.current_scope = current_scope
+        yield record if block_given?
+      end
+    end
+
+    def _new(attributes, &block)
+      klass.new(attributes, &block)
+    end
+
+    def _create(attributes, &block)
+      klass.create(attributes, &block)
+    end
+
+    def _create!(attributes, &block)
+      klass.create!(attributes, &block)
+    end
+
+    def _scoping(scope, registry, all_queries = false)
+      previous = registry.current_scope(klass, true)
+      registry.set_current_scope(klass, scope)
+
+      if all_queries
+        previous_global = registry.global_current_scope(klass, true)
+        registry.set_global_current_scope(klass, scope)
+      end
+      yield
+    ensure
+      registry.set_current_scope(klass, previous)
+      if all_queries
+        registry.set_global_current_scope(klass, previous_global)
+      end
+    end
+
+    def _substitute_values(values)
+      values.map do |name, value|
+        attr = table[name]
+        unless Arel.arel_node?(value)
+          type = klass.type_for_attribute(attr.name)
+          value = predicate_builder.build_bind_attribute(attr.name, type.cast(value))
         end
+        [attr, value]
       end
+    end
 
-      def _new(attributes, &block)
-        klass.new(attributes, &block)
+    def _increment_attribute(attribute, value = 1)
+      bind = predicate_builder.build_bind_attribute(attribute.name, value.abs)
+      expr = table.coalesce(Arel::Nodes::UnqualifiedColumn.new(attribute), 0)
+      expr = value < 0 ? expr - bind : expr + bind
+      expr.expr
+    end
+
+    def exec_queries(&block)
+      skip_query_cache_if_necessary do
+        rows = if scheduled?
+                 future = @future_result
+                 @future_result = nil
+                 future.result
+               else
+                 exec_main_query
+               end
+
+        records = instantiate_records(rows, &block)
+        preload_associations(records) unless skip_preloading_value
+
+        records.each(&:readonly!) if readonly_value
+        records.each { |record| record.strict_loading!(strict_loading_value) } unless strict_loading_value.nil?
+
+        records
       end
+    end
 
-      def _create(attributes, &block)
-        klass.create(attributes, &block)
-      end
-
-      def _create!(attributes, &block)
-        klass.create!(attributes, &block)
-      end
-
-      def _scoping(scope, registry, all_queries = false)
-        previous = registry.current_scope(klass, true)
-        registry.set_current_scope(klass, scope)
-
-        if all_queries
-          previous_global = registry.global_current_scope(klass, true)
-          registry.set_global_current_scope(klass, scope)
-        end
-        yield
-      ensure
-        registry.set_current_scope(klass, previous)
-        if all_queries
-          registry.set_global_current_scope(klass, previous_global)
-        end
-      end
-
-      def _substitute_values(values)
-        values.map do |name, value|
-          attr = table[name]
-          unless Arel.arel_node?(value)
-            type = klass.type_for_attribute(attr.name)
-            value = predicate_builder.build_bind_attribute(attr.name, type.cast(value))
-          end
-          [attr, value]
-        end
-      end
-
-      def _increment_attribute(attribute, value = 1)
-        bind = predicate_builder.build_bind_attribute(attribute.name, value.abs)
-        expr = table.coalesce(Arel::Nodes::UnqualifiedColumn.new(attribute), 0)
-        expr = value < 0 ? expr - bind : expr + bind
-        expr.expr
-      end
-
-      def exec_queries(&block)
-        skip_query_cache_if_necessary do
-          rows = if scheduled?
-            future = @future_result
-            @future_result = nil
-            future.result
-          else
-            exec_main_query
-          end
-
-          records = instantiate_records(rows, &block)
-          preload_associations(records) unless skip_preloading_value
-
-          records.each(&:readonly!) if readonly_value
-          records.each { |record| record.strict_loading!(strict_loading_value) } unless strict_loading_value.nil?
-
-          records
-        end
-      end
-
-      def exec_main_query(async: false)
-        skip_query_cache_if_necessary do
-          if where_clause.contradiction?
-            [].freeze
-          elsif eager_loading?
-            apply_join_dependency do |relation, join_dependency|
-              if relation.null_relation?
-                [].freeze
-              else
-                relation = join_dependency.apply_column_aliases(relation)
-                @_join_dependency = join_dependency
-                connection.select_all(relation.arel, "SQL", async: async)
-              end
+    def exec_main_query(async: false)
+      skip_query_cache_if_necessary do
+        if where_clause.contradiction?
+          [].freeze
+        elsif eager_loading?
+          apply_join_dependency do |relation, join_dependency|
+            if relation.null_relation?
+              [].freeze
+            else
+              relation = join_dependency.apply_column_aliases(relation)
+              @_join_dependency = join_dependency
+              connection.select_all(relation.arel, "SQL", async: async)
             end
-          else
-            klass._query_by_sql(arel, async: async)
           end
-        end
-      end
-
-      def instantiate_records(rows, &block)
-        return [].freeze if rows.empty?
-        if eager_loading?
-          records = @_join_dependency.instantiate(rows, strict_loading_value, &block).freeze
-          @_join_dependency = nil
-          records
         else
-          klass._load_from_sql(rows, &block).freeze
+          klass._query_by_sql(arel, async: async)
         end
       end
+    end
 
-      def skip_query_cache_if_necessary(&block)
-        if skip_query_cache_value
-          uncached(&block)
+    def instantiate_records(rows, &block)
+      return [].freeze if rows.empty?
+
+      if eager_loading?
+        records = @_join_dependency.instantiate(rows, strict_loading_value, &block).freeze
+        @_join_dependency = nil
+        records
+      else
+        klass._load_from_sql(rows, &block).freeze
+      end
+    end
+
+    def skip_query_cache_if_necessary(&block)
+      if skip_query_cache_value
+        uncached(&block)
+      else
+        yield
+      end
+    end
+
+    def references_eager_loaded_tables?
+      joined_tables = build_joins([]).flat_map do |join|
+        if join.is_a?(Arel::Nodes::StringJoin)
+          tables_in_string(join.left)
         else
-          yield
+          join.left.name
         end
       end
 
-      def references_eager_loaded_tables?
-        joined_tables = build_joins([]).flat_map do |join|
-          if join.is_a?(Arel::Nodes::StringJoin)
-            tables_in_string(join.left)
-          else
-            join.left.name
-          end
-        end
+      joined_tables << table.name
 
-        joined_tables << table.name
+      # always convert table names to downcase as in Oracle quoted table names are in uppercase
+      joined_tables.map!(&:downcase)
 
-        # always convert table names to downcase as in Oracle quoted table names are in uppercase
-        joined_tables.map!(&:downcase)
+      !(references_values.map(&:to_s) - joined_tables).empty?
+    end
 
-        !(references_values.map(&:to_s) - joined_tables).empty?
-      end
+    def tables_in_string(string)
+      return [] if string.blank?
 
-      def tables_in_string(string)
-        return [] if string.blank?
-        # always convert table names to downcase as in Oracle quoted table names are in uppercase
-        # ignore raw_sql_ that is used by Oracle adapter as alias for limit/offset subqueries
-        string.scan(/[a-zA-Z_][.\w]+(?=.?\.)/).map!(&:downcase) - ["raw_sql_"]
-      end
+      # always convert table names to downcase as in Oracle quoted table names are in uppercase
+      # ignore raw_sql_ that is used by Oracle adapter as alias for limit/offset subqueries
+      string.scan(/[a-zA-Z_][.\w]+(?=.?\.)/).map!(&:downcase) - ["raw_sql_"]
+    end
 
-      def limited_count
-        limit_value ? count : limit(2).count
-      end
+    def limited_count
+      limit_value ? count : limit(2).count
+    end
   end
 end

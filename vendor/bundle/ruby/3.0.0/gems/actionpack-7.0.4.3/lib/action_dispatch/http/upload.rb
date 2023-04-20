@@ -40,8 +40,8 @@ module ActionDispatch
           @original_filename = nil
         end
 
-        @content_type      = hash[:type]
-        @headers           = hash[:head]
+        @content_type = hash[:type]
+        @headers = hash[:head]
       end
 
       # Shortcut for +tempfile.read+.

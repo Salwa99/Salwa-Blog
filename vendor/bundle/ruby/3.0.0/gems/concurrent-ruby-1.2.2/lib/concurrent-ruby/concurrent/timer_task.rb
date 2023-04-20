@@ -8,7 +8,6 @@ require 'concurrent/executor/safe_task_executor'
 require 'concurrent/scheduled_task'
 
 module Concurrent
-
   # A very common concurrency pattern is to run a thread that performs a task at
   # regular intervals. The thread that performs the task sleeps for the given
   # interval then wakes up and performs the task. Lather, rinse, repeat... This
@@ -179,6 +178,7 @@ module Concurrent
     #   @return [TimerTask] the new `TimerTask`
     def initialize(opts = {}, &task)
       raise ArgumentError.new('no block given') unless block_given?
+
       super
       set_deref_options opts
     end
@@ -296,6 +296,7 @@ module Concurrent
     # @!visibility private
     def execute_task(completion)
       return nil unless @running.true?
+
       _success, value, reason = @executor.execute(self)
       if completion.try?
         self.value = value

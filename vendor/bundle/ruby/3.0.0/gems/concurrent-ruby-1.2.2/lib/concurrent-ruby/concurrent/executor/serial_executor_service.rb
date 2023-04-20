@@ -1,7 +1,6 @@
 require 'concurrent/executor/executor_service'
 
 module Concurrent
-
   # Indicates that the including `ExecutorService` guarantees
   # that all operations will occur in the order they are post and that no
   # two operations may occur simultaneously. This module provides no

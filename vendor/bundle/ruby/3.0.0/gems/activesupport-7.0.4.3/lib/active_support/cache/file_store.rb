@@ -70,133 +70,138 @@ module ActiveSupport
       end
 
       private
-        def read_entry(key, **options)
-          if payload = read_serialized_entry(key, **options)
-            entry = deserialize_entry(payload)
-            entry if entry.is_a?(Cache::Entry)
+
+      def read_entry(key, **options)
+        if payload = read_serialized_entry(key, **options)
+          entry = deserialize_entry(payload)
+          entry if entry.is_a?(Cache::Entry)
+        end
+      end
+
+      def read_serialized_entry(key, **)
+        File.binread(key) if File.exist?(key)
+      rescue => error
+        logger.error("FileStoreError (#{error}): #{error.message}") if logger
+        nil
+      end
+
+      def write_entry(key, entry, **options)
+        write_serialized_entry(key, serialize_entry(entry, **options), **options)
+      end
+
+      def write_serialized_entry(key, payload, **options)
+        return false if options[:unless_exist] && File.exist?(key)
+
+        ensure_cache_path(File.dirname(key))
+        File.atomic_write(key, cache_path) { |f| f.write(payload) }
+        true
+      end
+
+      def delete_entry(key, **options)
+        if File.exist?(key)
+          begin
+            File.delete(key)
+            delete_empty_directories(File.dirname(key))
+            true
+          rescue
+            # Just in case the error was caused by another process deleting the file first.
+            raise if File.exist?(key)
+
+            false
           end
         end
+      end
 
-        def read_serialized_entry(key, **)
-          File.binread(key) if File.exist?(key)
-        rescue => error
-          logger.error("FileStoreError (#{error}): #{error.message}") if logger
-          nil
-        end
-
-        def write_entry(key, entry, **options)
-          write_serialized_entry(key, serialize_entry(entry, **options), **options)
-        end
-
-        def write_serialized_entry(key, payload, **options)
-          return false if options[:unless_exist] && File.exist?(key)
-          ensure_cache_path(File.dirname(key))
-          File.atomic_write(key, cache_path) { |f| f.write(payload) }
-          true
-        end
-
-        def delete_entry(key, **options)
-          if File.exist?(key)
-            begin
-              File.delete(key)
-              delete_empty_directories(File.dirname(key))
-              true
-            rescue
-              # Just in case the error was caused by another process deleting the file first.
-              raise if File.exist?(key)
-              false
-            end
-          end
-        end
-
-        # Lock a file for a block so only one process can modify it at a time.
-        def lock_file(file_name, &block)
-          if File.exist?(file_name)
-            File.open(file_name, "r+") do |f|
-              f.flock File::LOCK_EX
-              yield
-            ensure
-              f.flock File::LOCK_UN
-            end
-          else
+      # Lock a file for a block so only one process can modify it at a time.
+      def lock_file(file_name, &block)
+        if File.exist?(file_name)
+          File.open(file_name, "r+") do |f|
+            f.flock File::LOCK_EX
             yield
+          ensure
+            f.flock File::LOCK_UN
           end
+        else
+          yield
+        end
+      end
+
+      # Translate a key into a file path.
+      def normalize_key(key, options)
+        key = super
+        fname = URI.encode_www_form_component(key)
+
+        if fname.size > FILEPATH_MAX_SIZE
+          fname = ActiveSupport::Digest.hexdigest(key)
         end
 
-        # Translate a key into a file path.
-        def normalize_key(key, options)
-          key = super
-          fname = URI.encode_www_form_component(key)
+        hash = Zlib.adler32(fname)
+        hash, dir_1 = hash.divmod(0x1000)
+        dir_2 = hash.modulo(0x1000)
 
-          if fname.size > FILEPATH_MAX_SIZE
-            fname = ActiveSupport::Digest.hexdigest(key)
-          end
+        # Make sure file name doesn't exceed file system limits.
+        if fname.length < FILENAME_MAX_SIZE
+          fname_paths = fname
+        else
+          fname_paths = []
+          begin
+            fname_paths << fname[0, FILENAME_MAX_SIZE]
+            fname = fname[FILENAME_MAX_SIZE..-1]
+          end until fname.blank?
+        end
 
-          hash = Zlib.adler32(fname)
-          hash, dir_1 = hash.divmod(0x1000)
-          dir_2 = hash.modulo(0x1000)
+        File.join(cache_path, DIR_FORMATTER % dir_1, DIR_FORMATTER % dir_2, fname_paths)
+      end
 
-          # Make sure file name doesn't exceed file system limits.
-          if fname.length < FILENAME_MAX_SIZE
-            fname_paths = fname
+      # Translate a file path into a key.
+      def file_path_key(path)
+        fname = path[cache_path.to_s.size..-1].split(File::SEPARATOR, 4).last
+        URI.decode_www_form_component(fname, Encoding::UTF_8)
+      end
+
+      # Delete empty directories in the cache.
+      def delete_empty_directories(dir)
+        return if File.realpath(dir) == File.realpath(cache_path)
+
+        if Dir.children(dir).empty?
+          Dir.delete(dir) rescue nil
+          delete_empty_directories(File.dirname(dir))
+        end
+      end
+
+      # Make sure a file path's directories exist.
+      def ensure_cache_path(path)
+        FileUtils.makedirs(path) unless File.exist?(path)
+      end
+
+      def search_dir(dir, &callback)
+        return if !File.exist?(dir)
+
+        Dir.each_child(dir) do |d|
+          name = File.join(dir, d)
+          if File.directory?(name)
+            search_dir(name, &callback)
           else
-            fname_paths = []
-            begin
-              fname_paths << fname[0, FILENAME_MAX_SIZE]
-              fname = fname[FILENAME_MAX_SIZE..-1]
-            end until fname.blank?
-          end
-
-          File.join(cache_path, DIR_FORMATTER % dir_1, DIR_FORMATTER % dir_2, fname_paths)
-        end
-
-        # Translate a file path into a key.
-        def file_path_key(path)
-          fname = path[cache_path.to_s.size..-1].split(File::SEPARATOR, 4).last
-          URI.decode_www_form_component(fname, Encoding::UTF_8)
-        end
-
-        # Delete empty directories in the cache.
-        def delete_empty_directories(dir)
-          return if File.realpath(dir) == File.realpath(cache_path)
-          if Dir.children(dir).empty?
-            Dir.delete(dir) rescue nil
-            delete_empty_directories(File.dirname(dir))
+            callback.call name
           end
         end
+      end
 
-        # Make sure a file path's directories exist.
-        def ensure_cache_path(path)
-          FileUtils.makedirs(path) unless File.exist?(path)
-        end
+      # Modifies the amount of an already existing integer value that is stored in the cache.
+      # If the key is not found nothing is done.
+      def modify_value(name, amount, options)
+        file_name = normalize_key(name, options)
 
-        def search_dir(dir, &callback)
-          return if !File.exist?(dir)
-          Dir.each_child(dir) do |d|
-            name = File.join(dir, d)
-            if File.directory?(name)
-              search_dir(name, &callback)
-            else
-              callback.call name
-            end
+        lock_file(file_name) do
+          options = merged_options(options)
+
+          if num = read(name, options)
+            num = num.to_i + amount
+            write(name, num, options)
+            num
           end
         end
-
-        # Modifies the amount of an already existing integer value that is stored in the cache.
-        # If the key is not found nothing is done.
-        def modify_value(name, amount, options)
-          file_name = normalize_key(name, options)
-
-          lock_file(file_name) do
-            options = merged_options(options)
-
-            if num = read(name, options)
-              num = num.to_i + amount
-              write(name, num, options)
-              num
-            end
-          end
-        end
+      end
     end
   end
 end

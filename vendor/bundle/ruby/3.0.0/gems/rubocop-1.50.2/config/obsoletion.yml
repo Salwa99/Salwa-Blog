@@ -13,7 +13,7 @@ renamed:
   Layout/IndentFirstHashElement: Layout/FirstHashElementIndentation
   Layout/IndentFirstParameter: Layout/FirstParameterIndentation
   Layout/IndentHash: Layout/FirstHashElementIndentation
-  Layout/IndentHeredoc: Layout/HeredocIndentation
+  Layout/HeredocIndentation: Layout/HeredocIndentation
   Layout/LeadingBlankLines: Layout/LeadingEmptyLines
   Layout/Tab: Layout/IndentationStyle
   Layout/TrailingBlankLines: Layout/TrailingEmptyLines
@@ -30,7 +30,7 @@ renamed:
   Lint/UnneededCopEnableDirective: Lint/RedundantCopEnableDirective
   Lint/UnneededRequireStatement: Lint/RedundantRequireStatement
   Lint/UnneededSplatExpansion: Lint/RedundantSplatExpansion
-  Metrics/LineLength: Layout/LineLength
+  Layout/LineLength: Layout/LineLength
   Naming/UncommunicativeBlockParamName: Naming/BlockParameterName
   Naming/UncommunicativeMethodParamName: Naming/MethodParameterName
   Style/AccessorMethodName: Naming/AccessorMethodName

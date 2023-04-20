@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   change-ws.rb -
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -16,7 +17,7 @@ module IRB
       description "Show workspaces."
 
       def execute(*obj)
-        irb_context.workspaces.collect{|ws| ws.main}
+        irb_context.workspaces.collect { |ws| ws.main }
       end
     end
 

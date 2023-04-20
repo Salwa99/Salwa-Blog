@@ -21,6 +21,7 @@ module LateObject
   def late_object
     33
   end
+
   def LateObject.included(mod)
     # Modules defining an included method should not prevent blank
     # slate erasure!
@@ -32,6 +33,7 @@ module LateKernel
   def late_kernel
     44
   end
+
   def LateKernel.included(mod)
     # Modules defining an included method should not prevent blank
     # slate erasure!
@@ -52,7 +54,6 @@ module Kernel
   end
 end
 
-
 # Introduce some late methods (both module and direct) into the Object
 # class.
 class Object
@@ -64,9 +65,9 @@ end
 
 # Introduce some late methods by inclusion.
 module GlobalModule
- def global_inclusion
-   42
- end
+  def global_inclusion
+    42
+  end
 end
 include GlobalModule
 
@@ -87,14 +88,13 @@ class TestBlankSlate < Builder::Test
     assert_raise(NoMethodError) { @bs.nil? }
   end
 
-
   # NOTE: NameError is acceptable because the lack of a '.' means that
   # Ruby can't tell if it is a method or a local variable.
   def test_undefined_methods_remain_undefined_during_instance_eval
-    assert_raise(NoMethodError, NameError)  do
+    assert_raise(NoMethodError, NameError) do
       @bs.instance_eval do nil? end
     end
-    assert_raise(NoMethodError, NameError)  do
+    assert_raise(NoMethodError, NameError) do
       @bs.instance_eval do no_such_method end
     end
   end
@@ -203,6 +203,6 @@ class TestBlankSlate < Builder::Test
     obj2 = with_object_id.new
 
     assert obj1.object_id != obj2.object_id,
-       "Revealed methods should not be bound to a particular instance"
+           "Revealed methods should not be bound to a particular instance"
   end
 end

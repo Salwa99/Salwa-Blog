@@ -31,6 +31,7 @@ module I18n
 
   class InvalidLocale < ArgumentError
     attr_reader :locale
+
     def initialize(locale)
       @locale = locale
       super "#{locale.inspect} is not a valid locale"
@@ -39,6 +40,7 @@ module I18n
 
   class InvalidLocaleData < ArgumentError
     attr_reader :filename
+
     def initialize(filename, exception_message)
       @filename, @exception_message = filename, exception_message
       super "can not load translations from #{filename}: #{exception_message}"
@@ -81,6 +83,7 @@ module I18n
 
   class InvalidPluralizationData < ArgumentError
     attr_reader :entry, :count, :key
+
     def initialize(entry, count, key)
       @entry, @count, @key = entry, count, key
       super "translation data #{entry.inspect} can not be used with :count => #{count}. key '#{key}' is missing."
@@ -89,6 +92,7 @@ module I18n
 
   class MissingInterpolationArgument < ArgumentError
     attr_reader :key, :values, :string
+
     def initialize(key, values, string)
       @key, @values, @string = key, values, string
       super "missing interpolation argument #{key.inspect} in #{string.inspect} (#{values.inspect} given)"
@@ -97,6 +101,7 @@ module I18n
 
   class ReservedInterpolationKey < ArgumentError
     attr_reader :key, :string
+
     def initialize(key, string)
       @key, @string = key, string
       super "reserved key #{key.inspect} used in #{string.inspect}"
@@ -105,6 +110,7 @@ module I18n
 
   class UnknownFileType < ArgumentError
     attr_reader :type, :filename
+
     def initialize(type, filename)
       @type, @filename = type, filename
       super "can not load translations from #{filename}, the file type #{type} is not known"
@@ -113,6 +119,7 @@ module I18n
 
   class UnsupportedMethod < ArgumentError
     attr_reader :method, :backend_klass, :msg
+
     def initialize(method, backend_klass, msg)
       @method = method
       @backend_klass = backend_klass

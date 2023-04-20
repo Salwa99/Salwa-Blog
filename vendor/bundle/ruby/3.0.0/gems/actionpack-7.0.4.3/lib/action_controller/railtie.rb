@@ -45,17 +45,17 @@ module ActionController
     end
 
     initializer "action_controller.set_configs" do |app|
-      paths   = app.config.paths
+      paths = app.config.paths
       options = app.config.action_controller
 
-      options.logger      ||= Rails.logger
+      options.logger ||= Rails.logger
       options.cache_store ||= Rails.cache
 
       options.javascripts_dir ||= paths["public/javascripts"].first
       options.stylesheets_dir ||= paths["public/stylesheets"].first
 
       # Ensure readers methods get compiled.
-      options.asset_host        ||= app.config.asset_host
+      options.asset_host ||= app.config.asset_host
       options.relative_url_root ||= app.config.relative_url_root
 
       ActiveSupport.on_load(:action_controller) do
@@ -107,16 +107,16 @@ module ActionController
 
     initializer "action_controller.query_log_tags" do |app|
       query_logs_tags_enabled = app.config.respond_to?(:active_record) &&
-        app.config.active_record.query_log_tags_enabled &&
-        app.config.action_controller.log_query_tags_around_actions
+                                app.config.active_record.query_log_tags_enabled &&
+                                app.config.action_controller.log_query_tags_around_actions
 
       if query_logs_tags_enabled
         app.config.active_record.query_log_tags += [:controller, :action]
 
         ActiveSupport.on_load(:active_record) do
           ActiveRecord::QueryLogs.taggings.merge!(
-            controller:            ->(context) { context[:controller]&.controller_name },
-            action:                ->(context) { context[:controller]&.action_name },
+            controller: ->(context) { context[:controller]&.controller_name },
+            action: ->(context) { context[:controller]&.action_name },
             namespaced_controller: ->(context) { context[:controller].class.name if context[:controller] }
           )
         end

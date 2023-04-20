@@ -9,14 +9,14 @@ module ActionDispatch
             "  #{from} -> #{to} [label=\"#{sym || 'ε'}\"];"
           }
 
-          <<-eodot
-digraph nfa {
-  rankdir=LR;
-  node [shape = doublecircle];
-  #{accepting_states.join ' '};
-  node [shape = circle];
-#{edges.join "\n"}
-}
+          <<~eodot
+            digraph nfa {
+              rankdir=LR;
+              node [shape = doublecircle];
+              #{accepting_states.join ' '};
+              node [shape = circle];
+            #{edges.join "\n"}
+            }
           eodot
         end
       end

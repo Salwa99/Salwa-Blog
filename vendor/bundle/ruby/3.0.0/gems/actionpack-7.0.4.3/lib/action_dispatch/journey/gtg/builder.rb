@@ -11,20 +11,21 @@ module ActionDispatch
         attr_reader :root, :ast, :endpoints
 
         def initialize(root)
-          @root      = root
-          @ast       = Nodes::Cat.new root, DUMMY_END_NODE
+          @root = root
+          @ast = Nodes::Cat.new root, DUMMY_END_NODE
           @followpos = build_followpos
         end
 
         def transition_table
-          dtrans   = TransitionTable.new
-          marked   = {}.compare_by_identity
+          dtrans = TransitionTable.new
+          marked = {}.compare_by_identity
           state_id = Hash.new { |h, k| h[k] = h.length }.compare_by_identity
-          dstates  = [firstpos(root)]
+          dstates = [firstpos(root)]
 
           until dstates.empty?
             s = dstates.shift
             next if marked[s]
+
             marked[s] = true # mark s
 
             s.group_by { |state| symbol(state) }.each do |sym, ps|
@@ -126,22 +127,23 @@ module ActionDispatch
         end
 
         private
-          def build_followpos
-            table = Hash.new { |h, k| h[k] = [] }.compare_by_identity
-            @ast.each do |n|
-              case n
-              when Nodes::Cat
-                lastpos(n.left).each do |i|
-                  table[i] += firstpos(n.right)
-                end
+
+        def build_followpos
+          table = Hash.new { |h, k| h[k] = [] }.compare_by_identity
+          @ast.each do |n|
+            case n
+            when Nodes::Cat
+              lastpos(n.left).each do |i|
+                table[i] += firstpos(n.right)
               end
             end
-            table
           end
+          table
+        end
 
-          def symbol(edge)
-            edge.symbol? ? edge.regexp : edge.left
-          end
+        def symbol(edge)
+          edge.symbol? ? edge.regexp : edge.left
+        end
       end
     end
   end

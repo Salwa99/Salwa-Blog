@@ -10,17 +10,25 @@ Capybara::SpecHelper.spec '#assert_all_of_selectors' do
   end
 
   it 'should be false if any of the given selectors are not on the page' do
-    expect { @session.assert_all_of_selectors(:css, 'p a#foo', 'h2#h2three', 'h2#h2one') }.to raise_error(Capybara::ElementNotFound)
+    expect {
+      @session.assert_all_of_selectors(:css, 'p a#foo', 'h2#h2three', 'h2#h2one')
+    }.to raise_error(Capybara::ElementNotFound)
   end
 
   it 'should use default selector' do
     Capybara.default_selector = :css
-    expect { @session.assert_all_of_selectors('p a#foo', 'h2#h2three', 'h2#h2one') }.to raise_error(Capybara::ElementNotFound)
+    expect {
+      @session.assert_all_of_selectors('p a#foo', 'h2#h2three', 'h2#h2one')
+    }.to raise_error(Capybara::ElementNotFound)
     @session.assert_all_of_selectors('p a#foo', 'h2#h2two', 'h2#h2one')
   end
 
   it 'should support filter block' do
-    expect { @session.assert_all_of_selectors(:css, 'h2#h2one', 'h2#h2two') { |n| n[:id] == 'h2one' } }.to raise_error(Capybara::ElementNotFound, /custom filter block/)
+    expect {
+      @session.assert_all_of_selectors(:css, 'h2#h2one', 'h2#h2two') { |n|
+        n[:id] == 'h2one'
+      }
+    }.to raise_error(Capybara::ElementNotFound, /custom filter block/)
   end
 
   context 'should respect scopes' do
@@ -41,7 +49,10 @@ Capybara::SpecHelper.spec '#assert_all_of_selectors' do
   context 'with options' do
     it 'should apply options to all locators' do
       @session.assert_all_of_selectors(:field, 'normal', 'additional_newline', type: :textarea)
-      expect { @session.assert_all_of_selectors(:field, 'normal', 'test_field', 'additional_newline', type: :textarea) }.to raise_error(Capybara::ElementNotFound)
+      expect {
+        @session.assert_all_of_selectors(:field, 'normal', 'test_field', 'additional_newline',
+                                         type: :textarea)
+      }.to raise_error(Capybara::ElementNotFound)
     end
   end
 
@@ -100,7 +111,9 @@ Capybara::SpecHelper.spec '#assert_none_of_selectors' do
     end
 
     it 'should discard all matches where the given regexp is matched' do
-      expect { @session.assert_none_of_selectors('//p//a', text: /re[dab]i/i, count: 1) }.to raise_error(Capybara::ElementNotFound)
+      expect {
+        @session.assert_none_of_selectors('//p//a', text: /re[dab]i/i, count: 1)
+      }.to raise_error(Capybara::ElementNotFound)
       @session.assert_none_of_selectors('//p//a', text: /Red$/)
     end
   end
@@ -125,7 +138,9 @@ Capybara::SpecHelper.spec '#assert_any_of_selectors' do
   end
 
   it 'should be false if none of the given selectors are on the page' do
-    expect { @session.assert_any_of_selectors(:css, 'h2#h2three', 'h4#h4four') }.to raise_error(Capybara::ElementNotFound)
+    expect {
+      @session.assert_any_of_selectors(:css, 'h2#h2three', 'h4#h4four')
+    }.to raise_error(Capybara::ElementNotFound)
   end
 
   it 'should use default selector' do
@@ -135,6 +150,10 @@ Capybara::SpecHelper.spec '#assert_any_of_selectors' do
   end
 
   it 'should support filter block' do
-    expect { @session.assert_any_of_selectors(:css, 'h2#h2one', 'h2#h2two') { |_n| false } }.to raise_error(Capybara::ElementNotFound, /custom filter block/)
+    expect {
+      @session.assert_any_of_selectors(:css, 'h2#h2one', 'h2#h2two') { |_n|
+        false
+      }
+    }.to raise_error(Capybara::ElementNotFound, /custom filter block/)
   end
 end

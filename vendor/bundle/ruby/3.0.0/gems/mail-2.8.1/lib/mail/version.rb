@@ -1,7 +1,7 @@
 # frozen_string_literal: true
+
 module Mail
   module VERSION
-
     MAJOR = 2
     MINOR = 8
     PATCH = 1
@@ -12,6 +12,5 @@ module Mail
     def self.version
       STRING
     end
-
   end
 end

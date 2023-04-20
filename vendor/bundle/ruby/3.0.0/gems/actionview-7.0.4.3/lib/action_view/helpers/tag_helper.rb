@@ -37,8 +37,8 @@ module ActionView
       TAG_TYPES.merge! ARIA_PREFIXES.index_with(:aria)
       TAG_TYPES.freeze
 
-      PRE_CONTENT_STRINGS             = Hash.new { "" }
-      PRE_CONTENT_STRINGS[:textarea]  = "\n"
+      PRE_CONTENT_STRINGS = Hash.new { "" }
+      PRE_CONTENT_STRINGS[:textarea] = "\n"
       PRE_CONTENT_STRINGS["textarea"] = "\n"
 
       class TagBuilder # :nodoc:
@@ -46,7 +46,8 @@ module ActionView
         include OutputSafetyHelper
 
         HTML_VOID_ELEMENTS = %i(area base br col embed hr img input keygen link meta param source track wbr).to_set
-        SVG_SELF_CLOSING_ELEMENTS = %i(animate animateMotion animateTransform circle ellipse line path polygon polyline rect set stop use view).to_set
+        SVG_SELF_CLOSING_ELEMENTS = %i(animate animateMotion animateTransform circle ellipse line path polygon polyline
+                                       rect set stop use view).to_set
 
         def initialize(view_context)
           @view_context = view_context
@@ -90,13 +91,15 @@ module ActionView
 
         def tag_options(options, escape = true)
           return if options.blank?
+
           output = +""
-          sep    = " "
+          sep = " "
           options.each_pair do |key, value|
             type = TAG_TYPES[key]
             if type == :data && value.is_a?(Hash)
               value.each_pair do |k, v|
                 next if v.nil?
+
                 output << sep
                 output << prefix_tag_option(key, k, v, escape)
               end
@@ -152,42 +155,44 @@ module ActionView
         end
 
         private
-          def prefix_tag_option(prefix, key, value, escape)
-            key = "#{prefix}-#{key.to_s.dasherize}"
-            unless value.is_a?(String) || value.is_a?(Symbol) || value.is_a?(BigDecimal)
-              value = value.to_json
-            end
-            tag_option(key, value, escape)
+
+        def prefix_tag_option(prefix, key, value, escape)
+          key = "#{prefix}-#{key.to_s.dasherize}"
+          unless value.is_a?(String) || value.is_a?(Symbol) || value.is_a?(BigDecimal)
+            value = value.to_json
+          end
+          tag_option(key, value, escape)
+        end
+
+        def respond_to_missing?(*args)
+          true
+        end
+
+        def handle_deprecated_escape_options(options)
+          # The option :escape_attributes has been merged into the options hash to be
+          # able to warn when it is used, so we need to handle default values here.
+          escape_option_provided = options.has_key?(:escape)
+          escape_attributes_option_provided = options.has_key?(:escape_attributes)
+
+          if escape_attributes_option_provided
+            ActiveSupport::Deprecation.warn(<<~MSG)
+              Use of the option :escape_attributes is deprecated. It currently \
+              escapes both names and values of tags and attributes and it is \
+              equivalent to :escape. If any of them are enabled, the escaping \
+              is fully enabled.
+            MSG
           end
 
-          def respond_to_missing?(*args)
-            true
-          end
+          return true unless escape_option_provided || escape_attributes_option_provided
 
-          def handle_deprecated_escape_options(options)
-            # The option :escape_attributes has been merged into the options hash to be
-            # able to warn when it is used, so we need to handle default values here.
-            escape_option_provided = options.has_key?(:escape)
-            escape_attributes_option_provided = options.has_key?(:escape_attributes)
+          escape_option = options.delete(:escape)
+          escape_attributes_option = options.delete(:escape_attributes)
+          escape_option || escape_attributes_option
+        end
 
-            if escape_attributes_option_provided
-              ActiveSupport::Deprecation.warn(<<~MSG)
-                Use of the option :escape_attributes is deprecated. It currently \
-                escapes both names and values of tags and attributes and it is \
-                equivalent to :escape. If any of them are enabled, the escaping \
-                is fully enabled.
-              MSG
-            end
-
-            return true unless escape_option_provided || escape_attributes_option_provided
-            escape_option = options.delete(:escape)
-            escape_attributes_option = options.delete(:escape_attributes)
-            escape_option || escape_attributes_option
-          end
-
-          def method_missing(called, *args, **options, &block)
-            tag_string(called, *args, **options, &block)
-          end
+        def method_missing(called, *args, **options, &block)
+          tag_string(called, *args, **options, &block)
+        end
       end
 
       # Returns an HTML tag.
@@ -422,29 +427,30 @@ module ActionView
       end
 
       private
-        def build_tag_values(*args)
-          tag_values = []
 
-          args.each do |tag_value|
-            case tag_value
-            when Hash
-              tag_value.each do |key, val|
-                tag_values << key.to_s if val && key.present?
-              end
-            when Array
-              tag_values.concat build_tag_values(*tag_value)
-            else
-              tag_values << tag_value.to_s if tag_value.present?
+      def build_tag_values(*args)
+        tag_values = []
+
+        args.each do |tag_value|
+          case tag_value
+          when Hash
+            tag_value.each do |key, val|
+              tag_values << key.to_s if val && key.present?
             end
+          when Array
+            tag_values.concat build_tag_values(*tag_value)
+          else
+            tag_values << tag_value.to_s if tag_value.present?
           end
-
-          tag_values
         end
-        module_function :build_tag_values
 
-        def tag_builder
-          @tag_builder ||= TagBuilder.new(self)
-        end
+        tag_values
+      end
+      module_function :build_tag_values
+
+      def tag_builder
+        @tag_builder ||= TagBuilder.new(self)
+      end
     end
   end
 end

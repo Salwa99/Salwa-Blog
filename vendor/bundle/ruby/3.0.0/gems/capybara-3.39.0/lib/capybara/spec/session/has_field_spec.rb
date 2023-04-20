@@ -46,7 +46,8 @@ Capybara::SpecHelper.spec '#has_field' do
       @session.fill_in('First Name', with: 'Thomas')
       expect do
         expect(@session).to have_field('First Name', with: 'Jonas')
-      end.to raise_exception(RSpec::Expectations::ExpectationNotMetError, /Expected value to be "Jonas" but was "Thomas"/)
+      end.to raise_exception(RSpec::Expectations::ExpectationNotMetError,
+                             /Expected value to be "Jonas" but was "Thomas"/)
 
       # native boolean node filter
       expect do

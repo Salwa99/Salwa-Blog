@@ -22,8 +22,8 @@ if str
 end
 
 if Gem.respond_to?(:activate_bin_path)
-load Gem.activate_bin_path('railties', 'rails', version)
+  load Gem.activate_bin_path('railties', 'rails', version)
 else
-gem "railties", version
-load Gem.bin_path("railties", "rails", version)
+  gem "railties", version
+  load Gem.bin_path("railties", "rails", version)
 end

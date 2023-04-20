@@ -1,5 +1,6 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/fields/named_structured_field'
 
 module Mail
@@ -21,7 +22,7 @@ module Mail
   #
   # item-value      =       1*angle-addr / addr-spec /
   #                          atom / domain / msg-id
-  class ReceivedField < NamedStructuredField #:nodoc:
+  class ReceivedField < NamedStructuredField # :nodoc:
     NAME = 'Received'
 
     def element
@@ -43,20 +44,21 @@ module Mail
     end
 
     private
-      def do_encode
-        if Utilities.blank?(value)
-          "#{name}: \r\n"
-        else
-          "#{name}: #{info}; #{formatted_date}\r\n"
-        end
-      end
 
-      def do_decode
-        if Utilities.blank?(value)
-          ""
-        else
-          "#{info}; #{formatted_date}"
-        end
+    def do_encode
+      if Utilities.blank?(value)
+        "#{name}: \r\n"
+      else
+        "#{name}: #{info}; #{formatted_date}\r\n"
       end
+    end
+
+    def do_decode
+      if Utilities.blank?(value)
+        ""
+      else
+        "#{info}; #{formatted_date}"
+      end
+    end
   end
 end

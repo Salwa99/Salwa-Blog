@@ -14,15 +14,16 @@ module ActiveModel
         end
       end
 
-    private
+      private
+
       def include?(record, value)
         members = if delimiter.respond_to?(:call)
-          delimiter.call(record)
-        elsif delimiter.respond_to?(:to_sym)
-          record.send(delimiter)
-        else
-          delimiter
-        end
+                    delimiter.call(record)
+                  elsif delimiter.respond_to?(:to_sym)
+                    record.send(delimiter)
+                  else
+                    delimiter
+                  end
 
         if value.is_a?(Array)
           value.all? { |v| members.public_send(inclusion_method(members), v) }

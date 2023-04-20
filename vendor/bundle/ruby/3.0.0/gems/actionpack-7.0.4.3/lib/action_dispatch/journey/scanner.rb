@@ -33,38 +33,39 @@ module ActionDispatch
       end
 
       private
-        # takes advantage of String @- deduping capabilities in Ruby 2.5 upwards
-        # see: https://bugs.ruby-lang.org/issues/13077
-        def dedup_scan(regex)
-          r = @ss.scan(regex)
-          r ? -r : nil
-        end
 
-        def scan
-          case
-            # /
-          when @ss.skip(/\//)
-            [:SLASH, "/"]
-          when @ss.skip(/\(/)
-            [:LPAREN, "("]
-          when @ss.skip(/\)/)
-            [:RPAREN, ")"]
-          when @ss.skip(/\|/)
-            [:OR, "|"]
-          when @ss.skip(/\./)
-            [:DOT, "."]
-          when text = dedup_scan(/:\w+/)
-            [:SYMBOL, text]
-          when text = dedup_scan(/\*\w+/)
-            [:STAR, text]
-          when text = @ss.scan(/(?:[\w%\-~!$&'*+,;=@]|\\[:()])+/)
-            text.tr! "\\", ""
-            [:LITERAL, -text]
-            # any char
-          when text = dedup_scan(/./)
-            [:LITERAL, text]
-          end
+      # takes advantage of String @- deduping capabilities in Ruby 2.5 upwards
+      # see: https://bugs.ruby-lang.org/issues/13077
+      def dedup_scan(regex)
+        r = @ss.scan(regex)
+        r ? -r : nil
+      end
+
+      def scan
+        case
+          # /
+        when @ss.skip(/\//)
+          [:SLASH, "/"]
+        when @ss.skip(/\(/)
+          [:LPAREN, "("]
+        when @ss.skip(/\)/)
+          [:RPAREN, ")"]
+        when @ss.skip(/\|/)
+          [:OR, "|"]
+        when @ss.skip(/\./)
+          [:DOT, "."]
+        when text = dedup_scan(/:\w+/)
+          [:SYMBOL, text]
+        when text = dedup_scan(/\*\w+/)
+          [:STAR, text]
+        when text = @ss.scan(/(?:[\w%\-~!$&'*+,;=@]|\\[:()])+/)
+          text.tr! "\\", ""
+          [:LITERAL, -text]
+          # any char
+        when text = dedup_scan(/./)
+          [:LITERAL, text]
         end
+      end
     end
   end
 end

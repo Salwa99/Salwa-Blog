@@ -35,9 +35,9 @@ module ActionController
         render
       elsif any_templates?(action_name.to_s, _prefixes)
         message = "#{self.class.name}\##{action_name} is missing a template " \
-          "for this request format and variant.\n" \
-          "\nrequest.formats: #{request.formats.map(&:to_s).inspect}" \
-          "\nrequest.variant: #{request.variant.inspect}"
+                  "for this request format and variant.\n" \
+                  "\nrequest.formats: #{request.formats.map(&:to_s).inspect}" \
+                  "\nrequest.variant: #{request.variant.inspect}"
 
         raise ActionController::UnknownFormat, message
       elsif interactive_browser_request?
@@ -56,8 +56,9 @@ module ActionController
     end
 
     private
-      def interactive_browser_request?
-        request.get? && request.format == Mime[:html] && !request.xhr?
-      end
+
+    def interactive_browser_request?
+      request.get? && request.format == Mime[:html] && !request.xhr?
+    end
   end
 end

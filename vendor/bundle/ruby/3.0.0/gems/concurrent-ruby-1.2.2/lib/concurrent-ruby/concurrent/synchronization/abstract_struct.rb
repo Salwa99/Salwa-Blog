@@ -1,10 +1,8 @@
 module Concurrent
   module Synchronization
-
     # @!visibility private
     # @!macro internal_implementation_note
     module AbstractStruct
-
       # @!visibility private
       def initialize(*values)
         super()
@@ -50,7 +48,7 @@ module Concurrent
       #
       # @!visibility private
       def ns_to_h
-        length.times.reduce({}){|memo, i| memo[self.class::MEMBERS[i]] = @values[i]; memo}
+        length.times.reduce({}) { |memo, i| memo[self.class::MEMBERS[i]] = @values[i]; memo }
       end
 
       # @!macro struct_get
@@ -61,6 +59,7 @@ module Concurrent
           if member >= @values.length
             raise IndexError.new("offset #{member} too large for struct(size:#{@values.length})")
           end
+
           @values[member]
         else
           send(member)
@@ -80,7 +79,7 @@ module Concurrent
       #
       # @!visibility private
       def ns_each
-        values.each{|value| yield value }
+        values.each { |value| yield value }
       end
 
       # @!macro struct_each_pair
@@ -96,7 +95,7 @@ module Concurrent
       #
       # @!visibility private
       def ns_select
-        values.select{|value| yield value }
+        values.select { |value| yield value }
       end
 
       # @!macro struct_inspect
@@ -130,8 +129,8 @@ module Concurrent
       def pr_underscore(clazz)
         word = clazz.to_s.dup # dup string to workaround JRuby 9.2.0.0 bug https://github.com/jruby/jruby/issues/5229
         word.gsub!(/::/, '/')
-        word.gsub!(/([A-Z]+)([A-Z][a-z])/,'\1_\2')
-        word.gsub!(/([a-z\d])([A-Z])/,'\1_\2')
+        word.gsub!(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
+        word.gsub!(/([a-z\d])([A-Z])/, '\1_\2')
         word.tr!("-", "_")
         word.downcase!
         word
@@ -141,10 +140,11 @@ module Concurrent
       def self.define_struct_class(parent, base, name, members, &block)
         clazz = Class.new(base || Object) do
           include parent
-          self.const_set(:MEMBERS, members.collect{|member| member.to_s.to_sym}.freeze)
+          self.const_set(:MEMBERS, members.collect { |member| member.to_s.to_sym }.freeze)
           def ns_initialize(*values)
             raise ArgumentError.new('struct size differs') if values.length > length
-            @values = values.fill(nil, values.length..length-1)
+
+            @values = values.fill(nil, values.length..length - 1)
           end
         end
         unless name.nil?

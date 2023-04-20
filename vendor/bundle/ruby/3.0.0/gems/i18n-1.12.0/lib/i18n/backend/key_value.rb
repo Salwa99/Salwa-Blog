@@ -3,7 +3,6 @@
 require 'i18n/backend/base'
 
 module I18n
-
   begin
     require 'oj'
     class JSON
@@ -11,6 +10,7 @@ module I18n
         def encode(value)
           Oj::Rails.encode(value)
         end
+
         def decode(value)
           Oj.load(value)
         end
@@ -72,7 +72,7 @@ module I18n
 
         include Base, Flatten
 
-        def initialize(store, subtrees=true)
+        def initialize(store, subtrees = true)
           @store, @subtrees = store, subtrees
         end
 
@@ -107,7 +107,7 @@ module I18n
           locales
         end
 
-      protected
+        protected
 
         # Queries the translations from the key-value store and converts
         # them into a hash such as the one returned from loading the
@@ -116,9 +116,9 @@ module I18n
           @translations = Utils.deep_symbolize_keys(@store.keys.clone.map do |main_key|
             main_value = JSON.decode(@store[main_key])
             main_key.to_s.split(".").reverse.inject(main_value) do |value, key|
-              {key.to_sym => value}
+              { key.to_sym => value }
             end
-          end.inject{|hash, elem| Utils.deep_merge!(hash, elem)})
+          end.inject { |hash, elem| Utils.deep_merge!(hash, elem) })
         end
 
         def init_translations
@@ -134,7 +134,7 @@ module I18n
         end
 
         def lookup(locale, key, scope = [], options = EMPTY_HASH)
-          key   = normalize_flat_keys(locale, key, scope, options[:separator])
+          key = normalize_flat_keys(locale, key, scope, options[:separator])
           value = @store["#{locale}.#{key}"]
           value = JSON.decode(value) if value
 
@@ -152,6 +152,7 @@ module I18n
             super
           else
             return entry unless entry.is_a?(Hash)
+
             key = pluralization_key(entry, count)
             entry[key]
           end

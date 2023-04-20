@@ -59,102 +59,103 @@ module ActiveRecord
       end
 
       private
-        # Returns the number of records in this collection.
-        #
-        # If the association has a counter cache it gets that value. Otherwise
-        # it will attempt to do a count via SQL, bounded to <tt>:limit</tt> if
-        # there's one. Some configuration options like :group make it impossible
-        # to do an SQL count, in those cases the array count will be used.
-        #
-        # That does not depend on whether the collection has already been loaded
-        # or not. The +size+ method is the one that takes the loaded flag into
-        # account and delegates to +count_records+ if needed.
-        #
-        # If the collection is empty the target is set to an empty array and
-        # the loaded flag is set to true as well.
-        def count_records
-          count = if reflection.has_cached_counter?
-            owner.read_attribute(reflection.counter_cache_column).to_i
-          else
-            scope.count(:all)
-          end
 
-          # If there's nothing in the database, @target should only contain new
-          # records or be an empty array. This is a documented side-effect of
-          # the method that may avoid an extra SELECT.
-          if count == 0
-            target.select!(&:new_record?)
-            loaded!
-          end
+      # Returns the number of records in this collection.
+      #
+      # If the association has a counter cache it gets that value. Otherwise
+      # it will attempt to do a count via SQL, bounded to <tt>:limit</tt> if
+      # there's one. Some configuration options like :group make it impossible
+      # to do an SQL count, in those cases the array count will be used.
+      #
+      # That does not depend on whether the collection has already been loaded
+      # or not. The +size+ method is the one that takes the loaded flag into
+      # account and delegates to +count_records+ if needed.
+      #
+      # If the collection is empty the target is set to an empty array and
+      # the loaded flag is set to true as well.
+      def count_records
+        count = if reflection.has_cached_counter?
+                  owner.read_attribute(reflection.counter_cache_column).to_i
+                else
+                  scope.count(:all)
+                end
 
-          [association_scope.limit_value, count].compact.min
+        # If there's nothing in the database, @target should only contain new
+        # records or be an empty array. This is a documented side-effect of
+        # the method that may avoid an extra SELECT.
+        if count == 0
+          target.select!(&:new_record?)
+          loaded!
         end
 
-        def update_counter(difference, reflection = reflection())
-          if reflection.has_cached_counter?
-            owner.increment!(reflection.counter_cache_column, difference)
-          end
-        end
+        [association_scope.limit_value, count].compact.min
+      end
 
-        def update_counter_in_memory(difference, reflection = reflection())
-          if reflection.counter_must_be_updated_by_has_many?
-            counter = reflection.counter_cache_column
-            owner.increment(counter, difference)
-            owner.send(:"clear_#{counter}_change")
-          end
+      def update_counter(difference, reflection = reflection())
+        if reflection.has_cached_counter?
+          owner.increment!(reflection.counter_cache_column, difference)
         end
+      end
 
-        def delete_count(method, scope)
-          if method == :delete_all
-            scope.delete_all
-          else
-            scope.update_all(nullified_owner_attributes)
-          end
+      def update_counter_in_memory(difference, reflection = reflection())
+        if reflection.counter_must_be_updated_by_has_many?
+          counter = reflection.counter_cache_column
+          owner.increment(counter, difference)
+          owner.send(:"clear_#{counter}_change")
         end
+      end
 
-        def delete_or_nullify_all_records(method)
-          count = delete_count(method, scope)
-          update_counter(-count)
-          count
+      def delete_count(method, scope)
+        if method == :delete_all
+          scope.delete_all
+        else
+          scope.update_all(nullified_owner_attributes)
         end
+      end
 
-        # Deletes the records according to the <tt>:dependent</tt> option.
-        def delete_records(records, method)
-          if method == :destroy
-            records.each(&:destroy!)
-            update_counter(-records.length) unless reflection.inverse_updates_counter_cache?
-          else
-            scope = self.scope.where(reflection.klass.primary_key => records)
-            update_counter(-delete_count(method, scope))
-          end
-        end
+      def delete_or_nullify_all_records(method)
+        count = delete_count(method, scope)
+        update_counter(-count)
+        count
+      end
 
-        def concat_records(records, *)
-          update_counter_if_success(super, records.length)
+      # Deletes the records according to the <tt>:dependent</tt> option.
+      def delete_records(records, method)
+        if method == :destroy
+          records.each(&:destroy!)
+          update_counter(-records.length) unless reflection.inverse_updates_counter_cache?
+        else
+          scope = self.scope.where(reflection.klass.primary_key => records)
+          update_counter(-delete_count(method, scope))
         end
+      end
 
-        def _create_record(attributes, *)
-          if attributes.is_a?(Array)
-            super
-          else
-            update_counter_if_success(super, 1)
-          end
-        end
+      def concat_records(records, *)
+        update_counter_if_success(super, records.length)
+      end
 
-        def update_counter_if_success(saved_successfully, difference)
-          if saved_successfully
-            update_counter_in_memory(difference)
-          end
-          saved_successfully
+      def _create_record(attributes, *)
+        if attributes.is_a?(Array)
+          super
+        else
+          update_counter_if_success(super, 1)
         end
+      end
 
-        def difference(a, b)
-          a - b
+      def update_counter_if_success(saved_successfully, difference)
+        if saved_successfully
+          update_counter_in_memory(difference)
         end
+        saved_successfully
+      end
 
-        def intersection(a, b)
-          a & b
-        end
+      def difference(a, b)
+        a - b
+      end
+
+      def intersection(a, b)
+        a & b
+      end
     end
   end
 end

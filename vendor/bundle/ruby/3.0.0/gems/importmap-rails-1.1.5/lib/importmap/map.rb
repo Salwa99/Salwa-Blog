@@ -75,7 +75,7 @@ class Importmap::Map
   def cache_sweeper(watches: nil)
     if watches
       @cache_sweeper =
-        Rails.application.config.file_watcher.new([], Array(watches).collect { |dir| [ dir.to_s, "js"] }.to_h) do
+        Rails.application.config.file_watcher.new([], Array(watches).collect { |dir| [dir.to_s, "js"] }.to_h) do
           clear_cache
         end
     else
@@ -84,75 +84,76 @@ class Importmap::Map
   end
 
   private
-    MappedDir  = Struct.new(:dir, :path, :under, :preload, keyword_init: true)
-    MappedFile = Struct.new(:name, :path, :preload, keyword_init: true)
 
-    def cache_as(name)
-      if result = @cache[name.to_s]
-        result
-      else
-        @cache[name.to_s] = yield
-      end
+  MappedDir = Struct.new(:dir, :path, :under, :preload, keyword_init: true)
+  MappedFile = Struct.new(:name, :path, :preload, keyword_init: true)
+
+  def cache_as(name)
+    if result = @cache[name.to_s]
+      result
+    else
+      @cache[name.to_s] = yield
     end
+  end
 
-    def clear_cache
-      @cache.clear
-    end
+  def clear_cache
+    @cache.clear
+  end
 
-    def rescuable_asset_error?(error)
-      Rails.application.config.importmap.rescuable_asset_errors.any? { |e| error.is_a?(e) }
-    end
+  def rescuable_asset_error?(error)
+    Rails.application.config.importmap.rescuable_asset_errors.any? { |e| error.is_a?(e) }
+  end
 
-    def resolve_asset_paths(paths, resolver:)
-      paths.transform_values do |mapping|
-        begin
-          resolver.path_to_asset(mapping.path)
-        rescue => e
-          if rescuable_asset_error?(e)
-            Rails.logger.warn "Importmap skipped missing path: #{mapping.path}"
-            nil
-          else
-            raise e
-          end
-        end
-      end.compact
-    end
-
-    def expanded_preloading_packages_and_directories
-      expanded_packages_and_directories.select { |name, mapping| mapping.preload }
-    end
-
-    def expanded_packages_and_directories
-      @packages.dup.tap { |expanded| expand_directories_into expanded }
-    end
-
-    def expand_directories_into(paths)
-      @directories.values.each do |mapping|
-        if (absolute_path = absolute_root_of(mapping.dir)).exist?
-          find_javascript_files_in_tree(absolute_path).each do |filename|
-            module_filename = filename.relative_path_from(absolute_path)
-            module_name     = module_name_from(module_filename, mapping)
-            module_path     = module_path_from(module_filename, mapping)
-
-            paths[module_name] = MappedFile.new(name: module_name, path: module_path, preload: mapping.preload)
-          end
+  def resolve_asset_paths(paths, resolver:)
+    paths.transform_values do |mapping|
+      begin
+        resolver.path_to_asset(mapping.path)
+      rescue => e
+        if rescuable_asset_error?(e)
+          Rails.logger.warn "Importmap skipped missing path: #{mapping.path}"
+          nil
+        else
+          raise e
         end
       end
-    end
+    end.compact
+  end
 
-    def module_name_from(filename, mapping)
-      [ mapping.under, filename.to_s.remove(filename.extname).remove(/\/?index$/).presence ].compact.join("/")
-    end
+  def expanded_preloading_packages_and_directories
+    expanded_packages_and_directories.select { |name, mapping| mapping.preload }
+  end
 
-    def module_path_from(filename, mapping)
-      [ mapping.path || mapping.under, filename.to_s ].compact.join("/")
-    end
+  def expanded_packages_and_directories
+    @packages.dup.tap { |expanded| expand_directories_into expanded }
+  end
 
-    def find_javascript_files_in_tree(path)
-      Dir[path.join("**/*.js{,m}")].collect { |file| Pathname.new(file) }.select(&:file?)
-    end
+  def expand_directories_into(paths)
+    @directories.values.each do |mapping|
+      if (absolute_path = absolute_root_of(mapping.dir)).exist?
+        find_javascript_files_in_tree(absolute_path).each do |filename|
+          module_filename = filename.relative_path_from(absolute_path)
+          module_name = module_name_from(module_filename, mapping)
+          module_path = module_path_from(module_filename, mapping)
 
-    def absolute_root_of(path)
-      (pathname = Pathname.new(path)).absolute? ? pathname : Rails.root.join(path)
+          paths[module_name] = MappedFile.new(name: module_name, path: module_path, preload: mapping.preload)
+        end
+      end
     end
+  end
+
+  def module_name_from(filename, mapping)
+    [mapping.under, filename.to_s.remove(filename.extname).remove(/\/?index$/).presence].compact.join("/")
+  end
+
+  def module_path_from(filename, mapping)
+    [mapping.path || mapping.under, filename.to_s].compact.join("/")
+  end
+
+  def find_javascript_files_in_tree(path)
+    Dir[path.join("**/*.js{,m}")].collect { |file| Pathname.new(file) }.select(&:file?)
+  end
+
+  def absolute_root_of(path)
+    (pathname = Pathname.new(path)).absolute? ? pathname : Rails.root.join(path)
+  end
 end

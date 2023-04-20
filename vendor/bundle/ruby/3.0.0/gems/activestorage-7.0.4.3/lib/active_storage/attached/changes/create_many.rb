@@ -28,24 +28,25 @@ module ActiveStorage
     end
 
     private
-      def subchanges
-        @subchanges ||= attachables.collect { |attachable| build_subchange_from(attachable) }
-      end
 
-      def build_subchange_from(attachable)
-        ActiveStorage::Attached::Changes::CreateOneOfMany.new(name, record, attachable)
-      end
+    def subchanges
+      @subchanges ||= attachables.collect { |attachable| build_subchange_from(attachable) }
+    end
 
-      def assign_associated_attachments
-        record.public_send("#{name}_attachments=", persisted_or_new_attachments)
-      end
+    def build_subchange_from(attachable)
+      ActiveStorage::Attached::Changes::CreateOneOfMany.new(name, record, attachable)
+    end
 
-      def reset_associated_blobs
-        record.public_send("#{name}_blobs").reset
-      end
+    def assign_associated_attachments
+      record.public_send("#{name}_attachments=", persisted_or_new_attachments)
+    end
 
-      def persisted_or_new_attachments
-        attachments.select { |attachment| attachment.persisted? || attachment.new_record? }
-      end
+    def reset_associated_blobs
+      record.public_send("#{name}_blobs").reset
+    end
+
+    def persisted_or_new_attachments
+      attachments.select { |attachment| attachment.persisted? || attachment.new_record? }
+    end
   end
 end

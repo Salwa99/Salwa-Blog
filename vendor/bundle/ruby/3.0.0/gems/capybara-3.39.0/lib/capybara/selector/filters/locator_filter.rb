@@ -16,7 +16,7 @@ module Capybara
           false
         end
 
-      private
+        private
 
         def apply(subject, value, skip_value, ctx, **options)
           return skip_value if skip?(value)

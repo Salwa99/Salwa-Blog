@@ -299,7 +299,8 @@ RSpec.describe Capybara do
           expect(string.all(:custom_css_selector, 'div, p', class: ['bb', '!cc']).size).to eq 2
           expect(string.all(:custom_css_selector, 'div, p', class: ['!cc', '!dd', 'bb']).size).to eq 1
           expect(string.all(:custom_xpath_selector, XPath.descendant(:div, :p), class: ['bb', '!cc']).size).to eq 2
-          expect(string.all(:custom_xpath_selector, XPath.descendant(:div, :p), class: ['!cc', '!dd', 'bb']).size).to eq 1
+          expect(string.all(:custom_xpath_selector, XPath.descendant(:div, :p),
+                            class: ['!cc', '!dd', 'bb']).size).to eq 1
         end
 
         it 'handles classes starting with ! by requiring negated negated first' do
@@ -313,8 +314,10 @@ RSpec.describe Capybara do
         end
 
         it 'accepts XPath expression for xpath based selectors' do
-          expect(string.find(:custom_xpath_selector, './/div', class: XPath.contains('dom wor'))[:id]).to eq 'random_words'
-          expect(string.find(:custom_xpath_selector, './/div', class: XPath.ends_with('words'))[:id]).to eq 'random_words'
+          expect(string.find(:custom_xpath_selector, './/div',
+                             class: XPath.contains('dom wor'))[:id]).to eq 'random_words'
+          expect(string.find(:custom_xpath_selector, './/div',
+                             class: XPath.ends_with('words'))[:id]).to eq 'random_words'
         end
 
         it 'errors XPath expression for CSS based selectors' do
@@ -334,15 +337,23 @@ RSpec.describe Capybara do
         it 'accepts Regexp for individual class names for XPath based selectors' do
           expect(string.find(:custom_xpath_selector, './/div', class: [/random/, 'some'])[:id]).to eq 'random_words'
           expect(string.find(:custom_xpath_selector, './/div', class: [/om/, /wor/])[:id]).to eq 'random_words'
-          expect { string.find(:custom_xpath_selector, './/div', class: [/not/, /wor/]) }.to raise_error(Capybara::ElementNotFound)
-          expect { string.find(:custom_xpath_selector, './/div', class: [/dom wor/]) }.to raise_error(Capybara::ElementNotFound)
+          expect {
+            string.find(:custom_xpath_selector, './/div', class: [/not/, /wor/])
+          }.to raise_error(Capybara::ElementNotFound)
+          expect {
+            string.find(:custom_xpath_selector, './/div', class: [/dom wor/])
+          }.to raise_error(Capybara::ElementNotFound)
         end
 
         it 'accepts Regexp for individual class names for CSS based selectors' do
           expect(string.find(:custom_css_selector, 'div', class: [/random/])[:id]).to eq 'random_words'
           expect(string.find(:custom_css_selector, 'div', class: [/om/, /wor/, 'some'])[:id]).to eq 'random_words'
-          expect { string.find(:custom_css_selector, 'div', class: [/not/, /wor/]) }.to raise_error(Capybara::ElementNotFound)
-          expect { string.find(:custom_css_selector, 'div', class: [/dom wor/]) }.to raise_error(Capybara::ElementNotFound)
+          expect {
+            string.find(:custom_css_selector, 'div', class: [/not/, /wor/])
+          }.to raise_error(Capybara::ElementNotFound)
+          expect {
+            string.find(:custom_css_selector, 'div', class: [/dom wor/])
+          }.to raise_error(Capybara::ElementNotFound)
         end
       end
 

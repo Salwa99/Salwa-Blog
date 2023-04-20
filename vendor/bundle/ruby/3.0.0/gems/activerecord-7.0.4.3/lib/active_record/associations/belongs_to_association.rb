@@ -81,68 +81,69 @@ module ActiveRecord
       end
 
       private
-        def replace(record)
-          if record
-            raise_on_type_mismatch!(record)
-            set_inverse_instance(record)
-            @updated = true
-          elsif target
-            remove_inverse_instance(target)
-          end
 
-          replace_keys(record, force: true)
-
-          self.target = record
+      def replace(record)
+        if record
+          raise_on_type_mismatch!(record)
+          set_inverse_instance(record)
+          @updated = true
+        elsif target
+          remove_inverse_instance(target)
         end
 
-        def update_counters(by)
-          if require_counter_update? && foreign_key_present?
-            if target && !stale_target?
-              target.increment!(reflection.counter_cache_column, by, touch: reflection.options[:touch])
-            else
-              update_counters_via_scope(klass, owner._read_attribute(reflection.foreign_key), by)
-            end
-          end
-        end
+        replace_keys(record, force: true)
 
-        def update_counters_via_scope(klass, foreign_key, by)
-          scope = klass.unscoped.where!(primary_key(klass) => foreign_key)
-          scope.update_counters(reflection.counter_cache_column => by, touch: reflection.options[:touch])
-        end
+        self.target = record
+      end
 
-        def find_target?
-          !loaded? && foreign_key_present? && klass
-        end
-
-        def require_counter_update?
-          reflection.counter_cache_column && owner.persisted?
-        end
-
-        def replace_keys(record, force: false)
-          target_key = record ? record._read_attribute(primary_key(record.class)) : nil
-
-          if force || owner._read_attribute(reflection.foreign_key) != target_key
-            owner[reflection.foreign_key] = target_key
+      def update_counters(by)
+        if require_counter_update? && foreign_key_present?
+          if target && !stale_target?
+            target.increment!(reflection.counter_cache_column, by, touch: reflection.options[:touch])
+          else
+            update_counters_via_scope(klass, owner._read_attribute(reflection.foreign_key), by)
           end
         end
+      end
 
-        def primary_key(klass)
-          reflection.association_primary_key(klass)
-        end
+      def update_counters_via_scope(klass, foreign_key, by)
+        scope = klass.unscoped.where!(primary_key(klass) => foreign_key)
+        scope.update_counters(reflection.counter_cache_column => by, touch: reflection.options[:touch])
+      end
 
-        def foreign_key_present?
-          owner._read_attribute(reflection.foreign_key)
-        end
+      def find_target?
+        !loaded? && foreign_key_present? && klass
+      end
 
-        def invertible_for?(record)
-          inverse = inverse_reflection_for(record)
-          inverse && (inverse.has_one? || inverse.klass.has_many_inversing)
-        end
+      def require_counter_update?
+        reflection.counter_cache_column && owner.persisted?
+      end
 
-        def stale_state
-          result = owner._read_attribute(reflection.foreign_key) { |n| owner.send(:missing_attribute, n, caller) }
-          result && result.to_s
+      def replace_keys(record, force: false)
+        target_key = record ? record._read_attribute(primary_key(record.class)) : nil
+
+        if force || owner._read_attribute(reflection.foreign_key) != target_key
+          owner[reflection.foreign_key] = target_key
         end
+      end
+
+      def primary_key(klass)
+        reflection.association_primary_key(klass)
+      end
+
+      def foreign_key_present?
+        owner._read_attribute(reflection.foreign_key)
+      end
+
+      def invertible_for?(record)
+        inverse = inverse_reflection_for(record)
+        inverse && (inverse.has_one? || inverse.klass.has_many_inversing)
+      end
+
+      def stale_state
+        result = owner._read_attribute(reflection.foreign_key) { |n| owner.send(:missing_attribute, n, caller) }
+        result && result.to_s
+      end
     end
   end
 end

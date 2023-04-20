@@ -68,15 +68,16 @@ module ActionCable
       end
 
       private
-        def connection_gid(ids)
-          ids.map do |o|
-            if o.respond_to?(:to_gid_param)
-              o.to_gid_param
-            else
-              o.to_s
-            end
-          end.sort.join(":")
-        end
+
+      def connection_gid(ids)
+        ids.map do |o|
+          if o.respond_to?(:to_gid_param)
+            o.to_gid_param
+          else
+            o.to_s
+          end
+        end.sort.join(":")
+      end
     end
 
     # Superclass for Action Cable channel functional tests.
@@ -220,6 +221,7 @@ module ActionCable
               Class === constant && constant < ActionCable::Channel::Base
             end
             raise NonInferrableChannelError.new(name) if channel.nil?
+
             channel
           end
         end
@@ -308,15 +310,16 @@ module ActionCable
         end
 
         private
-          def check_subscribed!
-            raise "Must be subscribed!" if subscription.nil? || subscription.rejected?
-          end
 
-          def broadcasting_for(stream_or_object)
-            return stream_or_object if stream_or_object.is_a?(String)
+        def check_subscribed!
+          raise "Must be subscribed!" if subscription.nil? || subscription.rejected?
+        end
 
-            self.class.channel_class.broadcasting_for(stream_or_object)
-          end
+        def broadcasting_for(stream_or_object)
+          return stream_or_object if stream_or_object.is_a?(String)
+
+          self.class.channel_class.broadcasting_for(stream_or_object)
+        end
       end
 
       include Behavior

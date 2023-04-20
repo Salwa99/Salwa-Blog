@@ -89,7 +89,8 @@ Capybara::SpecHelper.spec '#switch_to_frame', requires: [:frames] do
       @session.within(:css, '#parentBody') do
         @session.switch_to_frame(:parent)
       end
-    end.to raise_error(Capybara::ScopeError, "`switch_to_frame(:parent)` cannot be called from inside a descendant frame's `within` block.")
+    end.to raise_error(Capybara::ScopeError,
+                       "`switch_to_frame(:parent)` cannot be called from inside a descendant frame's `within` block.")
   end
 
   it "should raise error if switching to top inside a `within` in a frame as it's nonsense" do
@@ -98,7 +99,8 @@ Capybara::SpecHelper.spec '#switch_to_frame', requires: [:frames] do
     @session.within(:css, '#parentBody') do
       expect do
         @session.switch_to_frame(:top)
-      end.to raise_error(Capybara::ScopeError, "`switch_to_frame(:top)` cannot be called from inside a descendant frame's `within` block.")
+      end.to raise_error(Capybara::ScopeError,
+                         "`switch_to_frame(:top)` cannot be called from inside a descendant frame's `within` block.")
     end
   end
 
@@ -109,7 +111,8 @@ Capybara::SpecHelper.spec '#switch_to_frame', requires: [:frames] do
       @session.switch_to_frame(@session.find(:frame, 'childFrame'))
       expect do
         @session.switch_to_frame(:top)
-      end.to raise_error(Capybara::ScopeError, "`switch_to_frame(:top)` cannot be called from inside a descendant frame's `within` block.")
+      end.to raise_error(Capybara::ScopeError,
+                         "`switch_to_frame(:top)` cannot be called from inside a descendant frame's `within` block.")
       @session.switch_to_frame(:parent)
     end
   end

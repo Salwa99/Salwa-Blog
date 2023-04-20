@@ -184,7 +184,8 @@ Capybara::SpecHelper.spec '#attach_file' do
     it 'resets the style when done' do
       @session.visit('/with_js')
       @session.attach_file('hidden_file', with_os_path_separators(__FILE__), make_visible: true)
-      expect(@session.evaluate_script('arguments[0].style.display', @session.find(:css, '#hidden_file', visible: :all))).to eq 'none'
+      expect(@session.evaluate_script('arguments[0].style.display',
+                                      @session.find(:css, '#hidden_file', visible: :all))).to eq 'none'
     end
 
     it 'should fire change' do

@@ -65,6 +65,7 @@ module ActiveRecord
 
       @pool.with_connection do |connection|
         return unless @mutex.try_lock
+
         begin
           if pending?
             @event_buffer = EventBuffer.new(self, @instrumenter)
@@ -96,44 +97,46 @@ module ActiveRecord
     end
 
     private
-      def canceled?
-        @session && !@session.active?
-      end
 
-      def execute_or_wait
-        if pending?
-          start = Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_millisecond)
-          @mutex.synchronize do
-            if pending?
-              execute_query(@pool.connection)
-            else
-              @lock_wait = (Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_millisecond) - start)
-            end
+    def canceled?
+      @session && !@session.active?
+    end
+
+    def execute_or_wait
+      if pending?
+        start = Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_millisecond)
+        @mutex.synchronize do
+          if pending?
+            execute_query(@pool.connection)
+          else
+            @lock_wait = (Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_millisecond) - start)
           end
-        else
-          @lock_wait = 0.0
         end
+      else
+        @lock_wait = 0.0
       end
+    end
 
-      def execute_query(connection, async: false)
-        @result = exec_query(connection, *@args, **@kwargs, async: async)
-      rescue => error
-        @error = error
-      ensure
-        @pending = false
-      end
+    def execute_query(connection, async: false)
+      @result = exec_query(connection, *@args, **@kwargs, async: async)
+    rescue => error
+      @error = error
+    ensure
+      @pending = false
+    end
 
-      def exec_query(connection, *args, **kwargs)
-        connection.exec_query(*args, **kwargs)
-      end
+    def exec_query(connection, *args, **kwargs)
+      connection.exec_query(*args, **kwargs)
+    end
 
-      class SelectAll < FutureResult # :nodoc:
-        private
-          def exec_query(*, **)
-            super
-          rescue ::RangeError
-            ActiveRecord::Result.empty
-          end
+    class SelectAll < FutureResult # :nodoc:
+      private
+
+      def exec_query(*, **)
+        super
+      rescue ::RangeError
+        ActiveRecord::Result.empty
       end
+    end
   end
 end

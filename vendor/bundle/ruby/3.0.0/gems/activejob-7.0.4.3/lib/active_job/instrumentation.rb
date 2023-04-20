@@ -15,30 +15,31 @@ module ActiveJob
     end
 
     private
-      def _perform_job
-        instrument(:perform_start)
-        super
-      end
 
-      def instrument(operation, payload = {}, &block)
-        enhanced_block = ->(event_payload) do
-          value = block.call if block
+    def _perform_job
+      instrument(:perform_start)
+      super
+    end
 
-          if defined?(@_halted_callback_hook_called) && @_halted_callback_hook_called
-            event_payload[:aborted] = true
-            @_halted_callback_hook_called = nil
-          end
+    def instrument(operation, payload = {}, &block)
+      enhanced_block = ->(event_payload) do
+        value = block.call if block
 
-          value
+        if defined?(@_halted_callback_hook_called) && @_halted_callback_hook_called
+          event_payload[:aborted] = true
+          @_halted_callback_hook_called = nil
         end
 
-        ActiveSupport::Notifications.instrument \
-          "#{operation}.active_job", payload.merge(adapter: queue_adapter, job: self), &enhanced_block
+        value
       end
 
-      def halted_callback_hook(*)
-        super
-        @_halted_callback_hook_called = true
-      end
+      ActiveSupport::Notifications.instrument \
+        "#{operation}.active_job", payload.merge(adapter: queue_adapter, job: self), &enhanced_block
+    end
+
+    def halted_callback_hook(*)
+      super
+      @_halted_callback_hook_called = true
+    end
   end
 end

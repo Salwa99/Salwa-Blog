@@ -8,8 +8,8 @@ class Module
   class DelegationError < NoMethodError; end
 
   RUBY_RESERVED_KEYWORDS = %w(alias and BEGIN begin break case class def defined? do
-  else elsif END end ensure false for if in module next nil not or redo rescue retry
-  return self super then true undef unless until when while yield)
+                              else elsif END end ensure false for if in module next nil not or redo rescue retry
+                              return self super then true undef unless until when while yield)
   DELEGATION_RESERVED_KEYWORDS = %w(_ arg args block)
   DELEGATION_RESERVED_METHOD_NAMES = Set.new(
     RUBY_RESERVED_KEYWORDS + DELEGATION_RESERVED_KEYWORDS
@@ -170,7 +170,8 @@ class Module
   # The target method must be public, otherwise it will raise +NoMethodError+.
   def delegate(*methods, to: nil, prefix: nil, allow_nil: nil, private: nil)
     unless to
-      raise ArgumentError, "Delegation needs a target. Supply a keyword argument 'to' (e.g. delegate :hello, to: :greeter)."
+      raise ArgumentError,
+            "Delegation needs a target. Supply a keyword argument 'to' (e.g. delegate :hello, to: :greeter)."
     end
 
     if prefix == true && /^[^a-z_]/.match?(to)

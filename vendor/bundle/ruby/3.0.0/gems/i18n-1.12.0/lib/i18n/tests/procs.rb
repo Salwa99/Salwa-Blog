@@ -9,7 +9,9 @@ module I18n
       end
 
       test "lookup: given a translation is a proc it passes the interpolation values as keyword arguments" do
-        I18n.backend.store_translations(:en, :a_lambda => lambda { |key, foo:, **| I18n::Tests::Procs.filter_args(key, foo: foo) })
+        I18n.backend.store_translations(:en, :a_lambda => lambda { |key, foo:, **,|
+                                                            I18n::Tests::Procs.filter_args(key, foo: foo)
+})
         assert_equal '[:a_lambda, {:foo=>"foo"}]', I18n.t(:a_lambda, :foo => 'foo')
       end
 
@@ -37,8 +39,8 @@ module I18n
 
       test "pluralization: given a key resolves to a Proc that returns valid data then pluralization still works" do
         proc = lambda { |*args| { :zero => 'zero', :one => 'one', :other => 'other' } }
-        assert_equal 'zero',  I18n.t(:default => proc, :count => 0)
-        assert_equal 'one',   I18n.t(:default => proc, :count => 1)
+        assert_equal 'zero', I18n.t(:default => proc, :count => 0)
+        assert_equal 'one', I18n.t(:default => proc, :count => 1)
         assert_equal 'other', I18n.t(:default => proc, :count => 2)
       end
 
@@ -48,9 +50,10 @@ module I18n
       end
 
       test "lookup: given the option :resolve => false was passed it does not resolve proc default" do
-        assert_equal Proc, I18n.t(nil, :default => lambda { |*args| I18n::Tests::Procs.filter_args(*args) }, :resolve => false).class
+        assert_equal Proc, I18n.t(nil, :default => lambda { |*args|
+                                                     I18n::Tests::Procs.filter_args(*args)
+}, :resolve => false).class
       end
-
 
       def self.filter_args(*args)
         args.map do |arg|

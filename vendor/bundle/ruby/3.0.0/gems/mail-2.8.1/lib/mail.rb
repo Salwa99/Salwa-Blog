@@ -1,7 +1,7 @@
 # encoding: utf-8
 # frozen_string_literal: true
-module Mail # :doc:
 
+module Mail # :doc:
   require 'date'
   require 'shellwords'
 
@@ -33,7 +33,7 @@ module Mail # :doc:
   #   require 'mail'
   #   Mail.eager_autoload!
   def self.eager_autoload!
-    @@autoloads.each { |_,path| require(path) }
+    @@autoloads.each { |_, path| require(path) }
   end
 
   # Autoload mail send and receive classes.

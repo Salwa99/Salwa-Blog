@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # Rakefile for rake        -*- ruby -*-
 
 # Copyright 2004, 2005, 2006 by Jim Weirich (jim@weirichhouse.org).
@@ -53,7 +54,7 @@ end
 if defined?(RDoc)
   rd = RDoc::Task.new("rdoc") { |rdoc|
     rdoc.rdoc_dir = 'html'
-    rdoc.title    = "Builder for Markup"
+    rdoc.title = "Builder for Markup"
     rdoc.options << '--line-numbers' << '--inline-source' << '--main' << 'README.rdoc'
     rdoc.rdoc_files.include('lib/**/*.rb', '[A-Z]*', 'doc/**/*.rdoc').exclude("TAGS")
     rdoc.template = 'doc/jamis.rb'
@@ -82,11 +83,10 @@ BLANKSLATE_FILES = FileList[
   'test/test_blankslate.rb'
 ]
 
-if ! defined?(Gem)
+if !defined?(Gem)
   puts "Package Target requires RubyGEMs"
 else
   spec = Gem::Specification.new do |s|
-
     #### Basic information.
 
     s.name = 'builder'
@@ -107,7 +107,7 @@ simple to do.  Currently the following builder objects are supported:
 
     s.extra_rdoc_files = rd.rdoc_files.reject { |fn| fn =~ /\.rb$/ }.to_a
     s.rdoc_options <<
-      '--title' <<  'Builder -- Easy XML Building' <<
+      '--title' << 'Builder -- Easy XML Building' <<
       '--main' << 'README.rdoc' <<
       '--line-numbers'
 
@@ -118,7 +118,6 @@ simple to do.  Currently the following builder objects are supported:
   end
 
   blankslate_spec = Gem::Specification.new do |s|
-
     #### Basic information.
 
     s.name = 'blankslate'
@@ -137,7 +136,7 @@ classes that make heavy use of method_missing.
 
     s.extra_rdoc_files = rd.rdoc_files.reject { |fn| fn =~ /\.rb$/ }.to_a
     s.rdoc_options <<
-      '--title' <<  'BlankSlate -- Base Class for building proxies.' <<
+      '--title' << 'BlankSlate -- Base Class for building proxies.' <<
       '--main' << 'README.rdoc' <<
       '--line-numbers'
 
@@ -190,5 +189,6 @@ task :install_jamis_template do
   require 'rbconfig'
   dest_dir = File.join(Config::CONFIG['rubylibdir'], "rdoc/generators/template/html")
   fail "Unabled to write to #{dest_dir}" unless File.writable?(dest_dir)
+
   install "doc/jamis.rb", dest_dir, :verbose => true
 end

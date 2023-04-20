@@ -5,11 +5,10 @@ require 'concurrent/delay'
 module Concurrent
   # @!visibility private
   module Utility
-
     # @!visibility private
     class ProcessorCounter
       def initialize
-        @processor_count          = Delay.new { compute_processor_count }
+        @processor_count = Delay.new { compute_processor_count }
         @physical_processor_count = Delay.new { compute_physical_processor_count }
       end
 
@@ -37,12 +36,12 @@ module Concurrent
                 IO.popen("/usr/sbin/sysctl -n hw.physicalcpu", &:read).to_i
               when /linux/
                 cores = {} # unique physical ID / core ID combinations
-                phy   = 0
+                phy = 0
                 IO.read("/proc/cpuinfo").scan(/^physical id.*|^core id.*/) do |ln|
                   if ln.start_with?("physical")
                     phy = ln[/\d+/]
                   elsif ln.start_with?("core")
-                    cid        = phy + ":" + ln[/\d+/]
+                    cid = phy + ":" + ln[/\d+/]
                     cores[cid] = true if not cores[cid]
                   end
                 end
@@ -50,7 +49,8 @@ module Concurrent
               when /mswin|mingw/
                 require 'win32ole'
                 result_set = WIN32OLE.connect("winmgmts://").ExecQuery(
-                  "select NumberOfCores from Win32_Processor")
+                  "select NumberOfCores from Win32_Processor"
+                )
                 result_set.to_enum.collect(&:NumberOfCores).reduce(:+)
               else
                 processor_count

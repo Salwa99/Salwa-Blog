@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # date.rb: Written by Tadayoshi Funaba 1998-2011
 
 require 'date_core'
@@ -15,8 +16,7 @@ class Date
   end
 
   class Infinity < Numeric # :nodoc:
-
-    def initialize(d=1) @d = d <=> 0 end
+    def initialize(d = 1) @d = d <=> 0 end
 
     def d() @d end
 
@@ -58,13 +58,12 @@ class Date
 
     def to_f
       return 0 if @d == 0
+
       if @d > 0
         Float::INFINITY
       else
         -Float::INFINITY
       end
     end
-
   end
-
 end

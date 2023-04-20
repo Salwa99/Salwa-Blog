@@ -1,9 +1,10 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/parsers/content_disposition_parser'
 
 module Mail
-  class ContentDispositionElement #:nodoc:
+  class ContentDispositionElement # :nodoc:
     attr_reader :disposition_type, :parameters
 
     def initialize(string)
@@ -13,6 +14,7 @@ module Mail
     end
 
     private
+
     def cleaned(string)
       string =~ /(.+);\s*$/ ? $1 : string
     end

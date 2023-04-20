@@ -22,7 +22,7 @@ class Array
   def in_groups_of(number, fill_with = nil, &block)
     if number.to_i <= 0
       raise ArgumentError,
-        "Group size must be a positive integer, was #{number.inspect}"
+            "Group size must be a positive integer, was #{number.inspect}"
     end
 
     if fill_with == false
@@ -74,7 +74,7 @@ class Array
       length = division + (modulo > 0 && modulo > index ? 1 : 0)
       groups << last_group = slice(start, length)
       last_group << fill_with if fill_with != false &&
-        modulo > 0 && length == division
+                                 modulo > 0 && length == division
       start += length
     end
 

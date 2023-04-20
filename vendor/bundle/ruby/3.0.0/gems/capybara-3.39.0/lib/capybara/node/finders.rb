@@ -295,7 +295,7 @@ module Capybara
         all(*args, **options, &optional_filter_block).first
       end
 
-    private
+      private
 
       def synced_resolve(query)
         synchronize(query.wait) do
@@ -307,7 +307,8 @@ module Capybara
           end
 
           if ambiguous?(query, result)
-            raise Capybara::Ambiguous, "Ambiguous match, found #{result.size} elements matching #{query.applied_description}"
+            raise Capybara::Ambiguous,
+                  "Ambiguous match, found #{result.size} elements matching #{query.applied_description}"
           end
           raise Capybara::ElementNotFound, "Unable to find #{query.applied_description}" if result.empty?
 

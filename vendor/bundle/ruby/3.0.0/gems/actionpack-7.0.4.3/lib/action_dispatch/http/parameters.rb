@@ -8,7 +8,7 @@ module ActionDispatch
       PARAMETERS_KEY = "action_dispatch.request.path_parameters"
 
       DEFAULT_PARSERS = {
-        Mime[:json].symbol => -> (raw_post) {
+        Mime[:json].symbol => ->(raw_post) {
           data = ActiveSupport::JSON.decode(raw_post)
           data.is_a?(Hash) ? data : { _json: data }
         }
@@ -52,10 +52,10 @@ module ActionDispatch
         return params if params
 
         params = begin
-                   request_parameters.merge(query_parameters)
-                 rescue EOFError
-                   query_parameters.dup
-                 end
+          request_parameters.merge(query_parameters)
+        rescue EOFError
+          query_parameters.dup
+        end
         params.merge!(path_parameters)
         set_header("action_dispatch.request.parameters", params)
         params
@@ -84,34 +84,35 @@ module ActionDispatch
       end
 
       private
-        def parse_formatted_parameters(parsers)
-          return yield if content_length.zero? || content_mime_type.nil?
 
-          strategy = parsers.fetch(content_mime_type.symbol) { return yield }
+      def parse_formatted_parameters(parsers)
+        return yield if content_length.zero? || content_mime_type.nil?
 
-          begin
-            strategy.call(raw_post)
-          rescue # JSON or Ruby code block errors.
-            log_parse_error_once
-            raise ParseError, "Error occurred while parsing request parameters"
-          end
+        strategy = parsers.fetch(content_mime_type.symbol) { return yield }
+
+        begin
+          strategy.call(raw_post)
+        rescue # JSON or Ruby code block errors.
+          log_parse_error_once
+          raise ParseError, "Error occurred while parsing request parameters"
         end
+      end
 
-        def log_parse_error_once
-          @parse_error_logged ||= begin
-            parse_logger = logger || ActiveSupport::Logger.new($stderr)
-            parse_logger.debug <<~MSG.chomp
-              Error occurred while parsing request parameters.
-              Contents:
+      def log_parse_error_once
+        @parse_error_logged ||= begin
+          parse_logger = logger || ActiveSupport::Logger.new($stderr)
+          parse_logger.debug <<~MSG.chomp
+            Error occurred while parsing request parameters.
+            Contents:
 
-              #{raw_post}
-            MSG
-          end
+            #{raw_post}
+          MSG
         end
+      end
 
-        def params_parsers
-          ActionDispatch::Request.parameter_parsers
-        end
+      def params_parsers
+        ActionDispatch::Request.parameter_parsers
+      end
     end
   end
 end

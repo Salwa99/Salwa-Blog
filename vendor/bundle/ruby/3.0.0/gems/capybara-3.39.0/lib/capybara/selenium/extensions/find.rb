@@ -11,7 +11,7 @@ module Capybara
         find_by(:css, selector, uses_visibility: uses_visibility, texts: texts, styles: styles, position: position)
       end
 
-    private
+      private
 
       def find_by(format, selector, uses_visibility:, texts:, styles:, position:)
         els = find_context.find_elements(format, selector)

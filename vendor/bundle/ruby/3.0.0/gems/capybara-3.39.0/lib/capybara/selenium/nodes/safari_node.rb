@@ -44,10 +44,10 @@ class Capybara::Selenium::SafariNode < Capybara::Selenium::Node
 
     vis_text = driver.execute_script('return arguments[0].innerText', self)
     vis_text.squeeze(' ')
-            .gsub(/[\ \n]*\n[\ \n]*/, "\n")
-            .gsub(/\A[[:space:]&&[^\u00a0]]+/, '')
-            .gsub(/[[:space:]&&[^\u00a0]]+\z/, '')
-            .tr("\u00a0", ' ')
+      .gsub(/[\ \n]*\n[\ \n]*/, "\n")
+      .gsub(/\A[[:space:]&&[^\u00a0]]+/, '')
+      .gsub(/[[:space:]&&[^\u00a0]]+\z/, '')
+      .tr("\u00a0", ' ')
   end
 
   def disabled?
@@ -88,7 +88,7 @@ class Capybara::Selenium::SafariNode < Capybara::Selenium::Node
     scroll_if_needed { browser_action.move_to(native, 0, 0).move_to(native).perform }
   end
 
-private
+  private
 
   def _send_keys(keys, actions = browser_action, down_keys = ModifierKeysStack.new)
     case keys

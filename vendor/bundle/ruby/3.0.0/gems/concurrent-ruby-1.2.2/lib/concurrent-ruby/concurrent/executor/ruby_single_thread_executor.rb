@@ -1,12 +1,10 @@
 require 'concurrent/executor/ruby_thread_pool_executor'
 
 module Concurrent
-
   # @!macro single_thread_executor
   # @!macro abstract_executor_service_public_api
   # @!visibility private
   class RubySingleThreadExecutor < RubyThreadPoolExecutor
-
     # @!macro single_thread_executor_method_initialize
     def initialize(opts = {})
       super(

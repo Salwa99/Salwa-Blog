@@ -56,11 +56,13 @@ module I18n
         end
 
         test "localize DateTime: given a date format with the month name upcased it returns the correct value" do
-          assert_equal '1. FEBRUAR 2008', I18n.l(::DateTime.new(2008, 2, 1, 6), :format => "%-d. %^B %Y", :locale => :de)
+          assert_equal '1. FEBRUAR 2008',
+                       I18n.l(::DateTime.new(2008, 2, 1, 6), :format => "%-d. %^B %Y", :locale => :de)
         end
 
         test "localize DateTime: given missing translations it returns the correct error message" do
-          assert_equal 'translation missing: fr.date.abbr_month_names', I18n.l(@datetime, :format => '%b', :locale => :fr)
+          assert_equal 'translation missing: fr.date.abbr_month_names',
+                       I18n.l(@datetime, :format => '%b', :locale => :fr)
         end
 
         test "localize DateTime: given a meridian indicator format it returns the correct meridian indicator" do
@@ -83,20 +85,20 @@ module I18n
 
         protected
 
-          def setup_datetime_translations
-            # time translations might have been set up in Tests::Api::Localization::Time
-            I18n.backend.store_translations :de, {
-              :time => {
-                :formats => {
-                  :default => "%a, %d. %b %Y %H:%M:%S %z",
-                  :short => "%d. %b %H:%M",
-                  :long => "%d. %B %Y %H:%M"
-                },
-                :am => 'am',
-                :pm => 'pm'
-              }
+        def setup_datetime_translations
+          # time translations might have been set up in Tests::Api::Localization::Time
+          I18n.backend.store_translations :de, {
+            :time => {
+              :formats => {
+                :default => "%a, %d. %b %Y %H:%M:%S %z",
+                :short => "%d. %b %H:%M",
+                :long => "%d. %B %Y %H:%M"
+              },
+              :am => 'am',
+              :pm => 'pm'
             }
-          end
+          }
+        end
       end
     end
   end

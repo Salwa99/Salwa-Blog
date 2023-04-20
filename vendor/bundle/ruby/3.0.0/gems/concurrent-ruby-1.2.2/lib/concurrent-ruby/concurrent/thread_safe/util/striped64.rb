@@ -4,13 +4,10 @@ require 'concurrent/thread_safe/util/volatile'
 require 'concurrent/thread_safe/util/xor_shift_random'
 
 module Concurrent
-
   # @!visibility private
   module ThreadSafe
-
     # @!visibility private
     module Util
-
       # A Ruby port of the Doug Lea's jsr166e.Striped64 class version 1.6
       # available in public domain.
       #
@@ -75,7 +72,6 @@ module Concurrent
       #
       # @!visibility private
       class Striped64
-
         # Padded variant of AtomicLong supporting only raw accesses plus CAS.
         # The +value+ field is placed between pads, hoping that the JVM doesn't
         # reorder them.
@@ -85,7 +81,6 @@ module Concurrent
         #
         # @!visibility private
         class Cell < Concurrent::AtomicReference
-
           alias_method :cas, :compare_and_set
 
           def cas_computed
@@ -97,15 +92,16 @@ module Concurrent
             # TODO: this only adds padding after the :value slot, need to find a way to add padding before the slot
             # TODO (pitr-ch 28-Jul-2018): the padding instance vars may not be created
             # hide from yardoc in a method
-            attr_reader :padding_0, :padding_1, :padding_2, :padding_3, :padding_4, :padding_5, :padding_6, :padding_7, :padding_8, :padding_9, :padding_10, :padding_11
+            attr_reader :padding_0, :padding_1, :padding_2, :padding_3, :padding_4, :padding_5, :padding_6, :padding_7,
+                        :padding_8, :padding_9, :padding_10, :padding_11
           end
           padding
         end
 
         extend Volatile
         attr_volatile :cells, # Table of cells. When non-null, size is a power of 2.
-          :base,  # Base value, used mainly when there is no contention, but also as a fallback during table initialization races. Updated via CAS.
-          :busy   # Spinlock (locked via CAS) used when resizing and/or creating Cells.
+                      :base, # Base value, used mainly when there is no contention, but also as a fallback during table initialization races. Updated via CAS.
+                      :busy # Spinlock (locked via CAS) used when resizing and/or creating Cells.
 
         alias_method :busy?, :busy
 
@@ -129,7 +125,7 @@ module Concurrent
         # [+x+]
         #   false if CAS failed before call
         def retry_update(x, hash_code, was_uncontended) # :yields: current_value
-          hash     = hash_code
+          hash = hash_code
           collided = false # True if last slot nonempty
           while true
             if current_cells = cells
@@ -145,7 +141,7 @@ module Concurrent
                 end
               elsif !was_uncontended # CAS already known to fail
                 was_uncontended = true # Continue after rehash
-              elsif cell.cas_computed {|current_value| yield current_value}
+              elsif cell.cas_computed { |current_value| yield current_value }
                 break
               elsif current_cells.size >= CPU_COUNT || cells != current_cells # At max size or stale
                 collided = false
@@ -157,7 +153,7 @@ module Concurrent
               end
               hash = XorShiftRandom.xorshift(hash)
 
-            elsif try_initialize_cells(x, hash) || cas_base_computed {|current_base| yield current_base}
+            elsif try_initialize_cells(x, hash) || cas_base_computed { |current_base| yield current_base }
               break
             end
           end
@@ -165,6 +161,7 @@ module Concurrent
         end
 
         private
+
         # Static per-thread hash code key. Shared across all instances to
         # reduce Thread locals pollution and because adjustments due to
         # collisions in one table are likely to be appropriate for
@@ -184,7 +181,7 @@ module Concurrent
         # Sets base and all +cells+ to the given value.
         def internal_reset(initial_value)
           current_cells = cells
-          self.base     = initial_value
+          self.base = initial_value
           if current_cells
             current_cells.each do |cell|
               cell.value = initial_value if cell
@@ -216,7 +213,7 @@ module Concurrent
           try_in_busy do
             if current_cells == cells # Recheck under lock
               new_cells = current_cells.next_in_size_table
-              current_cells.each_with_index {|x, i| new_cells.volatile_set(i, x)}
+              current_cells.each_with_index { |x, i| new_cells.volatile_set(i, x) }
               self.cells = new_cells
             end
           end

@@ -37,55 +37,56 @@ module ActionDispatch
       end
 
       private
-        def registerable?
-          [:selenium, :poltergeist, :webkit, :cuprite, :rack_test].include?(@driver_type)
-        end
 
-        def register
-          @browser&.configure(&@capabilities)
+      def registerable?
+        [:selenium, :poltergeist, :webkit, :cuprite, :rack_test].include?(@driver_type)
+      end
 
-          Capybara.register_driver name do |app|
-            case @driver_type
-            when :selenium then register_selenium(app)
-            when :poltergeist then register_poltergeist(app)
-            when :webkit then register_webkit(app)
-            when :cuprite then register_cuprite(app)
-            when :rack_test then register_rack_test(app)
-            end
+      def register
+        @browser&.configure(&@capabilities)
+
+        Capybara.register_driver name do |app|
+          case @driver_type
+          when :selenium then register_selenium(app)
+          when :poltergeist then register_poltergeist(app)
+          when :webkit then register_webkit(app)
+          when :cuprite then register_cuprite(app)
+          when :rack_test then register_rack_test(app)
           end
         end
+      end
 
-        def browser_options
-          @options.merge(capabilities: @browser.options).compact
-        end
+      def browser_options
+        @options.merge(capabilities: @browser.options).compact
+      end
 
-        def register_selenium(app)
-          Capybara::Selenium::Driver.new(app, browser: @browser.type, **browser_options).tap do |driver|
-            driver.browser.manage.window.size = Selenium::WebDriver::Dimension.new(*@screen_size)
-          end
+      def register_selenium(app)
+        Capybara::Selenium::Driver.new(app, browser: @browser.type, **browser_options).tap do |driver|
+          driver.browser.manage.window.size = Selenium::WebDriver::Dimension.new(*@screen_size)
         end
+      end
 
-        def register_poltergeist(app)
-          Capybara::Poltergeist::Driver.new(app, @options.merge(window_size: @screen_size))
-        end
+      def register_poltergeist(app)
+        Capybara::Poltergeist::Driver.new(app, @options.merge(window_size: @screen_size))
+      end
 
-        def register_webkit(app)
-          Capybara::Webkit::Driver.new(app, Capybara::Webkit::Configuration.to_hash.merge(@options)).tap do |driver|
-            driver.resize_window_to(driver.current_window_handle, *@screen_size)
-          end
+      def register_webkit(app)
+        Capybara::Webkit::Driver.new(app, Capybara::Webkit::Configuration.to_hash.merge(@options)).tap do |driver|
+          driver.resize_window_to(driver.current_window_handle, *@screen_size)
         end
+      end
 
-        def register_cuprite(app)
-          Capybara::Cuprite::Driver.new(app, @options.merge(window_size: @screen_size))
-        end
+      def register_cuprite(app)
+        Capybara::Cuprite::Driver.new(app, @options.merge(window_size: @screen_size))
+      end
 
-        def register_rack_test(app)
-          Capybara::RackTest::Driver.new(app, respect_data_method: true, **@options)
-        end
+      def register_rack_test(app)
+        Capybara::RackTest::Driver.new(app, respect_data_method: true, **@options)
+      end
 
-        def setup
-          Capybara.current_driver = name
-        end
+      def setup
+        Capybara.current_driver = name
+      end
     end
   end
 end

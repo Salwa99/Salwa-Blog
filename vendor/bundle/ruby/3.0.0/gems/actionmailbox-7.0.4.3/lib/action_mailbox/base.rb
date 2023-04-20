@@ -65,6 +65,7 @@ module ActionMailbox
     include ActionMailbox::Callbacks, ActionMailbox::Routing
 
     attr_reader :inbound_email
+
     delegate :mail, :delivered!, :bounced!, to: :inbound_email
 
     delegate :logger, to: ActionMailbox
@@ -96,7 +97,6 @@ module ActionMailbox
       inbound_email.delivered? || inbound_email.bounced?
     end
 
-
     # Enqueues the given +message+ for delivery and changes the inbound email's status to +:bounced+.
     def bounce_with(message)
       inbound_email.bounced!
@@ -104,14 +104,15 @@ module ActionMailbox
     end
 
     private
-      def track_status_of_inbound_email
-        inbound_email.processing!
-        yield
-        inbound_email.delivered! unless inbound_email.bounced?
-      rescue
-        inbound_email.failed!
-        raise
-      end
+
+    def track_status_of_inbound_email
+      inbound_email.processing!
+      yield
+      inbound_email.delivered! unless inbound_email.bounced?
+    rescue
+      inbound_email.failed!
+      raise
+    end
   end
 end
 

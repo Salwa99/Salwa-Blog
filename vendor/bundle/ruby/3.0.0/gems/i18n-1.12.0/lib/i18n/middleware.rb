@@ -2,7 +2,6 @@
 
 module I18n
   class Middleware
-
     def initialize(app)
       @app = app
     end
@@ -12,6 +11,5 @@ module I18n
     ensure
       Thread.current[:i18n_config] = I18n::Config.new
     end
-
   end
 end

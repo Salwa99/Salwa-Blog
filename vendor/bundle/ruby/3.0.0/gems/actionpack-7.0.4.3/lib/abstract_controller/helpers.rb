@@ -26,7 +26,7 @@ module AbstractController
     class MissingHelperError < LoadError
       def initialize(error, path)
         @error = error
-        @path  = "helpers/#{path}.rb"
+        @path = "helpers/#{path}.rb"
         set_backtrace error.backtrace
 
         if /^#{path}(\.rb)?$/.match?(error.path)
@@ -147,6 +147,7 @@ module AbstractController
       def helper(*args, &block)
         modules_for_helpers(args).each do |mod|
           next if _helpers.include?(mod)
+
           _helpers_for_modification.include(mod)
         end
 
@@ -189,23 +190,24 @@ module AbstractController
       end
 
       private
-        def define_helpers_module(klass, helpers = nil)
-          # In some tests inherited is called explicitly. In that case, just
-          # return the module from the first time it was defined
-          return klass.const_get(:HelperMethods) if klass.const_defined?(:HelperMethods, false)
 
-          mod = Module.new
-          klass.const_set(:HelperMethods, mod)
-          mod.include(helpers) if helpers
-          mod
-        end
+      def define_helpers_module(klass, helpers = nil)
+        # In some tests inherited is called explicitly. In that case, just
+        # return the module from the first time it was defined
+        return klass.const_get(:HelperMethods) if klass.const_defined?(:HelperMethods, false)
 
-        def default_helper_module!
-          helper_prefix = name.delete_suffix("Controller")
-          helper(helper_prefix)
-        rescue NameError => e
-          raise unless e.missing_name?("#{helper_prefix}Helper")
-        end
+        mod = Module.new
+        klass.const_set(:HelperMethods, mod)
+        mod.include(helpers) if helpers
+        mod
+      end
+
+      def default_helper_module!
+        helper_prefix = name.delete_suffix("Controller")
+        helper(helper_prefix)
+      rescue NameError => e
+        raise unless e.missing_name?("#{helper_prefix}Helper")
+      end
     end
   end
 end

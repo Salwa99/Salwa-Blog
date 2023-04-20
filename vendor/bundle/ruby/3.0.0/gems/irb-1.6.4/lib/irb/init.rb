@@ -1,11 +1,11 @@
 # frozen_string_literal: false
+
 #
 #   irb/init.rb - irb initialize module
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
 #
 
 module IRB # :nodoc:
-
   # initialize config
   def IRB.setup(ap_path, argv: ::ARGV)
     IRB.init_config(ap_path)
@@ -121,6 +121,7 @@ module IRB # :nodoc:
     # See https://github.com/tmm1/stackprof#all-options.
     @CONF[:MEASURE_PROC][:STACKPROF] = proc { |context, code, line_no, arg, &block|
       return block.() unless IRB.conf[:MEASURE]
+
       success = false
       begin
         require 'stackprof'
@@ -175,7 +176,7 @@ module IRB # :nodoc:
       added = [:CUSTOM, IRB.conf[:MEASURE_PROC][:CUSTOM], arg]
     elsif block_given?
       added = [:BLOCK, block, arg]
-      found = IRB.conf[:MEASURE_CALLBACKS].find{ |m| m[0] == added[0] && m[2] == added[2] }
+      found = IRB.conf[:MEASURE_CALLBACKS].find { |m| m[0] == added[0] && m[2] == added[2] }
       if found
         found[1] = block
         return added
@@ -187,7 +188,7 @@ module IRB # :nodoc:
       added = [:TIME, IRB.conf[:MEASURE_PROC][:TIME], arg]
     end
     if added
-      found = IRB.conf[:MEASURE_CALLBACKS].find{ |m| m[0] == added[0] && m[2] == added[2] }
+      found = IRB.conf[:MEASURE_CALLBACKS].find { |m| m[0] == added[0] && m[2] == added[2] }
       if found
         # already added
         nil
@@ -205,7 +206,7 @@ module IRB # :nodoc:
       IRB.conf[:MEASURE_CALLBACKS].clear
     else
       type_sym = type.upcase.to_sym
-      IRB.conf[:MEASURE_CALLBACKS].reject!{ |t, | t == type_sym }
+      IRB.conf[:MEASURE_CALLBACKS].reject! { |t,| t == type_sym }
     end
   end
 
@@ -391,23 +392,23 @@ module IRB # :nodoc:
   # enumerate possible rc-file base name generators
   def IRB.rc_file_generators
     if irbrc = ENV["IRBRC"]
-      yield proc{|rc| rc == "rc" ? irbrc : irbrc+rc}
+      yield proc { |rc| rc == "rc" ? irbrc : irbrc + rc }
     end
     if xdg_config_home = ENV["XDG_CONFIG_HOME"]
       irb_home = File.join(xdg_config_home, "irb")
       if File.directory?(irb_home)
-        yield proc{|rc| irb_home + "/irb#{rc}"}
+        yield proc { |rc| irb_home + "/irb#{rc}" }
       end
     end
     if home = ENV["HOME"]
-      yield proc{|rc| home+"/.irb#{rc}"}
-      yield proc{|rc| home+"/.config/irb/irb#{rc}"}
+      yield proc { |rc| home + "/.irb#{rc}" }
+      yield proc { |rc| home + "/.config/irb/irb#{rc}" }
     end
     current_dir = Dir.pwd
-    yield proc{|rc| current_dir+"/.irb#{rc}"}
-    yield proc{|rc| current_dir+"/irb#{rc.sub(/\A_?/, '.')}"}
-    yield proc{|rc| current_dir+"/_irb#{rc}"}
-    yield proc{|rc| current_dir+"/$irb#{rc}"}
+    yield proc { |rc| current_dir + "/.irb#{rc}" }
+    yield proc { |rc| current_dir + "/irb#{rc.sub(/\A_?/, '.')}" }
+    yield proc { |rc| current_dir + "/_irb#{rc}" }
+    yield proc { |rc| current_dir + "/$irb#{rc}" }
   end
 
   # loading modules
@@ -423,6 +424,7 @@ module IRB # :nodoc:
 
   class << IRB
     private
+
     def set_encoding(extern, intern = nil, override: true)
       verbose, $VERBOSE = $VERBOSE, nil
       Encoding.default_external = extern unless extern.nil? || extern.empty?

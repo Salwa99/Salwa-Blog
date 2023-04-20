@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'mail/fields'
 require 'mail/constants'
 
@@ -51,7 +52,7 @@ module Mail
       "reply-to" => ReplyToField,
       "resent-date" => ResentDateField,
       "resent-from" => ResentFromField,
-      "resent-sender" =>  ResentSenderField,
+      "resent-sender" => ResentSenderField,
       "resent-to" => ResentToField,
       "resent-cc" => ResentCcField,
       "resent-bcc" => ResentBccField,
@@ -77,7 +78,7 @@ module Mail
 
     # Raised when a parsing error has occurred (ie, a StructuredField has tried
     # to parse a field that is invalid or improperly written)
-    class ParseError < FieldError #:nodoc:
+    class ParseError < FieldError # :nodoc:
       attr_accessor :element, :value, :reason
 
       def initialize(element, value, reason)
@@ -88,22 +89,23 @@ module Mail
       end
 
       private
-        def to_utf8(text)
-          if text.respond_to?(:force_encoding)
-            text.dup.force_encoding(Encoding::UTF_8)
-          else
-            text
-          end
+
+      def to_utf8(text)
+        if text.respond_to?(:force_encoding)
+          text.dup.force_encoding(Encoding::UTF_8)
+        else
+          text
         end
+      end
     end
 
-    class NilParseError < ParseError #:nodoc:
+    class NilParseError < ParseError # :nodoc:
       def initialize(element)
         super element, nil, 'nil is invalid'
       end
     end
 
-    class IncompleteParseError < ParseError #:nodoc:
+    class IncompleteParseError < ParseError # :nodoc:
       def initialize(element, original_text, unparsed_index)
         parsed_text = to_utf8(original_text[0...unparsed_index])
         super element, original_text, "Only able to parse up to #{parsed_text.inspect}"
@@ -111,7 +113,7 @@ module Mail
     end
 
     # Raised when attempting to set a structured field's contents to an invalid syntax
-    class SyntaxError < FieldError #:nodoc:
+    class SyntaxError < FieldError # :nodoc:
     end
 
     class << self
@@ -126,12 +128,12 @@ module Mail
         end
       end
 
-      def split(raw_field) #:nodoc:
+      def split(raw_field) # :nodoc:
         if raw_field.index(Constants::COLON)
           name, value = raw_field.split(Constants::COLON, 2)
           name.rstrip!
           if name =~ /\A#{Constants::FIELD_NAME}\z/
-            [ name.rstrip, value.strip ]
+            [name.rstrip, value.strip]
           else
             Kernel.warn "WARNING: Ignoring unparsable header #{raw_field.inspect}: invalid header name syntax: #{name.inspect}"
             nil
@@ -144,7 +146,7 @@ module Mail
         nil
       end
 
-      def field_class_for(name) #:nodoc:
+      def field_class_for(name) # :nodoc:
         FIELDS_MAP[name.to_s.downcase]
       end
     end
@@ -166,7 +168,8 @@ module Mail
     def initialize(name, value = nil, charset = 'utf-8')
       case
       when name.index(Constants::COLON)
-        raise ArgumentError, 'Passing an unparsed header field to Mail::Field.new is not supported in Mail 2.8.0+. Use Mail::Field.parse instead.'
+        raise ArgumentError,
+              'Passing an unparsed header field to Mail::Field.new is not supported in Mail 2.8.0+. Use Mail::Field.parse instead.'
       when Utilities.blank?(value)
         @name = name
         @unparsed_value = nil

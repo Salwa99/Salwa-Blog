@@ -115,7 +115,10 @@ Capybara::SpecHelper.spec '#choose' do
       end
 
       it 'should raise error if not allowed to click label' do
-        expect { @session.choose('party_democrat', allow_label_click: false) }.to raise_error(Capybara::ElementNotFound, /Unable to find visible radio button "party_democrat"/)
+        expect {
+          @session.choose('party_democrat',
+                          allow_label_click: false)
+        }.to raise_error(Capybara::ElementNotFound, /Unable to find visible radio button "party_democrat"/)
       end
     end
   end

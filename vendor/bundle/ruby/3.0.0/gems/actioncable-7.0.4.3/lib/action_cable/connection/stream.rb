@@ -10,9 +10,9 @@ module ActionCable
     # Copyright (c) 2010-2015 James Coglan
     class Stream # :nodoc:
       def initialize(event_loop, socket)
-        @event_loop    = event_loop
+        @event_loop = event_loop
         @socket_object = socket
-        @stream_send   = socket.env["stream.send"]
+        @stream_send = socket.env["stream.send"]
 
         @rack_hijack_io = nil
         @write_lock = Mutex.new
@@ -74,6 +74,7 @@ module ActionCable
           loop do
             if @write_head.nil?
               return true if @write_buffer.empty?
+
               @write_head = @write_buffer.pop
             end
 
@@ -107,11 +108,13 @@ module ActionCable
       end
 
       private
-        def clean_rack_hijack
-          return unless @rack_hijack_io
-          @event_loop.detach(@rack_hijack_io, self)
-          @rack_hijack_io = nil
-        end
+
+      def clean_rack_hijack
+        return unless @rack_hijack_io
+
+        @event_loop.detach(@rack_hijack_io, self)
+        @rack_hijack_io = nil
+      end
     end
   end
 end

@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   multi.rb -
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -48,6 +49,7 @@ module IRB
 
       def execute(key = nil)
         raise CommandArgumentError.new("Please specify the id of target IRB job (listed in the `jobs` command).") unless key
+
         IRB.JobManager.switch(key)
       end
     end

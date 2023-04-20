@@ -86,7 +86,7 @@ module ActionController
     # Note: SSEs are not currently supported by IE. However, they are supported
     # by Chrome, Firefox, Opera, and Safari.
     class SSE
-      PERMITTED_OPTIONS = %w( retry event id )
+      PERMITTED_OPTIONS = %w(retry event id)
 
       def initialize(stream, options = {})
         @stream = stream
@@ -107,18 +107,19 @@ module ActionController
       end
 
       private
-        def perform_write(json, options)
-          current_options = @options.merge(options).stringify_keys
 
-          PERMITTED_OPTIONS.each do |option_name|
-            if (option_value = current_options[option_name])
-              @stream.write "#{option_name}: #{option_value}\n"
-            end
+      def perform_write(json, options)
+        current_options = @options.merge(options).stringify_keys
+
+        PERMITTED_OPTIONS.each do |option_name|
+          if (option_value = current_options[option_name])
+            @stream.write "#{option_name}: #{option_value}\n"
           end
-
-          message = json.gsub("\n", "\ndata: ")
-          @stream.write "data: #{message}\n\n"
         end
+
+        message = json.gsub("\n", "\ndata: ")
+        @stream.write "data: #{message}\n\n"
+      end
     end
 
     class ClientDisconnected < RuntimeError
@@ -214,36 +215,39 @@ module ActionController
       end
 
       private
-        def each_chunk(&block)
-          loop do
-            str = nil
-            ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
-              str = @buf.pop
-            end
-            break unless str
-            yield str
-          end
-        end
 
-        def build_queue(queue_size)
-          queue_size ? SizedQueue.new(queue_size) : Queue.new
+      def each_chunk(&block)
+        loop do
+          str = nil
+          ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
+            str = @buf.pop
+          end
+          break unless str
+
+          yield str
         end
+      end
+
+      def build_queue(queue_size)
+        queue_size ? SizedQueue.new(queue_size) : Queue.new
+      end
     end
 
     class Response < ActionDispatch::Response # :nodoc: all
       private
-        def before_committed
-          super
-          jar = request.cookie_jar
-          # The response can be committed multiple times
-          jar.write self unless committed?
-        end
 
-        def build_buffer(response, body)
-          buf = Live::Buffer.new response
-          body.each { |part| buf.write part }
-          buf
-        end
+      def before_committed
+        super
+        jar = request.cookie_jar
+        # The response can be committed multiple times
+        jar.write self unless committed?
+      end
+
+      def build_buffer(response, body)
+        buf = Live::Buffer.new response
+        body.each { |part| buf.write part }
+        buf
+      end
     end
 
     def process(name)
@@ -333,28 +337,29 @@ module ActionController
     end
 
     private
-      # Spawn a new thread to serve up the controller in. This is to get
-      # around the fact that Rack isn't based around IOs and we need to use
-      # a thread to stream data from the response bodies. Nobody should call
-      # this method except in Rails internals. Seriously!
-      def new_controller_thread # :nodoc:
-        Thread.new {
-          t2 = Thread.current
-          t2.abort_on_exception = true
-          yield
-        }
-      end
 
-      def log_error(exception)
-        logger = ActionController::Base.logger
-        return unless logger
+    # Spawn a new thread to serve up the controller in. This is to get
+    # around the fact that Rack isn't based around IOs and we need to use
+    # a thread to stream data from the response bodies. Nobody should call
+    # this method except in Rails internals. Seriously!
+    def new_controller_thread # :nodoc:
+      Thread.new {
+        t2 = Thread.current
+        t2.abort_on_exception = true
+        yield
+      }
+    end
 
-        logger.fatal do
-          message = +"\n#{exception.class} (#{exception.message}):\n"
-          message << exception.annotated_source_code.to_s if exception.respond_to?(:annotated_source_code)
-          message << "  " << exception.backtrace.join("\n  ")
-          "#{message}\n\n"
-        end
+    def log_error(exception)
+      logger = ActionController::Base.logger
+      return unless logger
+
+      logger.fatal do
+        message = +"\n#{exception.class} (#{exception.message}):\n"
+        message << exception.annotated_source_code.to_s if exception.respond_to?(:annotated_source_code)
+        message << "  " << exception.backtrace.join("\n  ")
+        "#{message}\n\n"
       end
+    end
   end
 end

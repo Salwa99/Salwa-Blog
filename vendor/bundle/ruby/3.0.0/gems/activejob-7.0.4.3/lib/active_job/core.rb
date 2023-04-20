@@ -89,13 +89,13 @@ module ActiveJob
     # Creates a new job instance. Takes the arguments that will be
     # passed to the perform method.
     def initialize(*arguments)
-      @arguments  = arguments
-      @job_id     = SecureRandom.uuid
+      @arguments = arguments
+      @job_id = SecureRandom.uuid
       @queue_name = self.class.queue_name
-      @priority   = self.class.priority
+      @priority = self.class.priority
       @executions = 0
       @exception_executions = {}
-      @timezone   = Time.zone&.name
+      @timezone = Time.zone&.name
     end
     ruby2_keywords(:initialize)
 
@@ -103,16 +103,16 @@ module ActiveJob
     # queuing adapter.
     def serialize
       {
-        "job_class"  => self.class.name,
-        "job_id"     => job_id,
+        "job_class" => self.class.name,
+        "job_id" => job_id,
         "provider_job_id" => provider_job_id,
         "queue_name" => queue_name,
-        "priority"   => priority,
-        "arguments"  => serialize_arguments_if_needed(arguments),
+        "priority" => priority,
+        "arguments" => serialize_arguments_if_needed(arguments),
         "executions" => executions,
         "exception_executions" => exception_executions,
-        "locale"     => I18n.locale.to_s,
-        "timezone"   => timezone,
+        "locale" => I18n.locale.to_s,
+        "timezone" => timezone,
         "enqueued_at" => Time.now.utc.iso8601
       }
     end
@@ -144,54 +144,55 @@ module ActiveJob
     #      end
     #    end
     def deserialize(job_data)
-      self.job_id               = job_data["job_id"]
-      self.provider_job_id      = job_data["provider_job_id"]
-      self.queue_name           = job_data["queue_name"]
-      self.priority             = job_data["priority"]
+      self.job_id = job_data["job_id"]
+      self.provider_job_id = job_data["provider_job_id"]
+      self.queue_name = job_data["queue_name"]
+      self.priority = job_data["priority"]
       self.serialized_arguments = job_data["arguments"]
-      self.executions           = job_data["executions"]
+      self.executions = job_data["executions"]
       self.exception_executions = job_data["exception_executions"]
-      self.locale               = job_data["locale"] || I18n.locale.to_s
-      self.timezone             = job_data["timezone"] || Time.zone&.name
-      self.enqueued_at          = job_data["enqueued_at"]
+      self.locale = job_data["locale"] || I18n.locale.to_s
+      self.timezone = job_data["timezone"] || Time.zone&.name
+      self.enqueued_at = job_data["enqueued_at"]
     end
 
     # Configures the job with the given options.
     def set(options = {}) # :nodoc:
       self.scheduled_at = options[:wait].seconds.from_now.to_f if options[:wait]
       self.scheduled_at = options[:wait_until].to_f if options[:wait_until]
-      self.queue_name   = self.class.queue_name_from_part(options[:queue]) if options[:queue]
-      self.priority     = options[:priority].to_i if options[:priority]
+      self.queue_name = self.class.queue_name_from_part(options[:queue]) if options[:queue]
+      self.priority = options[:priority].to_i if options[:priority]
 
       self
     end
 
     private
-      def serialize_arguments_if_needed(arguments)
-        if arguments_serialized?
-          @serialized_arguments
-        else
-          serialize_arguments(arguments)
-        end
-      end
 
-      def deserialize_arguments_if_needed
-        if arguments_serialized?
-          @arguments = deserialize_arguments(@serialized_arguments)
-          @serialized_arguments = nil
-        end
+    def serialize_arguments_if_needed(arguments)
+      if arguments_serialized?
+        @serialized_arguments
+      else
+        serialize_arguments(arguments)
       end
+    end
 
-      def serialize_arguments(arguments)
-        Arguments.serialize(arguments)
+    def deserialize_arguments_if_needed
+      if arguments_serialized?
+        @arguments = deserialize_arguments(@serialized_arguments)
+        @serialized_arguments = nil
       end
+    end
 
-      def deserialize_arguments(serialized_args)
-        Arguments.deserialize(serialized_args)
-      end
+    def serialize_arguments(arguments)
+      Arguments.serialize(arguments)
+    end
 
-      def arguments_serialized?
-        defined?(@serialized_arguments) && @serialized_arguments
-      end
+    def deserialize_arguments(serialized_args)
+      Arguments.deserialize(serialized_args)
+    end
+
+    def arguments_serialized?
+      defined?(@serialized_arguments) && @serialized_arguments
+    end
   end
 end

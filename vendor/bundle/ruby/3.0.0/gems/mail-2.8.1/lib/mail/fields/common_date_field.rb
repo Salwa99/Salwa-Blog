@@ -3,7 +3,7 @@ require 'mail/elements/date_time_element'
 require 'mail/utilities'
 
 module Mail
-  class CommonDateField < NamedStructuredField #:nodoc:
+  class CommonDateField < NamedStructuredField # :nodoc:
     def self.singular?
       true
     end
@@ -47,12 +47,13 @@ module Mail
     end
 
     private
-      def do_encode
-        "#{name}: #{value}\r\n"
-      end
 
-      def do_decode
-        value.to_s
-      end
+    def do_encode
+      "#{name}: #{value}\r\n"
+    end
+
+    def do_decode
+      value.to_s
+    end
   end
 end

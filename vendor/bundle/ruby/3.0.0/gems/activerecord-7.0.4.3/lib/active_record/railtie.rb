@@ -21,10 +21,10 @@ module ActiveRecord
                                               timestamps: true
 
     config.action_dispatch.rescue_responses.merge!(
-      "ActiveRecord::RecordNotFound"   => :not_found,
+      "ActiveRecord::RecordNotFound" => :not_found,
       "ActiveRecord::StaleObjectError" => :conflict,
-      "ActiveRecord::RecordInvalid"    => :unprocessable_entity,
-      "ActiveRecord::RecordNotSaved"   => :unprocessable_entity
+      "ActiveRecord::RecordInvalid" => :unprocessable_entity,
+      "ActiveRecord::RecordNotSaved" => :unprocessable_entity
     )
 
     config.active_record.use_schema_cache_dump = true
@@ -33,7 +33,7 @@ module ActiveRecord
     config.active_record.has_many_inversing = false
     config.active_record.sqlite3_production_warning = true
     config.active_record.query_log_tags_enabled = false
-    config.active_record.query_log_tags = [ :application ]
+    config.active_record.query_log_tags = [:application]
     config.active_record.cache_query_log_tags = false
 
     config.active_record.queues = ActiveSupport::InheritableOptions.new
@@ -95,8 +95,8 @@ module ActiveRecord
     initializer "active_record.migration_error" do |app|
       if config.active_record.migration_error == :page_load
         config.app_middleware.insert_after ::ActionDispatch::Callbacks,
-          ActiveRecord::Migration::CheckPending,
-          file_watcher: app.config.file_watcher
+                                           ActiveRecord::Migration::CheckPending,
+                                           file_watcher: app.config.file_watcher
       end
     end
 
@@ -105,18 +105,18 @@ module ActiveRecord
         ActiveSupport.on_load(:active_record) do
           if app.config.active_record.cache_versioning && Rails.cache
             unless Rails.cache.class.try(:supports_cache_versioning?)
-              raise <<-end_error
+              raise <<~end_error
 
-You're using a cache store that doesn't support native cache versioning.
-Your best option is to upgrade to a newer version of #{Rails.cache.class}
-that supports cache versioning (#{Rails.cache.class}.supports_cache_versioning? #=> true).
+                You're using a cache store that doesn't support native cache versioning.
+                Your best option is to upgrade to a newer version of #{Rails.cache.class}
+                that supports cache versioning (#{Rails.cache.class}.supports_cache_versioning? #=> true).
 
-Next best, switch to a different cache store that does support cache versioning:
-https://guides.rubyonrails.org/caching_with_rails.html#cache-stores.
+                Next best, switch to a different cache store that does support cache versioning:
+                https://guides.rubyonrails.org/caching_with_rails.html#cache-stores.
 
-To keep using the current cache store, you can turn off cache versioning entirely:
+                To keep using the current cache store, you can turn off cache versioning entirely:
 
-    config.active_record.cache_versioning = false
+                    config.active_record.cache_versioning = false
 
               end_error
             end
@@ -200,8 +200,8 @@ To keep using the current cache store, you can turn off cache versioning entirel
       end
     end
 
-    SQLITE3_PRODUCTION_WARN = "You are running SQLite in production, this is generally not recommended."\
-      " You can disable this warning by setting \"config.active_record.sqlite3_production_warning=false\"."
+    SQLITE3_PRODUCTION_WARN = "You are running SQLite in production, this is generally not recommended. " \
+                              "You can disable this warning by setting \"config.active_record.sqlite3_production_warning=false\"."
     initializer "active_record.sqlite3_production_warning" do
       if config.active_record.sqlite3_production_warning && Rails.env.production?
         ActiveSupport.on_load(:active_record_sqlite3adapter) do
@@ -216,6 +216,7 @@ To keep using the current cache store, you can turn off cache versioning entirel
       config.after_initialize do
         configs.each do |k, v|
           next if k == :encryption
+
           setter = "#{k}="
           if ActiveRecord.respond_to?(setter)
             ActiveRecord.send(setter, v)
@@ -242,6 +243,7 @@ To keep using the current cache store, you can turn off cache versioning entirel
 
         configs.each do |k, v|
           next if k == :encryption
+
           setter = "#{k}="
           # Some existing initializers might rely on Active Record configuration
           # being copied from the config object to their actual destination when
@@ -323,16 +325,18 @@ To keep using the current cache store, you can turn off cache versioning entirel
 
     initializer "active_record.set_signed_id_verifier_secret" do
       ActiveSupport.on_load(:active_record) do
-        self.signed_id_verifier_secret ||= -> { Rails.application.key_generator.generate_key("active_record/signed_id") }
+        self.signed_id_verifier_secret ||= -> {
+          Rails.application.key_generator.generate_key("active_record/signed_id")
+        }
       end
     end
 
     initializer "active_record_encryption.configuration" do |app|
       ActiveRecord::Encryption.configure \
-         primary_key: app.credentials.dig(:active_record_encryption, :primary_key),
-         deterministic_key: app.credentials.dig(:active_record_encryption, :deterministic_key),
-         key_derivation_salt: app.credentials.dig(:active_record_encryption, :key_derivation_salt),
-         **config.active_record.encryption
+        primary_key: app.credentials.dig(:active_record_encryption, :primary_key),
+        deterministic_key: app.credentials.dig(:active_record_encryption, :deterministic_key),
+        key_derivation_salt: app.credentials.dig(:active_record_encryption, :key_derivation_salt),
+        **config.active_record.encryption
 
       ActiveSupport.on_load(:active_record) do
         # Support extended queries for deterministic attributes and validations
@@ -362,11 +366,11 @@ To keep using the current cache store, you can turn off cache versioning entirel
         if app.config.active_record.query_log_tags_enabled
           ActiveRecord.query_transformers << ActiveRecord::QueryLogs
           ActiveRecord::QueryLogs.taggings.merge!(
-            application:  Rails.application.class.name.split("::").first,
-            pid:          -> { Process.pid },
-            socket:       -> { ActiveRecord::Base.connection_db_config.socket },
-            db_host:      -> { ActiveRecord::Base.connection_db_config.host },
-            database:     -> { ActiveRecord::Base.connection_db_config.database }
+            application: Rails.application.class.name.split("::").first,
+            pid: -> { Process.pid },
+            socket: -> { ActiveRecord::Base.connection_db_config.socket },
+            db_host: -> { ActiveRecord::Base.connection_db_config.host },
+            database: -> { ActiveRecord::Base.connection_db_config.database }
           )
 
           if app.config.active_record.query_log_tags.present?

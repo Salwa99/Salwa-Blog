@@ -3,7 +3,6 @@ require 'concurrent/concern/logging'
 require 'concurrent/synchronization/lockable_object'
 
 module Concurrent
-
   # Ensures passed jobs in a serialized order never running at the same time.
   class SerializedExecution < Synchronization::LockableObject
     include Concern::Logging
@@ -69,16 +68,16 @@ module Concurrent
 
     def ns_initialize
       @being_executed = false
-      @stash          = []
+      @stash = []
     end
 
     def call_job(job)
       did_it_run = begin
-                     job.executor.post { work(job) }
-                     true
-                   rescue RejectedExecutionError => ex
-                     false
-                   end
+        job.executor.post { work(job) }
+        true
+      rescue RejectedExecutionError => ex
+        false
+      end
 
       # TODO not the best idea to run it myself
       unless did_it_run

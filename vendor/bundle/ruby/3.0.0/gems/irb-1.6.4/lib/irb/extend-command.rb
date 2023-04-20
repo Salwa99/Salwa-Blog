@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   irb/extend-command.rb - irb extend command
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -39,7 +40,6 @@ module IRB # :nodoc:
       [:exit, :irb_exit, OVERRIDE_PRIVATE_ONLY],
       [:quit, :irb_exit, OVERRIDE_PRIVATE_ONLY],
     ]
-
 
     @EXTEND_COMMANDS = [
       [
@@ -89,16 +89,19 @@ module IRB # :nodoc:
       ],
 
       [
-        :irb_load, :Load, "cmd/load"],
+        :irb_load, :Load, "cmd/load"
+      ],
       [
-        :irb_require, :Require, "cmd/load"],
+        :irb_require, :Require, "cmd/load"
+      ],
       [
         :irb_source, :Source, "cmd/load",
         [:source, NO_OVERRIDE],
       ],
 
       [
-        :irb, :IrbCommand, "cmd/subirb"],
+        :irb, :IrbCommand, "cmd/subirb"
+      ],
       [
         :irb_jobs, :Jobs, "cmd/subirb",
         [:jobs, NO_OVERRIDE],
@@ -190,11 +193,11 @@ module IRB # :nodoc:
       ]
     ]
 
-
     @@commands = []
 
     def self.all_commands_info
       return @@commands unless @@commands.empty?
+
       user_aliases = IRB.CurrentContext.command_aliases.each_with_object({}) do |(alias_name, target), result|
         result[target] ||= []
         result[target] << alias_name
@@ -274,12 +277,12 @@ module IRB # :nodoc:
       from = from.id2name unless from.kind_of?(String)
 
       if override == OVERRIDE_ALL or
-          (override == OVERRIDE_PRIVATE_ONLY) && !respond_to?(to) or
-          (override == NO_OVERRIDE) &&  !respond_to?(to, true)
+         (override == OVERRIDE_PRIVATE_ONLY) && !respond_to?(to) or
+         (override == NO_OVERRIDE) && !respond_to?(to, true)
         target = self
-        (class << self; self; end).instance_eval{
+        (class << self; self; end).instance_eval {
           if target.respond_to?(to, true) &&
-            !target.respond_to?(EXCB.irb_original_method_name(to), true)
+             !target.respond_to?(EXCB.irb_original_method_name(to), true)
             alias_method(EXCB.irb_original_method_name(to), to)
           end
           alias_method to, from

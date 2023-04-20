@@ -817,7 +817,7 @@ module Capybara
         eql?(other) || (other.respond_to?(:base) && base == other.base)
       end
 
-    private
+      private
 
       def extract_selector(args)
         args.first.is_a?(Symbol) ? args.shift : session_options.default_selector

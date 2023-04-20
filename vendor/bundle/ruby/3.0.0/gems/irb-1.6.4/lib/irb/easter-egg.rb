@@ -14,12 +14,12 @@ module IRB
       end
 
       def dot(other)
-        @x*other.x + @y*other.y + @z*other.z
+        @x * other.x + @y * other.y + @z * other.z
       end
 
       def cross(other)
         ox, oy, oz = other.x, other.y, other.z
-        Vec.new(@y*oz-@z*oy, @z*ox-@x*oz, @x*oy-@y*ox)
+        Vec.new(@y * oz - @z * oy, @z * ox - @x * oz, @x * oy - @y * ox)
       end
 
       def normalize
@@ -30,9 +30,9 @@ module IRB
 
     class Canvas
       def initialize((h, w))
-        @data = (0..h-2).map { [0] * w }
-        @scale = [w / 2.0, h-2].min
-        @center = Complex(w / 2, h-2)
+        @data = (0..h - 2).map { [0] * w }
+        @scale = [w / 2.0, h - 2].min
+        @center = Complex(w / 2, h - 2)
       end
 
       def line((x1, y1), (x2, y2))
@@ -53,9 +53,9 @@ module IRB
       end
 
       def draw
-        @data.each {|row| row.fill(0) }
+        @data.each { |row| row.fill(0) }
         yield
-        @data.map {|row| row.map {|n| " ',;"[n] }.join }.join("\n")
+        @data.map { |row| row.map { |n| " ',;"[n] }.join }.join("\n")
       end
     end
 
@@ -65,13 +65,13 @@ module IRB
       end
 
       def init_ruby_model
-        cap_vertices    = (0..5).map {|i| Vec.new(*Complex.polar(1,  i        * Math::PI / 3).rect, 1) }
-        middle_vertices = (0..5).map {|i| Vec.new(*Complex.polar(2, (i + 0.5) * Math::PI / 3).rect, 0) }
-        bottom_vertex   = Vec.new(0, 0, -2)
+        cap_vertices = (0..5).map { |i| Vec.new(*Complex.polar(1, i * Math::PI / 3).rect, 1) }
+        middle_vertices = (0..5).map { |i| Vec.new(*Complex.polar(2, (i + 0.5) * Math::PI / 3).rect, 0) }
+        bottom_vertex = Vec.new(0, 0, -2)
 
         faces = [cap_vertices]
         6.times do |j|
-          i = j-1
+          i = j - 1
           faces << [cap_vertices[i], middle_vertices[i], cap_vertices[j]]
           faces << [cap_vertices[j], middle_vertices[i], middle_vertices[j]]
           faces << [middle_vertices[i], bottom_vertex, middle_vertices[j]]
@@ -83,13 +83,13 @@ module IRB
       def render_frame(i)
         angle = i / 10.0
         dir = Vec.new(*Complex.polar(1, angle).rect, Math.sin(angle)).normalize
-        dir2 = Vec.new(*Complex.polar(1, angle - Math::PI/2).rect, 0)
+        dir2 = Vec.new(*Complex.polar(1, angle - Math::PI / 2).rect, 0)
         up = dir.cross(dir2)
         nm = dir.cross(up)
         @faces.each do |vertices|
           v0, v1, v2, = vertices
           if v1.sub(v0).cross(v2.sub(v0)).dot(dir) > 0
-            points = vertices.map {|p| [nm.dot(p), up.dot(p)] }
+            points = vertices.map { |p| [nm.dot(p), up.dot(p)] }
             (points + [points[0]]).each_cons(2) do |p1, p2|
               yield p1, p2
             end

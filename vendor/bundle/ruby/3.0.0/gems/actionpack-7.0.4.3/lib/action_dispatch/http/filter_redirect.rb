@@ -13,7 +13,8 @@ module ActionDispatch
         end
       end
 
-    private
+      private
+
       def location_filters
         if request
           request.get_header("action_dispatch.redirect_filter") || []

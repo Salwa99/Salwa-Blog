@@ -6,7 +6,6 @@ require 'concurrent/concern/dereferenceable'
 
 module Concurrent
   module Concern
-
     module Obligation
       include Concern::Dereferenceable
       # NOTE: The Dereferenceable module is going away in 2.0. In the mean time
@@ -54,7 +53,7 @@ module Concurrent
       #
       # @return [Boolean]
       def incomplete?
-        ! complete?
+        !complete?
       end
 
       # The current value of the obligation. Will be `nil` while the state is
@@ -125,6 +124,7 @@ module Concurrent
       #   raise rejected_ivar
       def exception(*args)
         raise 'obligation is not rejected' unless rejected?
+
         reason.exception(*args)
       end
 
@@ -153,7 +153,7 @@ module Concurrent
           @state = :fulfilled
         else
           @reason = reason
-          @state  = :rejected
+          @state = :rejected
         end
       end
 

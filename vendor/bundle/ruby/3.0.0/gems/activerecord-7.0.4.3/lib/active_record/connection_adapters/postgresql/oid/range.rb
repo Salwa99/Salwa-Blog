@@ -6,6 +6,7 @@ module ActiveRecord
       module OID # :nodoc:
         class Range < Type::Value # :nodoc:
           attr_reader :subtype, :type
+
           delegate :user_input_in_time_zone, to: :subtype
 
           def initialize(subtype, type = :range)
@@ -26,8 +27,10 @@ module ActiveRecord
             to = type_cast_single extracted[:to]
 
             if !infinity?(from) && extracted[:exclude_start]
-              raise ArgumentError, "The Ruby Range object does not support excluding the beginning of a Range. (unsupported value: '#{value}')"
+              raise ArgumentError,
+                    "The Ruby Range object does not support excluding the beginning of a Range. (unsupported value: '#{value}')"
             end
+
             ::Range.new(from, to, extracted[:exclude_end])
           end
 
@@ -58,56 +61,57 @@ module ActiveRecord
           end
 
           private
-            def type_cast_single(value)
-              infinity?(value) ? value : @subtype.deserialize(value)
-            end
 
-            def type_cast_single_for_database(value)
-              infinity?(value) ? value : @subtype.serialize(@subtype.cast(value))
-            end
+          def type_cast_single(value)
+            infinity?(value) ? value : @subtype.deserialize(value)
+          end
 
-            def extract_bounds(value)
-              from, to = value[1..-2].split(",", 2)
-              {
-                from:          (from == "" || from == "-infinity") ? infinity(negative: true) : unquote(from),
-                to:            (to == "" || to == "infinity") ? infinity : unquote(to),
-                exclude_start: value.start_with?("("),
-                exclude_end:   value.end_with?(")")
-              }
-            end
+          def type_cast_single_for_database(value)
+            infinity?(value) ? value : @subtype.serialize(@subtype.cast(value))
+          end
 
-            # When formatting the bound values of range types, PostgreSQL quotes
-            # the bound value using double-quotes in certain conditions. Within
-            # a double-quoted string, literal " and \ characters are themselves
-            # escaped. In input, PostgreSQL accepts multiple escape styles for "
-            # (either \" or "") but in output always uses "".
-            # See:
-            # * https://www.postgresql.org/docs/current/rangetypes.html#RANGETYPES-IO
-            # * https://www.postgresql.org/docs/current/rowtypes.html#ROWTYPES-IO-SYNTAX
-            def unquote(value)
-              if value.start_with?('"') && value.end_with?('"')
-                unquoted_value = value[1..-2]
-                unquoted_value.gsub!('""', '"')
-                unquoted_value.gsub!("\\\\", "\\")
-                unquoted_value
-              else
-                value
-              end
-            end
+          def extract_bounds(value)
+            from, to = value[1..-2].split(",", 2)
+            {
+              from: (from == "" || from == "-infinity") ? infinity(negative: true) : unquote(from),
+              to: (to == "" || to == "infinity") ? infinity : unquote(to),
+              exclude_start: value.start_with?("("),
+              exclude_end: value.end_with?(")")
+            }
+          end
 
-            def infinity(negative: false)
-              if subtype.respond_to?(:infinity)
-                subtype.infinity(negative: negative)
-              elsif negative
-                -::Float::INFINITY
-              else
-                ::Float::INFINITY
-              end
+          # When formatting the bound values of range types, PostgreSQL quotes
+          # the bound value using double-quotes in certain conditions. Within
+          # a double-quoted string, literal " and \ characters are themselves
+          # escaped. In input, PostgreSQL accepts multiple escape styles for "
+          # (either \" or "") but in output always uses "".
+          # See:
+          # * https://www.postgresql.org/docs/current/rangetypes.html#RANGETYPES-IO
+          # * https://www.postgresql.org/docs/current/rowtypes.html#ROWTYPES-IO-SYNTAX
+          def unquote(value)
+            if value.start_with?('"') && value.end_with?('"')
+              unquoted_value = value[1..-2]
+              unquoted_value.gsub!('""', '"')
+              unquoted_value.gsub!("\\\\", "\\")
+              unquoted_value
+            else
+              value
             end
+          end
 
-            def infinity?(value)
-              value.respond_to?(:infinite?) && value.infinite?
+          def infinity(negative: false)
+            if subtype.respond_to?(:infinity)
+              subtype.infinity(negative: negative)
+            elsif negative
+              -::Float::INFINITY
+            else
+              ::Float::INFINITY
             end
+          end
+
+          def infinity?(value)
+            value.respond_to?(:infinite?) && value.infinite?
+          end
         end
       end
     end

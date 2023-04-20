@@ -12,9 +12,10 @@ module ActiveJob
       end
 
       private
-        def klass
-          Date
-        end
+
+      def klass
+        Date
+      end
     end
   end
 end

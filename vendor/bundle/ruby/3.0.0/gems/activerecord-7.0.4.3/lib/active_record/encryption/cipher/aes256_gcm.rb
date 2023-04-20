@@ -81,17 +81,19 @@ module ActiveRecord
         end
 
         private
-          def generate_iv(cipher, clear_text)
-            if @deterministic
-              generate_deterministic_iv(clear_text)
-            else
-              cipher.random_iv
-            end
-          end
 
-          def generate_deterministic_iv(clear_text)
-            OpenSSL::HMAC.digest(OpenSSL::Digest::SHA256.new, @secret, clear_text)[0, ActiveRecord::Encryption.cipher.iv_length]
+        def generate_iv(cipher, clear_text)
+          if @deterministic
+            generate_deterministic_iv(clear_text)
+          else
+            cipher.random_iv
           end
+        end
+
+        def generate_deterministic_iv(clear_text)
+          OpenSSL::HMAC.digest(OpenSSL::Digest::SHA256.new, @secret, clear_text)[0,
+                                                                                 ActiveRecord::Encryption.cipher.iv_length]
+        end
       end
     end
   end

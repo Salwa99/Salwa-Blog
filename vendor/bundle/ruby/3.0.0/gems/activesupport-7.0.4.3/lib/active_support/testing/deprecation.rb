@@ -33,7 +33,9 @@ module ActiveSupport
         assert !warnings.empty?, "Expected a deprecation warning within the block but received none"
         if match
           match = Regexp.new(Regexp.escape(match)) unless match.is_a?(Regexp)
-          assert warnings.any? { |w| match.match?(w) }, "No deprecation warning matched #{match}: #{warnings.join(', ')}"
+          assert warnings.any? { |w|
+                   match.match?(w)
+                 }, "No deprecation warning matched #{match}: #{warnings.join(', ')}"
         end
         result
       end
@@ -55,7 +57,8 @@ module ActiveSupport
       #   end
       def assert_not_deprecated(deprecator = nil, &block)
         result, deprecations = collect_deprecations(deprecator, &block)
-        assert deprecations.empty?, "Expected no deprecation warning within the block but received #{deprecations.size}: \n  #{deprecations * "\n  "}"
+        assert deprecations.empty?,
+               "Expected no deprecation warning within the block but received #{deprecations.size}: \n  #{deprecations * "\n  "}"
         result
       end
 

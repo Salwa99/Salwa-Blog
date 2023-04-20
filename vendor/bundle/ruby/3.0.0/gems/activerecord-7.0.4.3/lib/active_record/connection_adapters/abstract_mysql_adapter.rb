@@ -28,27 +28,28 @@ module ActiveRecord
 
       NATIVE_DATABASE_TYPES = {
         primary_key: "bigint auto_increment PRIMARY KEY",
-        string:      { name: "varchar", limit: 255 },
-        text:        { name: "text" },
-        integer:     { name: "int", limit: 4 },
-        bigint:      { name: "bigint" },
-        float:       { name: "float", limit: 24 },
-        decimal:     { name: "decimal" },
-        datetime:    { name: "datetime" },
-        timestamp:   { name: "timestamp" },
-        time:        { name: "time" },
-        date:        { name: "date" },
-        binary:      { name: "blob" },
-        blob:        { name: "blob" },
-        boolean:     { name: "tinyint", limit: 1 },
-        json:        { name: "json" },
+        string: { name: "varchar", limit: 255 },
+        text: { name: "text" },
+        integer: { name: "int", limit: 4 },
+        bigint: { name: "bigint" },
+        float: { name: "float", limit: 24 },
+        decimal: { name: "decimal" },
+        datetime: { name: "datetime" },
+        timestamp: { name: "timestamp" },
+        time: { name: "time" },
+        date: { name: "date" },
+        binary: { name: "blob" },
+        blob: { name: "blob" },
+        boolean: { name: "tinyint", limit: 1 },
+        json: { name: "json" },
       }
 
       class StatementPool < ConnectionAdapters::StatementPool # :nodoc:
         private
-          def dealloc(stmt)
-            stmt.close
-          end
+
+        def dealloc(stmt)
+          stmt.close
+        end
       end
 
       def initialize(connection, logger, connection_options, config)
@@ -139,7 +140,9 @@ module ActiveRecord
       end
 
       def field_ordered_value(column, values) # :nodoc:
-        field = Arel::Nodes::NamedFunction.new("FIELD", [column, values.reverse.map { |value| Arel::Nodes.build_quoted(value) }])
+        field = Arel::Nodes::NamedFunction.new("FIELD", [column, values.reverse.map { |value|
+                                                                   Arel::Nodes.build_quoted(value)
+                                                                 }])
         Arel::Nodes::Descending.new(field)
       end
 
@@ -158,7 +161,7 @@ module ActiveRecord
       def index_algorithms
         {
           default: "ALGORITHM = DEFAULT",
-          copy:    "ALGORITHM = COPY",
+          copy: "ALGORITHM = COPY",
           inplace: "ALGORITHM = INPLACE",
           instant: "ALGORITHM = INSTANT",
         }
@@ -357,11 +360,13 @@ module ActiveRecord
       end
 
       def change_column(table_name, column_name, type, **options) # :nodoc:
-        execute("ALTER TABLE #{quote_table_name(table_name)} #{change_column_for_alter(table_name, column_name, type, **options)}")
+        execute("ALTER TABLE #{quote_table_name(table_name)} #{change_column_for_alter(table_name, column_name, type,
+                                                                                       **options)}")
       end
 
       def rename_column(table_name, column_name, new_column_name) # :nodoc:
-        execute("ALTER TABLE #{quote_table_name(table_name)} #{rename_column_for_alter(table_name, column_name, new_column_name)}")
+        execute("ALTER TABLE #{quote_table_name(table_name)} #{rename_column_for_alter(table_name, column_name,
+                                                                                       new_column_name)}")
         rename_column_indexes(table_name, column_name, new_column_name)
       end
 
@@ -562,55 +567,56 @@ module ActiveRecord
 
       class << self
         private
-          def initialize_type_map(m)
-            super
 
-            m.register_type(%r(char)i) do |sql_type|
-              limit = extract_limit(sql_type)
-              Type.lookup(:string, adapter: :mysql2, limit: limit)
-            end
+        def initialize_type_map(m)
+          super
 
-            m.register_type %r(tinytext)i,   Type::Text.new(limit: 2**8 - 1)
-            m.register_type %r(tinyblob)i,   Type::Binary.new(limit: 2**8 - 1)
-            m.register_type %r(text)i,       Type::Text.new(limit: 2**16 - 1)
-            m.register_type %r(blob)i,       Type::Binary.new(limit: 2**16 - 1)
-            m.register_type %r(mediumtext)i, Type::Text.new(limit: 2**24 - 1)
-            m.register_type %r(mediumblob)i, Type::Binary.new(limit: 2**24 - 1)
-            m.register_type %r(longtext)i,   Type::Text.new(limit: 2**32 - 1)
-            m.register_type %r(longblob)i,   Type::Binary.new(limit: 2**32 - 1)
-            m.register_type %r(^float)i,     Type::Float.new(limit: 24)
-            m.register_type %r(^double)i,    Type::Float.new(limit: 53)
-
-            register_integer_type m, %r(^bigint)i,    limit: 8
-            register_integer_type m, %r(^int)i,       limit: 4
-            register_integer_type m, %r(^mediumint)i, limit: 3
-            register_integer_type m, %r(^smallint)i,  limit: 2
-            register_integer_type m, %r(^tinyint)i,   limit: 1
-
-            m.alias_type %r(year)i, "integer"
-            m.alias_type %r(bit)i,  "binary"
-
-            m.register_type %r(^enum)i, Type.lookup(:string, adapter: :mysql2)
-            m.register_type %r(^set)i,  Type.lookup(:string, adapter: :mysql2)
+          m.register_type(%r(char)i) do |sql_type|
+            limit = extract_limit(sql_type)
+            Type.lookup(:string, adapter: :mysql2, limit: limit)
           end
 
-          def register_integer_type(mapping, key, **options)
-            mapping.register_type(key) do |sql_type|
-              if /\bunsigned\b/.match?(sql_type)
-                Type::UnsignedInteger.new(**options)
-              else
-                Type::Integer.new(**options)
-              end
-            end
-          end
+          m.register_type %r(tinytext)i, Type::Text.new(limit: 2**8 - 1)
+          m.register_type %r(tinyblob)i, Type::Binary.new(limit: 2**8 - 1)
+          m.register_type %r(text)i, Type::Text.new(limit: 2**16 - 1)
+          m.register_type %r(blob)i, Type::Binary.new(limit: 2**16 - 1)
+          m.register_type %r(mediumtext)i, Type::Text.new(limit: 2**24 - 1)
+          m.register_type %r(mediumblob)i, Type::Binary.new(limit: 2**24 - 1)
+          m.register_type %r(longtext)i, Type::Text.new(limit: 2**32 - 1)
+          m.register_type %r(longblob)i, Type::Binary.new(limit: 2**32 - 1)
+          m.register_type %r(^float)i, Type::Float.new(limit: 24)
+          m.register_type %r(^double)i, Type::Float.new(limit: 53)
 
-          def extract_precision(sql_type)
-            if /\A(?:date)?time(?:stamp)?\b/.match?(sql_type)
-              super || 0
+          register_integer_type m, %r(^bigint)i, limit: 8
+          register_integer_type m, %r(^int)i, limit: 4
+          register_integer_type m, %r(^mediumint)i, limit: 3
+          register_integer_type m, %r(^smallint)i, limit: 2
+          register_integer_type m, %r(^tinyint)i, limit: 1
+
+          m.alias_type %r(year)i, "integer"
+          m.alias_type %r(bit)i, "binary"
+
+          m.register_type %r(^enum)i, Type.lookup(:string, adapter: :mysql2)
+          m.register_type %r(^set)i, Type.lookup(:string, adapter: :mysql2)
+        end
+
+        def register_integer_type(mapping, key, **options)
+          mapping.register_type(key) do |sql_type|
+            if /\bunsigned\b/.match?(sql_type)
+              Type::UnsignedInteger.new(**options)
             else
-              super
+              Type::Integer.new(**options)
             end
           end
+        end
+
+        def extract_precision(sql_type)
+          if /\A(?:date)?time(?:stamp)?\b/.match?(sql_type)
+            super || 0
+          else
+            super
+          end
+        end
       end
 
       TYPE_MAP = Type::TypeMap.new.tap { |m| initialize_type_map(m) }
@@ -619,261 +625,263 @@ module ActiveRecord
       end
 
       private
-        def type_map
-          emulate_booleans ? TYPE_MAP_WITH_BOOLEAN : TYPE_MAP
-        end
 
-        def raw_execute(sql, name, async: false)
-          materialize_transactions
-          mark_transaction_written_if_write(sql)
+      def type_map
+        emulate_booleans ? TYPE_MAP_WITH_BOOLEAN : TYPE_MAP
+      end
 
-          log(sql, name, async: async) do
-            ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
-              @connection.query(sql)
-            end
+      def raw_execute(sql, name, async: false)
+        materialize_transactions
+        mark_transaction_written_if_write(sql)
+
+        log(sql, name, async: async) do
+          ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
+            @connection.query(sql)
           end
         end
+      end
 
-        # See https://dev.mysql.com/doc/mysql-errors/en/server-error-reference.html
-        ER_DB_CREATE_EXISTS     = 1007
-        ER_FILSORT_ABORT        = 1028
-        ER_DUP_ENTRY            = 1062
-        ER_NOT_NULL_VIOLATION   = 1048
-        ER_NO_REFERENCED_ROW    = 1216
-        ER_ROW_IS_REFERENCED    = 1217
-        ER_DO_NOT_HAVE_DEFAULT  = 1364
-        ER_ROW_IS_REFERENCED_2  = 1451
-        ER_NO_REFERENCED_ROW_2  = 1452
-        ER_DATA_TOO_LONG        = 1406
-        ER_OUT_OF_RANGE         = 1264
-        ER_LOCK_DEADLOCK        = 1213
-        ER_CANNOT_ADD_FOREIGN   = 1215
-        ER_CANNOT_CREATE_TABLE  = 1005
-        ER_LOCK_WAIT_TIMEOUT    = 1205
-        ER_QUERY_INTERRUPTED    = 1317
-        ER_QUERY_TIMEOUT        = 3024
-        ER_FK_INCOMPATIBLE_COLUMNS = 3780
+      # See https://dev.mysql.com/doc/mysql-errors/en/server-error-reference.html
+      ER_DB_CREATE_EXISTS = 1007
+      ER_FILSORT_ABORT = 1028
+      ER_DUP_ENTRY = 1062
+      ER_NOT_NULL_VIOLATION = 1048
+      ER_NO_REFERENCED_ROW = 1216
+      ER_ROW_IS_REFERENCED = 1217
+      ER_DO_NOT_HAVE_DEFAULT = 1364
+      ER_ROW_IS_REFERENCED_2 = 1451
+      ER_NO_REFERENCED_ROW_2 = 1452
+      ER_DATA_TOO_LONG = 1406
+      ER_OUT_OF_RANGE = 1264
+      ER_LOCK_DEADLOCK = 1213
+      ER_CANNOT_ADD_FOREIGN = 1215
+      ER_CANNOT_CREATE_TABLE = 1005
+      ER_LOCK_WAIT_TIMEOUT = 1205
+      ER_QUERY_INTERRUPTED = 1317
+      ER_QUERY_TIMEOUT = 3024
+      ER_FK_INCOMPATIBLE_COLUMNS = 3780
 
-        def translate_exception(exception, message:, sql:, binds:)
-          case error_number(exception)
-          when nil
-            if exception.message.match?(/MySQL client is not connected/i)
-              ConnectionNotEstablished.new(exception)
-            else
-              super
-            end
-          when ER_DB_CREATE_EXISTS
-            DatabaseAlreadyExists.new(message, sql: sql, binds: binds)
-          when ER_DUP_ENTRY
-            RecordNotUnique.new(message, sql: sql, binds: binds)
-          when ER_NO_REFERENCED_ROW, ER_ROW_IS_REFERENCED, ER_ROW_IS_REFERENCED_2, ER_NO_REFERENCED_ROW_2
-            InvalidForeignKey.new(message, sql: sql, binds: binds)
-          when ER_CANNOT_ADD_FOREIGN, ER_FK_INCOMPATIBLE_COLUMNS
-            mismatched_foreign_key(message, sql: sql, binds: binds)
-          when ER_CANNOT_CREATE_TABLE
-            if message.include?("errno: 150")
-              mismatched_foreign_key(message, sql: sql, binds: binds)
-            else
-              super
-            end
-          when ER_DATA_TOO_LONG
-            ValueTooLong.new(message, sql: sql, binds: binds)
-          when ER_OUT_OF_RANGE
-            RangeError.new(message, sql: sql, binds: binds)
-          when ER_NOT_NULL_VIOLATION, ER_DO_NOT_HAVE_DEFAULT
-            NotNullViolation.new(message, sql: sql, binds: binds)
-          when ER_LOCK_DEADLOCK
-            Deadlocked.new(message, sql: sql, binds: binds)
-          when ER_LOCK_WAIT_TIMEOUT
-            LockWaitTimeout.new(message, sql: sql, binds: binds)
-          when ER_QUERY_TIMEOUT, ER_FILSORT_ABORT
-            StatementTimeout.new(message, sql: sql, binds: binds)
-          when ER_QUERY_INTERRUPTED
-            QueryCanceled.new(message, sql: sql, binds: binds)
+      def translate_exception(exception, message:, sql:, binds:)
+        case error_number(exception)
+        when nil
+          if exception.message.match?(/MySQL client is not connected/i)
+            ConnectionNotEstablished.new(exception)
           else
             super
           end
-        end
-
-        def change_column_for_alter(table_name, column_name, type, **options)
-          column = column_for(table_name, column_name)
-          type ||= column.sql_type
-
-          unless options.key?(:default)
-            options[:default] = column.default
-          end
-
-          unless options.key?(:null)
-            options[:null] = column.null
-          end
-
-          unless options.key?(:comment)
-            options[:comment] = column.comment
-          end
-
-          unless options.key?(:collation)
-            options[:collation] = column.collation
-          end
-
-          unless options.key?(:auto_increment)
-            options[:auto_increment] = column.auto_increment?
-          end
-
-          td = create_table_definition(table_name)
-          cd = td.new_column_definition(column.name, type, **options)
-          schema_creation.accept(ChangeColumnDefinition.new(cd, column.name))
-        end
-
-        def rename_column_for_alter(table_name, column_name, new_column_name)
-          return rename_column_sql(table_name, column_name, new_column_name) if supports_rename_column?
-
-          column  = column_for(table_name, column_name)
-          options = {
-            default: column.default,
-            null: column.null,
-            auto_increment: column.auto_increment?,
-            comment: column.comment
-          }
-
-          current_type = exec_query("SHOW COLUMNS FROM #{quote_table_name(table_name)} LIKE #{quote(column_name)}", "SCHEMA").first["Type"]
-          td = create_table_definition(table_name)
-          cd = td.new_column_definition(new_column_name, current_type, **options)
-          schema_creation.accept(ChangeColumnDefinition.new(cd, column.name))
-        end
-
-        def add_index_for_alter(table_name, column_name, **options)
-          index, algorithm, _ = add_index_options(table_name, column_name, **options)
-          algorithm = ", #{algorithm}" if algorithm
-
-          "ADD #{schema_creation.accept(index)}#{algorithm}"
-        end
-
-        def remove_index_for_alter(table_name, column_name = nil, **options)
-          index_name = index_name_for_remove(table_name, column_name, options)
-          "DROP INDEX #{quote_column_name(index_name)}"
-        end
-
-        def supports_rename_index?
-          if mariadb?
-            database_version >= "10.5.2"
+        when ER_DB_CREATE_EXISTS
+          DatabaseAlreadyExists.new(message, sql: sql, binds: binds)
+        when ER_DUP_ENTRY
+          RecordNotUnique.new(message, sql: sql, binds: binds)
+        when ER_NO_REFERENCED_ROW, ER_ROW_IS_REFERENCED, ER_ROW_IS_REFERENCED_2, ER_NO_REFERENCED_ROW_2
+          InvalidForeignKey.new(message, sql: sql, binds: binds)
+        when ER_CANNOT_ADD_FOREIGN, ER_FK_INCOMPATIBLE_COLUMNS
+          mismatched_foreign_key(message, sql: sql, binds: binds)
+        when ER_CANNOT_CREATE_TABLE
+          if message.include?("errno: 150")
+            mismatched_foreign_key(message, sql: sql, binds: binds)
           else
-            database_version >= "5.7.6"
+            super
           end
+        when ER_DATA_TOO_LONG
+          ValueTooLong.new(message, sql: sql, binds: binds)
+        when ER_OUT_OF_RANGE
+          RangeError.new(message, sql: sql, binds: binds)
+        when ER_NOT_NULL_VIOLATION, ER_DO_NOT_HAVE_DEFAULT
+          NotNullViolation.new(message, sql: sql, binds: binds)
+        when ER_LOCK_DEADLOCK
+          Deadlocked.new(message, sql: sql, binds: binds)
+        when ER_LOCK_WAIT_TIMEOUT
+          LockWaitTimeout.new(message, sql: sql, binds: binds)
+        when ER_QUERY_TIMEOUT, ER_FILSORT_ABORT
+          StatementTimeout.new(message, sql: sql, binds: binds)
+        when ER_QUERY_INTERRUPTED
+          QueryCanceled.new(message, sql: sql, binds: binds)
+        else
+          super
+        end
+      end
+
+      def change_column_for_alter(table_name, column_name, type, **options)
+        column = column_for(table_name, column_name)
+        type ||= column.sql_type
+
+        unless options.key?(:default)
+          options[:default] = column.default
         end
 
-        def supports_rename_column?
-          if mariadb?
-            database_version >= "10.5.2"
+        unless options.key?(:null)
+          options[:null] = column.null
+        end
+
+        unless options.key?(:comment)
+          options[:comment] = column.comment
+        end
+
+        unless options.key?(:collation)
+          options[:collation] = column.collation
+        end
+
+        unless options.key?(:auto_increment)
+          options[:auto_increment] = column.auto_increment?
+        end
+
+        td = create_table_definition(table_name)
+        cd = td.new_column_definition(column.name, type, **options)
+        schema_creation.accept(ChangeColumnDefinition.new(cd, column.name))
+      end
+
+      def rename_column_for_alter(table_name, column_name, new_column_name)
+        return rename_column_sql(table_name, column_name, new_column_name) if supports_rename_column?
+
+        column = column_for(table_name, column_name)
+        options = {
+          default: column.default,
+          null: column.null,
+          auto_increment: column.auto_increment?,
+          comment: column.comment
+        }
+
+        current_type = exec_query("SHOW COLUMNS FROM #{quote_table_name(table_name)} LIKE #{quote(column_name)}",
+                                  "SCHEMA").first["Type"]
+        td = create_table_definition(table_name)
+        cd = td.new_column_definition(new_column_name, current_type, **options)
+        schema_creation.accept(ChangeColumnDefinition.new(cd, column.name))
+      end
+
+      def add_index_for_alter(table_name, column_name, **options)
+        index, algorithm, _ = add_index_options(table_name, column_name, **options)
+        algorithm = ", #{algorithm}" if algorithm
+
+        "ADD #{schema_creation.accept(index)}#{algorithm}"
+      end
+
+      def remove_index_for_alter(table_name, column_name = nil, **options)
+        index_name = index_name_for_remove(table_name, column_name, options)
+        "DROP INDEX #{quote_column_name(index_name)}"
+      end
+
+      def supports_rename_index?
+        if mariadb?
+          database_version >= "10.5.2"
+        else
+          database_version >= "5.7.6"
+        end
+      end
+
+      def supports_rename_column?
+        if mariadb?
+          database_version >= "10.5.2"
+        else
+          database_version >= "8.0.3"
+        end
+      end
+
+      def configure_connection
+        variables = @config.fetch(:variables, {}).stringify_keys
+
+        # By default, MySQL 'where id is null' selects the last inserted id; Turn this off.
+        variables["sql_auto_is_null"] = 0
+
+        # Increase timeout so the server doesn't disconnect us.
+        wait_timeout = self.class.type_cast_config_to_integer(@config[:wait_timeout])
+        wait_timeout = 2147483 unless wait_timeout.is_a?(Integer)
+        variables["wait_timeout"] = wait_timeout
+
+        defaults = [":default", :default].to_set
+
+        # Make MySQL reject illegal values rather than truncating or blanking them, see
+        # https://dev.mysql.com/doc/refman/en/sql-mode.html#sqlmode_strict_all_tables
+        # If the user has provided another value for sql_mode, don't replace it.
+        if sql_mode = variables.delete("sql_mode")
+          sql_mode = quote(sql_mode)
+        elsif !defaults.include?(strict_mode?)
+          if strict_mode?
+            sql_mode = "CONCAT(@@sql_mode, ',STRICT_ALL_TABLES')"
           else
-            database_version >= "8.0.3"
+            sql_mode = "REPLACE(@@sql_mode, 'STRICT_TRANS_TABLES', '')"
+            sql_mode = "REPLACE(#{sql_mode}, 'STRICT_ALL_TABLES', '')"
+            sql_mode = "REPLACE(#{sql_mode}, 'TRADITIONAL', '')"
           end
+          sql_mode = "CONCAT(#{sql_mode}, ',NO_AUTO_VALUE_ON_ZERO')"
+        end
+        sql_mode_assignment = "@@SESSION.sql_mode = #{sql_mode}, " if sql_mode
+
+        # NAMES does not have an equals sign, see
+        # https://dev.mysql.com/doc/refman/en/set-names.html
+        # (trailing comma because variable_assignments will always have content)
+        if @config[:encoding]
+          encoding = +"NAMES #{@config[:encoding]}"
+          encoding << " COLLATE #{@config[:collation]}" if @config[:collation]
+          encoding << ", "
         end
 
-        def configure_connection
-          variables = @config.fetch(:variables, {}).stringify_keys
-
-          # By default, MySQL 'where id is null' selects the last inserted id; Turn this off.
-          variables["sql_auto_is_null"] = 0
-
-          # Increase timeout so the server doesn't disconnect us.
-          wait_timeout = self.class.type_cast_config_to_integer(@config[:wait_timeout])
-          wait_timeout = 2147483 unless wait_timeout.is_a?(Integer)
-          variables["wait_timeout"] = wait_timeout
-
-          defaults = [":default", :default].to_set
-
-          # Make MySQL reject illegal values rather than truncating or blanking them, see
-          # https://dev.mysql.com/doc/refman/en/sql-mode.html#sqlmode_strict_all_tables
-          # If the user has provided another value for sql_mode, don't replace it.
-          if sql_mode = variables.delete("sql_mode")
-            sql_mode = quote(sql_mode)
-          elsif !defaults.include?(strict_mode?)
-            if strict_mode?
-              sql_mode = "CONCAT(@@sql_mode, ',STRICT_ALL_TABLES')"
-            else
-              sql_mode = "REPLACE(@@sql_mode, 'STRICT_TRANS_TABLES', '')"
-              sql_mode = "REPLACE(#{sql_mode}, 'STRICT_ALL_TABLES', '')"
-              sql_mode = "REPLACE(#{sql_mode}, 'TRADITIONAL', '')"
-            end
-            sql_mode = "CONCAT(#{sql_mode}, ',NO_AUTO_VALUE_ON_ZERO')"
+        # Gather up all of the SET variables...
+        variable_assignments = variables.filter_map do |k, v|
+          if defaults.include?(v)
+            "@@SESSION.#{k} = DEFAULT" # Sets the value to the global or compile default
+          elsif !v.nil?
+            "@@SESSION.#{k} = #{quote(v)}"
           end
-          sql_mode_assignment = "@@SESSION.sql_mode = #{sql_mode}, " if sql_mode
+        end.join(", ")
 
-          # NAMES does not have an equals sign, see
-          # https://dev.mysql.com/doc/refman/en/set-names.html
-          # (trailing comma because variable_assignments will always have content)
-          if @config[:encoding]
-            encoding = +"NAMES #{@config[:encoding]}"
-            encoding << " COLLATE #{@config[:collation]}" if @config[:collation]
-            encoding << ", "
-          end
+        # ...and send them all in one query
+        execute("SET #{encoding} #{sql_mode_assignment} #{variable_assignments}", "SCHEMA")
+      end
 
-          # Gather up all of the SET variables...
-          variable_assignments = variables.filter_map do |k, v|
-            if defaults.include?(v)
-              "@@SESSION.#{k} = DEFAULT" # Sets the value to the global or compile default
-            elsif !v.nil?
-              "@@SESSION.#{k} = #{quote(v)}"
-            end
-          end.join(", ")
+      def column_definitions(table_name) # :nodoc:
+        execute_and_free("SHOW FULL FIELDS FROM #{quote_table_name(table_name)}", "SCHEMA") do |result|
+          each_hash(result)
+        end
+      end
 
-          # ...and send them all in one query
-          execute("SET #{encoding} #{sql_mode_assignment} #{variable_assignments}", "SCHEMA")
+      def create_table_info(table_name) # :nodoc:
+        exec_query("SHOW CREATE TABLE #{quote_table_name(table_name)}", "SCHEMA").first["Create Table"]
+      end
+
+      def arel_visitor
+        Arel::Visitors::MySQL.new(self)
+      end
+
+      def build_statement_pool
+        StatementPool.new(self.class.type_cast_config_to_integer(@config[:statement_limit]))
+      end
+
+      def mismatched_foreign_key(message, sql:, binds:)
+        match = %r/
+          (?:CREATE|ALTER)\s+TABLE\s*(?:`?\w+`?\.)?`?(?<table>\w+)`?.+?
+          FOREIGN\s+KEY\s*\(`?(?<foreign_key>\w+)`?\)\s*
+          REFERENCES\s*(`?(?<target_table>\w+)`?)\s*\(`?(?<primary_key>\w+)`?\)
+        /xmi.match(sql)
+
+        options = {
+          message: message,
+          sql: sql,
+          binds: binds,
+        }
+
+        if match
+          options[:table] = match[:table]
+          options[:foreign_key] = match[:foreign_key]
+          options[:target_table] = match[:target_table]
+          options[:primary_key] = match[:primary_key]
+          options[:primary_key_column] = column_for(match[:target_table], match[:primary_key])
         end
 
-        def column_definitions(table_name) # :nodoc:
-          execute_and_free("SHOW FULL FIELDS FROM #{quote_table_name(table_name)}", "SCHEMA") do |result|
-            each_hash(result)
-          end
-        end
+        MismatchedForeignKey.new(**options)
+      end
 
-        def create_table_info(table_name) # :nodoc:
-          exec_query("SHOW CREATE TABLE #{quote_table_name(table_name)}", "SCHEMA").first["Create Table"]
-        end
+      def version_string(full_version_string)
+        full_version_string.match(/^(?:5\.5\.5-)?(\d+\.\d+\.\d+)/)[1]
+      end
 
-        def arel_visitor
-          Arel::Visitors::MySQL.new(self)
-        end
-
-        def build_statement_pool
-          StatementPool.new(self.class.type_cast_config_to_integer(@config[:statement_limit]))
-        end
-
-        def mismatched_foreign_key(message, sql:, binds:)
-          match = %r/
-            (?:CREATE|ALTER)\s+TABLE\s*(?:`?\w+`?\.)?`?(?<table>\w+)`?.+?
-            FOREIGN\s+KEY\s*\(`?(?<foreign_key>\w+)`?\)\s*
-            REFERENCES\s*(`?(?<target_table>\w+)`?)\s*\(`?(?<primary_key>\w+)`?\)
-          /xmi.match(sql)
-
-          options = {
-            message: message,
-            sql: sql,
-            binds: binds,
-          }
-
-          if match
-            options[:table] = match[:table]
-            options[:foreign_key] = match[:foreign_key]
-            options[:target_table] = match[:target_table]
-            options[:primary_key] = match[:primary_key]
-            options[:primary_key_column] = column_for(match[:target_table], match[:primary_key])
-          end
-
-          MismatchedForeignKey.new(**options)
-        end
-
-        def version_string(full_version_string)
-          full_version_string.match(/^(?:5\.5\.5-)?(\d+\.\d+\.\d+)/)[1]
-        end
-
-        ActiveRecord::Type.register(:immutable_string, adapter: :mysql2) do |_, **args|
-          Type::ImmutableString.new(true: "1", false: "0", **args)
-        end
-        ActiveRecord::Type.register(:string, adapter: :mysql2) do |_, **args|
-          Type::String.new(true: "1", false: "0", **args)
-        end
-        ActiveRecord::Type.register(:unsigned_integer, Type::UnsignedInteger, adapter: :mysql2)
+      ActiveRecord::Type.register(:immutable_string, adapter: :mysql2) do |_, **args|
+        Type::ImmutableString.new(true: "1", false: "0", **args)
+      end
+      ActiveRecord::Type.register(:string, adapter: :mysql2) do |_, **args|
+        Type::String.new(true: "1", false: "0", **args)
+      end
+      ActiveRecord::Type.register(:unsigned_integer, Type::UnsignedInteger, adapter: :mysql2)
     end
   end
 end

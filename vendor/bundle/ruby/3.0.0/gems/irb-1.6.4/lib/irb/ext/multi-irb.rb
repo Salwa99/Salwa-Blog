@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   irb/multi-irb.rb - multiple irb module
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -6,7 +7,6 @@
 
 module IRB
   class JobManager
-
     # Creates a new JobManager object
     def initialize
       @jobs = []
@@ -62,6 +62,7 @@ module IRB
       th, irb = search(key)
       fail IrbAlreadyDead unless th.alive?
       fail IrbSwitchedToCurrentThread if th == Thread.current
+
       @current_job = irb
       th.run
       Thread.stop
@@ -78,6 +79,7 @@ module IRB
       for key in keys
         th, _ = search(key)
         fail IrbAlreadyDead unless th.alive?
+
         th.exit
       end
     end
@@ -101,13 +103,14 @@ module IRB
             when Integer
               @jobs[key]
             when Irb
-              @jobs.find{|k, v| v.equal?(key)}
+              @jobs.find { |k, v| v.equal?(key) }
             when Thread
               @jobs.assoc(key)
             else
-              @jobs.find{|k, v| v.context.main.equal?(key)}
+              @jobs.find { |k, v| v.context.main.equal?(key) }
             end
       fail NoSuchJob, key if job.nil?
+
       job
     end
 
@@ -116,11 +119,11 @@ module IRB
       case key
       when Integer
         fail NoSuchJob, key unless @jobs[key]
+
         @jobs[key] = nil
       else
         catch(:EXISTS) do
-          @jobs.each_index do
-            |i|
+          @jobs.each_index do |i|
             if @jobs[i] and (@jobs[i][0] == key ||
                 @jobs[i][1] == key ||
                 @jobs[i][1].context.main.equal?(key))
@@ -138,8 +141,7 @@ module IRB
     # Outputs a list of jobs, see the irb command +irb_jobs+, or +jobs+.
     def inspect
       ary = []
-      @jobs.each_index do
-        |i|
+      @jobs.each_index do |i|
         th, irb = @jobs[i]
         next if th.nil?
 
@@ -153,11 +155,11 @@ module IRB
           t_status = "exited"
         end
         ary.push format("#%d->%s on %s (%s: %s)",
-          i,
-          irb.context.irb_name,
-          irb.context.main,
-          th,
-          t_status)
+                        i,
+                        irb.context.irb_name,
+                        irb.context.main,
+                        th,
+                        t_status)
       end
       ary.join("\n")
     end
@@ -203,7 +205,7 @@ module IRB
       rescue SystemExit
         system_exit = true
         raise
-        #fail
+        # fail
       ensure
         unless system_exit
           @JobManager.delete(irb)
@@ -254,5 +256,4 @@ module IRB
     @JobManager.current_job.signal_handle
     Thread.stop
   end
-
 end

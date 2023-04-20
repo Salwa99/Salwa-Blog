@@ -28,6 +28,7 @@ module ActionDispatch
       rescue => error
       end
       raise error if error
+
       result
     end
   end

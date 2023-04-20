@@ -42,7 +42,7 @@ module ActiveModel
       extend ActiveModel::Callbacks
       extend ActiveModel::Translation
 
-      extend  HelperMethods
+      extend HelperMethods
       include HelperMethods
 
       attr_accessor :validation_context
@@ -401,7 +401,8 @@ module ActiveModel
     #   end
     alias :read_attribute_for_validation :send
 
-  private
+    private
+
     def run_validations!
       _run_validate_callbacks
       errors.empty?
@@ -428,7 +429,8 @@ module ActiveModel
     def initialize(model)
       @model = model
       errors = @model.errors.full_messages.join(", ")
-      super(I18n.t(:"#{@model.class.i18n_scope}.errors.messages.model_invalid", errors: errors, default: :"errors.messages.model_invalid"))
+      super(I18n.t(:"#{@model.class.i18n_scope}.errors.messages.model_invalid", errors: errors,
+                                                                                default: :"errors.messages.model_invalid"))
     end
   end
 end

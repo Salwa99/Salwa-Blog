@@ -99,10 +99,10 @@ module Arel # :nodoc: all
       else
         left = lt(other.begin)
         right = if other.exclude_end?
-          gteq(other.end)
-        else
-          gt(other.end)
-        end
+                  gteq(other.end)
+                else
+                  gt(other.end)
+                end
         left.or(right)
       end
     end
@@ -227,32 +227,33 @@ module Arel # :nodoc: all
     end
 
     private
-      def grouping_any(method_id, others, *extras)
-        nodes = others.map { |expr| send(method_id, expr, *extras) }
-        Nodes::Grouping.new nodes.inject { |memo, node|
-          Nodes::Or.new(memo, node)
-        }
-      end
 
-      def grouping_all(method_id, others, *extras)
-        nodes = others.map { |expr| send(method_id, expr, *extras) }
-        Nodes::Grouping.new Nodes::And.new(nodes)
-      end
+    def grouping_any(method_id, others, *extras)
+      nodes = others.map { |expr| send(method_id, expr, *extras) }
+      Nodes::Grouping.new nodes.inject { |memo, node|
+        Nodes::Or.new(memo, node)
+      }
+    end
 
-      def quoted_node(other)
-        Nodes.build_quoted(other, self)
-      end
+    def grouping_all(method_id, others, *extras)
+      nodes = others.map { |expr| send(method_id, expr, *extras) }
+      Nodes::Grouping.new Nodes::And.new(nodes)
+    end
 
-      def infinity?(value)
-        value.respond_to?(:infinite?) && value.infinite?
-      end
+    def quoted_node(other)
+      Nodes.build_quoted(other, self)
+    end
 
-      def unboundable?(value)
-        value.respond_to?(:unboundable?) && value.unboundable?
-      end
+    def infinity?(value)
+      value.respond_to?(:infinite?) && value.infinite?
+    end
 
-      def open_ended?(value)
-        value.nil? || infinity?(value) || unboundable?(value)
-      end
+    def unboundable?(value)
+      value.respond_to?(:unboundable?) && value.unboundable?
+    end
+
+    def open_ended?(value)
+      value.nil? || infinity?(value) || unboundable?(value)
+    end
   end
 end

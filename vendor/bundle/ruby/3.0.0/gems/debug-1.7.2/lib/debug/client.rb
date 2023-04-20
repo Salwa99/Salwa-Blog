@@ -59,20 +59,20 @@ module DEBUGGER__
         case shell = working_shell_type
         when :bash, :zsh
           puts <<~EOS
-          # add the following lines in your ~/.#{shell}_profile
+            # add the following lines in your ~/.#{shell}_profile
 
-          if test -s #{prelude_path} ; then
-            export RUBYOPT='-r #{prelude_path}'
-          fi
+            if test -s #{prelude_path} ; then
+              export RUBYOPT='-r #{prelude_path}'
+            fi
 
-          # Add `Kernel#bb` method which is alias of `Kernel#debugger`
-          # export RUBY_DEBUG_BB=1
+            # Add `Kernel#bb` method which is alias of `Kernel#debugger`
+            # export RUBY_DEBUG_BB=1
           EOS
 
         when :fish
           puts <<~EOS
-          # add the following lines in your ~/.config/fish/config.fish
-          set -x RUBYOPT "-r #{__dir__}/prelude" $RUBYOPT
+            # add the following lines in your ~/.config/fish/config.fish
+            set -x RUBYOPT "-r #{__dir__}/prelude" $RUBYOPT
           EOS
 
         else
@@ -100,8 +100,8 @@ module DEBUGGER__
         end
 
         if verbose
-          socks = socks.map{|sock_path|
-            Socket.unix(sock_path){|sock|
+          socks = socks.map { |sock_path|
+            Socket.unix(sock_path) { |sock|
               sock.puts "info cookie: #{CONFIG[:cookie] || '-'}"
               pid = sock.gets.chomp
               _dbg = sock.gets.chomp
@@ -175,7 +175,7 @@ module DEBUGGER__
           @s = Socket.unix(files.first.first)
         else
           $stderr.puts "Please select a debug session:"
-          files.each{|(f, desc)|
+          files.each { |(f, desc)|
             $stderr.puts "  #{File.basename(f)} (#{desc})"
           }
           exit
@@ -195,12 +195,12 @@ module DEBUGGER__
     def connect
       pre_commands = (CONFIG[:commands] || '').split(';;')
 
-      trap(:SIGINT){
+      trap(:SIGINT) {
         send "pause"
       }
 
       begin
-        trap(:SIGWINCH){
+        trap(:SIGWINCH) {
           @width = IO.console_size[1]
         }
       rescue ArgumentError

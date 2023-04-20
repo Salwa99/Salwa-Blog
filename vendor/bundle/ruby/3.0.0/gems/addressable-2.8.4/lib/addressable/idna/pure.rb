@@ -16,7 +16,6 @@
 #    limitations under the License.
 #++
 
-
 module Addressable
   module IDNA
     # This module is loosely based on idn_actionmailer by Mick Staugaard,
@@ -31,7 +30,6 @@ module Addressable
     # http://github.com/staugaard/idn_actionmailer
     # http://www.yoshidam.net/Ruby.html#unicode
     # http://rubyforge.org/frs/?group_id=2550
-
 
     UNICODE_TABLE = File.expand_path(
       File.join(File.dirname(__FILE__), '../../..', 'data/unicode.data')
@@ -228,7 +226,7 @@ module Addressable
         if punycode_basic?(input[j])
           if max_out - out < 2
             raise PunycodeBigOutput,
-              "Output would exceed the space provided."
+                  "Output would exceed the space provided."
           end
           output[out] = input[j]
           out += 1
@@ -263,6 +261,7 @@ module Addressable
         if m - n > (PUNYCODE_MAXINT - delta) / (h + 1)
           raise PunycodeOverflow, "Input needs wider integers to process."
         end
+
         delta += (m - n) * (h + 1)
         n = m
 
@@ -272,7 +271,7 @@ module Addressable
             delta += 1
             if delta == 0
               raise PunycodeOverflow,
-                "Input needs wider integers to process."
+                    "Input needs wider integers to process."
             end
           end
 
@@ -283,7 +282,7 @@ module Addressable
             while true
               if out >= max_out
                 raise PunycodeBigOutput,
-                  "Output would exceed the space provided."
+                      "Output would exceed the space provided."
               end
               t = (
                 if k <= bias
@@ -295,6 +294,7 @@ module Addressable
                 end
               )
               break if q < t
+
               output[out] =
                 punycode_encode_digit(t + (q - t) % (PUNYCODE_BASE - t))
               out += 1
@@ -338,10 +338,12 @@ module Addressable
       if ACE_MAX_LENGTH * 2 < punycode.size
         raise PunycodeBigOutput, "Output would exceed the space provided."
       end
+
       punycode.each_byte do |c|
         unless c >= 0 && c <= 127
           raise PunycodeBadInput, "Input is invalid."
         end
+
         input.push(c)
       end
 
@@ -371,8 +373,9 @@ module Addressable
         unless punycode_basic?(input[j])
           raise PunycodeBadInput, "Input is invalid."
         end
+
         output[out] = input[j]
-        out+=1
+        out += 1
       end
 
       # Main decoding loop:  Start just after the last delimiter if any
@@ -394,14 +397,16 @@ module Addressable
           if in_ >= input_length
             raise PunycodeBadInput, "Input is invalid."
           end
+
           digit = punycode_decode_digit(input[in_])
-          in_+=1
+          in_ += 1
           if digit >= PUNYCODE_BASE
             raise PunycodeBadInput, "Input is invalid."
           end
           if digit > (PUNYCODE_MAXINT - i) / w
             raise PunycodeOverflow, "Input needs wider integers to process."
           end
+
           i += digit * w
           t = (
             if k <= bias
@@ -416,6 +421,7 @@ module Addressable
           if w > PUNYCODE_MAXINT / (PUNYCODE_BASE - t)
             raise PunycodeOverflow, "Input needs wider integers to process."
           end
+
           w *= PUNYCODE_BASE - t
           k += PUNYCODE_BASE
         end
@@ -428,6 +434,7 @@ module Addressable
         if i / (out + 1) > PUNYCODE_MAXINT - n
           raise PunycodeOverflow, "Input needs wider integers to process."
         end
+
         n += i / (out + 1)
         i %= out + 1
 
@@ -439,7 +446,7 @@ module Addressable
           raise PunycodeBigOutput, "Output would exceed the space provided."
         end
 
-        #memmove(output + i + 1, output + i, (out - i) * sizeof *output)
+        # memmove(output + i + 1, output + i, (out - i) * sizeof *output)
         output[i + 1, out - i] = output[i, out - i]
         output[i] = n
         i += 1

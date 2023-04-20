@@ -2,7 +2,6 @@ require 'concurrent/synchronization/abstract_struct'
 require 'concurrent/synchronization/lockable_object'
 
 module Concurrent
-
   # An thread-safe variation of Ruby's standard `Struct`. Values can be set at
   # construction or safely changed at any time during the object's lifecycle.
   #
@@ -138,6 +137,7 @@ module Concurrent
     #   @yieldparam [Object] value each struct value (in order)
     def each(&block)
       return enum_for(:each) unless block_given?
+
       synchronize { ns_each(&block) }
     end
 
@@ -151,6 +151,7 @@ module Concurrent
     #   @yieldparam [Object] value each struct value (in order)
     def each_pair(&block)
       return enum_for(:each_pair) unless block_given?
+
       synchronize { ns_each_pair(&block) }
     end
 
@@ -166,6 +167,7 @@ module Concurrent
     #   @return [Array] an array containing each value for which the block returns true
     def select(&block)
       return enum_for(:select) unless block_given?
+
       synchronize { ns_select(&block) }
     end
 
@@ -188,6 +190,7 @@ module Concurrent
         if member >= length
           raise IndexError.new("offset #{member} too large for struct(size:#{length})")
         end
+
         synchronize { @values[member] = value }
       else
         send("#{member}=", value)
@@ -214,13 +217,15 @@ module Concurrent
       elsif args.length > 0 && args.first.is_a?(String)
         clazz_name = args.shift
       end
+
       FACTORY.define_struct(clazz_name, args, &block)
     end
 
     FACTORY = Class.new(Synchronization::LockableObject) do
       def define_struct(name, members, &block)
         synchronize do
-          clazz = Synchronization::AbstractStruct.define_struct_class(MutableStruct, Synchronization::LockableObject, name, members, &block)
+          clazz = Synchronization::AbstractStruct.define_struct_class(MutableStruct, Synchronization::LockableObject,
+                                                                      name, members, &block)
           members.each_with_index do |member, index|
             clazz.send :remove_method, member
             clazz.send(:define_method, member) do

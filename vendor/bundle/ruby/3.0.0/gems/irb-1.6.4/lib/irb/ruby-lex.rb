@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   irb/ruby-lex.rb - ruby lexcal analyzer
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -9,7 +10,6 @@ require "jruby" if RUBY_ENGINE == "jruby"
 
 # :stopdoc:
 class RubyLex
-
   class TerminateLineInput < StandardError
     def initialize
       super("Terminate Line Input")
@@ -81,7 +81,7 @@ class RubyLex
       @io.dynamic_prompt do |lines|
         lines << '' if lines.empty?
         result = []
-        tokens = self.class.ripper_lex_without_warning(lines.map{ |l| l + "\n" }.join, context: @context)
+        tokens = self.class.ripper_lex_without_warning(lines.map { |l| l + "\n" }.join, context: @context)
         code = String.new
         partial_tokens = []
         unprocessed_tokens = []
@@ -94,6 +94,7 @@ class RubyLex
             t_str.each_line("\n") do |s|
               code << s
               next unless s.include?("\n")
+
               ltype, indent, continue, code_block_open = check_state(code, partial_tokens)
               result << @prompt.call(ltype, indent, continue || code_block_open, @line_no + line_num_offset)
               line_num_offset += 1
@@ -115,7 +116,7 @@ class RubyLex
     if block_given?
       @input = block
     else
-      @input = Proc.new{@io.gets}
+      @input = Proc.new { @io.gets }
     end
   end
 
@@ -150,6 +151,7 @@ class RubyLex
       lexer = Ripper::Lexer.new(inner_code, '-', line_no)
       lexer.scan.each_with_object([]) do |t, tokens|
         next if t.pos.first == 0
+
         prev_tk = tokens.last
         position_overlapped = prev_tk && t.pos[0] == prev_tk.pos[0] && t.pos[1] < prev_tk.pos[1] + prev_tk.tok.bytesize
         if position_overlapped
@@ -165,6 +167,7 @@ class RubyLex
 
   def find_prev_spaces(line_index)
     return 0 if @tokens.size == 0
+
     md = @tokens[0].tok.match(/(\A +)/)
     prev_spaces = md.nil? ? 0 : md[1].count(' ')
     line_count = 0
@@ -175,6 +178,7 @@ class RubyLex
           return prev_spaces
         end
         next if t.event == :on_tstring_content || t.event == :on_words_sep
+
         if (@tokens.size - 1) > i
           md = @tokens[i + 1].tok.match(/(\A +)/)
           prev_spaces = md.nil? ? 0 : md[1].count(' ')
@@ -194,7 +198,7 @@ class RubyLex
           depth_difference = 0 if depth_difference < 0
           prev_spaces + depth_difference * 2
         else
-          code = line_index.zero? ? '' : lines[0..(line_index - 1)].map{ |l| l + "\n" }.join
+          code = line_index.zero? ? '' : lines[0..(line_index - 1)].map { |l| l + "\n" }.join
           last_line = lines[line_index]&.byteslice(0, byte_pointer)
           code += last_line if last_line
           @tokens = self.class.ripper_lex_without_warning(code, context: @context)
@@ -253,6 +257,7 @@ class RubyLex
             yield @line, @exp_line_no
           end
           raise TerminateLineInput if @io.eof?
+
           @line = ''
           @exp_line_no = @line_no
 
@@ -270,6 +275,7 @@ class RubyLex
     if @io.respond_to?(:check_termination)
       return line # multiline
     end
+
     code = @line + (line.nil? ? '' : line)
     code.gsub!(/\s*\z/, '').concat("\n")
     @tokens = self.class.ripper_lex_without_warning(code, context: @context)
@@ -295,6 +301,7 @@ class RubyLex
       # endless range at end of line is not a continue
       return true
     end
+
     false
   end
 
@@ -422,6 +429,7 @@ class RubyLex
         indent -= 1
       when :on_kw
         next if index > 0 and tokens[index - 1].state.allbits?(Ripper::EXPR_FNAME)
+
         case t.tok
         when 'do'
           syntax_of_do = take_corresponding_syntax_to_kw_do(tokens, index)
@@ -446,7 +454,7 @@ class RubyLex
       # The target method call to pass the block with "do".
       return true
     elsif tk.state.anybits?(Ripper::EXPR_ARG) and tk.event == :on_ident
-      non_sp_index = tokens[0..(index - 1)].rindex{ |t| t.event != :on_sp }
+      non_sp_index = tokens[0..(index - 1)].rindex { |t| t.event != :on_sp }
       if non_sp_index
         prev_tk = tokens[non_sp_index]
         if prev_tk.state.anybits?(Ripper::EXPR_DOT) and prev_tk.event == :on_period
@@ -455,6 +463,7 @@ class RubyLex
         end
       end
     end
+
     false
   end
 
@@ -464,7 +473,7 @@ class RubyLex
     index.downto(0) do |i|
       tk = tokens[i]
       # In "continue", the token isn't the corresponding syntax to "do".
-      non_sp_index = tokens[0..(i - 1)].rindex{ |t| t.event != :on_sp }
+      non_sp_index = tokens[0..(i - 1)].rindex { |t| t.event != :on_sp }
       first_in_fomula = false
       if non_sp_index.nil?
         first_in_fomula = true
@@ -495,7 +504,7 @@ class RubyLex
     index.downto(0) do |i|
       tk = tokens[i]
       # In "continue", the token isn't the corresponding syntax to "do".
-      non_sp_index = tokens[0..(i - 1)].rindex{ |t| t.event != :on_sp }
+      non_sp_index = tokens[0..(i - 1)].rindex { |t| t.event != :on_sp }
       first_in_fomula = false
       if non_sp_index.nil?
         first_in_fomula = true
@@ -562,6 +571,7 @@ class RubyLex
         depth_difference -= 1 if open_brace_on_line > 0
       when :on_kw
         next if index > 0 and @tokens[index - 1].state.allbits?(Ripper::EXPR_FNAME)
+
         case t.tok
         when 'do'
           syntax_of_do = take_corresponding_syntax_to_kw_do(@tokens, index)
@@ -657,6 +667,7 @@ class RubyLex
         open_brace_on_line -= 1
       when :on_kw
         next if index > 0 and @tokens[index - 1].state.allbits?(Ripper::EXPR_FNAME)
+
         case t.tok
         when 'do'
           syntax_of_do = take_corresponding_syntax_to_kw_do(@tokens, index)
@@ -715,7 +726,7 @@ class RubyLex
       when :on_symbeg
         acceptable_single_tokens = %i{on_ident on_const on_op on_cvar on_ivar on_gvar on_kw on_int on_backtick}
         if (i + 1) < tokens.size
-          if acceptable_single_tokens.all?{ |st| tokens[i + 1].event != st }
+          if acceptable_single_tokens.all? { |st| tokens[i + 1].event != st }
             start_token << t
             end_type << :on_tstring_end
           else
@@ -753,19 +764,19 @@ class RubyLex
     case start_token&.event
     when :on_tstring_beg
       case start_token&.tok
-      when ?"      then ?"
-      when /^%.$/  then ?"
+      when ?" then ?"
+      when /^%.$/ then ?"
       when /^%Q.$/ then ?"
-      when ?'      then ?'
+      when ?' then ?'
       when /^%q.$/ then ?'
       end
-    when :on_regexp_beg   then ?/
-    when :on_symbeg       then ?:
-    when :on_backtick     then ?`
-    when :on_qwords_beg   then ?]
-    when :on_words_beg    then ?]
+    when :on_regexp_beg then ?/
+    when :on_symbeg then ?:
+    when :on_backtick then ?`
+    when :on_qwords_beg then ?]
+    when :on_words_beg then ?]
     when :on_qsymbols_beg then ?]
-    when :on_symbols_beg  then ?]
+    when :on_symbols_beg then ?]
     when :on_heredoc_beg
       start_token&.tok =~ /<<[-~]?(['"`])\w+\1/
       $1 || ?"
@@ -834,6 +845,7 @@ class RubyLex
     kw_tokens.reverse.each do |t|
       if t.tok == 'case'
         return true if counter.zero?
+
         counter += 1
       elsif t.tok == 'for'
         counter += 1

@@ -6,7 +6,7 @@ module ActiveSupport
       def initialize(*secrets, on_rotation: nil, **options)
         super(*secrets, **options)
 
-        @options   = options
+        @options = options
         @rotations = []
         @on_rotation = on_rotation
       end
@@ -25,9 +25,10 @@ module ActiveSupport
         end
 
         private
-          def build_rotation(secret = @secret, sign_secret = @sign_secret, options)
-            self.class.new(secret, sign_secret, **options)
-          end
+
+        def build_rotation(secret = @secret, sign_secret = @sign_secret, options)
+          self.class.new(secret, sign_secret, **options)
+        end
       end
 
       module Verifier
@@ -38,20 +39,22 @@ module ActiveSupport
         end
 
         private
-          def build_rotation(secret = @secret, options)
-            self.class.new(secret, **options)
-          end
+
+        def build_rotation(secret = @secret, options)
+          self.class.new(secret, **options)
+        end
       end
 
       private
-        def run_rotations(on_rotation)
-          @rotations.find do |rotation|
-            if message = yield(rotation) rescue next
-              on_rotation&.call
-              return message
-            end
+
+      def run_rotations(on_rotation)
+        @rotations.find do |rotation|
+          if message = yield(rotation) rescue next
+            on_rotation&.call
+            return message
           end
         end
+      end
     end
   end
 end

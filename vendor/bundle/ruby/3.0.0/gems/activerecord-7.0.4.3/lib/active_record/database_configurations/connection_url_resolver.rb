@@ -24,7 +24,8 @@ module ActiveRecord
       #   }
       def initialize(url)
         raise "Database URL cannot be empty" if url.blank?
-        @uri     = uri_parser.parse(url)
+
+        @uri = uri_parser.parse(url)
         @adapter = @uri.scheme && @uri.scheme.tr("-", "_")
         @adapter = "postgresql" if @adapter == "postgres"
 
@@ -43,58 +44,59 @@ module ActiveRecord
       end
 
       private
-        attr_reader :uri
 
-        def uri_parser
-          @uri_parser ||= URI::Parser.new
+      attr_reader :uri
+
+      def uri_parser
+        @uri_parser ||= URI::Parser.new
+      end
+
+      # Converts the query parameters of the URI into a hash.
+      #
+      #   "localhost?pool=5&reaping_frequency=2"
+      #   # => { pool: "5", reaping_frequency: "2" }
+      #
+      # returns empty hash if no query present.
+      #
+      #   "localhost"
+      #   # => {}
+      def query_hash
+        Hash[(@query || "").split("&").map { |pair| pair.split("=", 2) }].symbolize_keys
+      end
+
+      def raw_config
+        if uri.opaque
+          query_hash.merge(
+            adapter: @adapter,
+            database: uri.opaque
+          )
+        else
+          query_hash.reverse_merge(
+            adapter: @adapter,
+            username: uri.user,
+            password: uri.password,
+            port: uri.port,
+            database: database_from_path,
+            host: uri.hostname
+          )
         end
+      end
 
-        # Converts the query parameters of the URI into a hash.
-        #
-        #   "localhost?pool=5&reaping_frequency=2"
-        #   # => { pool: "5", reaping_frequency: "2" }
-        #
-        # returns empty hash if no query present.
-        #
-        #   "localhost"
-        #   # => {}
-        def query_hash
-          Hash[(@query || "").split("&").map { |pair| pair.split("=", 2) }].symbolize_keys
+      # Returns name of the database.
+      def database_from_path
+        if @adapter == "sqlite3"
+          # 'sqlite3:/foo' is absolute, because that makes sense. The
+          # corresponding relative version, 'sqlite3:foo', is handled
+          # elsewhere, as an "opaque".
+
+          uri.path
+        else
+          # Only SQLite uses a filename as the "database" name; for
+          # anything else, a leading slash would be silly.
+
+          uri.path.delete_prefix("/")
         end
-
-        def raw_config
-          if uri.opaque
-            query_hash.merge(
-              adapter: @adapter,
-              database: uri.opaque
-            )
-          else
-            query_hash.reverse_merge(
-              adapter: @adapter,
-              username: uri.user,
-              password: uri.password,
-              port: uri.port,
-              database: database_from_path,
-              host: uri.hostname
-            )
-          end
-        end
-
-        # Returns name of the database.
-        def database_from_path
-          if @adapter == "sqlite3"
-            # 'sqlite3:/foo' is absolute, because that makes sense. The
-            # corresponding relative version, 'sqlite3:foo', is handled
-            # elsewhere, as an "opaque".
-
-            uri.path
-          else
-            # Only SQLite uses a filename as the "database" name; for
-            # anything else, a leading slash would be silly.
-
-            uri.path.delete_prefix("/")
-          end
-        end
+      end
     end
   end
 end

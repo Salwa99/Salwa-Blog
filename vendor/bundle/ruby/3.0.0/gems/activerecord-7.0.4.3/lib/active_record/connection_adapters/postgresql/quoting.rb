@@ -185,46 +185,47 @@ module ActiveRecord
         private_constant :COLUMN_NAME, :COLUMN_NAME_WITH_ORDER
 
         private
-          def lookup_cast_type(sql_type)
-            super(query_value("SELECT #{quote(sql_type)}::regtype::oid", "SCHEMA").to_i)
-          end
 
-          def encode_array(array_data)
-            encoder = array_data.encoder
-            values = type_cast_array(array_data.values)
+        def lookup_cast_type(sql_type)
+          super(query_value("SELECT #{quote(sql_type)}::regtype::oid", "SCHEMA").to_i)
+        end
 
-            result = encoder.encode(values)
-            if encoding = determine_encoding_of_strings_in_array(values)
-              result.force_encoding(encoding)
-            end
-            result
-          end
+        def encode_array(array_data)
+          encoder = array_data.encoder
+          values = type_cast_array(array_data.values)
 
-          def encode_range(range)
-            "[#{type_cast_range_value(range.begin)},#{type_cast_range_value(range.end)}#{range.exclude_end? ? ')' : ']'}"
+          result = encoder.encode(values)
+          if encoding = determine_encoding_of_strings_in_array(values)
+            result.force_encoding(encoding)
           end
+          result
+        end
 
-          def determine_encoding_of_strings_in_array(value)
-            case value
-            when ::Array then determine_encoding_of_strings_in_array(value.first)
-            when ::String then value.encoding
-            end
-          end
+        def encode_range(range)
+          "[#{type_cast_range_value(range.begin)},#{type_cast_range_value(range.end)}#{range.exclude_end? ? ')' : ']'}"
+        end
 
-          def type_cast_array(values)
-            case values
-            when ::Array then values.map { |item| type_cast_array(item) }
-            else type_cast(values)
-            end
+        def determine_encoding_of_strings_in_array(value)
+          case value
+          when ::Array then determine_encoding_of_strings_in_array(value.first)
+          when ::String then value.encoding
           end
+        end
 
-          def type_cast_range_value(value)
-            infinity?(value) ? "" : type_cast(value)
+        def type_cast_array(values)
+          case values
+          when ::Array then values.map { |item| type_cast_array(item) }
+          else type_cast(values)
           end
+        end
 
-          def infinity?(value)
-            value.respond_to?(:infinite?) && value.infinite?
-          end
+        def type_cast_range_value(value)
+          infinity?(value) ? "" : type_cast(value)
+        end
+
+        def infinity?(value)
+          value.respond_to?(:infinite?) && value.infinite?
+        end
       end
     end
   end

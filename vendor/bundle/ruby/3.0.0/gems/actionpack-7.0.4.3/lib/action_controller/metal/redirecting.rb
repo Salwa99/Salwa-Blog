@@ -85,8 +85,9 @@ module ActionController
 
       allow_other_host = response_options.delete(:allow_other_host) { _allow_other_host }
 
-      self.status        = _extract_redirect_to_status(options, response_options)
-      self.location      = _enforce_open_redirect_protection(_compute_redirect_to_location(request, options), allow_other_host: allow_other_host)
+      self.status = _extract_redirect_to_status(options, response_options)
+      self.location = _enforce_open_redirect_protection(_compute_redirect_to_location(request, options),
+                                                        allow_other_host: allow_other_host)
       self.response_body = "<html><body>You are being <a href=\"#{ERB::Util.unwrapped_html_escape(response.location)}\">redirected</a>.</body></html>"
     end
 
@@ -172,37 +173,40 @@ module ActionController
     end
 
     private
-      def _allow_other_host
-        !raise_on_open_redirects
-      end
 
-      def _extract_redirect_to_status(options, response_options)
-        if options.is_a?(Hash) && options.key?(:status)
-          Rack::Utils.status_code(options.delete(:status))
-        elsif response_options.key?(:status)
-          Rack::Utils.status_code(response_options[:status])
-        else
-          302
-        end
-      end
+    def _allow_other_host
+      !raise_on_open_redirects
+    end
 
-      def _enforce_open_redirect_protection(location, allow_other_host:)
-        if allow_other_host || _url_host_allowed?(location)
-          location
-        else
-          raise UnsafeRedirectError, "Unsafe redirect to #{location.truncate(100).inspect}, pass allow_other_host: true to redirect anyway."
-        end
+    def _extract_redirect_to_status(options, response_options)
+      if options.is_a?(Hash) && options.key?(:status)
+        Rack::Utils.status_code(options.delete(:status))
+      elsif response_options.key?(:status)
+        Rack::Utils.status_code(response_options[:status])
+      else
+        302
       end
+    end
 
-      def _url_host_allowed?(url)
-        host = URI(url.to_s).host
-
-        return true if host == request.host
-        return false unless host.nil?
-        return false unless url.to_s.start_with?("/")
-        return !url.to_s.start_with?("//")
-      rescue ArgumentError, URI::Error
-        false
+    def _enforce_open_redirect_protection(location, allow_other_host:)
+      if allow_other_host || _url_host_allowed?(location)
+        location
+      else
+        raise UnsafeRedirectError,
+              "Unsafe redirect to #{location.truncate(100).inspect}, pass allow_other_host: true to redirect anyway."
       end
+    end
+
+    def _url_host_allowed?(url)
+      host = URI(url.to_s).host
+
+      return true if host == request.host
+      return false unless host.nil?
+      return false unless url.to_s.start_with?("/")
+
+      return !url.to_s.start_with?("//")
+    rescue ArgumentError, URI::Error
+      false
+    end
   end
 end

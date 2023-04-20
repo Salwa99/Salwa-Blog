@@ -89,7 +89,8 @@ module I18n
       # Eager loading is not supported in the lazy context.
       def eager_load!
         if lazy_load?
-          raise UnsupportedMethod.new(__method__, self.class, "Cannot eager load translations because backend was configured with lazy_load: true.")
+          raise UnsupportedMethod.new(__method__, self.class,
+                                      "Cannot eager load translations because backend was configured with lazy_load: true.")
         else
           super
         end
@@ -116,16 +117,15 @@ module I18n
 
       protected
 
-
       # Load translations from files that belong to the current locale.
       def init_translations
         file_errors = if lazy_load?
-          initialized_locales[I18n.locale] = true
-          load_translations_and_collect_file_errors(filenames_for_current_locale)
-        else
-          @initialized = true
-          load_translations_and_collect_file_errors(I18n.load_path)
-        end
+                        initialized_locales[I18n.locale] = true
+                        load_translations_and_collect_file_errors(filenames_for_current_locale)
+                      else
+                        @initialized = true
+                        load_translations_and_collect_file_errors(I18n.load_path)
+                      end
 
         raise InvalidFilenames.new(file_errors) unless file_errors.empty?
       end

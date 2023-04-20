@@ -14,7 +14,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-
 require "spec_helper"
 
 require "addressable/uri"
@@ -151,7 +150,7 @@ describe Addressable::URI, "when created with a non-string fragment" do
 end
 
 describe Addressable::URI, "when created with a scheme but no hierarchical " +
-    "segment" do
+                           "segment" do
   it "should raise an error" do
     expect do
       Addressable::URI.parse("http:")
@@ -221,7 +220,7 @@ describe Addressable::URI, "when created with an invalid host" do
 end
 
 describe Addressable::URI, "when created with a host consisting of " +
-    "sub-delims characters" do
+                           "sub-delims characters" do
   it "should not raise an error" do
     expect do
       Addressable::URI.new(
@@ -232,7 +231,7 @@ describe Addressable::URI, "when created with a host consisting of " +
 end
 
 describe Addressable::URI, "when created with a host consisting of " +
-    "unreserved characters" do
+                           "unreserved characters" do
   it "should not raise an error" do
     expect do
       Addressable::URI.new(
@@ -482,7 +481,7 @@ describe Addressable::URI, "when initialized from individual components" do
 end
 
 describe Addressable::URI, "when initialized from " +
-    "frozen individual components" do
+                           "frozen individual components" do
   before do
     @uri = Addressable::URI.new(
       :scheme => "http".freeze,
@@ -1090,7 +1089,7 @@ describe Addressable::URI, "when created from string components" do
 end
 
 describe Addressable::URI, "when created with a nil host but " +
-    "non-nil authority components" do
+                           "non-nil authority components" do
   it "should raise an error" do
     expect do
       Addressable::URI.new(:user => "user", :password => "pass", :port => 80)
@@ -1173,7 +1172,7 @@ describe Addressable::URI, "when created with both a userinfo and a user" do
 end
 
 describe Addressable::URI, "when created with a path that hasn't been " +
-    "prefixed with a '/' but a host specified" do
+                           "prefixed with a '/' but a host specified" do
   before do
     @uri = Addressable::URI.new(
       :scheme => "http", :host => "example.com", :path => "path"
@@ -1194,7 +1193,7 @@ describe Addressable::URI, "when created with a path that hasn't been " +
 end
 
 describe Addressable::URI, "when created with a path that hasn't been " +
-    "prefixed with a '/' but no host specified" do
+                           "prefixed with a '/' but no host specified" do
   before do
     @uri = Addressable::URI.new(
       :scheme => "http", :path => "path"
@@ -1257,7 +1256,7 @@ describe Addressable::URI, "when parsed from an Addressable::URI object" do
 end
 
 describe Addressable::URI, "when parsed from something that looks " +
-    "like a URI object" do
+                           "like a URI object" do
   it "should parse without error" do
     uri = Addressable::URI.parse(Fake::URI::HTTP.new("http://example.com/"))
     expect do
@@ -1311,7 +1310,7 @@ end
 
 # Section 1.1.2 of RFC 3986
 describe Addressable::URI, "when parsed from " +
-    "'ftp://ftp.is.co.za/rfc/rfc1808.txt'" do
+                           "'ftp://ftp.is.co.za/rfc/rfc1808.txt'" do
   before do
     @uri = Addressable::URI.parse("ftp://ftp.is.co.za/rfc/rfc1808.txt")
   end
@@ -1351,7 +1350,7 @@ end
 
 # Section 1.1.2 of RFC 3986
 describe Addressable::URI, "when parsed from " +
-    "'http://www.ietf.org/rfc/rfc2396.txt'" do
+                           "'http://www.ietf.org/rfc/rfc2396.txt'" do
   before do
     @uri = Addressable::URI.parse("http://www.ietf.org/rfc/rfc2396.txt")
   end
@@ -1401,7 +1400,7 @@ end
 
 # Section 1.1.2 of RFC 3986
 describe Addressable::URI, "when parsed from " +
-    "'ldap://[2001:db8::7]/c=GB?objectClass?one'" do
+                           "'ldap://[2001:db8::7]/c=GB?objectClass?one'" do
   before do
     @uri = Addressable::URI.parse("ldap://[2001:db8::7]/c=GB?objectClass?one")
   end
@@ -1467,7 +1466,7 @@ end
 
 # Section 1.1.2 of RFC 3986
 describe Addressable::URI, "when parsed from " +
-    "'mailto:John.Doe@example.com'" do
+                           "'mailto:John.Doe@example.com'" do
   before do
     @uri = Addressable::URI.parse("mailto:John.Doe@example.com")
   end
@@ -1503,7 +1502,7 @@ end
 
 # Section 2 of RFC 6068
 describe Addressable::URI, "when parsed from " +
-    "'mailto:?to=addr1@an.example,addr2@an.example'" do
+                           "'mailto:?to=addr1@an.example,addr2@an.example'" do
   before do
     @uri = Addressable::URI.parse(
       "mailto:?to=addr1@an.example,addr2@an.example"
@@ -1547,7 +1546,7 @@ end
 
 # Section 1.1.2 of RFC 3986
 describe Addressable::URI, "when parsed from " +
-    "'news:comp.infosystems.www.servers.unix'" do
+                           "'news:comp.infosystems.www.servers.unix'" do
   before do
     @uri = Addressable::URI.parse("news:comp.infosystems.www.servers.unix")
   end
@@ -1583,7 +1582,7 @@ end
 
 # Section 1.1.2 of RFC 3986
 describe Addressable::URI, "when parsed from " +
-    "'tel:+1-816-555-1212'" do
+                           "'tel:+1-816-555-1212'" do
   before do
     @uri = Addressable::URI.parse("tel:+1-816-555-1212")
   end
@@ -1619,7 +1618,7 @@ end
 
 # Section 1.1.2 of RFC 3986
 describe Addressable::URI, "when parsed from " +
-    "'telnet://192.0.2.16:80/'" do
+                           "'telnet://192.0.2.16:80/'" do
   before do
     @uri = Addressable::URI.parse("telnet://192.0.2.16:80/")
   end
@@ -1667,10 +1666,11 @@ end
 
 # Section 1.1.2 of RFC 3986
 describe Addressable::URI, "when parsed from " +
-    "'urn:oasis:names:specification:docbook:dtd:xml:4.1.2'" do
+                           "'urn:oasis:names:specification:docbook:dtd:xml:4.1.2'" do
   before do
     @uri = Addressable::URI.parse(
-      "urn:oasis:names:specification:docbook:dtd:xml:4.1.2")
+      "urn:oasis:names:specification:docbook:dtd:xml:4.1.2"
+    )
   end
 
   it "should use the 'urn' scheme" do
@@ -1686,7 +1686,7 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "should have a path of " +
-      "'oasis:names:specification:docbook:dtd:xml:4.1.2'" do
+     "'oasis:names:specification:docbook:dtd:xml:4.1.2'" do
     expect(@uri.path).to eq("oasis:names:specification:docbook:dtd:xml:4.1.2")
   end
 
@@ -1704,7 +1704,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when heuristically parsed from " +
-    "'192.0.2.16:8000/path'" do
+                           "'192.0.2.16:8000/path'" do
   before do
     @uri = Addressable::URI.heuristic_parse("192.0.2.16:8000/path")
   end
@@ -1739,7 +1739,7 @@ describe Addressable::URI, "when heuristically parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com'" do
+                           "'http://example.com'" do
   before do
     @uri = Addressable::URI.parse("http://example.com")
   end
@@ -1842,7 +1842,7 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "should not be roughly equal to the string " +
-      "'http://example.com:bogus/'" do
+     "'http://example.com:bogus/'" do
     expect do
       expect(@uri === "http://example.com:bogus/").to eq(false)
     end.not_to raise_error
@@ -1931,14 +1931,14 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "should have a route of 'http://elsewhere.com/' to " +
-      "'http://elsewhere.com/'" do
+     "'http://elsewhere.com/'" do
     expect(@uri.route_to("http://elsewhere.com/")).to eq(
       Addressable::URI.parse("http://elsewhere.com/")
     )
   end
 
   it "when joined with 'relative/path' should be " +
-      "'http://example.com/relative/path'" do
+     "'http://example.com/relative/path'" do
     expect(@uri.join('relative/path')).to eq(
       Addressable::URI.parse("http://example.com/relative/path")
     )
@@ -2020,15 +2020,15 @@ describe Addressable::URI, "when parsed from " +
 
   it "should correctly convert to a hash" do
     expect(@uri.to_hash).to eq({
-      :scheme => "http",
-      :user => nil,
-      :password => nil,
-      :host => "example.com",
-      :port => nil,
-      :path => "",
-      :query => nil,
-      :fragment => nil
-    })
+                                 :scheme => "http",
+                                 :user => nil,
+                                 :password => nil,
+                                 :host => "example.com",
+                                 :port => nil,
+                                 :path => "",
+                                 :query => nil,
+                                 :fragment => nil
+                               })
   end
 
   it "should be identical to its duplicate" do
@@ -2042,7 +2042,7 @@ end
 
 # Section 5.1.2 of RFC 2616
 describe Addressable::URI, "when parsed from " +
-    "'HTTP://www.w3.org/pub/WWW/TheProject.html'" do
+                           "'HTTP://www.w3.org/pub/WWW/TheProject.html'" do
   before do
     @uri = Addressable::URI.parse("HTTP://www.w3.org/pub/WWW/TheProject.html")
   end
@@ -2093,15 +2093,15 @@ describe Addressable::URI, "when parsed from " +
 
   it "should correctly convert to a hash" do
     expect(@uri.to_hash).to eq({
-      :scheme => "HTTP",
-      :user => nil,
-      :password => nil,
-      :host => "www.w3.org",
-      :port => nil,
-      :path => "/pub/WWW/TheProject.html",
-      :query => nil,
-      :fragment => nil
-    })
+                                 :scheme => "HTTP",
+                                 :user => nil,
+                                 :password => nil,
+                                 :host => "www.w3.org",
+                                 :port => nil,
+                                 :path => "/pub/WWW/TheProject.html",
+                                 :query => nil,
+                                 :fragment => nil
+                               })
   end
 
   it "should have an origin of 'http://www.w3.org'" do
@@ -2111,32 +2111,32 @@ end
 
 describe Addressable::URI, "when parsing IPv6 addresses" do
   it "should not raise an error for " +
-      "'http://[3ffe:1900:4545:3:200:f8ff:fe21:67cf]/'" do
+     "'http://[3ffe:1900:4545:3:200:f8ff:fe21:67cf]/'" do
     Addressable::URI.parse("http://[3ffe:1900:4545:3:200:f8ff:fe21:67cf]/")
   end
 
   it "should not raise an error for " +
-      "'http://[fe80:0:0:0:200:f8ff:fe21:67cf]/'" do
+     "'http://[fe80:0:0:0:200:f8ff:fe21:67cf]/'" do
     Addressable::URI.parse("http://[fe80:0:0:0:200:f8ff:fe21:67cf]/")
   end
 
   it "should not raise an error for " +
-      "'http://[fe80::200:f8ff:fe21:67cf]/'" do
+     "'http://[fe80::200:f8ff:fe21:67cf]/'" do
     Addressable::URI.parse("http://[fe80::200:f8ff:fe21:67cf]/")
   end
 
   it "should not raise an error for " +
-      "'http://[::1]/'" do
+     "'http://[::1]/'" do
     Addressable::URI.parse("http://[::1]/")
   end
 
   it "should not raise an error for " +
-      "'http://[fe80::1]/'" do
+     "'http://[fe80::1]/'" do
     Addressable::URI.parse("http://[fe80::1]/")
   end
 
   it "should raise an error for " +
-      "'http://[<invalid>]/'" do
+     "'http://[<invalid>]/'" do
     expect do
       Addressable::URI.parse("http://[<invalid>]/")
     end.to raise_error(Addressable::URI::InvalidURIError)
@@ -2173,32 +2173,32 @@ end
 
 describe Addressable::URI, "when parsing IPvFuture addresses" do
   it "should not raise an error for " +
-      "'http://[v9.3ffe:1900:4545:3:200:f8ff:fe21:67cf]/'" do
+     "'http://[v9.3ffe:1900:4545:3:200:f8ff:fe21:67cf]/'" do
     Addressable::URI.parse("http://[v9.3ffe:1900:4545:3:200:f8ff:fe21:67cf]/")
   end
 
   it "should not raise an error for " +
-      "'http://[vff.fe80:0:0:0:200:f8ff:fe21:67cf]/'" do
+     "'http://[vff.fe80:0:0:0:200:f8ff:fe21:67cf]/'" do
     Addressable::URI.parse("http://[vff.fe80:0:0:0:200:f8ff:fe21:67cf]/")
   end
 
   it "should not raise an error for " +
-      "'http://[v12.fe80::200:f8ff:fe21:67cf]/'" do
+     "'http://[v12.fe80::200:f8ff:fe21:67cf]/'" do
     Addressable::URI.parse("http://[v12.fe80::200:f8ff:fe21:67cf]/")
   end
 
   it "should not raise an error for " +
-      "'http://[va0.::1]/'" do
+     "'http://[va0.::1]/'" do
     Addressable::URI.parse("http://[va0.::1]/")
   end
 
   it "should not raise an error for " +
-      "'http://[v255.fe80::1]/'" do
+     "'http://[v255.fe80::1]/'" do
     Addressable::URI.parse("http://[v255.fe80::1]/")
   end
 
   it "should raise an error for " +
-      "'http://[v0.<invalid>]/'" do
+     "'http://[v0.<invalid>]/'" do
     expect do
       Addressable::URI.parse("http://[v0.<invalid>]/")
     end.to raise_error(Addressable::URI::InvalidURIError)
@@ -2206,7 +2206,7 @@ describe Addressable::URI, "when parsing IPvFuture addresses" do
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/'" do
+                           "'http://example.com/'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/")
   end
@@ -2256,15 +2256,15 @@ describe Addressable::URI, "when parsed from " +
 
   it "should correctly convert to a hash" do
     expect(@uri.to_hash).to eq({
-      :scheme => "http",
-      :user => nil,
-      :password => nil,
-      :host => "example.com",
-      :port => nil,
-      :path => "/",
-      :query => nil,
-      :fragment => nil
-    })
+                                 :scheme => "http",
+                                 :user => nil,
+                                 :password => nil,
+                                 :host => "example.com",
+                                 :port => nil,
+                                 :path => "/",
+                                 :query => nil,
+                                 :fragment => nil
+                               })
   end
 
   it "should be identical to its duplicate" do
@@ -2325,22 +2325,22 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com?#'" do
+                           "'http://example.com?#'" do
   before do
     @uri = Addressable::URI.parse("http://example.com?#")
   end
 
   it "should correctly convert to a hash" do
     expect(@uri.to_hash).to eq({
-      :scheme => "http",
-      :user => nil,
-      :password => nil,
-      :host => "example.com",
-      :port => nil,
-      :path => "",
-      :query => "",
-      :fragment => ""
-    })
+                                 :scheme => "http",
+                                 :user => nil,
+                                 :password => nil,
+                                 :host => "example.com",
+                                 :port => nil,
+                                 :path => "",
+                                 :query => "",
+                                 :fragment => ""
+                               })
   end
 
   it "should have a request URI of '/?'" do
@@ -2357,7 +2357,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://@example.com/'" do
+                           "'http://@example.com/'" do
   before do
     @uri = Addressable::URI.parse("http://@example.com/")
   end
@@ -2368,15 +2368,15 @@ describe Addressable::URI, "when parsed from " +
 
   it "should correctly convert to a hash" do
     expect(@uri.to_hash).to eq({
-      :scheme => "http",
-      :user => "",
-      :password => nil,
-      :host => "example.com",
-      :port => nil,
-      :path => "/",
-      :query => nil,
-      :fragment => nil
-    })
+                                 :scheme => "http",
+                                 :user => "",
+                                 :password => nil,
+                                 :host => "example.com",
+                                 :port => nil,
+                                 :path => "/",
+                                 :query => nil,
+                                 :fragment => nil
+                               })
   end
 
   it "should be identical to its duplicate" do
@@ -2389,7 +2389,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com./'" do
+                           "'http://example.com./'" do
   before do
     @uri = Addressable::URI.parse("http://example.com./")
   end
@@ -2412,7 +2412,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://:@example.com/'" do
+                           "'http://:@example.com/'" do
   before do
     @uri = Addressable::URI.parse("http://:@example.com/")
   end
@@ -2423,15 +2423,15 @@ describe Addressable::URI, "when parsed from " +
 
   it "should correctly convert to a hash" do
     expect(@uri.to_hash).to eq({
-      :scheme => "http",
-      :user => "",
-      :password => "",
-      :host => "example.com",
-      :port => nil,
-      :path => "/",
-      :query => nil,
-      :fragment => nil
-    })
+                                 :scheme => "http",
+                                 :user => "",
+                                 :password => "",
+                                 :host => "example.com",
+                                 :port => nil,
+                                 :path => "/",
+                                 :query => nil,
+                                 :fragment => nil
+                               })
   end
 
   it "should be identical to its duplicate" do
@@ -2444,7 +2444,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'HTTP://EXAMPLE.COM/'" do
+                           "'HTTP://EXAMPLE.COM/'" do
   before do
     @uri = Addressable::URI.parse("HTTP://EXAMPLE.COM/")
   end
@@ -2455,15 +2455,15 @@ describe Addressable::URI, "when parsed from " +
 
   it "should correctly convert to a hash" do
     expect(@uri.to_hash).to eq({
-      :scheme => "HTTP",
-      :user => nil,
-      :password => nil,
-      :host => "EXAMPLE.COM",
-      :port => nil,
-      :path => "/",
-      :query => nil,
-      :fragment => nil
-    })
+                                 :scheme => "HTTP",
+                                 :user => nil,
+                                 :password => nil,
+                                 :host => "EXAMPLE.COM",
+                                 :port => nil,
+                                 :path => "/",
+                                 :query => nil,
+                                 :fragment => nil
+                               })
   end
 
   it "should be identical to its duplicate" do
@@ -2480,7 +2480,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://www.example.co.uk/'" do
+                           "'http://www.example.co.uk/'" do
   before do
     @uri = Addressable::URI.parse("http://www.example.co.uk/")
   end
@@ -2499,7 +2499,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://sub_domain.blogspot.com/'" do
+                           "'http://sub_domain.blogspot.com/'" do
   before do
     @uri = Addressable::URI.parse("http://sub_domain.blogspot.com/")
   end
@@ -2518,7 +2518,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/~smith/'" do
+                           "'http://example.com/~smith/'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/~smith/")
   end
@@ -2539,7 +2539,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/%E8'" do
+                           "'http://example.com/%E8'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/%E8")
   end
@@ -2559,12 +2559,12 @@ describe Addressable::URI, "when parsed from " +
       "http://example.com/%E8"
     )
     expect(Addressable::URI.normalized_encode(@uri, Addressable::URI).to_s).to be ===
-      "http://example.com/%E8"
+                                                                               "http://example.com/%E8"
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/path%2Fsegment/'" do
+                           "'http://example.com/path%2Fsegment/'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/path%2Fsegment/")
   end
@@ -2593,7 +2593,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/?%F6'" do
+                           "'http://example.com/?%F6'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/?%F6")
   end
@@ -2613,12 +2613,12 @@ describe Addressable::URI, "when parsed from " +
       "http://example.com/?%F6"
     )
     expect(Addressable::URI.normalized_encode(@uri, Addressable::URI).to_s).to be ===
-      "http://example.com/?%F6"
+                                                                               "http://example.com/?%F6"
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/#%F6'" do
+                           "'http://example.com/#%F6'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/#%F6")
   end
@@ -2638,12 +2638,12 @@ describe Addressable::URI, "when parsed from " +
       "http://example.com/#%F6"
     )
     expect(Addressable::URI.normalized_encode(@uri, Addressable::URI).to_s).to be ===
-      "http://example.com/#%F6"
+                                                                               "http://example.com/#%F6"
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/%C3%87'" do
+                           "'http://example.com/%C3%87'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/%C3%87")
   end
@@ -2658,7 +2658,7 @@ describe Addressable::URI, "when parsed from " +
       "http://example.com/%C3%87"
     )
     expect(Addressable::URI.normalized_encode(@uri, Addressable::URI).to_s).to be ===
-      "http://example.com/%C3%87"
+                                                                               "http://example.com/%C3%87"
   end
 
   it "should raise an error if encoding with an unexpected return type" do
@@ -2691,7 +2691,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/?q=string'" do
+                           "'http://example.com/?q=string'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/?q=string")
   end
@@ -2750,7 +2750,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com:80/'" do
+                           "'http://example.com:80/'" do
   before do
     @uri = Addressable::URI.parse("http://example.com:80/")
   end
@@ -2816,7 +2816,7 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "should not be roughly equal to the string " +
-      "'http://example.com:bogus/'" do
+     "'http://example.com:bogus/'" do
     expect do
       expect(@uri === "http://example.com:bogus/").to eq(false)
     end.not_to raise_error
@@ -2849,15 +2849,15 @@ describe Addressable::URI, "when parsed from " +
 
   it "should correctly convert to a hash" do
     expect(@uri.to_hash).to eq({
-      :scheme => "http",
-      :user => nil,
-      :password => nil,
-      :host => "example.com",
-      :port => 80,
-      :path => "/",
-      :query => nil,
-      :fragment => nil
-    })
+                                 :scheme => "http",
+                                 :user => nil,
+                                 :password => nil,
+                                 :host => "example.com",
+                                 :port => 80,
+                                 :path => "/",
+                                 :query => nil,
+                                 :fragment => nil
+                               })
   end
 
   it "should be identical to its duplicate" do
@@ -2873,12 +2873,12 @@ describe Addressable::URI, "when parsed from " +
       "http://example.com:80/"
     )
     expect(Addressable::URI.normalized_encode(@uri, Addressable::URI).to_s).to be ===
-      "http://example.com:80/"
+                                                                               "http://example.com:80/"
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com:8080/'" do
+                           "'http://example.com:8080/'" do
   before do
     @uri = Addressable::URI.parse("http://example.com:8080/")
   end
@@ -2937,32 +2937,33 @@ describe Addressable::URI, "when parsed from " +
 
   it "should be exactly equal to http://example.com:8080/" do
     expect(@uri.eql?(Addressable::URI.parse(
-      "http://example.com:8080/"))).to eq(true)
+                       "http://example.com:8080/"
+                     ))).to eq(true)
   end
 
   it "should have a route of 'http://example.com:8080/' from " +
-      "'http://example.com/path/to/'" do
+     "'http://example.com/path/to/'" do
     expect(@uri.route_from("http://example.com/path/to/")).to eq(
       Addressable::URI.parse("http://example.com:8080/")
     )
   end
 
   it "should have a route of 'http://example.com:8080/' from " +
-      "'http://example.com:80/path/to/'" do
+     "'http://example.com:80/path/to/'" do
     expect(@uri.route_from("http://example.com:80/path/to/")).to eq(
       Addressable::URI.parse("http://example.com:8080/")
     )
   end
 
   it "should have a route of '../../' from " +
-      "'http://example.com:8080/path/to/'" do
+     "'http://example.com:8080/path/to/'" do
     expect(@uri.route_from("http://example.com:8080/path/to/")).to eq(
       Addressable::URI.parse("../../")
     )
   end
 
   it "should have a route of 'http://example.com:8080/' from " +
-      "'http://user:pass@example.com/path/to/'" do
+     "'http://user:pass@example.com/path/to/'" do
     expect(@uri.route_from("http://user:pass@example.com/path/to/")).to eq(
       Addressable::URI.parse("http://example.com:8080/")
     )
@@ -2970,15 +2971,15 @@ describe Addressable::URI, "when parsed from " +
 
   it "should correctly convert to a hash" do
     expect(@uri.to_hash).to eq({
-      :scheme => "http",
-      :user => nil,
-      :password => nil,
-      :host => "example.com",
-      :port => 8080,
-      :path => "/",
-      :query => nil,
-      :fragment => nil
-    })
+                                 :scheme => "http",
+                                 :user => nil,
+                                 :password => nil,
+                                 :host => "example.com",
+                                 :port => 8080,
+                                 :path => "/",
+                                 :query => nil,
+                                 :fragment => nil
+                               })
   end
 
   it "should be identical to its duplicate" do
@@ -2994,12 +2995,12 @@ describe Addressable::URI, "when parsed from " +
       "http://example.com:8080/"
     )
     expect(Addressable::URI.normalized_encode(@uri, Addressable::URI).to_s).to be ===
-      "http://example.com:8080/"
+                                                                               "http://example.com:8080/"
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com:%38%30/'" do
+                           "'http://example.com:%38%30/'" do
   before do
     @uri = Addressable::URI.parse("http://example.com:%38%30/")
   end
@@ -3036,7 +3037,7 @@ describe Addressable::URI, "when parsed with empty port" do
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/%2E/'" do
+                           "'http://example.com/%2E/'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/%2E/")
   end
@@ -3059,7 +3060,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/..'" do
+                           "'http://example.com/..'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/..")
   end
@@ -3078,7 +3079,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/../..'" do
+                           "'http://example.com/../..'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/../..")
   end
@@ -3097,7 +3098,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/path(/..'" do
+                           "'http://example.com/path(/..'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/path(/..")
   end
@@ -3116,7 +3117,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/(path)/..'" do
+                           "'http://example.com/(path)/..'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/(path)/..")
   end
@@ -3135,7 +3136,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/path(/../'" do
+                           "'http://example.com/path(/../'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/path(/../")
   end
@@ -3154,7 +3155,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/(path)/../'" do
+                           "'http://example.com/(path)/../'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/(path)/../")
   end
@@ -3173,7 +3174,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'/..//example.com'" do
+                           "'/..//example.com'" do
   before do
     @uri = Addressable::URI.parse("/..//example.com")
   end
@@ -3220,7 +3221,7 @@ describe Addressable::URI, "when parsed from 'mid/content=5/../6'" do
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://www.example.com///../'" do
+                           "'http://www.example.com///../'" do
   before do
     @uri = Addressable::URI.parse('http://www.example.com///../')
   end
@@ -3235,7 +3236,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/path/to/resource/'" do
+                           "'http://example.com/path/to/resource/'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/path/to/resource/")
   end
@@ -3286,61 +3287,61 @@ describe Addressable::URI, "when parsed from " +
 
   it "should be exactly equal to http://example.com:8080/" do
     expect(@uri.eql?(Addressable::URI.parse(
-      "http://example.com/path/to/resource/"))).to eq(true)
+                       "http://example.com/path/to/resource/"
+                     ))).to eq(true)
   end
 
   it "should have a route of 'resource/' from " +
-      "'http://example.com/path/to/'" do
+     "'http://example.com/path/to/'" do
     expect(@uri.route_from("http://example.com/path/to/")).to eq(
       Addressable::URI.parse("resource/")
     )
   end
 
   it "should have a route of '../' from " +
-    "'http://example.com/path/to/resource/sub'" do
+     "'http://example.com/path/to/resource/sub'" do
     expect(@uri.route_from("http://example.com/path/to/resource/sub")).to eq(
       Addressable::URI.parse("../")
     )
   end
 
-
   it "should have a route of 'resource/' from " +
-    "'http://example.com/path/to/another'" do
+     "'http://example.com/path/to/another'" do
     expect(@uri.route_from("http://example.com/path/to/another")).to eq(
       Addressable::URI.parse("resource/")
     )
   end
 
   it "should have a route of 'resource/' from " +
-      "'http://example.com/path/to/res'" do
+     "'http://example.com/path/to/res'" do
     expect(@uri.route_from("http://example.com/path/to/res")).to eq(
       Addressable::URI.parse("resource/")
     )
   end
 
   it "should have a route of 'resource/' from " +
-      "'http://example.com:80/path/to/'" do
+     "'http://example.com:80/path/to/'" do
     expect(@uri.route_from("http://example.com:80/path/to/")).to eq(
       Addressable::URI.parse("resource/")
     )
   end
 
   it "should have a route of 'http://example.com/path/to/' from " +
-      "'http://example.com:8080/path/to/'" do
+     "'http://example.com:8080/path/to/'" do
     expect(@uri.route_from("http://example.com:8080/path/to/")).to eq(
       Addressable::URI.parse("http://example.com/path/to/resource/")
     )
   end
 
   it "should have a route of 'http://example.com/path/to/' from " +
-      "'http://user:pass@example.com/path/to/'" do
+     "'http://user:pass@example.com/path/to/'" do
     expect(@uri.route_from("http://user:pass@example.com/path/to/")).to eq(
       Addressable::URI.parse("http://example.com/path/to/resource/")
     )
   end
 
   it "should have a route of '../../path/to/resource/' from " +
-      "'http://example.com/to/resource/'" do
+     "'http://example.com/to/resource/'" do
     expect(@uri.route_from("http://example.com/to/resource/")).to eq(
       Addressable::URI.parse("../../path/to/resource/")
     )
@@ -3348,15 +3349,15 @@ describe Addressable::URI, "when parsed from " +
 
   it "should correctly convert to a hash" do
     expect(@uri.to_hash).to eq({
-      :scheme => "http",
-      :user => nil,
-      :password => nil,
-      :host => "example.com",
-      :port => nil,
-      :path => "/path/to/resource/",
-      :query => nil,
-      :fragment => nil
-    })
+                                 :scheme => "http",
+                                 :user => nil,
+                                 :password => nil,
+                                 :host => "example.com",
+                                 :port => nil,
+                                 :path => "/path/to/resource/",
+                                 :query => nil,
+                                 :fragment => nil
+                               })
   end
 
   it "should be identical to its duplicate" do
@@ -3365,7 +3366,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'relative/path/to/resource'" do
+                           "'relative/path/to/resource'" do
   before do
     @uri = Addressable::URI.parse("relative/path/to/resource")
   end
@@ -3428,7 +3429,7 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "when joined with 'another/relative/path' should be " +
-      "'relative/path/to/another/relative/path'" do
+     "'relative/path/to/another/relative/path'" do
     expect(@uri.join('another/relative/path')).to eq(
       Addressable::URI.parse("relative/path/to/another/relative/path")
     )
@@ -3440,7 +3441,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'relative_path_with_no_slashes'" do
+                           "'relative_path_with_no_slashes'" do
   before do
     @uri = Addressable::URI.parse("relative_path_with_no_slashes")
   end
@@ -3494,7 +3495,7 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "when joined with 'another_relative_path' should be " +
-      "'another_relative_path'" do
+     "'another_relative_path'" do
     expect(@uri.join('another_relative_path')).to eq(
       Addressable::URI.parse("another_relative_path")
     )
@@ -3502,7 +3503,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/file.txt'" do
+                           "'http://example.com/file.txt'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/file.txt")
   end
@@ -3553,7 +3554,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/file.txt;parameter'" do
+                           "'http://example.com/file.txt;parameter'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/file.txt;parameter")
   end
@@ -3604,7 +3605,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/file.txt;x=y'" do
+                           "'http://example.com/file.txt;x=y'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/file.txt;x=y")
   end
@@ -3659,7 +3660,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'svn+ssh://developername@rubyforge.org/var/svn/project'" do
+                           "'svn+ssh://developername@rubyforge.org/var/svn/project'" do
   before do
     @uri = Addressable::URI.parse(
       "svn+ssh://developername@rubyforge.org/var/svn/project"
@@ -3692,7 +3693,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'ssh+svn://developername@RUBYFORGE.ORG/var/svn/project'" do
+                           "'ssh+svn://developername@RUBYFORGE.ORG/var/svn/project'" do
   before do
     @uri = Addressable::URI.parse(
       "ssh+svn://developername@RUBYFORGE.ORG/var/svn/project"
@@ -3733,7 +3734,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'mailto:user@example.com'" do
+                           "'mailto:user@example.com'" do
   before do
     @uri = Addressable::URI.parse("mailto:user@example.com")
   end
@@ -3760,10 +3761,11 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'tag:example.com,2006-08-18:/path/to/something'" do
+                           "'tag:example.com,2006-08-18:/path/to/something'" do
   before do
     @uri = Addressable::URI.parse(
-      "tag:example.com,2006-08-18:/path/to/something")
+      "tag:example.com,2006-08-18:/path/to/something"
+    )
   end
 
   it "should have a scheme of 'tag'" do
@@ -3775,7 +3777,7 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "should have a path of " +
-      "'example.com,2006-08-18:/path/to/something'" do
+     "'example.com,2006-08-18:/path/to/something'" do
     expect(@uri.path).to eq("example.com,2006-08-18:/path/to/something")
   end
 
@@ -3793,7 +3795,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/x;y/'" do
+                           "'http://example.com/x;y/'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/x;y/")
   end
@@ -3804,7 +3806,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/?x=1&y=2'" do
+                           "'http://example.com/?x=1&y=2'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/?x=1&y=2")
   end
@@ -3815,7 +3817,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'view-source:http://example.com/'" do
+                           "'view-source:http://example.com/'" do
   before do
     @uri = Addressable::URI.parse("view-source:http://example.com/")
   end
@@ -3838,10 +3840,11 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://user:pass@example.com/path/to/resource?query=x#fragment'" do
+                           "'http://user:pass@example.com/path/to/resource?query=x#fragment'" do
   before do
     @uri = Addressable::URI.parse(
-      "http://user:pass@example.com/path/to/resource?query=x#fragment")
+      "http://user:pass@example.com/path/to/resource?query=x#fragment"
+    )
   end
 
   it "should use the 'http' scheme" do
@@ -3885,54 +3888,56 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "should have a route of '../../' to " +
-      "'http://user:pass@example.com/path/'" do
+     "'http://user:pass@example.com/path/'" do
     expect(@uri.route_to("http://user:pass@example.com/path/")).to eq(
       Addressable::URI.parse("../../")
     )
   end
 
   it "should have a route of 'to/resource?query=x#fragment' " +
-      "from 'http://user:pass@example.com/path/'" do
+     "from 'http://user:pass@example.com/path/'" do
     expect(@uri.route_from("http://user:pass@example.com/path/")).to eq(
       Addressable::URI.parse("to/resource?query=x#fragment")
     )
   end
 
   it "should have a route of '?query=x#fragment' " +
-      "from 'http://user:pass@example.com/path/to/resource'" do
+     "from 'http://user:pass@example.com/path/to/resource'" do
     expect(@uri.route_from("http://user:pass@example.com/path/to/resource")).to eq(
       Addressable::URI.parse("?query=x#fragment")
     )
   end
 
   it "should have a route of '#fragment' " +
-      "from 'http://user:pass@example.com/path/to/resource?query=x'" do
+     "from 'http://user:pass@example.com/path/to/resource?query=x'" do
     expect(@uri.route_from(
-      "http://user:pass@example.com/path/to/resource?query=x")).to eq(
-        Addressable::URI.parse("#fragment")
-    )
+             "http://user:pass@example.com/path/to/resource?query=x"
+           )).to eq(
+             Addressable::URI.parse("#fragment")
+           )
   end
 
   it "should have a route of '#fragment' from " +
-      "'http://user:pass@example.com/path/to/resource?query=x#fragment'" do
+     "'http://user:pass@example.com/path/to/resource?query=x#fragment'" do
     expect(@uri.route_from(
-      "http://user:pass@example.com/path/to/resource?query=x#fragment"
-    )).to eq(Addressable::URI.parse("#fragment"))
+             "http://user:pass@example.com/path/to/resource?query=x#fragment"
+           )).to eq(Addressable::URI.parse("#fragment"))
   end
 
   it "should have a route of 'http://elsewhere.com/' to " +
-      "'http://elsewhere.com/'" do
+     "'http://elsewhere.com/'" do
     expect(@uri.route_to("http://elsewhere.com/")).to eq(
       Addressable::URI.parse("http://elsewhere.com/")
     )
   end
 
   it "should have a route of " +
-      "'http://user:pass@example.com/path/to/resource?query=x#fragment' " +
-      "from 'http://example.com/path/to/'" do
+     "'http://user:pass@example.com/path/to/resource?query=x#fragment' " +
+     "from 'http://example.com/path/to/'" do
     expect(@uri.route_from("http://elsewhere.com/path/to/")).to eq(
       Addressable::URI.parse(
-        "http://user:pass@example.com/path/to/resource?query=x#fragment")
+        "http://user:pass@example.com/path/to/resource?query=x#fragment"
+      )
     )
   end
 
@@ -4082,23 +4087,23 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "should have the correct query string after hash assignment" do
-    @uri.query_values = {"?uestion mark" => "=sign", "hello" => "g\xC3\xBCnther"}
+    @uri.query_values = { "?uestion mark" => "=sign", "hello" => "g\xC3\xBCnther" }
     expect(@uri.query.split("&")).to include("%3Fuestion%20mark=%3Dsign")
     expect(@uri.query.split("&")).to include("hello=g%C3%BCnther")
     expect(@uri.query_values).to eq({
-      "?uestion mark" => "=sign", "hello" => "g\xC3\xBCnther"
-    })
+                                      "?uestion mark" => "=sign", "hello" => "g\xC3\xBCnther"
+                                    })
   end
 
   it "should have the correct query string after flag hash assignment" do
-    @uri.query_values = {'flag?1' => nil, 'fl=ag2' => nil, 'flag3' => nil}
+    @uri.query_values = { 'flag?1' => nil, 'fl=ag2' => nil, 'flag3' => nil }
     expect(@uri.query.split("&")).to include("flag%3F1")
     expect(@uri.query.split("&")).to include("fl%3Dag2")
     expect(@uri.query.split("&")).to include("flag3")
     expect(@uri.query_values(Array).sort).to eq([["fl=ag2"], ["flag3"], ["flag?1"]])
     expect(@uri.query_values(Hash)).to eq({
-      'flag?1' => nil, 'fl=ag2' => nil, 'flag3' => nil
-    })
+                                            'flag?1' => nil, 'fl=ag2' => nil, 'flag3' => nil
+                                          })
   end
 
   it "should raise an error if query values are set to a bogus type" do
@@ -4221,8 +4226,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-  "'http://example.com/search?q=Q%26A'" do
-
+                           "'http://example.com/search?q=Q%26A'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/search?q=Q%26A")
   end
@@ -4236,13 +4240,13 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "should normalize to the original uri " +
-      "(with the ampersand properly percent-encoded)" do
+     "(with the ampersand properly percent-encoded)" do
     expect(@uri.normalize.to_s).to eq("http://example.com/search?q=Q%26A")
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/?&x=b'" do
+                           "'http://example.com/?&x=b'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/?&x=b")
   end
@@ -4252,12 +4256,12 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "should have query_values of {'x' => 'b'}" do
-    expect(@uri.query_values).to eq({'x' => 'b'})
+    expect(@uri.query_values).to eq({ 'x' => 'b' })
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/?q='one;two'&x=1'" do
+                           "'http://example.com/?q='one;two'&x=1'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/?q='one;two'&x=1")
   end
@@ -4267,18 +4271,18 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "should have query_values of {\"q\" => \"'one;two'\", \"x\" => \"1\"}" do
-    expect(@uri.query_values).to eq({"q" => "'one;two'", "x" => "1"})
+    expect(@uri.query_values).to eq({ "q" => "'one;two'", "x" => "1" })
   end
 
   it "should escape the ';' character when normalizing to avoid ambiguity " +
-      "with the W3C HTML 4.01 specification" do
+     "with the W3C HTML 4.01 specification" do
     # HTML 4.01 Section B.2.2
     expect(@uri.normalize.query).to eq("q='one%3Btwo'&x=1")
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/?&&x=b'" do
+                           "'http://example.com/?&&x=b'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/?&&x=b")
   end
@@ -4288,12 +4292,12 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "should have query_values of {'x' => 'b'}" do
-    expect(@uri.query_values).to eq({'x' => 'b'})
+    expect(@uri.query_values).to eq({ 'x' => 'b' })
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/?q=a&&x=b'" do
+                           "'http://example.com/?q=a&&x=b'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/?q=a&&x=b")
   end
@@ -4303,12 +4307,12 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "should have query_values of {'q' => 'a, 'x' => 'b'}" do
-    expect(@uri.query_values).to eq({'q' => 'a', 'x' => 'b'})
+    expect(@uri.query_values).to eq({ 'q' => 'a', 'x' => 'b' })
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/?q&&x=b'" do
+                           "'http://example.com/?q&&x=b'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/?q&&x=b")
   end
@@ -4318,12 +4322,12 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "should have query_values of {'q' => true, 'x' => 'b'}" do
-    expect(@uri.query_values).to eq({'q' => nil, 'x' => 'b'})
+    expect(@uri.query_values).to eq({ 'q' => nil, 'x' => 'b' })
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/?q=a+b'" do
+                           "'http://example.com/?q=a+b'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/?q=a+b")
   end
@@ -4333,7 +4337,7 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "should have query_values of {'q' => 'a b'}" do
-    expect(@uri.query_values).to eq({'q' => 'a b'})
+    expect(@uri.query_values).to eq({ 'q' => 'a b' })
   end
 
   it "should have a normalized query of 'q=a+b'" do
@@ -4372,7 +4376,7 @@ describe Addressable::URI, "when parsed from 'mailto:?q=a+b'" do
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/?q=a%2bb'" do
+                           "'http://example.com/?q=a%2bb'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/?q=a%2bb")
   end
@@ -4382,7 +4386,7 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "should have query_values of {'q' => 'a+b'}" do
-    expect(@uri.query_values).to eq({'q' => 'a+b'})
+    expect(@uri.query_values).to eq({ 'q' => 'a+b' })
   end
 
   it "should have a normalized query of 'q=a%2Bb'" do
@@ -4391,7 +4395,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/?v=%7E&w=%&x=%25&y=%2B&z=C%CC%A7'" do
+                           "'http://example.com/?v=%7E&w=%&x=%25&y=%2B&z=C%CC%A7'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/?v=%7E&w=%&x=%25&y=%2B&z=C%CC%A7")
   end
@@ -4402,7 +4406,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/?v=%7E&w=%&x=%25&y=+&z=C%CC%A7'" do
+                           "'http://example.com/?v=%7E&w=%&x=%25&y=+&z=C%CC%A7'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/?v=%7E&w=%&x=%25&y=+&z=C%CC%A7")
   end
@@ -4453,7 +4457,7 @@ describe Addressable::URI, "when parsed from 'http://example.com/?a=1&a=2'" do
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/sound%2bvision'" do
+                           "'http://example.com/sound%2bvision'" do
   before do
     @uri = Addressable::URI.parse("http://example.com/sound%2bvision")
   end
@@ -4464,7 +4468,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/?q='" do
+                           "'http://example.com/?q='" do
   before do
     @uri = Addressable::URI.parse("http://example.com/?q=")
   end
@@ -4474,12 +4478,12 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "should have query_values of {'q' => ''}" do
-    expect(@uri.query_values).to eq({'q' => ''})
+    expect(@uri.query_values).to eq({ 'q' => '' })
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://user@example.com'" do
+                           "'http://user@example.com'" do
   before do
     @uri = Addressable::URI.parse("http://user@example.com")
   end
@@ -4571,7 +4575,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://user:@example.com'" do
+                           "'http://user:@example.com'" do
   before do
     @uri = Addressable::URI.parse("http://user:@example.com")
   end
@@ -4626,7 +4630,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://:pass@example.com'" do
+                           "'http://:pass@example.com'" do
   before do
     @uri = Addressable::URI.parse("http://:pass@example.com")
   end
@@ -4686,7 +4690,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://:@example.com'" do
+                           "'http://:@example.com'" do
   before do
     @uri = Addressable::URI.parse("http://:@example.com")
   end
@@ -4742,7 +4746,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'#example'" do
+                           "'#example'" do
   before do
     @uri = Addressable::URI.parse("#example")
   end
@@ -4777,7 +4781,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "the network-path reference '//example.com/'" do
+                           "the network-path reference '//example.com/'" do
   before do
     @uri = Addressable::URI.parse("//example.com/")
   end
@@ -4809,7 +4813,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'feed://http://example.com/'" do
+                           "'feed://http://example.com/'" do
   before do
     @uri = Addressable::URI.parse("feed://http://example.com/")
   end
@@ -4824,7 +4828,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'feed:http://example.com/'" do
+                           "'feed:http://example.com/'" do
   before do
     @uri = Addressable::URI.parse("feed:http://example.com/")
   end
@@ -4844,7 +4848,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'example://a/b/c/%7Bfoo%7D'" do
+                           "'example://a/b/c/%7Bfoo%7D'" do
   before do
     @uri = Addressable::URI.parse("example://a/b/c/%7Bfoo%7D")
   end
@@ -4862,10 +4866,11 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://example.com/indirect/path/./to/../resource/'" do
+                           "'http://example.com/indirect/path/./to/../resource/'" do
   before do
     @uri = Addressable::URI.parse(
-      "http://example.com/indirect/path/./to/../resource/")
+      "http://example.com/indirect/path/./to/../resource/"
+    )
   end
 
   it "should use the 'http' scheme" do
@@ -4892,7 +4897,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://under_score.example.com/'" do
+                           "'http://under_score.example.com/'" do
   it "should not cause an error" do
     expect do
       Addressable::URI.parse("http://under_score.example.com/")
@@ -4901,7 +4906,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'./this:that'" do
+                           "'./this:that'" do
   before do
     @uri = Addressable::URI.parse("./this:that")
   end
@@ -4920,7 +4925,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'this:that'" do
+                           "'this:that'" do
   before do
     @uri = Addressable::URI.parse("this:that")
   end
@@ -4964,7 +4969,7 @@ describe Addressable::URI, "when parsed from '?one=1&two=2&three=3'" do
   end
 
   it "should have the correct query values" do
-    expect(@uri.query_values).to eq({"one" => "1", "two" => "2", "three" => "3"})
+    expect(@uri.query_values).to eq({ "one" => "1", "two" => "2", "three" => "3" })
   end
 
   it "should raise an error for invalid return type values" do
@@ -4975,8 +4980,8 @@ describe Addressable::URI, "when parsed from '?one=1&two=2&three=3'" do
 
   it "should have the correct array query values" do
     expect(@uri.query_values(Array)).to eq([
-      ["one", "1"], ["two", "2"], ["three", "3"]
-    ])
+                                             ["one", "1"], ["two", "2"], ["three", "3"]
+                                           ])
   end
 
   it "should have a 'null' origin" do
@@ -4990,13 +4995,13 @@ describe Addressable::URI, "when parsed from '?one=1=uno&two=2=dos'" do
   end
 
   it "should have the correct query values" do
-    expect(@uri.query_values).to eq({"one" => "1=uno", "two" => "2=dos"})
+    expect(@uri.query_values).to eq({ "one" => "1=uno", "two" => "2=dos" })
   end
 
   it "should have the correct array query values" do
     expect(@uri.query_values(Array)).to eq([
-      ["one", "1=uno"], ["two", "2=dos"]
-    ])
+                                             ["one", "1=uno"], ["two", "2=dos"]
+                                           ])
   end
 end
 
@@ -5006,13 +5011,13 @@ describe Addressable::URI, "when parsed from '?one[two][three]=four'" do
   end
 
   it "should have the correct query values" do
-    expect(@uri.query_values).to eq({"one[two][three]" => "four"})
+    expect(@uri.query_values).to eq({ "one[two][three]" => "four" })
   end
 
   it "should have the correct array query values" do
     expect(@uri.query_values(Array)).to eq([
-      ["one[two][three]", "four"]
-    ])
+                                             ["one[two][three]", "four"]
+                                           ])
   end
 end
 
@@ -5023,57 +5028,57 @@ describe Addressable::URI, "when parsed from '?one.two.three=four'" do
 
   it "should have the correct query values" do
     expect(@uri.query_values).to eq({
-      "one.two.three" => "four"
-    })
+                                      "one.two.three" => "four"
+                                    })
   end
 
   it "should have the correct array query values" do
     expect(@uri.query_values(Array)).to eq([
-      ["one.two.three", "four"]
-    ])
+                                             ["one.two.three", "four"]
+                                           ])
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'?one[two][three]=four&one[two][five]=six'" do
+                           "'?one[two][three]=four&one[two][five]=six'" do
   before do
     @uri = Addressable::URI.parse("?one[two][three]=four&one[two][five]=six")
   end
 
   it "should have the correct query values" do
     expect(@uri.query_values).to eq({
-      "one[two][three]" => "four", "one[two][five]" => "six"
-    })
+                                      "one[two][three]" => "four", "one[two][five]" => "six"
+                                    })
   end
 
   it "should have the correct array query values" do
     expect(@uri.query_values(Array)).to eq([
-      ["one[two][three]", "four"], ["one[two][five]", "six"]
-    ])
+                                             ["one[two][three]", "four"], ["one[two][five]", "six"]
+                                           ])
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'?one.two.three=four&one.two.five=six'" do
+                           "'?one.two.three=four&one.two.five=six'" do
   before do
     @uri = Addressable::URI.parse("?one.two.three=four&one.two.five=six")
   end
 
   it "should have the correct query values" do
     expect(@uri.query_values).to eq({
-      "one.two.three" => "four", "one.two.five" => "six"
-    })
+                                      "one.two.three" => "four", "one.two.five" => "six"
+                                    })
   end
 
   it "should have the correct array query values" do
     expect(@uri.query_values(Array)).to eq([
-      ["one.two.three", "four"], ["one.two.five", "six"]
-    ])
+                                             ["one.two.three", "four"], ["one.two.five", "six"]
+                                           ])
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'?one=two&one=three'" do
+                           "'?one=two&one=three'" do
   before do
     @uri = Addressable::URI.parse(
       "?one=two&one=three&one=four"
@@ -5089,18 +5094,18 @@ describe Addressable::URI, "when parsed from " +
   it "should have correct hash query values" do
     skip("This is probably more desirable behavior.")
     expect(@uri.query_values(Hash)).to eq(
-      {'one' => ['two', 'three', 'four']}
-      )
+      { 'one' => ['two', 'three', 'four'] }
+    )
   end
 
   it "should handle assignment with keys of mixed type" do
-    @uri.query_values = @uri.query_values(Hash).merge({:one => 'three'})
-    expect(@uri.query_values(Hash)).to eq({'one' => 'three'})
+    @uri.query_values = @uri.query_values(Hash).merge({ :one => 'three' })
+    expect(@uri.query_values(Hash)).to eq({ 'one' => 'three' })
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'?one[two][three][]=four&one[two][three][]=five'" do
+                           "'?one[two][three][]=four&one[two][three][]=five'" do
   before do
     @uri = Addressable::URI.parse(
       "?one[two][three][]=four&one[two][three][]=five"
@@ -5108,18 +5113,18 @@ describe Addressable::URI, "when parsed from " +
   end
 
   it "should have correct query values" do
-    expect(@uri.query_values(Hash)).to eq({"one[two][three][]" => "five"})
+    expect(@uri.query_values(Hash)).to eq({ "one[two][three][]" => "five" })
   end
 
   it "should have correct array query values" do
     expect(@uri.query_values(Array)).to eq([
-      ["one[two][three][]", "four"], ["one[two][three][]", "five"]
-    ])
+                                             ["one[two][three][]", "four"], ["one[two][three][]", "five"]
+                                           ])
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'?one[two][three][0]=four&one[two][three][1]=five'" do
+                           "'?one[two][three][0]=four&one[two][three][1]=five'" do
   before do
     @uri = Addressable::URI.parse(
       "?one[two][three][0]=four&one[two][three][1]=five"
@@ -5128,13 +5133,13 @@ describe Addressable::URI, "when parsed from " +
 
   it "should have the correct query values" do
     expect(@uri.query_values).to eq({
-      "one[two][three][0]" => "four", "one[two][three][1]" => "five"
-    })
+                                      "one[two][three][0]" => "four", "one[two][three][1]" => "five"
+                                    })
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'?one[two][three][1]=four&one[two][three][0]=five'" do
+                           "'?one[two][three][1]=four&one[two][three][0]=five'" do
   before do
     @uri = Addressable::URI.parse(
       "?one[two][three][1]=four&one[two][three][0]=five"
@@ -5143,13 +5148,13 @@ describe Addressable::URI, "when parsed from " +
 
   it "should have the correct query values" do
     expect(@uri.query_values).to eq({
-      "one[two][three][1]" => "four", "one[two][three][0]" => "five"
-    })
+                                      "one[two][three][1]" => "four", "one[two][three][0]" => "five"
+                                    })
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'?one[two][three][2]=four&one[two][three][1]=five'" do
+                           "'?one[two][three][2]=four&one[two][three][1]=five'" do
   before do
     @uri = Addressable::URI.parse(
       "?one[two][three][2]=four&one[two][three][1]=five"
@@ -5158,13 +5163,13 @@ describe Addressable::URI, "when parsed from " +
 
   it "should have the correct query values" do
     expect(@uri.query_values).to eq({
-      "one[two][three][2]" => "four", "one[two][three][1]" => "five"
-    })
+                                      "one[two][three][2]" => "four", "one[two][three][1]" => "five"
+                                    })
   end
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://www.詹姆斯.com/'" do
+                           "'http://www.詹姆斯.com/'" do
   before do
     @uri = Addressable::URI.parse("http://www.詹姆斯.com/")
   end
@@ -5187,16 +5192,17 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://www.詹姆斯.com/ some spaces /'" do
+                           "'http://www.詹姆斯.com/ some spaces /'" do
   before do
     @uri = Addressable::URI.parse("http://www.詹姆斯.com/ some spaces /")
   end
 
   it "should be equivalent to " +
-      "'http://www.xn--8ws00zhy3a.com/%20some%20spaces%20/'" do
+     "'http://www.xn--8ws00zhy3a.com/%20some%20spaces%20/'" do
     expect(@uri).to eq(
       Addressable::URI.parse(
-        "http://www.xn--8ws00zhy3a.com/%20some%20spaces%20/")
+        "http://www.xn--8ws00zhy3a.com/%20some%20spaces%20/"
+      )
     )
   end
 
@@ -5212,7 +5218,7 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://www.xn--8ws00zhy3a.com/'" do
+                           "'http://www.xn--8ws00zhy3a.com/'" do
   before do
     @uri = Addressable::URI.parse("http://www.xn--8ws00zhy3a.com/")
   end
@@ -5235,13 +5241,13 @@ describe Addressable::URI, "when parsed from " +
 end
 
 describe Addressable::URI, "when parsed from " +
-    "'http://www.詹姆斯.com/atomtests/iri/詹.html'" do
+                           "'http://www.詹姆斯.com/atomtests/iri/詹.html'" do
   before do
     @uri = Addressable::URI.parse("http://www.詹姆斯.com/atomtests/iri/詹.html")
   end
 
   it "should normalize to " +
-      "http://www.xn--8ws00zhy3a.com/atomtests/iri/%E8%A9%B9.html" do
+     "http://www.xn--8ws00zhy3a.com/atomtests/iri/%E8%A9%B9.html" do
     expect(@uri.normalize.to_s).to eq(
       "http://www.xn--8ws00zhy3a.com/atomtests/iri/%E8%A9%B9.html"
     )
@@ -5353,7 +5359,8 @@ describe Addressable::URI, "with a base uri of 'http://a/b/c/d;p?q'" do
   it "when joined with 'g?y#s' should resolve to http://a/b/c/g?y#s" do
     expect((@uri + "g?y#s").to_s).to eq("http://a/b/c/g?y#s")
     expect(Addressable::URI.join(
-      @uri.to_s, "g?y#s").to_s).to eq("http://a/b/c/g?y#s")
+      @uri.to_s, "g?y#s"
+    ).to_s).to eq("http://a/b/c/g?y#s")
   end
 
   # Section 5.4.1 of RFC 3986
@@ -5372,7 +5379,8 @@ describe Addressable::URI, "with a base uri of 'http://a/b/c/d;p?q'" do
   it "when joined with 'g;x?y#s' should resolve to http://a/b/c/g;x?y#s" do
     expect((@uri + "g;x?y#s").to_s).to eq("http://a/b/c/g;x?y#s")
     expect(Addressable::URI.join(
-      @uri.to_s, "g;x?y#s").to_s).to eq("http://a/b/c/g;x?y#s")
+      @uri.to_s, "g;x?y#s"
+    ).to_s).to eq("http://a/b/c/g;x?y#s")
   end
 
   # Section 5.4.1 of RFC 3986
@@ -5446,7 +5454,8 @@ describe Addressable::URI, "with a base uri of 'http://a/b/c/d;p?q'" do
   it "when joined with '../../../../g' should resolve to http://a/g" do
     expect((@uri + "../../../../g").to_s).to eq("http://a/g")
     expect(Addressable::URI.join(
-      @uri.to_s, "../../../../g").to_s).to eq("http://a/g")
+      @uri.to_s, "../../../../g"
+    ).to_s).to eq("http://a/g")
   end
 
   # Section 5.4.2 of RFC 3986
@@ -5511,49 +5520,55 @@ describe Addressable::URI, "with a base uri of 'http://a/b/c/d;p?q'" do
 
   # Section 5.4.2 of RFC 3986
   it "when joined with 'g;x=1/./y' " +
-      "should resolve to http://a/b/c/g;x=1/y" do
+     "should resolve to http://a/b/c/g;x=1/y" do
     expect((@uri + "g;x=1/./y").to_s).to eq("http://a/b/c/g;x=1/y")
     expect(Addressable::URI.join(
-      @uri.to_s, "g;x=1/./y").to_s).to eq("http://a/b/c/g;x=1/y")
+      @uri.to_s, "g;x=1/./y"
+    ).to_s).to eq("http://a/b/c/g;x=1/y")
   end
 
   # Section 5.4.2 of RFC 3986
   it "when joined with 'g;x=1/../y' should resolve to http://a/b/c/y" do
     expect((@uri + "g;x=1/../y").to_s).to eq("http://a/b/c/y")
     expect(Addressable::URI.join(
-      @uri.to_s, "g;x=1/../y").to_s).to eq("http://a/b/c/y")
+      @uri.to_s, "g;x=1/../y"
+    ).to_s).to eq("http://a/b/c/y")
   end
 
   # Section 5.4.2 of RFC 3986
   it "when joined with 'g?y/./x' " +
-      "should resolve to http://a/b/c/g?y/./x" do
+     "should resolve to http://a/b/c/g?y/./x" do
     expect((@uri + "g?y/./x").to_s).to eq("http://a/b/c/g?y/./x")
     expect(Addressable::URI.join(
-      @uri.to_s, "g?y/./x").to_s).to eq("http://a/b/c/g?y/./x")
+      @uri.to_s, "g?y/./x"
+    ).to_s).to eq("http://a/b/c/g?y/./x")
   end
 
   # Section 5.4.2 of RFC 3986
   it "when joined with 'g?y/../x' " +
-      "should resolve to http://a/b/c/g?y/../x" do
+     "should resolve to http://a/b/c/g?y/../x" do
     expect((@uri + "g?y/../x").to_s).to eq("http://a/b/c/g?y/../x")
     expect(Addressable::URI.join(
-      @uri.to_s, "g?y/../x").to_s).to eq("http://a/b/c/g?y/../x")
+      @uri.to_s, "g?y/../x"
+    ).to_s).to eq("http://a/b/c/g?y/../x")
   end
 
   # Section 5.4.2 of RFC 3986
   it "when joined with 'g#s/./x' " +
-      "should resolve to http://a/b/c/g#s/./x" do
+     "should resolve to http://a/b/c/g#s/./x" do
     expect((@uri + "g#s/./x").to_s).to eq("http://a/b/c/g#s/./x")
     expect(Addressable::URI.join(
-      @uri.to_s, "g#s/./x").to_s).to eq("http://a/b/c/g#s/./x")
+      @uri.to_s, "g#s/./x"
+    ).to_s).to eq("http://a/b/c/g#s/./x")
   end
 
   # Section 5.4.2 of RFC 3986
   it "when joined with 'g#s/../x' " +
-      "should resolve to http://a/b/c/g#s/../x" do
+     "should resolve to http://a/b/c/g#s/../x" do
     expect((@uri + "g#s/../x").to_s).to eq("http://a/b/c/g#s/../x")
     expect(Addressable::URI.join(
-      @uri.to_s, "g#s/../x").to_s).to eq("http://a/b/c/g#s/../x")
+      @uri.to_s, "g#s/../x"
+    ).to_s).to eq("http://a/b/c/g#s/../x")
   end
 
   # Section 5.4.2 of RFC 3986
@@ -5564,10 +5579,11 @@ describe Addressable::URI, "with a base uri of 'http://a/b/c/d;p?q'" do
 
   # Edge case to be sure
   it "when joined with '//example.com/' should " +
-      "resolve to http://example.com/" do
+     "resolve to http://example.com/" do
     expect((@uri + "//example.com/").to_s).to eq("http://example.com/")
     expect(Addressable::URI.join(
-      @uri.to_s, "//example.com/").to_s).to eq("http://example.com/")
+      @uri.to_s, "//example.com/"
+    ).to_s).to eq("http://example.com/")
   end
 
   it "when joined with a bogus object a TypeError should be raised" do
@@ -5578,13 +5594,13 @@ describe Addressable::URI, "with a base uri of 'http://a/b/c/d;p?q'" do
 end
 
 describe Addressable::URI, "when converting the path " +
-    "'relative/path/to/something'" do
+                           "'relative/path/to/something'" do
   before do
     @path = 'relative/path/to/something'
   end
 
   it "should convert to " +
-      "\'relative/path/to/something\'" do
+     "\'relative/path/to/something\'" do
     @uri = Addressable::URI.convert_path(@path)
     expect(@uri.to_str).to eq("relative/path/to/something")
   end
@@ -5644,7 +5660,7 @@ describe Addressable::URI, "when given the path '/one/two/'" do
   end
 
   it "should convert to " +
-      "\'file:///one/two/\'" do
+     "\'file:///one/two/\'" do
     @uri = Addressable::URI.convert_path(@path)
     expect(@uri.to_str).to eq("file:///one/two/")
   end
@@ -5681,13 +5697,13 @@ describe Addressable::URI, "when given the tld " do
 end
 
 describe Addressable::URI, "when given the path " +
-    "'c:\\windows\\My Documents 100%20\\foo.txt'" do
+                           "'c:\\windows\\My Documents 100%20\\foo.txt'" do
   before do
     @path = "c:\\windows\\My Documents 100%20\\foo.txt"
   end
 
   it "should convert to " +
-      "\'file:///c:/windows/My%20Documents%20100%20/foo.txt\'" do
+     "\'file:///c:/windows/My%20Documents%20100%20/foo.txt\'" do
     @uri = Addressable::URI.convert_path(@path)
     expect(@uri.to_str).to eq("file:///c:/windows/My%20Documents%20100%20/foo.txt")
   end
@@ -5699,13 +5715,13 @@ describe Addressable::URI, "when given the path " +
 end
 
 describe Addressable::URI, "when given the path " +
-    "'file://c:\\windows\\My Documents 100%20\\foo.txt'" do
+                           "'file://c:\\windows\\My Documents 100%20\\foo.txt'" do
   before do
     @path = "file://c:\\windows\\My Documents 100%20\\foo.txt"
   end
 
   it "should convert to " +
-      "\'file:///c:/windows/My%20Documents%20100%20/foo.txt\'" do
+     "\'file:///c:/windows/My%20Documents%20100%20/foo.txt\'" do
     @uri = Addressable::URI.convert_path(@path)
     expect(@uri.to_str).to eq("file:///c:/windows/My%20Documents%20100%20/foo.txt")
   end
@@ -5717,13 +5733,13 @@ describe Addressable::URI, "when given the path " +
 end
 
 describe Addressable::URI, "when given the path " +
-    "'file:c:\\windows\\My Documents 100%20\\foo.txt'" do
+                           "'file:c:\\windows\\My Documents 100%20\\foo.txt'" do
   before do
     @path = "file:c:\\windows\\My Documents 100%20\\foo.txt"
   end
 
   it "should convert to " +
-      "\'file:///c:/windows/My%20Documents%20100%20/foo.txt\'" do
+     "\'file:///c:/windows/My%20Documents%20100%20/foo.txt\'" do
     @uri = Addressable::URI.convert_path(@path)
     expect(@uri.to_str).to eq("file:///c:/windows/My%20Documents%20100%20/foo.txt")
   end
@@ -5735,13 +5751,13 @@ describe Addressable::URI, "when given the path " +
 end
 
 describe Addressable::URI, "when given the path " +
-    "'file:/c:\\windows\\My Documents 100%20\\foo.txt'" do
+                           "'file:/c:\\windows\\My Documents 100%20\\foo.txt'" do
   before do
     @path = "file:/c:\\windows\\My Documents 100%20\\foo.txt"
   end
 
   it "should convert to " +
-      "\'file:///c:/windows/My%20Documents%20100%20/foo.txt\'" do
+     "\'file:///c:/windows/My%20Documents%20100%20/foo.txt\'" do
     @uri = Addressable::URI.convert_path(@path)
     expect(@uri.to_str).to eq("file:///c:/windows/My%20Documents%20100%20/foo.txt")
   end
@@ -5753,13 +5769,13 @@ describe Addressable::URI, "when given the path " +
 end
 
 describe Addressable::URI, "when given the path " +
-    "'file:///c|/windows/My%20Documents%20100%20/foo.txt'" do
+                           "'file:///c|/windows/My%20Documents%20100%20/foo.txt'" do
   before do
     @path = "file:///c|/windows/My%20Documents%20100%20/foo.txt"
   end
 
   it "should convert to " +
-      "\'file:///c:/windows/My%20Documents%20100%20/foo.txt\'" do
+     "\'file:///c:/windows/My%20Documents%20100%20/foo.txt\'" do
     @uri = Addressable::URI.convert_path(@path)
     expect(@uri.to_str).to eq("file:///c:/windows/My%20Documents%20100%20/foo.txt")
   end
@@ -5816,38 +5832,38 @@ end
 describe Addressable::URI, "when form encoding a hash" do
   it "should result in correct percent encoded sequence" do
     expect(Addressable::URI.form_encode(
-      [["&one", "/1"], ["=two", "?2"], [":three", "#3"]]
-    )).to eq("%26one=%2F1&%3Dtwo=%3F2&%3Athree=%233")
+             [["&one", "/1"], ["=two", "?2"], [":three", "#3"]]
+           )).to eq("%26one=%2F1&%3Dtwo=%3F2&%3Athree=%233")
   end
 
   it "should result in correct percent encoded sequence" do
     expect(Addressable::URI.form_encode(
-      {"q" => "one two three"}
-    )).to eq("q=one+two+three")
+             { "q" => "one two three" }
+           )).to eq("q=one+two+three")
   end
 
   it "should result in correct percent encoded sequence" do
     expect(Addressable::URI.form_encode(
-      {"key" => nil}
-    )).to eq("key=")
+             { "key" => nil }
+           )).to eq("key=")
   end
 
   it "should result in correct percent encoded sequence" do
     expect(Addressable::URI.form_encode(
-      {"q" => ["one", "two", "three"]}
-    )).to eq("q=one&q=two&q=three")
+             { "q" => ["one", "two", "three"] }
+           )).to eq("q=one&q=two&q=three")
   end
 
   it "should result in correctly encoded newlines" do
     expect(Addressable::URI.form_encode(
-      {"text" => "one\ntwo\rthree\r\nfour\n\r"}
-    )).to eq("text=one%0D%0Atwo%0D%0Athree%0D%0Afour%0D%0A%0D%0A")
+             { "text" => "one\ntwo\rthree\r\nfour\n\r" }
+           )).to eq("text=one%0D%0Atwo%0D%0Athree%0D%0Afour%0D%0A%0D%0A")
   end
 
   it "should result in a sorted percent encoded sequence" do
     expect(Addressable::URI.form_encode(
-      [["a", "1"], ["dup", "3"], ["dup", "2"]], true
-    )).to eq("a=1&dup=2&dup=3")
+             [["a", "1"], ["dup", "3"], ["dup", "2"]], true
+           )).to eq("a=1&dup=2&dup=3")
   end
 end
 
@@ -5863,8 +5879,8 @@ end
 describe Addressable::URI, "when form encoding the example value from OAuth 2" do
   it "should result in correct values" do
     expect(Addressable::URI.form_encode(
-      {"value" => " %&+£€"}
-    )).to eq("value=+%25%26%2B%C2%A3%E2%82%AC")
+             { "value" => " %&+£€" }
+           )).to eq("value=+%25%26%2B%C2%A3%E2%82%AC")
   end
 end
 
@@ -5872,40 +5888,40 @@ end
 describe Addressable::URI, "when form unencoding the example value from OAuth 2" do
   it "should result in correct values" do
     expect(Addressable::URI.form_unencode(
-      "value=+%25%26%2B%C2%A3%E2%82%AC"
-    )).to eq([["value", " %&+£€"]])
+             "value=+%25%26%2B%C2%A3%E2%82%AC"
+           )).to eq([["value", " %&+£€"]])
   end
 end
 
 describe Addressable::URI, "when form unencoding a string" do
   it "should result in correct values" do
     expect(Addressable::URI.form_unencode(
-      "%26one=%2F1&%3Dtwo=%3F2&%3Athree=%233"
-    )).to eq([["&one", "/1"], ["=two", "?2"], [":three", "#3"]])
+             "%26one=%2F1&%3Dtwo=%3F2&%3Athree=%233"
+           )).to eq([["&one", "/1"], ["=two", "?2"], [":three", "#3"]])
   end
 
   it "should result in correct values" do
     expect(Addressable::URI.form_unencode(
-      "q=one+two+three"
-    )).to eq([["q", "one two three"]])
+             "q=one+two+three"
+           )).to eq([["q", "one two three"]])
   end
 
   it "should result in correct values" do
     expect(Addressable::URI.form_unencode(
-      "text=one%0D%0Atwo%0D%0Athree%0D%0Afour%0D%0A%0D%0A"
-    )).to eq([["text", "one\ntwo\nthree\nfour\n\n"]])
+             "text=one%0D%0Atwo%0D%0Athree%0D%0Afour%0D%0A%0D%0A"
+           )).to eq([["text", "one\ntwo\nthree\nfour\n\n"]])
   end
 
   it "should result in correct values" do
     expect(Addressable::URI.form_unencode(
-      "a=1&dup=2&dup=3"
-    )).to eq([["a", "1"], ["dup", "2"], ["dup", "3"]])
+             "a=1&dup=2&dup=3"
+           )).to eq([["a", "1"], ["dup", "2"], ["dup", "3"]])
   end
 
   it "should result in correct values" do
     expect(Addressable::URI.form_unencode(
-      "key"
-    )).to eq([["key", nil]])
+             "key"
+           )).to eq([["key", nil]])
   end
 
   it "should result in correct values" do
@@ -5976,28 +5992,28 @@ end
 describe Addressable::URI, "when normalizing a partially encoded string" do
   it "should result in correct percent encoded sequence" do
     expect(Addressable::URI.normalize_component(
-      "partially % encoded%21"
-    )).to eq("partially%20%25%20encoded!")
+             "partially % encoded%21"
+           )).to eq("partially%20%25%20encoded!")
   end
 
   it "should result in correct percent encoded sequence" do
     expect(Addressable::URI.normalize_component(
-      "partially %25 encoded!"
-    )).to eq("partially%20%25%20encoded!")
+             "partially %25 encoded!"
+           )).to eq("partially%20%25%20encoded!")
   end
 end
 
 describe Addressable::URI, "when normalizing a unicode sequence" do
   it "should result in correct percent encoded sequence" do
     expect(Addressable::URI.normalize_component(
-      "/C%CC%A7"
-    )).to eq("/%C3%87")
+             "/C%CC%A7"
+           )).to eq("/%C3%87")
   end
 
   it "should result in correct percent encoded sequence" do
     expect(Addressable::URI.normalize_component(
-      "/%C3%87"
-    )).to eq("/%C3%87")
+             "/%C3%87"
+           )).to eq("/%C3%87")
   end
 end
 
@@ -6058,14 +6074,14 @@ describe Addressable::URI, "when encoding a multibyte string" do
 
   it "should result in correct percent encoded sequence" do
     expect(Addressable::URI.encode_component(
-      "günther", /[^a-zA-Z0-9\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=\-\.\_\~]/
-    )).to eq("g%C3%BCnther")
+             "günther", /[^a-zA-Z0-9\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=\-\.\_\~]/
+           )).to eq("g%C3%BCnther")
   end
 end
 
 describe Addressable::URI, "when form encoding a multibyte string" do
   it "should result in correct percent encoded sequence" do
-    expect(Addressable::URI.form_encode({"GivenName" => "René"})).to eq(
+    expect(Addressable::URI.form_encode({ "GivenName" => "René" })).to eq(
       "GivenName=Ren%C3%A9"
     )
   end
@@ -6078,8 +6094,8 @@ describe Addressable::URI, "when encoding a string with ASCII chars 0-15" do
 
   it "should result in correct percent encoded sequence" do
     expect(Addressable::URI.encode_component(
-      "one\ntwo", /[^a-zA-Z0-9\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=\-\.\_\~]/
-    )).to eq("one%0Atwo")
+             "one\ntwo", /[^a-zA-Z0-9\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=\-\.\_\~]/
+           )).to eq("one%0Atwo")
   end
 end
 
@@ -6099,10 +6115,10 @@ describe Addressable::URI, "when unencoding a multibyte string" do
 
   it "should result in correct percent encoded sequence as a URI" do
     expect(Addressable::URI.unencode(
-      "/path?g%C3%BCnther", ::Addressable::URI
-    )).to eq(Addressable::URI.new(
-      :path => "/path", :query => "günther"
-    ))
+             "/path?g%C3%BCnther", ::Addressable::URI
+           )).to eq(Addressable::URI.new(
+                      :path => "/path", :query => "günther"
+                    ))
   end
 end
 
@@ -6161,7 +6177,7 @@ describe Addressable::URI, "when encoding a bogus object" do
 end
 
 describe Addressable::URI, "when given the input " +
-    "'http://example.com/'" do
+                           "'http://example.com/'" do
   before do
     @input = "http://example.com/"
   end
@@ -6179,7 +6195,7 @@ describe Addressable::URI, "when given the input " +
 end
 
 describe Addressable::URI, "when given the input " +
-    "'https://example.com/'" do
+                           "'https://example.com/'" do
   before do
     @input = "https://example.com/"
   end
@@ -6191,7 +6207,7 @@ describe Addressable::URI, "when given the input " +
 end
 
 describe Addressable::URI, "when given the input " +
-    "'http:example.com/'" do
+                           "'http:example.com/'" do
   before do
     @input = "http:example.com/"
   end
@@ -6202,14 +6218,14 @@ describe Addressable::URI, "when given the input " +
   end
 
   it "should heuristically parse to 'http://example.com/' " +
-      "even with a scheme hint of 'ftp'" do
-    @uri = Addressable::URI.heuristic_parse(@input, {:scheme => 'ftp'})
+     "even with a scheme hint of 'ftp'" do
+    @uri = Addressable::URI.heuristic_parse(@input, { :scheme => 'ftp' })
     expect(@uri.to_s).to eq("http://example.com/")
   end
 end
 
 describe Addressable::URI, "when given the input " +
-    "'https:example.com/'" do
+                           "'https:example.com/'" do
   before do
     @input = "https:example.com/"
   end
@@ -6220,14 +6236,14 @@ describe Addressable::URI, "when given the input " +
   end
 
   it "should heuristically parse to 'https://example.com/' " +
-      "even with a scheme hint of 'ftp'" do
-    @uri = Addressable::URI.heuristic_parse(@input, {:scheme => 'ftp'})
+     "even with a scheme hint of 'ftp'" do
+    @uri = Addressable::URI.heuristic_parse(@input, { :scheme => 'ftp' })
     expect(@uri.to_s).to eq("https://example.com/")
   end
 end
 
 describe Addressable::URI, "when given the input " +
-    "'http://example.com/example.com/'" do
+                           "'http://example.com/example.com/'" do
   before do
     @input = "http://example.com/example.com/"
   end
@@ -6239,7 +6255,7 @@ describe Addressable::URI, "when given the input " +
 end
 
 describe Addressable::URI, "when given the input " +
-    "'http://prefix\\.example.com/'" do
+                           "'http://prefix\\.example.com/'" do
   before do
     @input = "http://prefix\\.example.com/"
   end
@@ -6251,14 +6267,14 @@ describe Addressable::URI, "when given the input " +
   end
 
   it "should heuristically parse to 'http://prefix/.example.com/' " +
-      "even with a scheme hint of 'ftp'" do
-    @uri = Addressable::URI.heuristic_parse(@input, {:scheme => 'ftp'})
+     "even with a scheme hint of 'ftp'" do
+    @uri = Addressable::URI.heuristic_parse(@input, { :scheme => 'ftp' })
     expect(@uri.to_s).to eq("http://prefix/.example.com/")
   end
 end
 
 describe Addressable::URI, "when given the input " +
-    "'http://p:\\/'" do
+                           "'http://p:\\/'" do
   before do
     @input = "http://p:\\/"
   end
@@ -6270,14 +6286,14 @@ describe Addressable::URI, "when given the input " +
   end
 
   it "should heuristically parse to 'http://p//' " +
-      "even with a scheme hint of 'ftp'" do
-    @uri = Addressable::URI.heuristic_parse(@input, {:scheme => 'ftp'})
+     "even with a scheme hint of 'ftp'" do
+    @uri = Addressable::URI.heuristic_parse(@input, { :scheme => 'ftp' })
     expect(@uri.to_s).to eq("http://p//")
   end
 end
 
 describe Addressable::URI, "when given the input " +
-    "'http://p://'" do
+                           "'http://p://'" do
   before do
     @input = "http://p://"
   end
@@ -6289,14 +6305,14 @@ describe Addressable::URI, "when given the input " +
   end
 
   it "should heuristically parse to 'http://p//' " +
-      "even with a scheme hint of 'ftp'" do
-    @uri = Addressable::URI.heuristic_parse(@input, {:scheme => 'ftp'})
+     "even with a scheme hint of 'ftp'" do
+    @uri = Addressable::URI.heuristic_parse(@input, { :scheme => 'ftp' })
     expect(@uri.to_s).to eq("http://p//")
   end
 end
 
 describe Addressable::URI, "when given the input " +
-    "'http://p://p'" do
+                           "'http://p://p'" do
   before do
     @input = "http://p://p"
   end
@@ -6308,14 +6324,14 @@ describe Addressable::URI, "when given the input " +
   end
 
   it "should heuristically parse to 'http://p//p' " +
-      "even with a scheme hint of 'ftp'" do
-    @uri = Addressable::URI.heuristic_parse(@input, {:scheme => 'ftp'})
+     "even with a scheme hint of 'ftp'" do
+    @uri = Addressable::URI.heuristic_parse(@input, { :scheme => 'ftp' })
     expect(@uri.to_s).to eq("http://p//p")
   end
 end
 
 describe Addressable::URI, "when given the input " +
-    "'http://prefix .example.com/'" do
+                           "'http://prefix .example.com/'" do
   before do
     @input = "http://prefix .example.com/"
   end
@@ -6329,14 +6345,14 @@ describe Addressable::URI, "when given the input " +
   end
 
   it "should heuristically parse to 'http://prefix%20.example.com/' " +
-      "even with a scheme hint of 'ftp'" do
-    @uri = Addressable::URI.heuristic_parse(@input, {:scheme => 'ftp'})
+     "even with a scheme hint of 'ftp'" do
+    @uri = Addressable::URI.heuristic_parse(@input, { :scheme => 'ftp' })
     expect(@uri.to_s).to eq("http://prefix%20.example.com/")
   end
 end
 
 describe Addressable::URI, "when given the input " +
-    "'  http://www.example.com/  '" do
+                           "'  http://www.example.com/  '" do
   before do
     @input = "  http://www.example.com/  "
   end
@@ -6350,7 +6366,7 @@ describe Addressable::URI, "when given the input " +
 end
 
 describe Addressable::URI, "when given the input " +
-    "'http://prefix%2F.example.com/'" do
+                           "'http://prefix%2F.example.com/'" do
   before do
     @input = "http://prefix%2F.example.com/"
   end
@@ -6362,14 +6378,14 @@ describe Addressable::URI, "when given the input " +
   end
 
   it "should heuristically parse to 'http://prefix%2F.example.com/' " +
-      "even with a scheme hint of 'ftp'" do
-    @uri = Addressable::URI.heuristic_parse(@input, {:scheme => 'ftp'})
+     "even with a scheme hint of 'ftp'" do
+    @uri = Addressable::URI.heuristic_parse(@input, { :scheme => 'ftp' })
     expect(@uri.to_s).to eq("http://prefix%2F.example.com/")
   end
 end
 
 describe Addressable::URI, "when given the input " +
-    "'/path/to/resource'" do
+                           "'/path/to/resource'" do
   before do
     @input = "/path/to/resource"
   end
@@ -6381,7 +6397,7 @@ describe Addressable::URI, "when given the input " +
 end
 
 describe Addressable::URI, "when given the input " +
-    "'relative/path/to/resource'" do
+                           "'relative/path/to/resource'" do
   before do
     @input = "relative/path/to/resource"
   end
@@ -6393,7 +6409,7 @@ describe Addressable::URI, "when given the input " +
 end
 
 describe Addressable::URI, "when given the input " +
-    "'example.com'" do
+                           "'example.com'" do
   before do
     @input = "example.com"
   end
@@ -6405,10 +6421,10 @@ describe Addressable::URI, "when given the input " +
 end
 
 describe Addressable::URI, "when given the input " +
-    "'example.com' and a scheme hint of 'ftp'" do
+                           "'example.com' and a scheme hint of 'ftp'" do
   before do
     @input = "example.com"
-    @hints = {:scheme => 'ftp'}
+    @hints = { :scheme => 'ftp' }
   end
 
   it "should heuristically parse to 'http://example.com'" do
@@ -6418,10 +6434,10 @@ describe Addressable::URI, "when given the input " +
 end
 
 describe Addressable::URI, "when given the input " +
-    "'example.com:21' and a scheme hint of 'ftp'" do
+                           "'example.com:21' and a scheme hint of 'ftp'" do
   before do
     @input = "example.com:21"
-    @hints = {:scheme => 'ftp'}
+    @hints = { :scheme => 'ftp' }
   end
 
   it "should heuristically parse to 'http://example.com:21'" do
@@ -6431,7 +6447,7 @@ describe Addressable::URI, "when given the input " +
 end
 
 describe Addressable::URI, "when given the input " +
-    "'example.com/path/to/resource'" do
+                           "'example.com/path/to/resource'" do
   before do
     @input = "example.com/path/to/resource"
   end
@@ -6443,7 +6459,7 @@ describe Addressable::URI, "when given the input " +
 end
 
 describe Addressable::URI, "when given the input " +
-    "'http:///example.com'" do
+                           "'http:///example.com'" do
   before do
     @input = "http:///example.com"
   end
@@ -6454,8 +6470,8 @@ describe Addressable::URI, "when given the input " +
   end
 end
 
-describe Addressable::URI, "when given the input which "\
-  "start with digits and has specified port" do
+describe Addressable::URI, "when given the input which " \
+                           "start with digits and has specified port" do
   before do
     @input = "7777.example.org:8089"
   end
@@ -6467,7 +6483,7 @@ describe Addressable::URI, "when given the input which "\
 end
 
 describe Addressable::URI, "when given the input " +
-    "'feed:///example.com'" do
+                           "'feed:///example.com'" do
   before do
     @input = "feed:///example.com"
   end
@@ -6479,7 +6495,7 @@ describe Addressable::URI, "when given the input " +
 end
 
 describe Addressable::URI, "when given the input " +
-    "'file://localhost/path/to/resource/'" do
+                           "'file://localhost/path/to/resource/'" do
   before do
     @input = "file://localhost/path/to/resource/"
   end
@@ -6491,7 +6507,7 @@ describe Addressable::URI, "when given the input " +
 end
 
 describe Addressable::URI, "when given the input " +
-    "'file://path/to/resource/'" do
+                           "'file://path/to/resource/'" do
   before do
     @input = "file://path/to/resource/"
   end
@@ -6503,7 +6519,7 @@ describe Addressable::URI, "when given the input " +
 end
 
 describe Addressable::URI, "when given the input " +
-    "'file://///path/to/resource/'" do
+                           "'file://///path/to/resource/'" do
   before do
     @input = "file:///////path/to/resource/"
   end
@@ -6515,7 +6531,7 @@ describe Addressable::URI, "when given the input " +
 end
 
 describe Addressable::URI, "when given the input " +
-    "'feed://http://example.com'" do
+                           "'feed://http://example.com'" do
   before do
     @input = "feed://http://example.com"
   end
@@ -6527,7 +6543,7 @@ describe Addressable::URI, "when given the input " +
 end
 
 describe Addressable::URI, "when given the input " +
-    "::URI.parse('http://example.com')" do
+                           "::URI.parse('http://example.com')" do
   before do
     @input = ::URI.parse('http://example.com')
   end
@@ -6551,7 +6567,7 @@ describe Addressable::URI, "when given the input: 'user@domain.com'" do
 
     it "should have a scheme of 'mailto'" do
       uri = Addressable::URI.heuristic_parse(@input)
-      expect(uri.to_s).to   eq("mailto:user@domain.com")
+      expect(uri.to_s).to eq("mailto:user@domain.com")
       expect(uri.scheme).to eq("mailto")
     end
 
@@ -6582,57 +6598,57 @@ describe Addressable::URI, "when assigning query values" do
   end
 
   it "should correctly assign {:a => 'a', :b => ['c', 'd', 'e']}" do
-    @uri.query_values = {:a => "a", :b => ["c", "d", "e"]}
+    @uri.query_values = { :a => "a", :b => ["c", "d", "e"] }
     expect(@uri.query).to eq("a=a&b=c&b=d&b=e")
   end
 
   it "should raise an error attempting to assign {'a' => {'b' => ['c']}}" do
     expect do
-      @uri.query_values = { 'a' => {'b' => ['c'] } }
+      @uri.query_values = { 'a' => { 'b' => ['c'] } }
     end.to raise_error(TypeError)
   end
 
   it "should raise an error attempting to assign " +
-      "{:b => '2', :a => {:c => '1'}}" do
+     "{:b => '2', :a => {:c => '1'}}" do
     expect do
-      @uri.query_values = {:b => '2', :a => {:c => '1'}}
+      @uri.query_values = { :b => '2', :a => { :c => '1' } }
     end.to raise_error(TypeError)
   end
 
   it "should raise an error attempting to assign " +
-      "{:a => 'a', :b => [{:c => 'c', :d => 'd'}, " +
-      "{:e => 'e', :f => 'f'}]}" do
+     "{:a => 'a', :b => [{:c => 'c', :d => 'd'}, " +
+     "{:e => 'e', :f => 'f'}]}" do
     expect do
       @uri.query_values = {
-        :a => "a", :b => [{:c => "c", :d => "d"}, {:e => "e", :f => "f"}]
+        :a => "a", :b => [{ :c => "c", :d => "d" }, { :e => "e", :f => "f" }]
       }
     end.to raise_error(TypeError)
   end
 
   it "should raise an error attempting to assign " +
-      "{:a => 'a', :b => [{:c => true, :d => 'd'}, " +
-      "{:e => 'e', :f => 'f'}]}" do
+     "{:a => 'a', :b => [{:c => true, :d => 'd'}, " +
+     "{:e => 'e', :f => 'f'}]}" do
     expect do
       @uri.query_values = {
-        :a => 'a', :b => [{:c => true, :d => 'd'}, {:e => 'e', :f => 'f'}]
+        :a => 'a', :b => [{ :c => true, :d => 'd' }, { :e => 'e', :f => 'f' }]
       }
     end.to raise_error(TypeError)
   end
 
   it "should raise an error attempting to assign " +
-      "{:a => 'a', :b => {:c => true, :d => 'd'}}" do
+     "{:a => 'a', :b => {:c => true, :d => 'd'}}" do
     expect do
       @uri.query_values = {
-        :a => 'a', :b => {:c => true, :d => 'd'}
+        :a => 'a', :b => { :c => true, :d => 'd' }
       }
     end.to raise_error(TypeError)
   end
 
   it "should raise an error attempting to assign " +
-      "{:a => 'a', :b => {:c => true, :d => 'd'}}" do
+     "{:a => 'a', :b => {:c => true, :d => 'd'}}" do
     expect do
       @uri.query_values = {
-        :a => 'a', :b => {:c => true, :d => 'd'}
+        :a => 'a', :b => { :c => true, :d => 'd' }
       }
     end.to raise_error(TypeError)
   end
@@ -6643,12 +6659,12 @@ describe Addressable::URI, "when assigning query values" do
   end
 
   it "should raise an error attempting to assign " +
-      "{:z => 1, :f => [2, {999.1 => [3,'4']}, ['h', 'i']], " +
-      ":a => {:b => ['c', 'd'], :e => true, :y => 0.5}}" do
+     "{:z => 1, :f => [2, {999.1 => [3,'4']}, ['h', 'i']], " +
+     ":a => {:b => ['c', 'd'], :e => true, :y => 0.5}}" do
     expect do
       @uri.query_values = {
         :z => 1,
-        :f => [ 2, {999.1 => [3,'4']}, ['h', 'i'] ],
+        :f => [2, { 999.1 => [3, '4'] }, ['h', 'i']],
         :a => { :b => ['c', 'd'], :e => true, :y => 0.5 }
       }
     end.to raise_error(TypeError)
@@ -6665,12 +6681,12 @@ describe Addressable::URI, "when assigning query values" do
   end
 
   it "should correctly sort {'ab' => 'c', :ab => 'a', :a => 'x'}" do
-    @uri.query_values = {'ab' => 'c', :ab => 'a', :a => 'x'}
+    @uri.query_values = { 'ab' => 'c', :ab => 'a', :a => 'x' }
     expect(@uri.query).to eq("a=x&ab=a&ab=c")
   end
 
   it "should correctly assign " +
-      "[['b', 'c'], ['b', 'a'], ['a', 'a']]" do
+     "[['b', 'c'], ['b', 'a'], ['a', 'a']]" do
     # Order can be guaranteed in this format, so preserve it.
     @uri.query_values = [['b', 'c'], ['b', 'a'], ['a', 'a']]
     expect(@uri.query).to eq("b=c&b=a&a=a")

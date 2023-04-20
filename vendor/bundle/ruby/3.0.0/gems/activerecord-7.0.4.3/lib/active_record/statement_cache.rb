@@ -159,6 +159,7 @@ module ActiveRecord
     end
 
     private
-      attr_reader :query_builder, :bind_map, :klass
+
+    attr_reader :query_builder, :bind_map, :klass
   end
 end

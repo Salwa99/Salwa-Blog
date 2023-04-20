@@ -51,7 +51,7 @@ module DEBUGGER__
           greeting_done = false
           @need_pause_at_first = true
 
-          @accept_m.synchronize{
+          @accept_m.synchronize {
             @sock = server
             greeting
             greeting_done = true
@@ -59,7 +59,7 @@ module DEBUGGER__
             @accept_cv.signal
 
             # flush unsent messages
-            @unsent_messages.each{|m|
+            @unsent_messages.each { |m|
               @sock.puts m
             } if @repl
             @unsent_messages.clear
@@ -157,6 +157,7 @@ module DEBUGGER__
         require_relative 'server_dap'
 
         raise unless @sock.read(2) == "\r\n"
+
         self.extend(UI_DAP)
         @repl = false
         @need_pause_at_first = false
@@ -176,17 +177,17 @@ module DEBUGGER__
 
     def process
       while true
-        DEBUGGER__.debug{ "sleep IO.select" }
+        DEBUGGER__.debug { "sleep IO.select" }
         _r = IO.select([@sock])
-        DEBUGGER__.debug{ "wakeup IO.select" }
+        DEBUGGER__.debug { "wakeup IO.select" }
 
         line = @session.process_group.sync do
           unless IO.select([@sock], nil, nil, 0)
-            DEBUGGER__.debug{ "UI_Server can not read" }
+            DEBUGGER__.debug { "UI_Server can not read" }
             break :can_not_read
           end
-          @sock.gets&.chomp.tap{|line|
-            DEBUGGER__.debug{ "UI_Server received: #{line}" }
+          @sock.gets&.chomp.tap { |line|
+            DEBUGGER__.debug { "UI_Server received: #{line}" }
           }
         end
 
@@ -278,9 +279,9 @@ module DEBUGGER__
     class NoRemoteError < Exception; end
 
     def sock skip: false
-      if s = @sock         # already connection
+      if s = @sock # already connection
         # ok
-      elsif skip == true   # skip process
+      elsif skip == true # skip process
         no_sock = true
         r = @accept_m.synchronize do
           if @sock
@@ -290,9 +291,9 @@ module DEBUGGER__
           end
         end
         return r if no_sock
-      else                 # wait for connection
+      else # wait for connection
         until s = @sock
-          @accept_m.synchronize{
+          @accept_m.synchronize {
             unless @sock
               DEBUGGER__.warn "wait for debugger connection..."
               @accept_cv.wait(@accept_m)
@@ -341,13 +342,14 @@ module DEBUGGER__
 
         if @repl
           raise "not in subsession, but received: #{line.inspect}" unless @session.in_subsession?
+
           line = "input #{Process.pid}"
-          DEBUGGER__.debug{ "send: #{line}" }
+          DEBUGGER__.debug { "send: #{line}" }
           s.puts line
         end
         sleep 0.01 until @q_msg
-        @q_msg.pop.tap{|msg|
-          DEBUGGER__.debug{ "readline: #{msg.inspect}" }
+        @q_msg.pop.tap { |msg|
+          DEBUGGER__.debug { "readline: #{msg.inspect}" }
         }
       end || 'continue')
 
@@ -412,7 +414,7 @@ module DEBUGGER__
 
            devtools://devtools/bundled/inspector.html?v8only=true&panel=sources&ws=#{@local_addr.inspect_sockaddr}/#{@uuid}
 
-        EOS
+      EOS
     end
 
     def accept
@@ -431,10 +433,10 @@ module DEBUGGER__
           end
 
           DEBUGGER__.info <<~EOS
-          With rdbg, use the following command line:
-          #
-          #   #{rdbg} --attach #{@local_addr.ip_address} #{@local_addr.ip_port}
-          #
+            With rdbg, use the following command line:
+            #
+            #   #{rdbg} --attach #{@local_addr.ip_address} #{@local_addr.ip_port}
+            #
           EOS
 
           case CONFIG[:open]

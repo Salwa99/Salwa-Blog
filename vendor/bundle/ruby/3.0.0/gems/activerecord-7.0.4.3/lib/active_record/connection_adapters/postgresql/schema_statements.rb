@@ -40,7 +40,7 @@ module ActiveRecord
                       " CONNECTION LIMIT = #{value}"
                     else
                       ""
-            end
+                    end
           end
 
           execute "CREATE DATABASE #{quote_table_name(name)}#{option_string}"
@@ -182,7 +182,8 @@ module ActiveRecord
 
         # Returns the current database encoding format.
         def encoding
-          query_value("SELECT pg_encoding_to_char(encoding) FROM pg_database WHERE datname = current_database()", "SCHEMA")
+          query_value("SELECT pg_encoding_to_char(encoding) FROM pg_database WHERE datname = current_database()",
+                      "SCHEMA")
         end
 
         # Returns the current database collation.
@@ -247,6 +248,7 @@ module ActiveRecord
         def default_sequence_name(table_name, pk = "id") # :nodoc:
           result = serial_sequence(table_name, pk)
           return nil unless result
+
           Utils.extract_schema_qualified_name(result).to_s
         rescue ActiveRecord::StatementInvalid
           PostgreSQL::Name.new(nil, "#{table_name}_#{pk}_seq").to_s
@@ -289,13 +291,17 @@ module ActiveRecord
             max_pk = query_value("SELECT MAX(#{quote_column_name pk}) FROM #{quote_table_name(table)}", "SCHEMA")
             if max_pk.nil?
               if database_version >= 100000
-                minvalue = query_value("SELECT seqmin FROM pg_sequence WHERE seqrelid = #{quote(quoted_sequence)}::regclass", "SCHEMA")
+                minvalue = query_value(
+                  "SELECT seqmin FROM pg_sequence WHERE seqrelid = #{quote(quoted_sequence)}::regclass", "SCHEMA"
+                )
               else
                 minvalue = query_value("SELECT min_value FROM #{quoted_sequence}", "SCHEMA")
               end
             end
 
-            query_value("SELECT setval(#{quote(quoted_sequence)}, #{max_pk ? max_pk : minvalue}, #{max_pk ? true : false})", "SCHEMA")
+            query_value(
+              "SELECT setval(#{quote(quoted_sequence)}, #{max_pk ? max_pk : minvalue}, #{max_pk ? true : false})", "SCHEMA"
+            )
           end
         end
 
@@ -401,23 +407,29 @@ module ActiveRecord
 
         def change_column(table_name, column_name, type, **options) # :nodoc:
           clear_cache!
-          sqls, procs = Array(change_column_for_alter(table_name, column_name, type, **options)).partition { |v| v.is_a?(String) }
+          sqls, procs = Array(change_column_for_alter(table_name, column_name, type, **options)).partition { |v|
+            v.is_a?(String)
+          }
           execute "ALTER TABLE #{quote_table_name(table_name)} #{sqls.join(", ")}"
           procs.each(&:call)
         end
 
         # Changes the default value of a table column.
         def change_column_default(table_name, column_name, default_or_changes) # :nodoc:
-          execute "ALTER TABLE #{quote_table_name(table_name)} #{change_column_default_for_alter(table_name, column_name, default_or_changes)}"
+          execute "ALTER TABLE #{quote_table_name(table_name)} #{change_column_default_for_alter(table_name,
+                                                                                                 column_name, default_or_changes)}"
         end
 
         def change_column_null(table_name, column_name, null, default = nil) # :nodoc:
           clear_cache!
           unless null || default.nil?
             column = column_for(table_name, column_name)
-            execute "UPDATE #{quote_table_name(table_name)} SET #{quote_column_name(column_name)}=#{quote_default_expression(default, column)} WHERE #{quote_column_name(column_name)} IS NULL" if column
+            execute "UPDATE #{quote_table_name(table_name)} SET #{quote_column_name(column_name)}=#{quote_default_expression(
+              default, column
+            )} WHERE #{quote_column_name(column_name)} IS NULL" if column
           end
-          execute "ALTER TABLE #{quote_table_name(table_name)} #{change_column_null_for_alter(table_name, column_name, null, default)}"
+          execute "ALTER TABLE #{quote_table_name(table_name)} #{change_column_null_for_alter(table_name, column_name,
+                                                                                              null, default)}"
         end
 
         # Adds comment for given table column or drops it if +comment+ is a +nil+
@@ -437,7 +449,8 @@ module ActiveRecord
         # Renames a column in a table.
         def rename_column(table_name, column_name, new_column_name) # :nodoc:
           clear_cache!
-          execute("ALTER TABLE #{quote_table_name(table_name)} #{rename_column_sql(table_name, column_name, new_column_name)}")
+          execute("ALTER TABLE #{quote_table_name(table_name)} #{rename_column_sql(table_name, column_name,
+                                                                                   new_column_name)}")
           rename_column_indexes(table_name, column_name, new_column_name)
         end
 
@@ -554,14 +567,16 @@ module ActiveRecord
               # The hard limit is 1GB, because of a 32-bit size field, and TOAST.
               case limit
               when nil, 0..0x3fffffff; super(type)
-              else raise ArgumentError, "No binary type has byte size #{limit}. The limit on binary can be at most 1GB - 1byte."
+              else raise ArgumentError,
+                         "No binary type has byte size #{limit}. The limit on binary can be at most 1GB - 1byte."
               end
             when "text"
               # PostgreSQL doesn't support limits on text columns.
               # The hard limit is 1GB, according to section 8.3 in the manual.
               case limit
               when nil, 0..0x3fffffff; super(type)
-              else raise ArgumentError, "No text type has byte size #{limit}. The limit on text can be at most 1GB - 1byte."
+              else raise ArgumentError,
+                         "No text type has byte size #{limit}. The limit on text can be at most 1GB - 1byte."
               end
             when "integer"
               case limit
@@ -590,7 +605,7 @@ module ActiveRecord
             s = visitor.compile(s) unless s.is_a?(String)
             # Remove any ASC/DESC modifiers
             s.gsub(/\s+(?:ASC|DESC)\b/i, "")
-             .gsub(/\s+NULLS\s+(?:FIRST|LAST)\b/i, "")
+              .gsub(/\s+NULLS\s+(?:FIRST|LAST)\b/i, "")
           }.compact_blank.map.with_index { |column, i| "#{column} AS alias_#{i}" }
 
           (order_columns << super).join(", ")
@@ -649,163 +664,167 @@ module ActiveRecord
         end
 
         private
-          def schema_creation
-            PostgreSQL::SchemaCreation.new(self)
+
+        def schema_creation
+          PostgreSQL::SchemaCreation.new(self)
+        end
+
+        def create_table_definition(name, **options)
+          PostgreSQL::TableDefinition.new(self, name, **options)
+        end
+
+        def create_alter_table(name)
+          PostgreSQL::AlterTable.new create_table_definition(name)
+        end
+
+        def new_column_from_field(table_name, field)
+          column_name, type, default, notnull, oid, fmod, collation, comment, attgenerated = field
+          type_metadata = fetch_type_metadata(column_name, type, oid.to_i, fmod.to_i)
+          default_value = extract_value_from_default(default)
+
+          if attgenerated.present?
+            default_function = default
+          else
+            default_function = extract_default_function(default_value, default)
           end
 
-          def create_table_definition(name, **options)
-            PostgreSQL::TableDefinition.new(self, name, **options)
+          if match = default_function&.match(/\Anextval\('"?(?<sequence_name>.+_(?<suffix>seq\d*))"?'::regclass\)\z/)
+            serial = sequence_name_from_parts(table_name, column_name, match[:suffix]) == match[:sequence_name]
           end
 
-          def create_alter_table(name)
-            PostgreSQL::AlterTable.new create_table_definition(name)
+          PostgreSQL::Column.new(
+            column_name,
+            default_value,
+            type_metadata,
+            !notnull,
+            default_function,
+            collation: collation,
+            comment: comment.presence,
+            serial: serial,
+            generated: attgenerated
+          )
+        end
+
+        def fetch_type_metadata(column_name, sql_type, oid, fmod)
+          cast_type = get_oid_type(oid, fmod, column_name, sql_type)
+          simple_type = SqlTypeMetadata.new(
+            sql_type: sql_type,
+            type: cast_type.type,
+            limit: cast_type.limit,
+            precision: cast_type.precision,
+            scale: cast_type.scale,
+          )
+          PostgreSQL::TypeMetadata.new(simple_type, oid: oid, fmod: fmod)
+        end
+
+        def sequence_name_from_parts(table_name, column_name, suffix)
+          over_length = [table_name, column_name, suffix].sum(&:length) + 2 - max_identifier_length
+
+          if over_length > 0
+            column_name_length = [(max_identifier_length - suffix.length - 2) / 2, column_name.length].min
+            over_length -= column_name.length - column_name_length
+            column_name = column_name[0, column_name_length - [over_length, 0].min]
           end
 
-          def new_column_from_field(table_name, field)
-            column_name, type, default, notnull, oid, fmod, collation, comment, attgenerated = field
-            type_metadata = fetch_type_metadata(column_name, type, oid.to_i, fmod.to_i)
-            default_value = extract_value_from_default(default)
+          if over_length > 0
+            table_name = table_name[0, table_name.length - over_length]
+          end
 
-            if attgenerated.present?
-              default_function = default
-            else
-              default_function = extract_default_function(default_value, default)
+          "#{table_name}_#{column_name}_#{suffix}"
+        end
+
+        def extract_foreign_key_action(specifier)
+          case specifier
+          when "c"; :cascade
+          when "n"; :nullify
+          when "r"; :restrict
+          end
+        end
+
+        def extract_foreign_key_deferrable(deferrable, deferred)
+          deferrable && (deferred ? :deferred : true)
+        end
+
+        def add_column_for_alter(table_name, column_name, type, **options)
+          return super unless options.key?(:comment)
+
+          [super, Proc.new { change_column_comment(table_name, column_name, options[:comment]) }]
+        end
+
+        def change_column_for_alter(table_name, column_name, type, **options)
+          td = create_table_definition(table_name)
+          cd = td.new_column_definition(column_name, type, **options)
+          sqls = [schema_creation.accept(ChangeColumnDefinition.new(cd, column_name))]
+          sqls << Proc.new {
+            change_column_comment(table_name, column_name, options[:comment])
+          } if options.key?(:comment)
+          sqls
+        end
+
+        def change_column_default_for_alter(table_name, column_name, default_or_changes)
+          column = column_for(table_name, column_name)
+          return unless column
+
+          default = extract_new_default_value(default_or_changes)
+          alter_column_query = "ALTER COLUMN #{quote_column_name(column_name)} %s"
+          if default.nil?
+            # <tt>DEFAULT NULL</tt> results in the same behavior as <tt>DROP DEFAULT</tt>. However, PostgreSQL will
+            # cast the default to the columns type, which leaves us with a default like "default NULL::character varying".
+            alter_column_query % "DROP DEFAULT"
+          else
+            alter_column_query % "SET DEFAULT #{quote_default_expression(default, column)}"
+          end
+        end
+
+        def change_column_null_for_alter(table_name, column_name, null, default = nil)
+          "ALTER COLUMN #{quote_column_name(column_name)} #{null ? 'DROP' : 'SET'} NOT NULL"
+        end
+
+        def add_index_opclass(quoted_columns, **options)
+          opclasses = options_for_index_columns(options[:opclass])
+          quoted_columns.each do |name, column|
+            column << " #{opclasses[name]}" if opclasses[name].present?
+          end
+        end
+
+        def add_options_for_index_columns(quoted_columns, **options)
+          quoted_columns = add_index_opclass(quoted_columns, **options)
+          super
+        end
+
+        def data_source_sql(name = nil, type: nil)
+          scope = quoted_scope(name, type: type)
+          scope[:type] ||= "'r','v','m','p','f'" # (r)elation/table, (v)iew, (m)aterialized view, (p)artitioned table, (f)oreign table
+
+          sql = +"SELECT c.relname FROM pg_class c LEFT JOIN pg_namespace n ON n.oid = c.relnamespace"
+          sql << " WHERE n.nspname = #{scope[:schema]}"
+          sql << " AND c.relname = #{scope[:name]}" if scope[:name]
+          sql << " AND c.relkind IN (#{scope[:type]})"
+          sql
+        end
+
+        def quoted_scope(name = nil, type: nil)
+          schema, name = extract_schema_qualified_name(name)
+          type = \
+            case type
+            when "BASE TABLE"
+              "'r','p'"
+            when "VIEW"
+              "'v','m'"
+            when "FOREIGN TABLE"
+              "'f'"
             end
+          scope = {}
+          scope[:schema] = schema ? quote(schema) : "ANY (current_schemas(false))"
+          scope[:name] = quote(name) if name
+          scope[:type] = type if type
+          scope
+        end
 
-            if match = default_function&.match(/\Anextval\('"?(?<sequence_name>.+_(?<suffix>seq\d*))"?'::regclass\)\z/)
-              serial = sequence_name_from_parts(table_name, column_name, match[:suffix]) == match[:sequence_name]
-            end
-
-            PostgreSQL::Column.new(
-              column_name,
-              default_value,
-              type_metadata,
-              !notnull,
-              default_function,
-              collation: collation,
-              comment: comment.presence,
-              serial: serial,
-              generated: attgenerated
-            )
-          end
-
-          def fetch_type_metadata(column_name, sql_type, oid, fmod)
-            cast_type = get_oid_type(oid, fmod, column_name, sql_type)
-            simple_type = SqlTypeMetadata.new(
-              sql_type: sql_type,
-              type: cast_type.type,
-              limit: cast_type.limit,
-              precision: cast_type.precision,
-              scale: cast_type.scale,
-            )
-            PostgreSQL::TypeMetadata.new(simple_type, oid: oid, fmod: fmod)
-          end
-
-          def sequence_name_from_parts(table_name, column_name, suffix)
-            over_length = [table_name, column_name, suffix].sum(&:length) + 2 - max_identifier_length
-
-            if over_length > 0
-              column_name_length = [(max_identifier_length - suffix.length - 2) / 2, column_name.length].min
-              over_length -= column_name.length - column_name_length
-              column_name = column_name[0, column_name_length - [over_length, 0].min]
-            end
-
-            if over_length > 0
-              table_name = table_name[0, table_name.length - over_length]
-            end
-
-            "#{table_name}_#{column_name}_#{suffix}"
-          end
-
-          def extract_foreign_key_action(specifier)
-            case specifier
-            when "c"; :cascade
-            when "n"; :nullify
-            when "r"; :restrict
-            end
-          end
-
-          def extract_foreign_key_deferrable(deferrable, deferred)
-            deferrable && (deferred ? :deferred : true)
-          end
-
-          def add_column_for_alter(table_name, column_name, type, **options)
-            return super unless options.key?(:comment)
-            [super, Proc.new { change_column_comment(table_name, column_name, options[:comment]) }]
-          end
-
-          def change_column_for_alter(table_name, column_name, type, **options)
-            td = create_table_definition(table_name)
-            cd = td.new_column_definition(column_name, type, **options)
-            sqls = [schema_creation.accept(ChangeColumnDefinition.new(cd, column_name))]
-            sqls << Proc.new { change_column_comment(table_name, column_name, options[:comment]) } if options.key?(:comment)
-            sqls
-          end
-
-          def change_column_default_for_alter(table_name, column_name, default_or_changes)
-            column = column_for(table_name, column_name)
-            return unless column
-
-            default = extract_new_default_value(default_or_changes)
-            alter_column_query = "ALTER COLUMN #{quote_column_name(column_name)} %s"
-            if default.nil?
-              # <tt>DEFAULT NULL</tt> results in the same behavior as <tt>DROP DEFAULT</tt>. However, PostgreSQL will
-              # cast the default to the columns type, which leaves us with a default like "default NULL::character varying".
-              alter_column_query % "DROP DEFAULT"
-            else
-              alter_column_query % "SET DEFAULT #{quote_default_expression(default, column)}"
-            end
-          end
-
-          def change_column_null_for_alter(table_name, column_name, null, default = nil)
-            "ALTER COLUMN #{quote_column_name(column_name)} #{null ? 'DROP' : 'SET'} NOT NULL"
-          end
-
-          def add_index_opclass(quoted_columns, **options)
-            opclasses = options_for_index_columns(options[:opclass])
-            quoted_columns.each do |name, column|
-              column << " #{opclasses[name]}" if opclasses[name].present?
-            end
-          end
-
-          def add_options_for_index_columns(quoted_columns, **options)
-            quoted_columns = add_index_opclass(quoted_columns, **options)
-            super
-          end
-
-          def data_source_sql(name = nil, type: nil)
-            scope = quoted_scope(name, type: type)
-            scope[:type] ||= "'r','v','m','p','f'" # (r)elation/table, (v)iew, (m)aterialized view, (p)artitioned table, (f)oreign table
-
-            sql = +"SELECT c.relname FROM pg_class c LEFT JOIN pg_namespace n ON n.oid = c.relnamespace"
-            sql << " WHERE n.nspname = #{scope[:schema]}"
-            sql << " AND c.relname = #{scope[:name]}" if scope[:name]
-            sql << " AND c.relkind IN (#{scope[:type]})"
-            sql
-          end
-
-          def quoted_scope(name = nil, type: nil)
-            schema, name = extract_schema_qualified_name(name)
-            type = \
-              case type
-              when "BASE TABLE"
-                "'r','p'"
-              when "VIEW"
-                "'v','m'"
-              when "FOREIGN TABLE"
-                "'f'"
-              end
-            scope = {}
-            scope[:schema] = schema ? quote(schema) : "ANY (current_schemas(false))"
-            scope[:name] = quote(name) if name
-            scope[:type] = type if type
-            scope
-          end
-
-          def extract_schema_qualified_name(string)
-            name = Utils.extract_schema_qualified_name(string.to_s)
-            [name.schema, name.identifier]
-          end
+        def extract_schema_qualified_name(string)
+          name = Utils.extract_schema_qualified_name(string.to_s)
+          [name.schema, name.identifier]
+        end
       end
     end
   end

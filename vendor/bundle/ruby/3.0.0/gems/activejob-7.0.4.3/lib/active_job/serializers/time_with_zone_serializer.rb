@@ -8,9 +8,10 @@ module ActiveJob
       end
 
       private
-        def klass
-          ActiveSupport::TimeWithZone
-        end
+
+      def klass
+        ActiveSupport::TimeWithZone
+      end
     end
   end
 end

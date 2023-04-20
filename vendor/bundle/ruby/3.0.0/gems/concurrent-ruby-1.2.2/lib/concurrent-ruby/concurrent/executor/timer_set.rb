@@ -7,7 +7,6 @@ require 'concurrent/executor/single_thread_executor'
 require 'concurrent/options'
 
 module Concurrent
-
   # Executes a collection of tasks, each after a given delay. A master task
   # monitors the set and schedules each task for execution at the appropriate
   # time. Tasks are run on the global thread pool or on the supplied executor.
@@ -17,7 +16,6 @@ module Concurrent
   #
   # @!macro monotonic_clock_warning
   class TimerSet < RubyExecutorService
-
     # Create a new set of timed tasks.
     #
     # @!macro executor_options
@@ -48,8 +46,9 @@ module Concurrent
     def post(delay, *args, &task)
       raise ArgumentError.new('no block given') unless block_given?
       return false unless running?
-      opts = { executor:  @task_executor,
-               args:      args,
+
+      opts = { executor: @task_executor,
+               args: args,
                timer_set: self }
       task = ScheduledTask.execute(delay, opts, &task) # may raise exception
       task.unscheduled? ? false : task
@@ -72,11 +71,11 @@ module Concurrent
     # @param [Hash] opts the options to create the object with.
     # @!visibility private
     def ns_initialize(opts)
-      @queue              = Collection::NonConcurrentPriorityQueue.new(order: :min)
-      @task_executor      = Options.executor_from_options(opts) || Concurrent.global_io_executor
-      @timer_executor     = SingleThreadExecutor.new
-      @condition          = Event.new
-      @ruby_pid           = $$ # detects if Ruby has forked
+      @queue = Collection::NonConcurrentPriorityQueue.new(order: :min)
+      @task_executor = Options.executor_from_options(opts) || Concurrent.global_io_executor
+      @timer_executor = SingleThreadExecutor.new
+      @condition = Event.new
+      @ruby_pid = $$ # detects if Ruby has forked
     end
 
     # Post the task to the internal queue.
@@ -93,6 +92,7 @@ module Concurrent
     # @!visibility private
     def ns_post_task(task)
       return false unless ns_running?
+
       ns_reset_if_forked
       if (task.initial_delay) <= 0.01
         task.executor.post { task.process_task }
@@ -145,7 +145,7 @@ module Concurrent
         task = synchronize { @condition.reset; @queue.peek }
         break unless task
 
-        now  = Concurrent.monotonic_time
+        now = Concurrent.monotonic_time
         diff = task.schedule_time - now
 
         if diff <= 0

@@ -55,7 +55,8 @@ end
 
 skipped_tests = %i[response_headers status_code trigger download]
 
-Capybara::SpecHelper.run_specs TestSessions::Chrome, CHROME_REMOTE_DRIVER.to_s, capybara_skip: skipped_tests do |example|
+Capybara::SpecHelper.run_specs TestSessions::Chrome, CHROME_REMOTE_DRIVER.to_s,
+                               capybara_skip: skipped_tests do |example|
   case example.metadata[:full_description]
   when 'Capybara::Session selenium_chrome_remote #attach_file with multipart form should not break when using HTML5 multiple file input uploading multiple files',
        'Capybara::Session selenium_chrome_remote #attach_file with multipart form should fire change once for each set of files uploaded',

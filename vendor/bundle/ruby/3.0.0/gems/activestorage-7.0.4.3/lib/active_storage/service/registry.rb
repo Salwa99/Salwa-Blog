@@ -16,17 +16,18 @@ module ActiveStorage
             yield key
           else
             raise KeyError, "Missing configuration for the #{key} Active Storage service. " \
-              "Configurations available for the #{configurations.keys.to_sentence} services."
+                            "Configurations available for the #{configurations.keys.to_sentence} services."
           end
         end
       end
     end
 
     private
-      attr_reader :configurations, :services
 
-      def configurator
-        @configurator ||= ActiveStorage::Service::Configurator.new(configurations)
-      end
+    attr_reader :configurations, :services
+
+    def configurator
+      @configurator ||= ActiveStorage::Service::Configurator.new(configurations)
+    end
   end
 end

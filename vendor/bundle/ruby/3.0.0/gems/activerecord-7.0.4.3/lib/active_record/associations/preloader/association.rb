@@ -55,43 +55,44 @@ module ActiveRecord
           end
 
           private
-            attr_reader :loader_query, :loaders, :keys_to_load, :already_loaded_records_by_key
 
-            def populate_keys_to_load_and_already_loaded_records
-              loaders.each do |loader|
-                loader.owners_by_key.each do |key, owners|
-                  if loaded_owner = owners.find { |owner| loader.loaded?(owner) }
-                    already_loaded_records_by_key[key] = loader.target_for(loaded_owner)
-                  else
-                    keys_to_load << key
-                  end
+          attr_reader :loader_query, :loaders, :keys_to_load, :already_loaded_records_by_key
+
+          def populate_keys_to_load_and_already_loaded_records
+            loaders.each do |loader|
+              loader.owners_by_key.each do |key, owners|
+                if loaded_owner = owners.find { |owner| loader.loaded?(owner) }
+                  already_loaded_records_by_key[key] = loader.target_for(loaded_owner)
+                else
+                  keys_to_load << key
                 end
               end
-
-              @keys_to_load.subtract(already_loaded_records_by_key.keys)
             end
 
-            def load_records
-              loader_query.load_records_for_keys(keys_to_load) do |record|
-                loaders.each { |l| l.set_inverse(record) }
-              end
-            end
+            @keys_to_load.subtract(already_loaded_records_by_key.keys)
+          end
 
-            def already_loaded_records
-              already_loaded_records_by_key.values.flatten
+          def load_records
+            loader_query.load_records_for_keys(keys_to_load) do |record|
+              loaders.each { |l| l.set_inverse(record) }
             end
+          end
+
+          def already_loaded_records
+            already_loaded_records_by_key.values.flatten
+          end
         end
 
         attr_reader :klass
 
         def initialize(klass, owners, reflection, preload_scope, reflection_scope, associate_by_default)
-          @klass         = klass
-          @owners        = owners.uniq(&:__id__)
-          @reflection    = reflection
+          @klass = klass
+          @owners = owners.uniq(&:__id__)
+          @reflection = reflection
           @preload_scope = preload_scope
           @reflection_scope = reflection_scope
-          @associate     = associate_by_default || !preload_scope || preload_scope.empty_scope?
-          @model         = owners.first && owners.first.class
+          @associate = associate_by_default || !preload_scope || preload_scope.empty_scope?
+          @model = owners.first && owners.first.class
           @run = false
         end
 
@@ -117,6 +118,7 @@ module ActiveRecord
 
         def run
           return self if run?
+
           @run = true
 
           records = records_by_owner
@@ -219,72 +221,75 @@ module ActiveRecord
         end
 
         private
-          attr_reader :owners, :reflection, :preload_scope, :model
 
-          # The name of the key on the model which declares the association
-          def owner_key_name
-            reflection.join_foreign_key
+        attr_reader :owners, :reflection, :preload_scope, :model
+
+        # The name of the key on the model which declares the association
+        def owner_key_name
+          reflection.join_foreign_key
+        end
+
+        def associate_records_to_owner(owner, records)
+          return if loaded?(owner)
+
+          association = owner.association(reflection.name)
+
+          if reflection.collection?
+            association.target = records
+          else
+            association.target = records.first
+          end
+        end
+
+        def key_conversion_required?
+          unless defined?(@key_conversion_required)
+            @key_conversion_required = (association_key_type != owner_key_type)
           end
 
-          def associate_records_to_owner(owner, records)
-            return if loaded?(owner)
+          @key_conversion_required
+        end
 
-            association = owner.association(reflection.name)
+        def convert_key(key)
+          if key_conversion_required?
+            key.to_s
+          else
+            key
+          end
+        end
 
-            if reflection.collection?
-              association.target = records
-            else
-              association.target = records.first
-            end
+        def association_key_type
+          @klass.type_for_attribute(association_key_name).type
+        end
+
+        def owner_key_type
+          @model.type_for_attribute(owner_key_name).type
+        end
+
+        def reflection_scope
+          @reflection_scope ||= reflection.join_scopes(klass.arel_table, klass.predicate_builder, klass).inject(
+            klass.unscoped, &:merge!
+          )
+        end
+
+        def build_scope
+          scope = klass.scope_for_association
+
+          if reflection.type && !reflection.through_reflection?
+            scope.where!(reflection.type => model.polymorphic_name)
           end
 
-          def key_conversion_required?
-            unless defined?(@key_conversion_required)
-              @key_conversion_required = (association_key_type != owner_key_type)
-            end
+          scope.merge!(reflection_scope) unless reflection_scope.empty_scope?
 
-            @key_conversion_required
+          if preload_scope && !preload_scope.empty_scope?
+            scope.merge!(preload_scope)
           end
 
-          def convert_key(key)
-            if key_conversion_required?
-              key.to_s
-            else
-              key
-            end
-          end
+          cascade_strict_loading(scope)
+        end
 
-          def association_key_type
-            @klass.type_for_attribute(association_key_name).type
-          end
-
-          def owner_key_type
-            @model.type_for_attribute(owner_key_name).type
-          end
-
-          def reflection_scope
-            @reflection_scope ||= reflection.join_scopes(klass.arel_table, klass.predicate_builder, klass).inject(klass.unscoped, &:merge!)
-          end
-
-          def build_scope
-            scope = klass.scope_for_association
-
-            if reflection.type && !reflection.through_reflection?
-              scope.where!(reflection.type => model.polymorphic_name)
-            end
-
-            scope.merge!(reflection_scope) unless reflection_scope.empty_scope?
-
-            if preload_scope && !preload_scope.empty_scope?
-              scope.merge!(preload_scope)
-            end
-
-            cascade_strict_loading(scope)
-          end
-
-          def cascade_strict_loading(scope)
-            preload_scope&.strict_loading_value ? scope.strict_loading : scope
-          end
+        def cascade_strict_loading(scope)
+          preload_scope&.strict_loading_value ? scope.strict_loading : scope
+        end
       end
     end
   end

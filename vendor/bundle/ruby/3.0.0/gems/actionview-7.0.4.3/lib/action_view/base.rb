@@ -142,11 +142,14 @@ module ActionView # :nodoc:
     include Helpers, ::ERB::Util, Context
 
     # Specify the proc used to decorate input tags that refer to attributes with errors.
-    cattr_accessor :field_error_proc, default: Proc.new { |html_tag, instance| content_tag :div, html_tag, class: "field_with_errors" }
+    cattr_accessor :field_error_proc, default: Proc.new { |html_tag, instance|
+                                                 content_tag :div, html_tag, class: "field_with_errors"
+                                               }
 
     # How to complete the streaming when an exception occurs.
     # This is our best guess: first try to close the attribute, then the tag.
-    cattr_accessor :streaming_completion_on_exception, default: %("><script>window.location = "/500.html"</script></html>)
+    cattr_accessor :streaming_completion_on_exception,
+                   default: %("><script>window.location = "/500.html"</script></html>)
 
     # Specify whether rendering within namespaced controllers should prefix
     # the partial paths for ActiveModel objects with the namespace.
@@ -185,7 +188,7 @@ module ActionView # :nodoc:
           # We can't implement these as self.class because subclasses will
           # share the same template cache as superclasses, so "changed?" won't work
           # correctly.
-          define_method(:compiled_method_container)           { subclass }
+          define_method(:compiled_method_container) { subclass }
           define_singleton_method(:compiled_method_container) { subclass }
 
           def inspect
@@ -200,6 +203,7 @@ module ActionView # :nodoc:
     end
 
     attr_reader :view_renderer, :lookup_context
+
     attr_internal :config, :assigns
 
     delegate :formats, :formats=, :locale, :locale=, :view_paths, :view_paths=, to: :lookup_context
@@ -255,7 +259,7 @@ module ActionView # :nodoc:
     end
 
     def in_rendering_context(options)
-      old_view_renderer  = @view_renderer
+      old_view_renderer = @view_renderer
       old_lookup_context = @lookup_context
 
       if !lookup_context.html_fallback_for_js && options[:formats]

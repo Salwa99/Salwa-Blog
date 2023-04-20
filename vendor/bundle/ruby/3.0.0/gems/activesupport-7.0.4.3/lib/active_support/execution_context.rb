@@ -45,9 +45,10 @@ module ActiveSupport
       end
 
       private
-        def store
-          IsolatedExecutionState[:active_support_execution_context] ||= {}
-        end
+
+      def store
+        IsolatedExecutionState[:active_support_execution_context] ||= {}
+      end
     end
   end
 end

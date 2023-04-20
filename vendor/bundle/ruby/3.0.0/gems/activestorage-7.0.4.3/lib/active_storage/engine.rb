@@ -26,8 +26,10 @@ module ActiveStorage
     isolate_namespace ActiveStorage
 
     config.active_storage = ActiveSupport::OrderedOptions.new
-    config.active_storage.previewers = [ ActiveStorage::Previewer::PopplerPDFPreviewer, ActiveStorage::Previewer::MuPDFPreviewer, ActiveStorage::Previewer::VideoPreviewer ]
-    config.active_storage.analyzers = [ ActiveStorage::Analyzer::ImageAnalyzer::Vips, ActiveStorage::Analyzer::ImageAnalyzer::ImageMagick, ActiveStorage::Analyzer::VideoAnalyzer, ActiveStorage::Analyzer::AudioAnalyzer ]
+    config.active_storage.previewers = [ActiveStorage::Previewer::PopplerPDFPreviewer,
+                                        ActiveStorage::Previewer::MuPDFPreviewer, ActiveStorage::Previewer::VideoPreviewer]
+    config.active_storage.analyzers = [ActiveStorage::Analyzer::ImageAnalyzer::Vips,
+                                       ActiveStorage::Analyzer::ImageAnalyzer::ImageMagick, ActiveStorage::Analyzer::VideoAnalyzer, ActiveStorage::Analyzer::AudioAnalyzer]
     config.active_storage.paths = ActiveSupport::OrderedOptions.new
     config.active_storage.queues = ActiveSupport::InheritableOptions.new
     config.active_storage.precompile_assets = true
@@ -84,13 +86,13 @@ module ActiveStorage
 
     initializer "active_storage.configs" do
       config.after_initialize do |app|
-        ActiveStorage.logger            = app.config.active_storage.logger || Rails.logger
+        ActiveStorage.logger = app.config.active_storage.logger || Rails.logger
         ActiveStorage.variant_processor = app.config.active_storage.variant_processor || :mini_magick
-        ActiveStorage.previewers        = app.config.active_storage.previewers || []
-        ActiveStorage.analyzers         = app.config.active_storage.analyzers || []
-        ActiveStorage.paths             = app.config.active_storage.paths || {}
-        ActiveStorage.routes_prefix     = app.config.active_storage.routes_prefix || "/rails/active_storage"
-        ActiveStorage.draw_routes       = app.config.active_storage.draw_routes != false
+        ActiveStorage.previewers = app.config.active_storage.previewers || []
+        ActiveStorage.analyzers = app.config.active_storage.analyzers || []
+        ActiveStorage.paths = app.config.active_storage.paths || {}
+        ActiveStorage.routes_prefix = app.config.active_storage.routes_prefix || "/rails/active_storage"
+        ActiveStorage.draw_routes = app.config.active_storage.draw_routes != false
         ActiveStorage.resolve_model_to_route = app.config.active_storage.resolve_model_to_route || :rails_storage_redirect
 
         ActiveStorage.supported_image_processing_methods += app.config.active_storage.supported_image_processing_methods || []
@@ -185,7 +187,7 @@ module ActiveStorage
     initializer "active_storage.asset" do
       config.after_initialize do |app|
         if app.config.respond_to?(:assets) && app.config.active_storage.precompile_assets
-          app.config.assets.precompile += %w( activestorage activestorage.esm )
+          app.config.assets.precompile += %w(activestorage activestorage.esm)
         end
       end
     end

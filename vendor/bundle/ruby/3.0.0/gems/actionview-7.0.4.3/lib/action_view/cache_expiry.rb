@@ -22,11 +22,12 @@ module ActionView
       end
 
       private
-        def clear_cache
-          @execution_lock.with_write_lock do
-            ActionView::LookupContext::DetailsKey.clear
-          end
+
+      def clear_cache
+        @execution_lock.with_write_lock do
+          ActionView::LookupContext::DetailsKey.clear
         end
+      end
     end
 
     class ViewModificationWatcher
@@ -54,13 +55,14 @@ module ActionView
       end
 
       private
-        def dirs_to_watch
-          all_view_paths.grep(FileSystemResolver).map!(&:path).tap(&:uniq!).sort!
-        end
 
-        def all_view_paths
-          ActionView::ViewPaths.all_view_paths.flat_map(&:paths)
-        end
+      def dirs_to_watch
+        all_view_paths.grep(FileSystemResolver).map!(&:path).tap(&:uniq!).sort!
+      end
+
+      def all_view_paths
+        ActionView::ViewPaths.all_view_paths.flat_map(&:paths)
+      end
     end
   end
 end

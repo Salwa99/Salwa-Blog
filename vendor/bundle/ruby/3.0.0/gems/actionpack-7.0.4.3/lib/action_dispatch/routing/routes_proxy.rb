@@ -22,7 +22,8 @@ module ActionDispatch
         end
       end
 
-    private
+      private
+
       def respond_to_missing?(method, _)
         super || @helpers.respond_to?(method)
       end

@@ -72,33 +72,34 @@ module ActionView
       #
       def translate(key, **options)
         return key.map { |k| translate(k, **options) } if key.is_a?(Array)
+
         key = key&.to_s unless key.is_a?(Symbol)
 
         alternatives = if options.key?(:default)
-          options[:default].is_a?(Array) ? options.delete(:default).compact : [options.delete(:default)]
-        end
+                         options[:default].is_a?(Array) ? options.delete(:default).compact : [options.delete(:default)]
+                       end
 
         options[:raise] = true if options[:raise].nil? && TranslationHelper.raise_on_missing_translations
         default = MISSING_TRANSLATION
 
         translation = while key || alternatives.present?
-          if alternatives.blank? && !options[:raise].nil?
-            default = NO_DEFAULT # let I18n handle missing translation
-          end
+                        if alternatives.blank? && !options[:raise].nil?
+                          default = NO_DEFAULT # let I18n handle missing translation
+                        end
 
-          key = scope_key_by_partial(key)
+                        key = scope_key_by_partial(key)
 
-          translated = ActiveSupport::HtmlSafeTranslation.translate(key, **options, default: default)
+                        translated = ActiveSupport::HtmlSafeTranslation.translate(key, **options, default: default)
 
-          break translated unless translated == MISSING_TRANSLATION
+                        break translated unless translated == MISSING_TRANSLATION
 
-          if alternatives.present? && !alternatives.first.is_a?(Symbol)
-            break alternatives.first && I18n.translate(**options, default: alternatives)
-          end
+                        if alternatives.present? && !alternatives.first.is_a?(Symbol)
+                          break alternatives.first && I18n.translate(**options, default: alternatives)
+                        end
 
-          first_key ||= key
-          key = alternatives&.shift
-        end
+                        first_key ||= key
+                        key = alternatives&.shift
+                      end
 
         if key.nil? && !first_key.nil?
           translation = missing_translation(first_key, options)
@@ -119,43 +120,44 @@ module ActionView
       alias :l :localize
 
       private
-        MISSING_TRANSLATION = -(2**60)
-        private_constant :MISSING_TRANSLATION
 
-        NO_DEFAULT = [].freeze
-        private_constant :NO_DEFAULT
+      MISSING_TRANSLATION = -(2**60)
+      private_constant :MISSING_TRANSLATION
 
-        def scope_key_by_partial(key)
-          if key&.start_with?(".")
-            if @virtual_path
-              @_scope_key_by_partial_cache ||= {}
-              @_scope_key_by_partial_cache[@virtual_path] ||= @virtual_path.gsub(%r{/_?}, ".")
-              "#{@_scope_key_by_partial_cache[@virtual_path]}#{key}"
-            else
-              raise "Cannot use t(#{key.inspect}) shortcut because path is not available"
-            end
+      NO_DEFAULT = [].freeze
+      private_constant :NO_DEFAULT
+
+      def scope_key_by_partial(key)
+        if key&.start_with?(".")
+          if @virtual_path
+            @_scope_key_by_partial_cache ||= {}
+            @_scope_key_by_partial_cache[@virtual_path] ||= @virtual_path.gsub(%r{/_?}, ".")
+            "#{@_scope_key_by_partial_cache[@virtual_path]}#{key}"
           else
-            key
+            raise "Cannot use t(#{key.inspect}) shortcut because path is not available"
+          end
+        else
+          key
+        end
+      end
+
+      def missing_translation(key, options)
+        keys = I18n.normalize_keys(options[:locale] || I18n.locale, key, options[:scope])
+
+        title = +"translation missing: #{keys.join(".")}"
+
+        options.each do |name, value|
+          unless name == :scope
+            title << ", " << name.to_s << ": " << ERB::Util.html_escape(value)
           end
         end
 
-        def missing_translation(key, options)
-          keys = I18n.normalize_keys(options[:locale] || I18n.locale, key, options[:scope])
-
-          title = +"translation missing: #{keys.join(".")}"
-
-          options.each do |name, value|
-            unless name == :scope
-              title << ", " << name.to_s << ": " << ERB::Util.html_escape(value)
-            end
-          end
-
-          if ActionView::Base.debug_missing_translation
-            content_tag("span", keys.last.to_s.titleize, class: "translation_missing", title: title)
-          else
-            title
-          end
+        if ActionView::Base.debug_missing_translation
+          content_tag("span", keys.last.to_s.titleize, class: "translation_missing", title: title)
+        else
+          title
         end
+      end
     end
   end
 end

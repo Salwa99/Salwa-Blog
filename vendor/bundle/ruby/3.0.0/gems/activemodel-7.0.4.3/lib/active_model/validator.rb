@@ -138,6 +138,7 @@ module ActiveModel
     def initialize(options)
       @attributes = Array(options.delete(:attributes))
       raise ArgumentError, ":attributes cannot be blank" if @attributes.empty?
+
       super
       check_validity!
     end
@@ -149,6 +150,7 @@ module ActiveModel
       attributes.each do |attribute|
         value = record.read_attribute_for_validation(attribute)
         next if (value.nil? && options[:allow_nil]) || (value.blank? && options[:allow_blank])
+
         value = prepare_value_for_validation(value, record, attribute)
         validate_each(record, attribute, value)
       end
@@ -167,9 +169,10 @@ module ActiveModel
     end
 
     private
-      def prepare_value_for_validation(value, record, attr_name)
-        value
-      end
+
+    def prepare_value_for_validation(value, record, attr_name)
+      value
+    end
   end
 
   # +BlockValidator+ is a special +EachValidator+ which receives a block on initialization
@@ -181,8 +184,9 @@ module ActiveModel
     end
 
     private
-      def validate_each(record, attribute, value)
-        @block.call(record, attribute, value)
-      end
+
+    def validate_each(record, attribute, value)
+      @block.call(record, attribute, value)
+    end
   end
 end

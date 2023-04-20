@@ -1,8 +1,8 @@
 # encoding: utf-8
 # frozen_string_literal: true
 
-module Mail #:nodoc:
-  module Multibyte #:nodoc:
+module Mail # :nodoc:
+  module Multibyte # :nodoc:
     # Returns a regular expression that matches valid characters in the current encoding
     def self.valid_character
       VALID_CHARACTER[Encoding.default_external.to_s]

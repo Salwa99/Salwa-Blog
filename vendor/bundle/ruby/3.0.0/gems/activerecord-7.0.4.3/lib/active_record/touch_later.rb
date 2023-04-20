@@ -26,7 +26,8 @@ module ActiveRecord
       # touch the parents as we are not calling the after_save callbacks
       self.class.reflect_on_all_associations(:belongs_to).each do |r|
         if touch = r.options[:touch]
-          ActiveRecord::Associations::Builder::BelongsTo.touch_record(self, changes_to_save, r.foreign_key, r.name, touch, :touch_later)
+          ActiveRecord::Associations::Builder::BelongsTo.touch_record(self, changes_to_save, r.foreign_key, r.name,
+                                                                      touch, :touch_later)
         end
       end
     end
@@ -42,24 +43,25 @@ module ActiveRecord
     end
 
     private
-      def surreptitiously_touch(attr_names)
-        attr_names.each do |attr_name|
-          _write_attribute(attr_name, @_touch_time)
-          clear_attribute_change(attr_name)
-        end
-      end
 
-      def touch_deferred_attributes
-        @_skip_dirty_tracking = true
-        touch(time: @_touch_time)
+    def surreptitiously_touch(attr_names)
+      attr_names.each do |attr_name|
+        _write_attribute(attr_name, @_touch_time)
+        clear_attribute_change(attr_name)
       end
+    end
 
-      def has_defer_touch_attrs?
-        defined?(@_defer_touch_attrs) && @_defer_touch_attrs.present?
-      end
+    def touch_deferred_attributes
+      @_skip_dirty_tracking = true
+      touch(time: @_touch_time)
+    end
 
-      def belongs_to_touch_method
-        :touch_later
-      end
+    def has_defer_touch_attrs?
+      defined?(@_defer_touch_attrs) && @_defer_touch_attrs.present?
+    end
+
+    def belongs_to_touch_method
+      :touch_later
+    end
   end
 end

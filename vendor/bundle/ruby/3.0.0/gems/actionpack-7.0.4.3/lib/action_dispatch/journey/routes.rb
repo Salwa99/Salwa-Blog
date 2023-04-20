@@ -10,11 +10,11 @@ module ActionDispatch
       attr_reader :routes, :custom_routes, :anchored_routes
 
       def initialize
-        @routes             = []
-        @ast                = nil
-        @anchored_routes    = []
-        @custom_routes      = []
-        @simulator          = nil
+        @routes = []
+        @ast = nil
+        @anchored_routes = []
+        @custom_routes = []
+        @simulator = nil
       end
 
       def empty?
@@ -71,10 +71,11 @@ module ActionDispatch
       end
 
       private
-        def clear_cache!
-          @ast                = nil
-          @simulator          = nil
-        end
+
+      def clear_cache!
+        @ast = nil
+        @simulator = nil
+      end
     end
   end
 end

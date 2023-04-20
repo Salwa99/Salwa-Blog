@@ -65,23 +65,24 @@ module ActiveModel
     end
 
     private
-      attr_reader :attributes
 
-      def forced_changes
-        @forced_changes ||= {}
-      end
+    attr_reader :attributes
 
-      def attr_names
-        attributes.keys
-      end
+    def forced_changes
+      @forced_changes ||= {}
+    end
 
-      def attribute_changed?(attr_name)
-        forced_changes.include?(attr_name) || !!attributes[attr_name].changed?
-      end
+    def attr_names
+      attributes.keys
+    end
 
-      def fetch_value(attr_name)
-        attributes.fetch_value(attr_name)
-      end
+    def attribute_changed?(attr_name)
+      forced_changes.include?(attr_name) || !!attributes[attr_name].changed?
+    end
+
+    def fetch_value(attr_name)
+      attributes.fetch_value(attr_name)
+    end
   end
 
   class ForcedMutationTracker < AttributeMutationTracker # :nodoc:
@@ -123,26 +124,27 @@ module ActiveModel
     end
 
     private
-      attr_reader :finalized_changes
 
-      def attr_names
-        forced_changes.keys
-      end
+    attr_reader :finalized_changes
 
-      def attribute_changed?(attr_name)
-        forced_changes.include?(attr_name)
-      end
+    def attr_names
+      forced_changes.keys
+    end
 
-      def fetch_value(attr_name)
-        attributes.send(:_read_attribute, attr_name)
-      end
+    def attribute_changed?(attr_name)
+      forced_changes.include?(attr_name)
+    end
 
-      def clone_value(attr_name)
-        value = fetch_value(attr_name)
-        value.duplicable? ? value.clone : value
-      rescue TypeError, NoMethodError
-        value
-      end
+    def fetch_value(attr_name)
+      attributes.send(:_read_attribute, attr_name)
+    end
+
+    def clone_value(attr_name)
+      value = fetch_value(attr_name)
+      value.duplicable? ? value.clone : value
+    rescue TypeError, NoMethodError
+      value
+    end
   end
 
   class NullMutationTracker # :nodoc:

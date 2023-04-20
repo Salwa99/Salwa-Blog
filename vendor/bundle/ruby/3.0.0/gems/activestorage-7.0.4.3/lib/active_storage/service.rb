@@ -147,32 +147,34 @@ module ActiveStorage
     end
 
     private
-      def private_url(key, expires_in:, filename:, disposition:, content_type:, **)
-        raise NotImplementedError
-      end
 
-      def public_url(key, **)
-        raise NotImplementedError
-      end
+    def private_url(key, expires_in:, filename:, disposition:, content_type:, **)
+      raise NotImplementedError
+    end
 
-      def custom_metadata_headers(metadata)
-        raise NotImplementedError
-      end
+    def public_url(key, **)
+      raise NotImplementedError
+    end
 
-      def instrument(operation, payload = {}, &block)
-        ActiveSupport::Notifications.instrument(
-          "service_#{operation}.active_storage",
-          payload.merge(service: service_name), &block)
-      end
+    def custom_metadata_headers(metadata)
+      raise NotImplementedError
+    end
 
-      def service_name
-        # ActiveStorage::Service::DiskService => Disk
-        self.class.name.split("::").third.remove("Service")
-      end
+    def instrument(operation, payload = {}, &block)
+      ActiveSupport::Notifications.instrument(
+        "service_#{operation}.active_storage",
+        payload.merge(service: service_name), &block
+      )
+    end
 
-      def content_disposition_with(type: "inline", filename:)
-        disposition = (type.to_s.presence_in(%w( attachment inline )) || "inline")
-        ActionDispatch::Http::ContentDisposition.format(disposition: disposition, filename: filename.sanitized)
-      end
+    def service_name
+      # ActiveStorage::Service::DiskService => Disk
+      self.class.name.split("::").third.remove("Service")
+    end
+
+    def content_disposition_with(type: "inline", filename:)
+      disposition = (type.to_s.presence_in(%w(attachment inline)) || "inline")
+      ActionDispatch::Http::ContentDisposition.format(disposition: disposition, filename: filename.sanitized)
+    end
   end
 end

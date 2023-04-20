@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Mail
   module Matchers
     def have_sent_email
@@ -118,10 +119,13 @@ module Mail
         candidate_deliveries = deliveries
         modifiers =
           %w(sender recipients copy_recipients blind_copy_recipients subject
-          subject_matcher body body_matcher html_part_body text_part_body  having_attachments attachments)
+             subject_matcher body body_matcher html_part_body text_part_body having_attachments attachments)
         modifiers.each do |modifier_name|
           next unless instance_variable_defined?("@#{modifier_name}")
-          candidate_deliveries = candidate_deliveries.select{|matching_delivery| self.send("matches_on_#{modifier_name}?", matching_delivery)}
+
+          candidate_deliveries = candidate_deliveries.select { |matching_delivery|
+            self.send("matches_on_#{modifier_name}?", matching_delivery)
+          }
         end
 
         candidate_deliveries
@@ -132,15 +136,15 @@ module Mail
       end
 
       def matches_on_recipients?(delivery)
-        @recipients.all? {|recipient| delivery.to.include?(recipient) }
+        @recipients.all? { |recipient| delivery.to.include?(recipient) }
       end
 
       def matches_on_copy_recipients?(delivery)
-        @copy_recipients.all? {|recipient| delivery.cc.include?(recipient) }
+        @copy_recipients.all? { |recipient| delivery.cc.include?(recipient) }
       end
 
       def matches_on_blind_copy_recipients?(delivery)
-        @blind_copy_recipients.all? {|recipient| delivery.bcc.include?(recipient) }
+        @blind_copy_recipients.all? { |recipient| delivery.bcc.include?(recipient) }
       end
 
       def matches_on_subject?(delivery)
@@ -157,7 +161,7 @@ module Mail
       end
 
       def matches_on_attachments?(delivery)
-        @attachments.each_with_index.inject( true ) do |sent_attachments, (attachment, index)|
+        @attachments.each_with_index.inject(true) do |sent_attachments, (attachment, index)|
           sent_attachments &&= (attachment === delivery.attachments[index])
         end
       end

@@ -1,11 +1,12 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/parsers/received_parser'
 require 'mail/utilities'
 require 'date'
 
 module Mail
-  class ReceivedElement #:nodoc:
+  class ReceivedElement # :nodoc:
     attr_reader :info, :date_time
 
     def initialize(string)
@@ -24,12 +25,14 @@ module Mail
     end
 
     private
-      def datetime_for(received)
-        ::DateTime.parse("#{received.date} #{received.time}")
-      rescue ArgumentError => e
-        raise e unless e.message == 'invalid date'
-        warn "WARNING: Invalid date field for received element (#{received.date} #{received.time}): #{e.class}: #{e.message}"
-        nil
-      end
+
+    def datetime_for(received)
+      ::DateTime.parse("#{received.date} #{received.time}")
+    rescue ArgumentError => e
+      raise e unless e.message == 'invalid date'
+
+      warn "WARNING: Invalid date field for received element (#{received.date} #{received.time}): #{e.class}: #{e.message}"
+      nil
+    end
   end
 end

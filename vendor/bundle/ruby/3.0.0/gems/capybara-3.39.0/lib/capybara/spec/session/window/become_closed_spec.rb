@@ -36,7 +36,8 @@ Capybara::SpecHelper.spec '#become_closed', requires: %i[windows js] do
       Capybara.using_wait_time 2 do
         expect do
           expect(other_window).to become_closed(wait: 0.2)
-        end.to raise_error(RSpec::Expectations::ExpectationNotMetError, /\Aexpected #<Window @handle=".+"> to become closed after 0.2 seconds\Z/)
+        end.to raise_error(RSpec::Expectations::ExpectationNotMetError,
+                           /\Aexpected #<Window @handle=".+"> to become closed after 0.2 seconds\Z/)
       end
     end
   end
@@ -58,7 +59,8 @@ Capybara::SpecHelper.spec '#become_closed', requires: %i[windows js] do
       Capybara.using_wait_time 0.4 do
         expect do
           expect(other_window).to become_closed
-        end.to raise_error(RSpec::Expectations::ExpectationNotMetError, /\Aexpected #<Window @handle=".+"> to become closed after 0.4 seconds\Z/)
+        end.to raise_error(RSpec::Expectations::ExpectationNotMetError,
+                           /\Aexpected #<Window @handle=".+"> to become closed after 0.4 seconds\Z/)
       end
     end
   end
@@ -82,7 +84,8 @@ Capybara::SpecHelper.spec '#become_closed', requires: %i[windows js] do
       Capybara.using_wait_time 3.1 do
         expect do
           expect(other_window).not_to become_closed
-        end.to raise_error(RSpec::Expectations::ExpectationNotMetError, /\Aexpected #<Window @handle=".+"> not to become closed after 3.1 seconds\Z/)
+        end.to raise_error(RSpec::Expectations::ExpectationNotMetError,
+                           /\Aexpected #<Window @handle=".+"> not to become closed after 3.1 seconds\Z/)
       end
     end
   end

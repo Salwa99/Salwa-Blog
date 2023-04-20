@@ -34,16 +34,17 @@ module ActiveStorage
       end
 
       private
-        def reflection_class_for(macro)
-          case macro
-          when :has_one_attached
-            HasOneAttachedReflection
-          when :has_many_attached
-            HasManyAttachedReflection
-          else
-            super
-          end
+
+      def reflection_class_for(macro)
+        case macro
+        when :has_one_attached
+          HasOneAttachedReflection
+        when :has_many_attached
+          HasManyAttachedReflection
+        else
+          super
         end
+      end
     end
 
     module ActiveRecordExtensions

@@ -62,7 +62,8 @@ Capybara::SpecHelper.spec 'node' do
     end
 
     it 'should return multiple style values' do
-      expect(@session.find(:css, '#first').style('display', :'line-height')).to eq('display' => 'block', 'line-height' => '25px')
+      expect(@session.find(:css, '#first').style('display',
+                                                 :'line-height')).to eq('display' => 'block', 'line-height' => '25px')
     end
   end
 
@@ -266,7 +267,8 @@ Capybara::SpecHelper.spec 'node' do
     end
 
     it 'details non-summary descendants should be non-visible when closed' do
-      descendants = @session.all(:css, '#closed_details > *:not(summary), #closed_details > *:not(summary) *', minimum: 2)
+      descendants = @session.all(:css, '#closed_details > *:not(summary), #closed_details > *:not(summary) *',
+                                 minimum: 2)
       expect(descendants).not_to include(be_visible)
     end
 
@@ -1380,7 +1382,8 @@ Capybara::SpecHelper.spec 'node' do
       end)
     end
 
-    it 'sets an explanatory exception as the cause of server exceptions with errors with initializers', requires: %i[server js] do
+    it 'sets an explanatory exception as the cause of server exceptions with errors with initializers',
+       requires: %i[server js] do
       quietly { @session.visit('/other_error') }
       expect do
         @session.find(:css, 'span')

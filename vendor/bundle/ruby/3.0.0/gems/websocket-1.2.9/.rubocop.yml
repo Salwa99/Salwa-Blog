@@ -8,7 +8,7 @@ AllCops:
 Gemspec/RequiredRubyVersion:
   Enabled: false
 
-Layout/IndentHeredoc:
+Layout/HeredocIndentation:
   Enabled: false
 
 # Target: 15
@@ -31,7 +31,7 @@ Metrics/CyclomaticComplexity:
   Exclude:
     - spec/support/handshake_requests.rb
 
-Metrics/LineLength:
+Layout/LineLength:
   Enabled: false
 
 # Target: 10

@@ -64,26 +64,26 @@ module ActiveSupport
   # (via <tt>action_dispatch.callback</tt> notification) in a Rails environment.
   class LogSubscriber < Subscriber
     # Embed in a String to clear all previous ANSI sequences.
-    CLEAR   = "\e[0m"
-    BOLD    = "\e[1m"
+    CLEAR = "\e[0m"
+    BOLD = "\e[1m"
 
     # Colors
-    BLACK   = "\e[30m"
-    RED     = "\e[31m"
-    GREEN   = "\e[32m"
-    YELLOW  = "\e[33m"
-    BLUE    = "\e[34m"
+    BLACK = "\e[30m"
+    RED = "\e[31m"
+    GREEN = "\e[32m"
+    YELLOW = "\e[33m"
+    BLUE = "\e[34m"
     MAGENTA = "\e[35m"
-    CYAN    = "\e[36m"
-    WHITE   = "\e[37m"
+    CYAN = "\e[36m"
+    WHITE = "\e[37m"
 
     mattr_accessor :colorize_logging, default: true
 
     class << self
       def logger
         @logger ||= if defined?(Rails) && Rails.respond_to?(:logger)
-          Rails.logger
-        end
+                      Rails.logger
+                    end
       end
 
       attr_writer :logger
@@ -98,9 +98,10 @@ module ActiveSupport
       end
 
       private
-        def fetch_public_methods(subscriber, inherit_all)
-          subscriber.public_methods(inherit_all) - LogSubscriber.public_instance_methods(true)
-        end
+
+      def fetch_public_methods(subscriber, inherit_all)
+        subscriber.public_methods(inherit_all) - LogSubscriber.public_instance_methods(true)
+      end
     end
 
     def logger
@@ -123,7 +124,8 @@ module ActiveSupport
       log_exception(event.name, e)
     end
 
-  private
+    private
+
     %w(info debug warn error fatal unknown).each do |level|
       class_eval <<-METHOD, __FILE__, __LINE__ + 1
         def #{level}(progname = nil, &block)
@@ -138,8 +140,9 @@ module ActiveSupport
     # end of the returned String.
     def color(text, color, bold = false) # :doc:
       return text unless colorize_logging
+
       color = self.class.const_get(color.upcase) if color.is_a?(Symbol)
-      bold  = bold ? BOLD : ""
+      bold = bold ? BOLD : ""
       "#{bold}#{color}#{text}#{CLEAR}"
     end
 

@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   frame.rb -
 #   	by Keiju ISHITSUKA(Nihon Rational Software Co.,Ltd)
@@ -11,6 +12,7 @@ module IRB
         super("frame overflow")
       end
     end
+
     class FrameUnderflow < StandardError
       def initialize
         super("frame underflow")
@@ -44,6 +46,7 @@ module IRB
     def top(n = 0)
       bind = @frames[-(n + CALL_STACK_OFFSET)]
       fail FrameUnderflow unless bind
+
       bind
     end
 
@@ -54,6 +57,7 @@ module IRB
     def bottom(n = 0)
       bind = @frames[n]
       fail FrameOverflow unless bind
+
       bind
     end
 
@@ -73,7 +77,7 @@ module IRB
     end
 
     @backtrace = Frame.new
-    set_trace_func proc{|event, file, line, id, binding, klass|
+    set_trace_func proc { |event, file, line, id, binding, klass|
       @backtrace.trace_func(event, file, line, id, binding)
     }
   end

@@ -1,9 +1,10 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/multibyte/unicode'
 
-module Mail #:nodoc:
-  module Multibyte #:nodoc:
+module Mail # :nodoc:
+  module Multibyte # :nodoc:
     # Chars enables you to work transparently with UTF-8 encoding in the Ruby String class without having extensive
     # knowledge about the encoding. A Chars object accepts a string upon initialization and proxies String methods in an
     # encoding safe manner. All the normal String methods are also implemented on the proxy.
@@ -57,7 +58,7 @@ module Mail #:nodoc:
 
       # Returns +true+ if _obj_ responds to the given method. Private methods are included in the search
       # only if the optional second parameter evaluates to +true+.
-      def respond_to?(method, include_private=false)
+      def respond_to?(method, include_private = false)
         super || @wrapped_string.respond_to?(method, include_private) || false
       end
 
@@ -114,12 +115,14 @@ module Mail #:nodoc:
           result = Unicode.u_unpack(@wrapped_string)
           if args[0].is_a?(Integer)
             raise IndexError, "index #{args[0]} out of string" if args[0] >= result.length
+
             min = args[0]
             max = args[1].nil? ? min : (min + args[1] - 1)
             range = Range.new(min, max)
             replace_by = [replace_by].pack('U') if replace_by.is_a?(Integer)
           elsif args.first.is_a?(Range)
             raise RangeError, "#{args[0]} out of range" if args[0].min >= result.length
+
             range = args[0]
           else
             needle = args[0].to_s
@@ -164,6 +167,7 @@ module Mail #:nodoc:
           cps = Unicode.u_unpack(@wrapped_string).slice(*args)
           result = cps && cps.pack('U*')
         end
+
         result && chars(result)
       end
       alias_method :[], :slice
@@ -269,50 +273,51 @@ module Mail #:nodoc:
 
       protected
 
-        def translate_offset(byte_offset) #:nodoc:
-          return nil if byte_offset.nil?
-          return 0   if @wrapped_string == ''
+      def translate_offset(byte_offset) # :nodoc:
+        return nil if byte_offset.nil?
+        return 0 if @wrapped_string == ''
 
-          if @wrapped_string.respond_to?(:force_encoding)
-            @wrapped_string = @wrapped_string.dup.force_encoding(Encoding::ASCII_8BIT)
-          end
-
-          begin
-            @wrapped_string[0...byte_offset].unpack('U*').length
-          rescue ArgumentError
-            byte_offset -= 1
-            retry
-          end
+        if @wrapped_string.respond_to?(:force_encoding)
+          @wrapped_string = @wrapped_string.dup.force_encoding(Encoding::ASCII_8BIT)
         end
 
-        def justify(integer, way, padstr=' ') #:nodoc:
-          raise ArgumentError, "zero width padding" if padstr.length == 0
-          padsize = integer - size
-          padsize = padsize > 0 ? padsize : 0
-          case way
-          when :right
-            result = @wrapped_string.dup.insert(0, padding(padsize, padstr))
-          when :left
-            result = @wrapped_string.dup.insert(-1, padding(padsize, padstr))
-          when :center
-            lpad = padding((padsize / 2.0).floor, padstr)
-            rpad = padding((padsize / 2.0).ceil, padstr)
-            result = @wrapped_string.dup.insert(0, lpad).insert(-1, rpad)
-          end
-          chars(result)
+        begin
+          @wrapped_string[0...byte_offset].unpack('U*').length
+        rescue ArgumentError
+          byte_offset -= 1
+          retry
         end
+      end
 
-        def padding(padsize, padstr=' ') #:nodoc:
-          if padsize != 0
-            chars(padstr * ((padsize / Unicode.u_unpack(padstr).size) + 1)).slice(0, padsize)
-          else
-            ''
-          end
-        end
+      def justify(integer, way, padstr = ' ') # :nodoc:
+        raise ArgumentError, "zero width padding" if padstr.length == 0
 
-        def chars(string) #:nodoc:
-          self.class.new(string)
+        padsize = integer - size
+        padsize = padsize > 0 ? padsize : 0
+        case way
+        when :right
+          result = @wrapped_string.dup.insert(0, padding(padsize, padstr))
+        when :left
+          result = @wrapped_string.dup.insert(-1, padding(padsize, padstr))
+        when :center
+          lpad = padding((padsize / 2.0).floor, padstr)
+          rpad = padding((padsize / 2.0).ceil, padstr)
+          result = @wrapped_string.dup.insert(0, lpad).insert(-1, rpad)
         end
+        chars(result)
+      end
+
+      def padding(padsize, padstr = ' ') # :nodoc:
+        if padsize != 0
+          chars(padstr * ((padsize / Unicode.u_unpack(padstr).size) + 1)).slice(0, padsize)
+        else
+          ''
+        end
+      end
+
+      def chars(string) # :nodoc:
+        self.class.new(string)
+      end
     end
   end
 end

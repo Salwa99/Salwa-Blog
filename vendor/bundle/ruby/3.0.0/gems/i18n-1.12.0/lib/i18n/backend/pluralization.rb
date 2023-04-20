@@ -35,6 +35,7 @@ module I18n
         if pluralizer.respond_to?(:call)
           key = count == 0 && entry.has_key?(:zero) ? :zero : pluralizer.call(count)
           raise InvalidPluralizationData.new(entry, count, key) unless entry.has_key?(key)
+
           entry[key]
         else
           super
@@ -43,13 +44,13 @@ module I18n
 
       protected
 
-        def pluralizers
-          @pluralizers ||= {}
-        end
+      def pluralizers
+        @pluralizers ||= {}
+      end
 
-        def pluralizer(locale)
-          pluralizers[locale] ||= I18n.t(:'i18n.plural.rule', :locale => locale, :resolve => false)
-        end
+      def pluralizer(locale)
+        pluralizers[locale] ||= I18n.t(:'i18n.plural.rule', :locale => locale, :resolve => false)
+      end
     end
   end
 end

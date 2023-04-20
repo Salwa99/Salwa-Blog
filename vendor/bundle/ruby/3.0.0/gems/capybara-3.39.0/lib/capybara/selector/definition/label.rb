@@ -35,7 +35,7 @@ Capybara.add_selector(:label, locator_type: [String, Symbol]) do
         field_or_value.match? for_val
       else
         node.find_xpath(XPath.descendant(*labelable_elements).to_s)
-            .any? { |n| field_or_value.match? n[:id] }
+          .any? { |n| field_or_value.match? n[:id] }
       end
     else
       # Non element/regexp values were handled through the expression filter

@@ -26,7 +26,7 @@ module ActionCable
     initializer "action_cable.asset" do
       config.after_initialize do |app|
         if app.config.respond_to?(:assets) && app.config.action_cable.precompile_assets
-          app.config.assets.precompile += %w( actioncable.js actioncable.esm.js )
+          app.config.assets.precompile += %w(actioncable.js actioncable.esm.js)
         end
       end
     end

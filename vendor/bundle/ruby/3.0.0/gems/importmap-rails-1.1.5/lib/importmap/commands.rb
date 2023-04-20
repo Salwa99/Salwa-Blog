@@ -8,7 +8,7 @@ class Importmap::Commands < Thor
   def self.exit_on_failure?
     false
   end
-  
+
   desc "pin [*PACKAGES]", "Pin new packages"
   option :env, type: :string, aliases: :e, default: "production"
   option :from, type: :string, aliases: :f, default: "jspm"
@@ -75,8 +75,8 @@ class Importmap::Commands < Thor
       puts_table(table)
       vulnerabilities = 'vulnerability'.pluralize(vulnerable_packages.size)
       severities = vulnerable_packages.map(&:severity).tally.sort_by(&:last).reverse
-                                      .map { |severity, count| "#{count} #{severity}" }
-                                      .join(", ")
+        .map { |severity, count| "#{count} #{severity}" }
+        .join(", ")
       puts "  #{vulnerable_packages.size} #{vulnerabilities} found: #{severities}"
 
       exit 1
@@ -104,39 +104,40 @@ class Importmap::Commands < Thor
   end
 
   private
-    def packager
-      @packager ||= Importmap::Packager.new
+
+  def packager
+    @packager ||= Importmap::Packager.new
+  end
+
+  def npm
+    @npm ||= Importmap::Npm.new
+  end
+
+  def remove_line_from_file(path, pattern)
+    path = File.expand_path(path, destination_root)
+
+    all_lines = File.readlines(path)
+    with_lines_removed = all_lines.select { |line| line !~ pattern }
+
+    File.open(path, "w") do |file|
+      with_lines_removed.each { |line| file.write(line) }
+    end
+  end
+
+  def puts_table(array)
+    column_sizes = array.reduce([]) do |lengths, row|
+      row.each_with_index.map { |iterand, index| [lengths[index] || 0, iterand.to_s.length].max }
     end
 
-    def npm
-      @npm ||= Importmap::Npm.new
+    puts head = "+" + (column_sizes.map { |s| "-" * (s + 2) }.join('+')) + '+'
+    array.each_with_index do |row, row_number|
+      row = row.fill(nil, row.size..(column_sizes.size - 1))
+      row = row.each_with_index.map { |v, i| v.to_s + " " * (column_sizes[i] - v.to_s.length) }
+      puts "| " + row.join(" | ") + " |"
+      puts head if row_number == 0
     end
-
-    def remove_line_from_file(path, pattern)
-      path = File.expand_path(path, destination_root)
-
-      all_lines = File.readlines(path)
-      with_lines_removed = all_lines.select { |line| line !~ pattern }
-
-      File.open(path, "w") do |file|
-        with_lines_removed.each { |line| file.write(line) }
-      end
-    end
-
-    def puts_table(array)
-      column_sizes = array.reduce([]) do |lengths, row|
-        row.each_with_index.map{ |iterand, index| [lengths[index] || 0, iterand.to_s.length].max }
-      end
-
-      puts head = "+" + (column_sizes.map { |s| "-" * (s + 2) }.join('+')) + '+'
-      array.each_with_index do |row, row_number|
-        row = row.fill(nil, row.size..(column_sizes.size - 1))
-        row = row.each_with_index.map { |v, i| v.to_s + " " * (column_sizes[i] - v.to_s.length) }
-        puts "| " + row.join(" | ") + " |"
-        puts head if row_number == 0
-      end
-      puts head
-    end
+    puts head
+  end
 end
 
 Importmap::Commands.start(ARGV)

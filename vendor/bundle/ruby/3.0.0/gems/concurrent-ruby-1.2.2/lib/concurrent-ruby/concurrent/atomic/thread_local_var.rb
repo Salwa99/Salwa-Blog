@@ -2,7 +2,6 @@ require 'concurrent/constants'
 require_relative 'locals'
 
 module Concurrent
-
   # A `ThreadLocalVar` is a variable where the value is different for each thread.
   # Each variable may have a default value, but when you modify the variable only
   # the current thread will ever see that change.

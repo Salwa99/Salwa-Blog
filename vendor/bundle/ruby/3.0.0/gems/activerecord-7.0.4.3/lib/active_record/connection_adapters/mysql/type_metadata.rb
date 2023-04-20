@@ -29,11 +29,12 @@ module ActiveRecord
         end
 
         private
-          def deduplicated
-            __setobj__(__getobj__.deduplicate)
-            @extra = -extra if extra
-            super
-          end
+
+        def deduplicated
+          __setobj__(__getobj__.deduplicate)
+          @extra = -extra if extra
+          super
+        end
       end
     end
   end

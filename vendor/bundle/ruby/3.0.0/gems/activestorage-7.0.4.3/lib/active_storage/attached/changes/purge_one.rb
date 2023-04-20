@@ -19,9 +19,10 @@ module ActiveStorage
     end
 
     private
-      def reset
-        record.attachment_changes.delete(name)
-        record.public_send("#{name}_attachment=", nil)
-      end
+
+    def reset
+      record.attachment_changes.delete(name)
+      record.public_send("#{name}_attachment=", nil)
+    end
   end
 end

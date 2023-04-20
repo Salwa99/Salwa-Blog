@@ -7,7 +7,6 @@ require 'concurrent/executor/safe_task_executor'
 require 'concurrent/synchronization/lockable_object'
 
 module Concurrent
-
   # An `IVar` is like a future that you can assign. As a future is a value that
   # is being computed that you can wait on, an `IVar` is a value that is waiting
   # to be assigned, that you can wait on. `IVars` are single assignment and
@@ -63,6 +62,7 @@ module Concurrent
       if value != NULL && block_given?
         raise ArgumentError.new('provide only a value or a block')
       end
+
       super(&nil)
       synchronize { ns_initialize(value, opts, &block) }
     end
@@ -80,6 +80,7 @@ module Concurrent
     #   `Observable` has changes`
     def add_observer(observer = nil, func = :update, &block)
       raise ArgumentError.new('cannot provide both an observer and a block') if observer && block
+
       direct_notification = false
 
       if block
@@ -188,19 +189,20 @@ module Concurrent
 
     # @!visibility private
     def notify_observers(value, reason)
-      observers.notify_and_delete_observers{ [Time.now, value, reason] }
+      observers.notify_and_delete_observers { [Time.now, value, reason] }
     end
 
     # @!visibility private
     def ns_complete_without_notification(success, value, reason)
       raise MultipleAssignmentError if [:fulfilled, :rejected].include? @state
+
       set_state(success, value, reason)
       event.set
     end
 
     # @!visibility private
     def check_for_block_or_value!(block_given, value) # :nodoc:
-      if (block_given && value != NULL) || (! block_given && value == NULL)
+      if (block_given && value != NULL) || (!block_given && value == NULL)
         raise ArgumentError.new('must set with either a value or a block')
       end
     end

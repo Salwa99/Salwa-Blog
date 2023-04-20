@@ -77,6 +77,7 @@ module ActiveSupport
       unless subscriber.respond_to?(:report)
         raise ArgumentError, "Error subscribers must respond to #report"
       end
+
       @subscribers << subscriber
     end
 

@@ -14,6 +14,7 @@ module ActiveRecord
     class InvalidConfigurationError < StandardError; end
 
     attr_reader :configurations
+
     delegate :any?, to: :configurations
 
     def initialize(configurations = {})
@@ -133,124 +134,127 @@ module ActiveRecord
     end
 
     private
-      def default_env
-        ActiveRecord::ConnectionHandling::DEFAULT_ENV.call.to_s
-      end
 
-      def env_with_configs(env = nil)
-        if env
-          configurations.select { |db_config| db_config.env_name == env }
+    def default_env
+      ActiveRecord::ConnectionHandling::DEFAULT_ENV.call.to_s
+    end
+
+    def env_with_configs(env = nil)
+      if env
+        configurations.select { |db_config| db_config.env_name == env }
+      else
+        configurations
+      end
+    end
+
+    def build_configs(configs)
+      return configs.configurations if configs.is_a?(DatabaseConfigurations)
+      return configs if configs.is_a?(Array)
+
+      db_configs = configs.flat_map do |env_name, config|
+        if config.is_a?(Hash) && config.values.all?(Hash)
+          walk_configs(env_name.to_s, config)
         else
-          configurations
+          build_db_config_from_raw_config(env_name.to_s, "primary", config)
         end
       end
 
-      def build_configs(configs)
-        return configs.configurations if configs.is_a?(DatabaseConfigurations)
-        return configs if configs.is_a?(Array)
-
-        db_configs = configs.flat_map do |env_name, config|
-          if config.is_a?(Hash) && config.values.all?(Hash)
-            walk_configs(env_name.to_s, config)
-          else
-            build_db_config_from_raw_config(env_name.to_s, "primary", config)
-          end
-        end
-
-        unless db_configs.find(&:for_current_env?)
-          db_configs << environment_url_config(default_env, "primary", {})
-        end
-
-        merge_db_environment_variables(default_env, db_configs.compact)
+      unless db_configs.find(&:for_current_env?)
+        db_configs << environment_url_config(default_env, "primary", {})
       end
 
-      def walk_configs(env_name, config)
-        config.map do |name, sub_config|
-          build_db_config_from_raw_config(env_name, name.to_s, sub_config)
-        end
-      end
+      merge_db_environment_variables(default_env, db_configs.compact)
+    end
 
-      def resolve_symbol_connection(name)
-        if db_config = find_db_config(name)
-          db_config
+    def walk_configs(env_name, config)
+      config.map do |name, sub_config|
+        build_db_config_from_raw_config(env_name, name.to_s, sub_config)
+      end
+    end
+
+    def resolve_symbol_connection(name)
+      if db_config = find_db_config(name)
+        db_config
+      else
+        raise AdapterNotSpecified, <<~MSG
+          The `#{name}` database is not configured for the `#{default_env}` environment.
+
+            Available database configurations are:
+
+            #{build_configuration_sentence}
+        MSG
+      end
+    end
+
+    def build_configuration_sentence
+      configs = configs_for(include_hidden: true)
+
+      configs.group_by(&:env_name).map do |env, config|
+        names = config.map(&:name)
+        if names.size > 1
+          "#{env}: #{names.join(", ")}"
         else
-          raise AdapterNotSpecified, <<~MSG
-            The `#{name}` database is not configured for the `#{default_env}` environment.
-
-              Available database configurations are:
-
-              #{build_configuration_sentence}
-          MSG
+          env
         end
+      end.join("\n")
+    end
+
+    def build_db_config_from_raw_config(env_name, name, config)
+      case config
+      when String
+        build_db_config_from_string(env_name, name, config)
+      when Hash
+        build_db_config_from_hash(env_name, name, config.symbolize_keys)
+      else
+        raise InvalidConfigurationError,
+              "'{ #{env_name} => #{config} }' is not a valid configuration. Expected '#{config}' to be a URL string or a Hash."
       end
+    end
 
-      def build_configuration_sentence
-        configs = configs_for(include_hidden: true)
-
-        configs.group_by(&:env_name).map do |env, config|
-          names = config.map(&:name)
-          if names.size > 1
-            "#{env}: #{names.join(", ")}"
-          else
-            env
-          end
-        end.join("\n")
+    def build_db_config_from_string(env_name, name, config)
+      url = config
+      uri = URI.parse(url)
+      if uri.scheme
+        UrlConfig.new(env_name, name, url)
+      else
+        raise InvalidConfigurationError,
+              "'{ #{env_name} => #{config} }' is not a valid configuration. Expected '#{config}' to be a URL string or a Hash."
       end
+    end
 
-      def build_db_config_from_raw_config(env_name, name, config)
-        case config
-        when String
-          build_db_config_from_string(env_name, name, config)
-        when Hash
-          build_db_config_from_hash(env_name, name, config.symbolize_keys)
-        else
-          raise InvalidConfigurationError, "'{ #{env_name} => #{config} }' is not a valid configuration. Expected '#{config}' to be a URL string or a Hash."
-        end
+    def build_db_config_from_hash(env_name, name, config)
+      if config.has_key?(:url)
+        url = config[:url]
+        config_without_url = config.dup
+        config_without_url.delete :url
+
+        UrlConfig.new(env_name, name, url, config_without_url)
+      else
+        HashConfig.new(env_name, name, config)
       end
+    end
 
-      def build_db_config_from_string(env_name, name, config)
-        url = config
-        uri = URI.parse(url)
-        if uri.scheme
-          UrlConfig.new(env_name, name, url)
-        else
-          raise InvalidConfigurationError, "'{ #{env_name} => #{config} }' is not a valid configuration. Expected '#{config}' to be a URL string or a Hash."
-        end
+    def merge_db_environment_variables(current_env, configs)
+      configs.map do |config|
+        next config if config.is_a?(UrlConfig) || config.env_name != current_env
+
+        url_config = environment_url_config(current_env, config.name, config.configuration_hash)
+        url_config || config
       end
+    end
 
-      def build_db_config_from_hash(env_name, name, config)
-        if config.has_key?(:url)
-          url = config[:url]
-          config_without_url = config.dup
-          config_without_url.delete :url
+    def environment_url_config(env, name, config)
+      url = environment_value_for(name)
+      return unless url
 
-          UrlConfig.new(env_name, name, url, config_without_url)
-        else
-          HashConfig.new(env_name, name, config)
-        end
-      end
+      UrlConfig.new(env, name, url, config)
+    end
 
-      def merge_db_environment_variables(current_env, configs)
-        configs.map do |config|
-          next config if config.is_a?(UrlConfig) || config.env_name != current_env
-
-          url_config = environment_url_config(current_env, config.name, config.configuration_hash)
-          url_config || config
-        end
-      end
-
-      def environment_url_config(env, name, config)
-        url = environment_value_for(name)
-        return unless url
-
-        UrlConfig.new(env, name, url, config)
-      end
-
-      def environment_value_for(name)
-        name_env_key = "#{name.upcase}_DATABASE_URL"
-        url = ENV[name_env_key]
-        url ||= ENV["DATABASE_URL"] if name == "primary"
-        url
-      end
+    def environment_value_for(name)
+      name_env_key = "#{name.upcase}_DATABASE_URL"
+      url = ENV[name_env_key]
+      url ||= ENV["DATABASE_URL"] if name == "primary"
+      url
+    end
   end
 end

@@ -8,10 +8,10 @@ module ActionController
       return unless logger.info?
 
       payload = event.payload
-      params  = payload[:params].except(*INTERNAL_PARAMS)
-      format  = payload[:format]
-      format  = format.to_s.upcase if format.is_a?(Symbol)
-      format  = "*/*" if format.nil?
+      params = payload[:params].except(*INTERNAL_PARAMS)
+      format = payload[:format]
+      format = format.to_s.upcase if format.is_a?(Symbol)
+      format = "*/*" if format.nil?
 
       info "Processing by #{payload[:controller]}##{payload[:action]} as #{format}"
       info "  Parameters: #{params.inspect}" unless params.empty?
@@ -58,7 +58,9 @@ module ActionController
         unpermitted_keys = event.payload[:keys]
         display_unpermitted_keys = unpermitted_keys.map { |e| ":#{e}" }.join(", ")
         context = event.payload[:context].map { |k, v| "#{k}: #{v}" }.join(", ")
-        color("Unpermitted parameter#{'s' if unpermitted_keys.size > 1}: #{display_unpermitted_keys}. Context: { #{context} }", RED)
+        color(
+          "Unpermitted parameter#{'s' if unpermitted_keys.size > 1}: #{display_unpermitted_keys}. Context: { #{context} }", RED
+        )
       end
     end
 

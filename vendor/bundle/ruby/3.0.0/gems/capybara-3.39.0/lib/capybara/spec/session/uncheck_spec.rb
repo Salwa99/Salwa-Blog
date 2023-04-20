@@ -43,14 +43,14 @@ Capybara::SpecHelper.spec '#uncheck' do
 
   context 'with :exact option' do
     it 'should accept partial matches when false' do
-      @session.uncheck('Ham', exact:  false)
+      @session.uncheck('Ham', exact: false)
       @session.click_button('awesome')
       expect(extract_results(@session)['pets']).not_to include('hamster')
     end
 
     it 'should not accept partial matches when true' do
       expect do
-        @session.uncheck('Ham', exact:  true)
+        @session.uncheck('Ham', exact: true)
       end.to raise_error(Capybara::ElementNotFound)
     end
   end
@@ -85,15 +85,25 @@ Capybara::SpecHelper.spec '#uncheck' do
       end
 
       it 'should raise original error when no label available' do
-        expect { @session.uncheck('form_cars_porsche') }.to raise_error(Capybara::ElementNotFound, /Unable to find visible checkbox "form_cars_porsche"/)
+        expect {
+          @session.uncheck('form_cars_porsche')
+        }.to raise_error(Capybara::ElementNotFound,
+                         /Unable to find visible checkbox "form_cars_porsche"/)
       end
 
       it 'should raise error if not allowed to click label' do
-        expect { @session.uncheck('form_cars_jaguar', allow_label_click: false) }.to raise_error(Capybara::ElementNotFound, /Unable to find visible checkbox "form_cars_jaguar"/)
+        expect {
+          @session.uncheck('form_cars_jaguar',
+                           allow_label_click: false)
+        }.to raise_error(Capybara::ElementNotFound, /Unable to find visible checkbox "form_cars_jaguar"/)
       end
 
       it 'should include node filter description in error if necessary' do
-        expect { @session.uncheck('form_cars_maserati', allow_label_click: false) }.to raise_error(Capybara::ElementNotFound, 'Unable to find visible checkbox "form_cars_maserati" that is not disabled')
+        expect {
+          @session.uncheck('form_cars_maserati',
+                           allow_label_click: false)
+        }.to raise_error(Capybara::ElementNotFound,
+                         'Unable to find visible checkbox "form_cars_maserati" that is not disabled')
       end
     end
   end

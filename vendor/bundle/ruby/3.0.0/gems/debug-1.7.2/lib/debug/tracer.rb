@@ -43,7 +43,7 @@ module DEBUGGER__
     end
 
     def header depth
-      "DEBUGGER (trace/#{@type}) \#th:#{Thread.current.instance_variable_get(:@__thread_client_id)} \#depth:#{'%-2d'%depth}"
+      "DEBUGGER (trace/#{@type}) \#th:#{Thread.current.instance_variable_get(:@__thread_client_id)} \#depth:#{'%-2d' % depth}"
     end
 
     def enable
@@ -104,8 +104,9 @@ module DEBUGGER__
 
   class LineTracer < Tracer
     def setup
-      @tracer = TracePoint.new(:line){|tp|
+      @tracer = TracePoint.new(:line) { |tp|
         next if skip?(tp)
+
         # pp tp.object_id, caller(0)
         out tp
       }
@@ -114,7 +115,7 @@ module DEBUGGER__
 
   class CallTracer < Tracer
     def setup
-      @tracer = TracePoint.new(:a_call, :a_return){|tp|
+      @tracer = TracePoint.new(:a_call, :a_return) { |tp|
         next if skip?(tp)
 
         depth = caller.size
@@ -182,7 +183,7 @@ module DEBUGGER__
     end
 
     def setup
-      @tracer = TracePoint.new(:a_call){|tp|
+      @tracer = TracePoint.new(:a_call) { |tp|
         next if skip?(tp)
 
         if M_OBJECT_ID.bind_call(tp.self) == @obj_id
@@ -204,7 +205,7 @@ module DEBUGGER__
           b = tp.binding
           method_info = colorize_blue(minfo(tp))
 
-          tp.parameters.each{|type, name|
+          tp.parameters.each { |type, name|
             next unless name
 
             colorized_name = colorize_cyan(name)
@@ -218,15 +219,16 @@ module DEBUGGER__
               next if name == :"*"
 
               ary = b.local_variable_get(name)
-              ary.each{|e|
+              ary.each { |e|
                 if e.object_id == @obj_id
                   out tp, " #{colorized_obj_inspect} is used as a parameter in #{colorized_name} of #{method_info}"
                 end
               }
             when :keyrest
               next if name == :'**'
+
               h = b.local_variable_get(name)
-              h.each{|k, e|
+              h.each { |k, e|
                 if e.object_id == @obj_id
                   out tp, " #{colorized_obj_inspect} is used as a parameter in #{colorized_name} of #{method_info}"
                 end
@@ -238,4 +240,3 @@ module DEBUGGER__
     end
   end
 end
-

@@ -94,13 +94,13 @@ module ActionDispatch
 
         options = options.clone
         generated_path, query_string_keys = @routes.generate_extras(options, defaults)
-        found_extras = options.reject { |k, _| ! query_string_keys.include? k }
+        found_extras = options.reject { |k, _| !query_string_keys.include? k }
 
         msg = message || sprintf("found extras <%s>, not <%s>", found_extras, extras)
         assert_equal(extras, found_extras, msg)
 
         msg = message || sprintf("The generated path <%s> did not match <%s>", generated_path,
-            expected_path)
+                                 expected_path)
         assert_equal(expected_path, generated_path, msg)
       end
 
@@ -190,46 +190,47 @@ module ActionDispatch
       ruby2_keywords(:method_missing)
 
       private
-        # Recognizes the route for a given path.
-        def recognized_request_for(path, extras = {}, msg)
-          if path.is_a?(Hash)
-            method = path[:method]
-            path   = path[:path]
-          else
-            method = :get
-          end
 
-          controller = @controller if defined?(@controller)
-          request = ActionController::TestRequest.create controller&.class
-
-          if %r{://}.match?(path)
-            fail_on(URI::InvalidURIError, msg) do
-              uri = URI.parse(path)
-              request.env["rack.url_scheme"] = uri.scheme || "http"
-              request.host = uri.host if uri.host
-              request.port = uri.port if uri.port
-              request.path = uri.path.to_s.empty? ? "/" : uri.path
-            end
-          else
-            path = "/#{path}" unless path.start_with?("/")
-            request.path = path
-          end
-
-          request.request_method = method if method
-
-          params = fail_on(ActionController::RoutingError, msg) do
-            @routes.recognize_path(path, method: method, extras: extras)
-          end
-          request.path_parameters = params.with_indifferent_access
-
-          request
+      # Recognizes the route for a given path.
+      def recognized_request_for(path, extras = {}, msg)
+        if path.is_a?(Hash)
+          method = path[:method]
+          path = path[:path]
+        else
+          method = :get
         end
 
-        def fail_on(exception_class, message)
-          yield
-        rescue exception_class => e
-          raise Minitest::Assertion, message || e.message
+        controller = @controller if defined?(@controller)
+        request = ActionController::TestRequest.create controller&.class
+
+        if %r{://}.match?(path)
+          fail_on(URI::InvalidURIError, msg) do
+            uri = URI.parse(path)
+            request.env["rack.url_scheme"] = uri.scheme || "http"
+            request.host = uri.host if uri.host
+            request.port = uri.port if uri.port
+            request.path = uri.path.to_s.empty? ? "/" : uri.path
+          end
+        else
+          path = "/#{path}" unless path.start_with?("/")
+          request.path = path
         end
+
+        request.request_method = method if method
+
+        params = fail_on(ActionController::RoutingError, msg) do
+          @routes.recognize_path(path, method: method, extras: extras)
+        end
+        request.path_parameters = params.with_indifferent_access
+
+        request
+      end
+
+      def fail_on(exception_class, message)
+        yield
+      rescue exception_class => e
+        raise Minitest::Assertion, message || e.message
+      end
     end
   end
 end

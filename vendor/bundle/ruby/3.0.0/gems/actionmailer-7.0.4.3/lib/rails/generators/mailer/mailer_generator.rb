@@ -22,17 +22,18 @@ module Rails
       hook_for :template_engine, :test_framework
 
       private
-        def file_name # :doc:
-          @_file_name ||= super.sub(/_mailer\z/i, "")
-        end
 
-        def application_mailer_file_name
-          @_application_mailer_file_name ||= if mountable_engine?
-            "app/mailers/#{namespaced_path}/application_mailer.rb"
-          else
-            "app/mailers/application_mailer.rb"
-          end
-        end
+      def file_name # :doc:
+        @_file_name ||= super.sub(/_mailer\z/i, "")
+      end
+
+      def application_mailer_file_name
+        @_application_mailer_file_name ||= if mountable_engine?
+                                             "app/mailers/#{namespaced_path}/application_mailer.rb"
+                                           else
+                                             "app/mailers/application_mailer.rb"
+                                           end
+      end
     end
   end
 end

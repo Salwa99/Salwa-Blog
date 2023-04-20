@@ -50,10 +50,11 @@ class NameError
   end
 
   private
-    UNBOUND_METHOD_MODULE_NAME = Module.instance_method(:name)
-    private_constant :UNBOUND_METHOD_MODULE_NAME
 
-    def real_mod_name(mod)
-      UNBOUND_METHOD_MODULE_NAME.bind_call(mod)
-    end
+  UNBOUND_METHOD_MODULE_NAME = Module.instance_method(:name)
+  private_constant :UNBOUND_METHOD_MODULE_NAME
+
+  def real_mod_name(mod)
+    UNBOUND_METHOD_MODULE_NAME.bind_call(mod)
+  end
 end

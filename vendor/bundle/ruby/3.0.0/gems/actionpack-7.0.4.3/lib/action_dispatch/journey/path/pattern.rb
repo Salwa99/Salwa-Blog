@@ -7,17 +7,17 @@ module ActionDispatch
         attr_reader :ast, :names, :requirements, :anchored, :spec
 
         def initialize(ast, requirements, separators, anchored)
-          @ast          = ast
-          @spec         = ast.root
+          @ast = ast
+          @spec = ast.root
           @requirements = requirements
-          @separators   = separators
-          @anchored     = anchored
+          @separators = separators
+          @anchored = anchored
 
-          @names          = ast.names
+          @names = ast.names
           @optional_names = nil
           @required_names = nil
-          @re             = nil
-          @offsets        = nil
+          @re = nil
+          @offsets = nil
         end
 
         def build_formatter
@@ -65,7 +65,7 @@ module ActionDispatch
         class AnchoredRegexp < Journey::Visitors::Visitor # :nodoc:
           def initialize(separator, matchers)
             @separator = separator
-            @matchers  = matchers
+            @matchers = matchers
             @separator_re = "([^#{separator}]+)"
             super()
           end
@@ -122,9 +122,9 @@ module ActionDispatch
           attr_reader :names
 
           def initialize(names, offsets, match)
-            @names   = names
+            @names = names
             @offsets = offsets
-            @match   = match
+            @match = match
           end
 
           def captures
@@ -155,6 +155,7 @@ module ActionDispatch
 
         def match(other)
           return unless match = to_regexp.match(other)
+
           MatchData.new(names, offsets, match)
         end
         alias :=~ :match
@@ -178,28 +179,29 @@ module ActionDispatch
         end
 
         private
-          def regexp_visitor
-            @anchored ? AnchoredRegexp : UnanchoredRegexp
-          end
 
-          def offsets
-            return @offsets if @offsets
+        def regexp_visitor
+          @anchored ? AnchoredRegexp : UnanchoredRegexp
+        end
 
-            @offsets = [0]
+        def offsets
+          return @offsets if @offsets
 
-            spec.find_all(&:symbol?).each do |node|
-              node = node.to_sym
+          @offsets = [0]
 
-              if @requirements.key?(node)
-                re = /#{Regexp.union(@requirements[node])}|/
-                @offsets.push((re.match("").length - 1) + @offsets.last)
-              else
-                @offsets << @offsets.last
-              end
+          spec.find_all(&:symbol?).each do |node|
+            node = node.to_sym
+
+            if @requirements.key?(node)
+              re = /#{Regexp.union(@requirements[node])}|/
+              @offsets.push((re.match("").length - 1) + @offsets.last)
+            else
+              @offsets << @offsets.last
             end
-
-            @offsets
           end
+
+          @offsets
+        end
       end
     end
   end

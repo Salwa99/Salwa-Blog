@@ -15,6 +15,7 @@ module ActiveRecord
 
         def match?(other)
           return true if self == other
+
           super && base_klass == other.base_klass
         end
       end

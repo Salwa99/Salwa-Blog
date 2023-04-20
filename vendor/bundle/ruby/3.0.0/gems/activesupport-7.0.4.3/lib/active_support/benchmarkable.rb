@@ -41,7 +41,7 @@ module ActiveSupport
 
         result = nil
         ms = Benchmark.ms { result = options[:silence] ? logger.silence(&block) : yield }
-        logger.public_send(options[:level], "%s (%.1fms)" % [ message, ms ])
+        logger.public_send(options[:level], "%s (%.1fms)" % [message, ms])
         result
       else
         yield

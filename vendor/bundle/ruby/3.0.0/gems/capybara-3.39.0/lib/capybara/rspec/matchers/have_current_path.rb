@@ -18,7 +18,7 @@ module Capybara
           "have current path #{current_path.inspect}"
         end
 
-      private
+        private
 
         def current_path
           @args.first

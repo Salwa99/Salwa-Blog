@@ -84,19 +84,19 @@ module I18n
 
         protected
 
-          def setup_time_translations
-            I18n.backend.store_translations :de, {
-              :time => {
-                :formats => {
-                  :default => "%a, %d. %b %Y %H:%M:%S %z",
-                  :short => "%d. %b %H:%M",
-                  :long => "%d. %B %Y %H:%M",
-                },
-                :am => 'am',
-                :pm => 'pm'
-              }
+        def setup_time_translations
+          I18n.backend.store_translations :de, {
+            :time => {
+              :formats => {
+                :default => "%a, %d. %b %Y %H:%M:%S %z",
+                :short => "%d. %b %H:%M",
+                :long => "%d. %B %Y %H:%M",
+              },
+              :am => 'am',
+              :pm => 'pm'
             }
-          end
+          }
+        end
       end
     end
   end

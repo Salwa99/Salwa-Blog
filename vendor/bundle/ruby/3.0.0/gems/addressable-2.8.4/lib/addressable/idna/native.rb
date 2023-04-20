@@ -16,7 +16,6 @@
 #    limitations under the License.
 #++
 
-
 require "idn"
 
 module Addressable
@@ -25,9 +24,9 @@ module Addressable
       IDN::Punycode.encode(value.to_s)
     end
 
-     def self.punycode_decode(value)
-       IDN::Punycode.decode(value.to_s)
-     end
+    def self.punycode_decode(value)
+      IDN::Punycode.decode(value.to_s)
+    end
 
     class << self
       # @deprecated Use {String#unicode_normalize(:nfkc)} instead

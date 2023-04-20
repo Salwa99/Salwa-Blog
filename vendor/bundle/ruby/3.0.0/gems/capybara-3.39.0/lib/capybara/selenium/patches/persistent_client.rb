@@ -8,7 +8,7 @@ module Capybara
         @http.finish if @http&.started?
       end
 
-    private
+      private
 
       def http
         super.tap do |http|

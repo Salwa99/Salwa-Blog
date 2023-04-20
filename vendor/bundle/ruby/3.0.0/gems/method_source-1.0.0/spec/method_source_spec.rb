@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe MethodSource do
-
   describe "source_location (testing 1.8 implementation)" do
     it 'should return correct source_location for a method' do
       expect(method(:hello).source_location.first).to match(/spec_helper/)
@@ -55,8 +54,8 @@ describe MethodSource do
 
     it 'should return source for a singleton method as an instance method' do
       expect(class << $o
-        self
-      end.instance_method(:hello).source).to eq(@hello_singleton_source)
+               self
+             end.instance_method(:hello).source).to eq(@hello_singleton_source)
     end
 
     it 'should return source for a singleton method' do

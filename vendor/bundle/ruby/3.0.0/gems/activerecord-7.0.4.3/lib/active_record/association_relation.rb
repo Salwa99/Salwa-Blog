@@ -28,23 +28,24 @@ module ActiveRecord
     end
 
     private
-      def _new(attributes, &block)
-        @association.build(attributes, &block)
-      end
 
-      def _create(attributes, &block)
-        @association.create(attributes, &block)
-      end
+    def _new(attributes, &block)
+      @association.build(attributes, &block)
+    end
 
-      def _create!(attributes, &block)
-        @association.create!(attributes, &block)
-      end
+    def _create(attributes, &block)
+      @association.create(attributes, &block)
+    end
 
-      def exec_queries
-        super do |record|
-          @association.set_inverse_instance_from_queries(record)
-          yield record if block_given?
-        end
+    def _create!(attributes, &block)
+      @association.create!(attributes, &block)
+    end
+
+    def exec_queries
+      super do |record|
+        @association.set_inverse_instance_from_queries(record)
+        yield record if block_given?
       end
+    end
   end
 end

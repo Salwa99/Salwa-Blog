@@ -27,6 +27,7 @@ module ActionController
     # Check for double render errors and set the content_type after rendering.
     def render(*args) # :nodoc:
       raise ::AbstractController::DoubleRenderError if response_body
+
       super
     end
 
@@ -47,81 +48,82 @@ module ActionController
     end
 
     private
-      # Before processing, set the request formats in current controller formats.
-      def process_action(*) # :nodoc:
-        self.formats = request.formats.filter_map(&:ref)
-        super
+
+    # Before processing, set the request formats in current controller formats.
+    def process_action(*) # :nodoc:
+      self.formats = request.formats.filter_map(&:ref)
+      super
+    end
+
+    def _process_variant(options)
+      if defined?(request) && !request.nil? && request.variant.present?
+        options[:variant] = request.variant
+      end
+    end
+
+    def _render_in_priorities(options)
+      RENDER_FORMATS_IN_PRIORITY.each do |format|
+        return options[format] if options.key?(format)
       end
 
-      def _process_variant(options)
-        if defined?(request) && !request.nil? && request.variant.present?
-          options[:variant] = request.variant
+      nil
+    end
+
+    def _set_html_content_type
+      self.content_type = Mime[:html].to_s
+    end
+
+    def _set_rendered_content_type(format)
+      if format && !response.media_type
+        self.content_type = format.to_s
+      end
+    end
+
+    def _set_vary_header
+      if response.headers["Vary"].blank? && request.should_apply_vary_header?
+        response.headers["Vary"] = "Accept"
+      end
+    end
+
+    # Normalize arguments by catching blocks and setting them on :update.
+    def _normalize_args(action = nil, options = {}, &blk)
+      options = super
+      options[:update] = blk if block_given?
+      options
+    end
+
+    # Normalize both text and status options.
+    def _normalize_options(options)
+      _normalize_text(options)
+
+      if options[:html]
+        options[:html] = ERB::Util.html_escape(options[:html])
+      end
+
+      if options[:status]
+        options[:status] = Rack::Utils.status_code(options[:status])
+      end
+
+      super
+    end
+
+    def _normalize_text(options)
+      RENDER_FORMATS_IN_PRIORITY.each do |format|
+        if options.key?(format) && options[format].respond_to?(:to_text)
+          options[format] = options[format].to_text
         end
       end
+    end
 
-      def _render_in_priorities(options)
-        RENDER_FORMATS_IN_PRIORITY.each do |format|
-          return options[format] if options.key?(format)
-        end
+    # Process controller specific options, as status, content-type and location.
+    def _process_options(options)
+      status, content_type, location = options.values_at(:status, :content_type, :location)
 
-        nil
-      end
+      self.status = status if status
+      self.content_type = content_type if content_type
+      headers["Location"] = url_for(location) if location
 
-      def _set_html_content_type
-        self.content_type = Mime[:html].to_s
-      end
-
-      def _set_rendered_content_type(format)
-        if format && !response.media_type
-          self.content_type = format.to_s
-        end
-      end
-
-      def _set_vary_header
-        if response.headers["Vary"].blank? && request.should_apply_vary_header?
-          response.headers["Vary"] = "Accept"
-        end
-      end
-
-      # Normalize arguments by catching blocks and setting them on :update.
-      def _normalize_args(action = nil, options = {}, &blk)
-        options = super
-        options[:update] = blk if block_given?
-        options
-      end
-
-      # Normalize both text and status options.
-      def _normalize_options(options)
-        _normalize_text(options)
-
-        if options[:html]
-          options[:html] = ERB::Util.html_escape(options[:html])
-        end
-
-        if options[:status]
-          options[:status] = Rack::Utils.status_code(options[:status])
-        end
-
-        super
-      end
-
-      def _normalize_text(options)
-        RENDER_FORMATS_IN_PRIORITY.each do |format|
-          if options.key?(format) && options[format].respond_to?(:to_text)
-            options[format] = options[format].to_text
-          end
-        end
-      end
-
-      # Process controller specific options, as status, content-type and location.
-      def _process_options(options)
-        status, content_type, location = options.values_at(:status, :content_type, :location)
-
-        self.status = status if status
-        self.content_type = content_type if content_type
-        headers["Location"] = url_for(location) if location
-
-        super
-      end
+      super
+    end
   end
 end

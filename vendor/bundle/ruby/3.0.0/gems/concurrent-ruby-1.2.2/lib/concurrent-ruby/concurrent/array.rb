@@ -2,7 +2,6 @@ require 'concurrent/utility/engine'
 require 'concurrent/thread_safe/util'
 
 module Concurrent
-
   # @!macro concurrent_array
   #
   #   A thread-safe subclass of Array. This version locks against the object
@@ -52,5 +51,4 @@ module Concurrent
   # @!macro concurrent_array
   class Array < ArrayImplementation
   end
-
 end

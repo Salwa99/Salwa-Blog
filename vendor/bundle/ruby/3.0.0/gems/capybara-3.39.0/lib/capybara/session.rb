@@ -89,10 +89,11 @@ module Capybara
         yield config
       end
       @server = if config.run_server && @app && driver.needs_server?
-        server_options = { port: config.server_port, host: config.server_host, reportable_errors: config.server_errors }
-        server_options[:extra_middleware] = [Capybara::Server::AnimationDisabler] if config.disable_animation
-        Capybara::Server.new(@app, **server_options).boot
-      end
+                  server_options = { port: config.server_port, host: config.server_host,
+                                     reportable_errors: config.server_errors }
+                  server_options[:extra_middleware] = [Capybara::Server::AnimationDisabler] if config.disable_animation
+                  Capybara::Server.new(@app, **server_options).boot
+                end
       @touched = false
     end
 
@@ -100,7 +101,8 @@ module Capybara
       @driver ||= begin
         unless Capybara.drivers[mode]
           other_drivers = Capybara.drivers.names.map(&:inspect)
-          raise Capybara::DriverNotFoundError, "no driver called #{mode.inspect} was found, available drivers: #{other_drivers.join(', ')}"
+          raise Capybara::DriverNotFoundError,
+                "no driver called #{mode.inspect} was found, available drivers: #{other_drivers.join(', ')}"
         end
         driver = Capybara.drivers[mode].call(app)
         driver.session = self if driver.respond_to?(:session=)
@@ -160,7 +162,8 @@ module Capybara
       # Force an explanation for the error being raised as the exception cause
       begin
         if config.raise_server_errors
-          raise CapybaraError, 'Your application server raised an error - It has been raised in your test code because Capybara.raise_server_errors == true'
+          raise CapybaraError,
+                'Your application server raised an error - It has been raised in your test code because Capybara.raise_server_errors == true'
         end
       rescue CapybaraError => capy_error # rubocop:disable Naming/RescuedExceptionsVariableName
         raise @server.error, cause: capy_error
@@ -509,7 +512,8 @@ module Capybara
     # @raise [ArgumentError]               if both or neither arguments were provided
     #
     def switch_to_window(window = nil, **options, &window_locator)
-      raise ArgumentError, '`switch_to_window` can take either a block or a window, not both' if window && window_locator
+      raise ArgumentError,
+            '`switch_to_window` can take either a block or a window, not both' if window && window_locator
       raise ArgumentError, '`switch_to_window`: either window or block should be provided' if !window && !window_locator
 
       unless scopes.last.nil?
@@ -827,17 +831,17 @@ module Capybara
 
     def config
       @config ||= if Capybara.threadsafe
-        Capybara.session_options.dup
-      else
-        Capybara::ReadOnlySessionConfig.new(Capybara.session_options)
-      end
+                    Capybara.session_options.dup
+                  else
+                    Capybara::ReadOnlySessionConfig.new(Capybara.session_options)
+                  end
     end
 
     def server_url
       @server&.base_url
     end
 
-  private
+    private
 
     @@instance_created = false # rubocop:disable Style/ClassVars
 

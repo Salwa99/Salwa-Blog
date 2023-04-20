@@ -54,7 +54,8 @@ module ActiveSupport
       @filters.empty? ? value : compiled_filter.value_for_key(key, value)
     end
 
-  private
+    private
+
     def compiled_filter
       @compiled_filter ||= CompiledFilter.compile(@filters, mask: @mask)
     end

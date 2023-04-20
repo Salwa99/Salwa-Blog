@@ -13,7 +13,6 @@
 require 'builder/xmlmarkup'
 
 module Builder
-
   # Create a series of SAX-like XML events (e.g. start_tag, end_tag)
   # from the markup code.  XmlEvent objects are used in a way similar
   # to XmlMarkup objects, except that a series of events are generated
@@ -51,7 +50,7 @@ module Builder
       @target.text(text)
     end
 
-    def _start_tag(sym, attrs, end_too=false)
+    def _start_tag(sym, attrs, end_too = false)
       @target.start_tag(sym, attrs)
       _end_tag(sym) if end_too
     end
@@ -60,5 +59,4 @@ module Builder
       @target.end_tag(sym)
     end
   end
-
 end

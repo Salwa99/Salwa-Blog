@@ -28,7 +28,7 @@ module Capybara
         self
       end
 
-    private
+      private
 
       def options
         # (@args.last.is_a?(Hash) ? @args : @args.push({})).last

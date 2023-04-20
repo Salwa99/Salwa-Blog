@@ -109,6 +109,7 @@ module ActiveSupport
 
     def initialize(secret, digest: nil, serializer: nil)
       raise ArgumentError, "Secret should not be nil." unless secret
+
       @secret = secret
       @digest = digest&.to_s || "SHA1"
       @serializer = serializer || Marshal
@@ -157,6 +158,7 @@ module ActiveSupport
           @serializer.load(message) if message
         rescue ArgumentError => argument_error
           return if argument_error.message.include?("invalid base64")
+
           raise
         end
       end
@@ -186,52 +188,54 @@ module ActiveSupport
     #   verifier = ActiveSupport::MessageVerifier.new 's3Krit'
     #   verifier.generate 'a private message' # => "BAhJIhRwcml2YXRlLW1lc3NhZ2UGOgZFVA==--e2d724331ebdee96a10fb99b089508d1c72bd772"
     def generate(value, expires_at: nil, expires_in: nil, purpose: nil)
-      data = encode(Messages::Metadata.wrap(@serializer.dump(value), expires_at: expires_at, expires_in: expires_in, purpose: purpose))
+      data = encode(Messages::Metadata.wrap(@serializer.dump(value), expires_at: expires_at, expires_in: expires_in,
+                                                                     purpose: purpose))
       "#{data}#{SEPARATOR}#{generate_digest(data)}"
     end
 
     private
-      def encode(data)
-        ::Base64.strict_encode64(data)
-      end
 
-      def decode(data)
-        ::Base64.strict_decode64(data)
-      end
+    def encode(data)
+      ::Base64.strict_encode64(data)
+    end
 
-      def generate_digest(data)
-        OpenSSL::HMAC.hexdigest(@digest, @secret, data)
-      end
+    def decode(data)
+      ::Base64.strict_decode64(data)
+    end
 
-      def digest_length_in_hex
-        # In hexadecimal (AKA base16) it takes 4 bits to represent a character,
-        # hence we multiply the digest's length (in bytes) by 8 to get it in
-        # bits and divide by 4 to get its number of characters it hex. Well, 8
-        # divided by 4 is 2.
-        @digest_length_in_hex ||= OpenSSL::Digest.new(@digest).digest_length * 2
-      end
+    def generate_digest(data)
+      OpenSSL::HMAC.hexdigest(@digest, @secret, data)
+    end
 
-      def separator_index_for(signed_message)
-        index = signed_message.length - digest_length_in_hex - SEPARATOR_LENGTH
-        return if index.negative? || signed_message[index, SEPARATOR_LENGTH] != SEPARATOR
+    def digest_length_in_hex
+      # In hexadecimal (AKA base16) it takes 4 bits to represent a character,
+      # hence we multiply the digest's length (in bytes) by 8 to get it in
+      # bits and divide by 4 to get its number of characters it hex. Well, 8
+      # divided by 4 is 2.
+      @digest_length_in_hex ||= OpenSSL::Digest.new(@digest).digest_length * 2
+    end
 
-        index
-      end
+    def separator_index_for(signed_message)
+      index = signed_message.length - digest_length_in_hex - SEPARATOR_LENGTH
+      return if index.negative? || signed_message[index, SEPARATOR_LENGTH] != SEPARATOR
 
-      def get_data_and_digest_from(signed_message)
-        return if signed_message.nil? || !signed_message.valid_encoding? || signed_message.empty?
+      index
+    end
 
-        separator_index = separator_index_for(signed_message)
-        return if separator_index.nil?
+    def get_data_and_digest_from(signed_message)
+      return if signed_message.nil? || !signed_message.valid_encoding? || signed_message.empty?
 
-        data = signed_message[0...separator_index]
-        digest = signed_message[separator_index + SEPARATOR_LENGTH..-1]
+      separator_index = separator_index_for(signed_message)
+      return if separator_index.nil?
 
-        [data, digest]
-      end
+      data = signed_message[0...separator_index]
+      digest = signed_message[separator_index + SEPARATOR_LENGTH..-1]
 
-      def digest_matches_data?(digest, data)
-        data.present? && digest.present? && ActiveSupport::SecurityUtils.secure_compare(digest, generate_digest(data))
-      end
+      [data, digest]
+    end
+
+    def digest_matches_data?(digest, data)
+      data.present? && digest.present? && ActiveSupport::SecurityUtils.secure_compare(digest, generate_digest(data))
+    end
   end
 end

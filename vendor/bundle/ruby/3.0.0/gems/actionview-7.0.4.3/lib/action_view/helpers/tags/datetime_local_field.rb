@@ -11,9 +11,10 @@ module ActionView
         end
 
         private
-          def format_date(value)
-            value&.strftime("%Y-%m-%dT%T")
-          end
+
+        def format_date(value)
+          value&.strftime("%Y-%m-%dT%T")
+        end
       end
     end
   end

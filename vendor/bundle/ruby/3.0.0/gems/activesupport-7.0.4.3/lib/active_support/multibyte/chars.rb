@@ -168,9 +168,10 @@ module ActiveSupport # :nodoc:
       end
 
       private
-        def chars(string)
-          self.class.new(string)
-        end
+
+      def chars(string)
+        self.class.new(string)
+      end
     end
   end
 end

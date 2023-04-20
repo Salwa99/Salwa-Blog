@@ -52,6 +52,7 @@ module ActiveModel
 
     def write_from_user(name, value)
       raise FrozenError, "can't modify frozen attributes" if frozen?
+
       @attributes[name] = self[name].with_value_from_user(value)
       value
     end
@@ -99,11 +100,13 @@ module ActiveModel
     end
 
     protected
-      attr_reader :attributes
+
+    attr_reader :attributes
 
     private
-      def default_attribute(name)
-        Attribute.null(name)
-      end
+
+    def default_attribute(name)
+      Attribute.null(name)
+    end
   end
 end

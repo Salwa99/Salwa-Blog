@@ -6,7 +6,7 @@ module ActionView
   class Template # :nodoc:
     module Types
       class Type
-        SET = Struct.new(:symbols).new([ :html, :text, :js, :css, :xml, :json ])
+        SET = Struct.new(:symbols).new([:html, :text, :js, :css, :xml, :json])
 
         def self.[](type)
           if type.is_a?(self)

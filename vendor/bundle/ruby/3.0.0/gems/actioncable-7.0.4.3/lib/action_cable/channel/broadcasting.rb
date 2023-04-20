@@ -22,7 +22,7 @@ module ActionCable
         # You can pass any object as a target (e.g. Active Record model), and it
         # would be serialized into a string under the hood.
         def broadcasting_for(model)
-          serialize_broadcasting([ channel_name, model ])
+          serialize_broadcasting([channel_name, model])
         end
 
         def serialize_broadcasting(object) # :nodoc:

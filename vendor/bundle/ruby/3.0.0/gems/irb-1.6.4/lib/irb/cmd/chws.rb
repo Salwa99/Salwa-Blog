@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   change-ws.rb -
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -11,7 +12,6 @@ module IRB
   # :stopdoc:
 
   module ExtendCommand
-
     class CurrentWorkingWorkspace < Nop
       category "IRB"
       description "Show the current workspace."

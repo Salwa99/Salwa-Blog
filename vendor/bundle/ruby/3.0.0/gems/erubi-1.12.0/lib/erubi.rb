@@ -37,14 +37,15 @@ module Erubi
       end
     rescue LoadError
       # :nocov:
-      ESCAPE_TABLE = {'&' => '&amp;'.freeze, '<' => '&lt;'.freeze, '>' => '&gt;'.freeze, '"' => '&quot;'.freeze, "'" => '&#39;'.freeze}.freeze
+      ESCAPE_TABLE = { '&' => '&amp;'.freeze, '<' => '&lt;'.freeze, '>' => '&gt;'.freeze, '"' => '&quot;'.freeze,
+                       "'" => '&#39;'.freeze }.freeze
       if RUBY_VERSION >= '1.9'
         def self.h(value)
           value.to_s.gsub(/[&<>"']/, ESCAPE_TABLE)
         end
       else
         def self.h(value)
-          value.to_s.gsub(/[&<>"']/){|s| ESCAPE_TABLE[s]}
+          value.to_s.gsub(/[&<>"']/) { |s| ESCAPE_TABLE[s] }
         end
       end
       # :nocov:
@@ -54,7 +55,7 @@ module Erubi
   class Engine
     # The default regular expression used for scanning.
     DEFAULT_REGEXP = /<%(={1,2}|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m
-    
+
     # The frozen ruby source code generated from the template, which can be evaled.
     attr_reader :src
 
@@ -91,23 +92,23 @@ module Erubi
     # +:regexp+ :: The regexp to use for scanning.
     # +:src+ :: The initial value to use for the source code, an empty string by default.
     # +:trim+ :: Whether to trim leading and trailing whitespace, true by default.
-    def initialize(input, properties={})
-      @escape = escape = properties.fetch(:escape){properties.fetch(:escape_html, false)}
-      trim       = properties[:trim] != false
-      @filename  = properties[:filename]
+    def initialize(input, properties = {})
+      @escape = escape = properties.fetch(:escape) { properties.fetch(:escape_html, false) }
+      trim = properties[:trim] != false
+      @filename = properties[:filename]
       @bufvar = bufvar = properties[:bufvar] || properties[:outvar] || "_buf"
       bufval = properties[:bufval] || '::String.new'
       regexp = properties[:regexp] || DEFAULT_REGEXP
       literal_prefix = properties[:literal_prefix] || '<%'
       literal_postfix = properties[:literal_postfix] || '%>'
-      preamble   = properties[:preamble] || "#{bufvar} = #{bufval};"
-      postamble  = properties[:postamble] || "#{bufvar}.to_s\n"
+      preamble = properties[:preamble] || "#{bufvar} = #{bufval};"
+      postamble = properties[:postamble] || "#{bufvar}.to_s\n"
       @chain_appends = properties[:chain_appends]
       @text_end = if properties.fetch(:freeze_template_literals, FREEZE_TEMPLATE_LITERALS)
-        "'.freeze"
-      else
-        "'"
-      end
+                    "'.freeze"
+                  else
+                    "'"
+                  end
 
       @buffer_on_stack = false
       @src = src = properties[:src] || String.new
@@ -136,10 +137,10 @@ module Erubi
       is_bol = true
       input.scan(regexp) do |indicator, code, tailch, rspace|
         match = Regexp.last_match
-        len  = match.begin(0) - pos
+        len = match.begin(0) - pos
         text = input[pos, len]
-        pos  = match.end(0)
-        ch   = indicator ? indicator[RANGE_FIRST] : nil
+        pos = match.end(0)
+        ch = indicator ? indicator[RANGE_FIRST] : nil
 
         lspace = nil
 
@@ -151,7 +152,7 @@ module Erubi
           else
             rindex = text.rindex("\n")
             if rindex
-              range = rindex+1..-1
+              range = rindex + 1..-1
               s = text[range]
               if /\A[ \t]*\z/.send(MATCH_METHOD, s)
                 lspace = s
@@ -219,7 +220,7 @@ module Erubi
         text.gsub!(/['\\]/, '\\\\\&')
       end
 
-      with_buffer{@src << " << '" << text << @text_end}
+      with_buffer { @src << " << '" << text << @text_end }
     end
 
     # Add ruby code to the template
@@ -242,12 +243,12 @@ module Erubi
 
     # Add the result of Ruby expression to the template
     def add_expression_result(code)
-      with_buffer{@src << ' << (' << code << ').to_s'}
+      with_buffer { @src << ' << (' << code << ').to_s' }
     end
 
     # Add the escaped result of Ruby expression to the template
     def add_expression_result_escaped(code)
-      with_buffer{@src << ' << ' << @escapefunc << '((' << code << '))'}
+      with_buffer { @src << ' << ' << @escapefunc << '((' << code << '))' }
     end
 
     # Add the given postamble to the src.  Can be overridden in subclasses

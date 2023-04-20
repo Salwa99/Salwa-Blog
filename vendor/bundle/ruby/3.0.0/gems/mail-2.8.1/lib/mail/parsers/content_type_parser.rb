@@ -1,5 +1,5 @@
-
 # frozen_string_literal: true
+
 require "mail/utilities"
 require "mail/parser_tools"
 
@@ -690,6 +690,7 @@ begin
         data = data.dup.force_encoding(Encoding::ASCII_8BIT) if data.respond_to?(:force_encoding)
 
         return ContentTypeStruct.new("text", "plain", []) if Mail::Utilities.blank?(data)
+
         content_type = ContentTypeStruct.new(nil, nil, [])
 
         # Parser state
@@ -788,7 +789,7 @@ begin
                     # Use quoted s value if one exists, otherwise use parameter value
                     value = qstr || chars(data, param_val_s, p - 1)
 
-                    content_type.parameters << {param_attr => value}
+                    content_type.parameters << { param_attr => value }
                     param_attr = nil
                     qstr = nil
                   end
@@ -859,7 +860,7 @@ begin
                     # Use quoted s value if one exists, otherwise use parameter value
                     value = qstr || chars(data, param_val_s, p - 1)
 
-                    content_type.parameters << {param_attr => value}
+                    content_type.parameters << { param_attr => value }
                     param_attr = nil
                     qstr = nil
                   end
@@ -889,7 +890,7 @@ begin
                     # Use quoted s value if one exists, otherwise use parameter value
                     value = qstr || chars(data, param_val_s, p - 1)
 
-                    content_type.parameters << {param_attr => value}
+                    content_type.parameters << { param_attr => value }
                     param_attr = nil
                     qstr = nil
                   end
@@ -946,7 +947,7 @@ begin
                     # Use quoted s value if one exists, otherwise use parameter value
                     value = qstr || chars(data, param_val_s, p - 1)
 
-                    content_type.parameters << {param_attr => value}
+                    content_type.parameters << { param_attr => value }
                     param_attr = nil
                     qstr = nil
                   end
@@ -970,7 +971,7 @@ begin
                     # Use quoted s value if one exists, otherwise use parameter value
                     value = qstr || chars(data, param_val_s, p - 1)
 
-                    content_type.parameters << {param_attr => value}
+                    content_type.parameters << { param_attr => value }
                     param_attr = nil
                     qstr = nil
                   end
@@ -1004,7 +1005,7 @@ begin
                     # Use quoted s value if one exists, otherwise use parameter value
                     value = qstr || chars(data, param_val_s, p - 1)
 
-                    content_type.parameters << {param_attr => value}
+                    content_type.parameters << { param_attr => value }
                     param_attr = nil
                     qstr = nil
                   end
@@ -1022,7 +1023,7 @@ begin
                     # Use quoted s value if one exists, otherwise use parameter value
                     value = qstr || chars(data, param_val_s, p - 1)
 
-                    content_type.parameters << {param_attr => value}
+                    content_type.parameters << { param_attr => value }
                     param_attr = nil
                     qstr = nil
                   end

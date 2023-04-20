@@ -246,7 +246,8 @@ module ActionView
       end
 
       def digest_path_from_template(template) # :nodoc:
-        digest = Digestor.digest(name: template.virtual_path, format: template.format, finder: lookup_context, dependencies: view_cache_dependencies)
+        digest = Digestor.digest(name: template.virtual_path, format: template.format, finder: lookup_context,
+                                 dependencies: view_cache_dependencies)
 
         if digest.present?
           "#{template.virtual_path}:#{digest}"
@@ -255,13 +256,14 @@ module ActionView
         end
       end
 
-    private
+      private
+
       def fragment_name_with_digest(name, digest_path)
         name = controller.url_for(name).split("://").last if name.is_a?(Hash)
 
         if @current_template&.virtual_path || digest_path
           digest_path ||= digest_path_from_template(@current_template)
-          [ digest_path, name ]
+          [digest_path, name]
         else
           name
         end

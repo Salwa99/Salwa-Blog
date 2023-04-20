@@ -149,7 +149,7 @@ Capybara::SpecHelper.spec '#select' do
     end
 
     it 'should return value of the selected options' do
-      @session.select('Ruby',       from: 'Languages')
+      @session.select('Ruby', from: 'Languages')
       @session.select('Javascript', from: 'Languages')
       expect(@session.find_field('Languages').value).to include('Ruby', 'Javascript')
     end
@@ -161,16 +161,16 @@ Capybara::SpecHelper.spec '#select' do
     end
 
     it 'should select multiple options' do
-      @session.select('Ruby',       from: 'Languages')
+      @session.select('Ruby', from: 'Languages')
       @session.select('Javascript', from: 'Languages')
       @session.click_button('awesome')
       expect(extract_results(@session)['languages']).to include('Ruby', 'Javascript')
     end
 
     it 'should remain selected if already selected' do
-      @session.select('Ruby',       from: 'Languages')
+      @session.select('Ruby', from: 'Languages')
       @session.select('Javascript', from: 'Languages')
-      @session.select('Ruby',       from: 'Languages')
+      @session.select('Ruby', from: 'Languages')
       @session.click_button('awesome')
       expect(extract_results(@session)['languages']).to include('Ruby', 'Javascript')
     end
@@ -189,13 +189,13 @@ Capybara::SpecHelper.spec '#select' do
       end
 
       it 'can match option approximately' do
-        @session.select('Fin', from: 'Locale', exact:  false)
+        @session.select('Fin', from: 'Locale', exact: false)
         @session.click_button('awesome')
         expect(extract_results(@session)['locale']).to eq('fi')
       end
 
       it 'can match option approximately when :from not given' do
-        @session.select('made-up language', exact:  false)
+        @session.select('made-up language', exact: false)
         @session.click_button('awesome')
         expect(extract_results(@session)['locale']).to eq('jo')
       end

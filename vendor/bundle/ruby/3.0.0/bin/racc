@@ -22,8 +22,8 @@ if str
 end
 
 if Gem.respond_to?(:activate_bin_path)
-load Gem.activate_bin_path('racc', 'racc', version)
+  load Gem.activate_bin_path('racc', 'racc', version)
 else
-gem "racc", version
-load Gem.bin_path("racc", "racc", version)
+  gem "racc", version
+  load Gem.bin_path("racc", "racc", version)
 end

@@ -4,7 +4,6 @@ require 'concurrent/executor/immediate_executor'
 require 'concurrent/synchronization/lockable_object'
 
 module Concurrent
-
   # This file has circular require issues. It must be autoloaded here.
   autoload :Options, 'concurrent/options'
 
@@ -61,6 +60,7 @@ module Concurrent
     # @raise [ArgumentError] if no block is given
     def initialize(opts = {}, &block)
       raise ArgumentError.new('no block given') unless block_given?
+
       super(&nil)
       synchronize { ns_initialize(opts, &block) }
     end
@@ -116,6 +116,7 @@ module Concurrent
       else
         result = value
         raise @reason if @reason
+
         result
       end
     end
@@ -146,6 +147,7 @@ module Concurrent
     def reconfigure(&block)
       synchronize do
         raise ArgumentError.new('no block given') unless block_given?
+
         unless @evaluation_started
           @task = block
           true
@@ -162,8 +164,8 @@ module Concurrent
       set_deref_options(opts)
       @executor = opts[:executor]
 
-      @task               = block
-      @state              = :pending
+      @task = block
+      @state = :pending
       @evaluation_started = false
     end
 
@@ -176,14 +178,14 @@ module Concurrent
       execute = task = nil
       synchronize do
         execute = @evaluation_started = true unless @evaluation_started
-        task    = @task
+        task = @task
       end
 
       if execute
         executor = Options.executor_from_options(executor: @executor)
         executor.post do
           begin
-            result  = task.call
+            result = task.call
             success = true
           rescue => ex
             reason = ex

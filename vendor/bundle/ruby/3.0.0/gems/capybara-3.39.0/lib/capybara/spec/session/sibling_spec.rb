@@ -47,6 +47,7 @@ Capybara::SpecHelper.spec '#sibling' do
     el = @session.find(:css, '#child')
     expect do
       el.sibling(:xpath, '//div[@id="nosuchthing"]')
-    end.to raise_error(Capybara::ElementNotFound, 'Unable to find xpath "//div[@id=\\"nosuchthing\\"]" that is a sibling of visible css "#child"')
+    end.to raise_error(Capybara::ElementNotFound,
+                       'Unable to find xpath "//div[@id=\\"nosuchthing\\"]" that is a sibling of visible css "#child"')
   end
 end

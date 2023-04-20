@@ -61,7 +61,7 @@ class Capybara::RackTest::Form < Capybara::RackTest::Node
     self[:enctype] == 'multipart/form-data'
   end
 
-private
+  private
 
   class ParamsHash < Hash
     def to_params_hash
@@ -95,21 +95,21 @@ private
     return if name.empty?
 
     value = case field['type']
-    when 'radio', 'checkbox'
-      return unless field['checked']
+            when 'radio', 'checkbox'
+              return unless field['checked']
 
-      Capybara::RackTest::Node.new(driver, field).value.to_s
-    when 'file'
-      return if value.empty? && params.keys.include?(name) && Rack::Test::VERSION.to_f >= 2.0 # rubocop:disable Performance/InefficientHashSearch
+              Capybara::RackTest::Node.new(driver, field).value.to_s
+            when 'file'
+              return if value.empty? && params.keys.include?(name) && Rack::Test::VERSION.to_f >= 2.0 # rubocop:disable Performance/InefficientHashSearch
 
-      if multipart?
-        file_to_upload(value)
-      else
-        File.basename(value)
-      end
-    else
-      value
-    end
+              if multipart?
+                file_to_upload(value)
+              else
+                File.basename(value)
+              end
+            else
+              value
+            end
     # merge_param!(params, name, value)
     params[name] = value
   end

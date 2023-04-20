@@ -34,13 +34,14 @@ module ActiveModel
       end
 
       private
-        def cast_value(value)
-          if value == ""
-            nil
-          else
-            !FALSE_VALUES.include?(value)
-          end
+
+      def cast_value(value)
+        if value == ""
+          nil
+        else
+          !FALSE_VALUES.include?(value)
         end
+      end
     end
   end
 end

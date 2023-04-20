@@ -11,6 +11,7 @@ module ActiveRecord
 
           def serialize(value)
             return unless value
+
             Data.new(super)
           end
 

@@ -30,14 +30,14 @@ module DEBUGGER__
         # vscode-rdbg 0.0.9 or later is needed
         open('.vscode/rdbg_autoattach.json', 'w') do |f|
           f.puts JSON.pretty_generate({
-            type: "rdbg",
-            name: "Attach with rdbg",
-            request: "attach",
-            rdbgPath: File.expand_path('../../exe/rdbg', __dir__),
-            debugPort: debug_port,
-            localfs: true,
-            autoAttach: key,
-          })
+                                        type: "rdbg",
+                                        name: "Attach with rdbg",
+                                        request: "attach",
+                                        rdbgPath: File.expand_path('../../exe/rdbg', __dir__),
+                                        debugPort: debug_port,
+                                        localfs: true,
+                                        autoAttach: key,
+                                      })
         end
       end
 
@@ -46,19 +46,19 @@ module DEBUGGER__
       ssh_cmdline = "code --remote ssh-remote+[SSH hostname] #{dir}/"
 
       STDERR.puts "Launching: #{cmdline}"
-      env = ENV.delete_if{|k, h| /RUBY/ =~ k}.to_h
+      env = ENV.delete_if { |k, h| /RUBY/ =~ k }.to_h
       env['RUBY_DEBUG_AUTOATTACH'] = key
 
       unless system(env, *cmds)
         DEBUGGER__.warn <<~MESSAGE
-        Can not invoke the command.
-        Use the command-line on your terminal (with modification if you need).
+          Can not invoke the command.
+          Use the command-line on your terminal (with modification if you need).
 
-          #{cmdline}
+            #{cmdline}
 
-        If your application is running on a SSH remote host, please try:
+          If your application is running on a SSH remote host, please try:
 
-          #{ssh_cmdline}
+            #{ssh_cmdline}
 
         MESSAGE
       end
@@ -84,7 +84,7 @@ module DEBUGGER__
       else # Array
         @local_fs_map.each do |(remote_path_prefix, local_path_prefix)|
           if path.start_with? remote_path_prefix
-            return path.sub(remote_path_prefix){ local_path_prefix }
+            return path.sub(remote_path_prefix) { local_path_prefix }
           end
         end
 
@@ -101,7 +101,7 @@ module DEBUGGER__
       else # Array
         @local_fs_map.each do |(remote_path_prefix, local_path_prefix)|
           if path.start_with? local_path_prefix
-            return path.sub(local_path_prefix){ remote_path_prefix }
+            return path.sub(local_path_prefix) { remote_path_prefix }
           end
         end
 
@@ -114,7 +114,7 @@ module DEBUGGER__
 
       case map
       when String
-        @local_fs_map = map.split(',').map{|e| e.split(':').map{|path| path.delete_suffix('/') + '/'}}
+        @local_fs_map = map.split(',').map { |e| e.split(':').map { |path| path.delete_suffix('/') + '/' } }
       when true
         @local_fs_map = map
       when nil
@@ -141,64 +141,62 @@ module DEBUGGER__
 
       # capability
       send_response(req,
-             ## Supported
-             supportsConfigurationDoneRequest: true,
-             supportsFunctionBreakpoints: true,
-             supportsConditionalBreakpoints: true,
-             supportTerminateDebuggee: true,
-             supportsTerminateRequest: true,
-             exceptionBreakpointFilters: [
-               {
-                 filter: 'any',
-                 label: 'rescue any exception',
-                 supportsCondition: true,
-                 #conditionDescription: '',
-               },
-               {
-                 filter: 'RuntimeError',
-                 label: 'rescue RuntimeError',
-                 supportsCondition: true,
-                 #conditionDescription: '',
-               },
-             ],
-             supportsExceptionFilterOptions: true,
-             supportsStepBack: true,
-             supportsEvaluateForHovers: true,
-             supportsCompletionsRequest: true,
+                    ## Supported
+                    supportsConfigurationDoneRequest: true,
+                    supportsFunctionBreakpoints: true,
+                    supportsConditionalBreakpoints: true,
+                    supportTerminateDebuggee: true,
+                    supportsTerminateRequest: true,
+                    exceptionBreakpointFilters: [
+                      {
+                        filter: 'any',
+                        label: 'rescue any exception',
+                        supportsCondition: true,
+                        # conditionDescription: '',
+                      },
+                      {
+                        filter: 'RuntimeError',
+                        label: 'rescue RuntimeError',
+                        supportsCondition: true,
+                        # conditionDescription: '',
+                      },
+                    ],
+                    supportsExceptionFilterOptions: true,
+                    supportsStepBack: true,
+                    supportsEvaluateForHovers: true,
+                    supportsCompletionsRequest: true,)
+      ## Will be supported
+      # supportsExceptionOptions: true,
+      # supportsHitConditionalBreakpoints:
+      # supportsSetVariable: true,
+      # supportSuspendDebuggee:
+      # supportsLogPoints:
+      # supportsLoadedSourcesRequest:
+      # supportsDataBreakpoints:
+      # supportsBreakpointLocationsRequest:
 
-             ## Will be supported
-             # supportsExceptionOptions: true,
-             # supportsHitConditionalBreakpoints:
-             # supportsSetVariable: true,
-             # supportSuspendDebuggee:
-             # supportsLogPoints:
-             # supportsLoadedSourcesRequest:
-             # supportsDataBreakpoints:
-             # supportsBreakpointLocationsRequest:
+      ## Possible?
+      # supportsRestartFrame:
+      # completionTriggerCharacters:
+      # supportsModulesRequest:
+      # additionalModuleColumns:
+      # supportedChecksumAlgorithms:
+      # supportsRestartRequest:
+      # supportsValueFormattingOptions:
+      # supportsExceptionInfoRequest:
+      # supportsDelayedStackTraceLoading:
+      # supportsTerminateThreadsRequest:
+      # supportsSetExpression:
+      # supportsClipboardContext:
 
-             ## Possible?
-             # supportsRestartFrame:
-             # completionTriggerCharacters:
-             # supportsModulesRequest:
-             # additionalModuleColumns:
-             # supportedChecksumAlgorithms:
-             # supportsRestartRequest:
-             # supportsValueFormattingOptions:
-             # supportsExceptionInfoRequest:
-             # supportsDelayedStackTraceLoading:
-             # supportsTerminateThreadsRequest:
-             # supportsSetExpression:
-             # supportsClipboardContext:
-
-             ## Never
-             # supportsGotoTargetsRequest:
-             # supportsStepInTargetsRequest:
-             # supportsReadMemoryRequest:
-             # supportsDisassembleRequest:
-             # supportsCancelRequest:
-             # supportsSteppingGranularity:
-             # supportsInstructionBreakpoints:
-      )
+      ## Never
+      # supportsGotoTargetsRequest:
+      # supportsStepInTargetsRequest:
+      # supportsReadMemoryRequest:
+      # supportsDisassembleRequest:
+      # supportsCancelRequest:
+      # supportsSteppingGranularity:
+      # supportsInstructionBreakpoints:
       send_event 'initialized'
       puts <<~WELCOME
         Ruby REPL: You can run any Ruby expression here.
@@ -277,6 +275,7 @@ module DEBUGGER__
     def process
       while req = recv_request
         raise "not a request: #{req.inspect}" unless req['type'] == 'request'
+
         args = req.dig('arguments')
 
         case req['command']
@@ -318,7 +317,7 @@ module DEBUGGER__
             SESSION.clear_line_breakpoints path
 
             bps = []
-            args['breakpoints'].each{|bp|
+            args['breakpoints'].each { |bp|
               line = bp['line']
               if cond = bp['condition']
                 bps << SESSION.add_line_breakpoint(path, line, cond: cond)
@@ -326,7 +325,7 @@ module DEBUGGER__
                 bps << SESSION.add_line_breakpoint(path, line)
               end
             }
-            send_response req, breakpoints: (bps.map do |bp| {verified: true,} end)
+            send_response req, breakpoints: (bps.map do |bp| { verified: true, } end)
           else
             send_response req, success: false, message: "#{req_path} is not available"
           end
@@ -345,19 +344,19 @@ module DEBUGGER__
               else
                 nil
               end
-              {
-                verified: !bp.nil?,
-                message: bp.inspect,
-              }
+            {
+              verified: !bp.nil?,
+              message: bp.inspect,
             }
+          }
 
-            SESSION.clear_catch_breakpoints 'Exception', 'RuntimeError'
+          SESSION.clear_catch_breakpoints 'Exception', 'RuntimeError'
 
-            filters = args.fetch('filters').map {|filter_id|
-              process_filter.call(filter_id)
-            }
+          filters = args.fetch('filters').map { |filter_id|
+            process_filter.call(filter_id)
+          }
 
-            filters += args.fetch('filterOptions', {}).map{|bp_info|
+          filters += args.fetch('filterOptions', {}).map { |bp_info|
             process_filter.call(bp_info['filterId'], bp_info['condition'])
           }
 
@@ -431,10 +430,9 @@ module DEBUGGER__
 
         ## query
         when 'threads'
-          send_response req, threads: SESSION.managed_thread_clients.map{|tc|
+          send_response req, threads: SESSION.managed_thread_clients.map { |tc|
             { id: tc.id,
-              name: tc.name,
-            }
+              name: tc.name, }
           }
 
         when 'evaluate'
@@ -528,7 +526,7 @@ module DEBUGGER__
     include GlobalVariablesHelper
 
     def find_waiting_tc id
-      @th_clients.each{|th, tc|
+      @th_clients.each { |th, tc|
         return tc if tc.id == id && tc.waiting?
       }
       return nil
@@ -648,7 +646,7 @@ module DEBUGGER__
         if find_waiting_tc(tid)
           text = req.dig('arguments', 'text')
           line = req.dig('arguments', 'line')
-          if col  = req.dig('arguments', 'column')
+          if col = req.dig('arguments', 'column')
             text = text.split(/\n/)[line.to_i - 1][0...(col.to_i - 1)]
           end
           request_tc [:dap, :completions, req, fid, text]
@@ -670,7 +668,7 @@ module DEBUGGER__
 
       case type
       when :backtrace
-        result[:stackFrames].each{|fi|
+        result[:stackFrames].each { |fi|
           frame_depth = fi[:id]
           fi[:id] = id = @frame_map.size + 1
           @frame_map[id] = [req.dig('arguments', 'threadId'), frame_depth]
@@ -730,7 +728,8 @@ module DEBUGGER__
 
     def register_vars vars, tid
       raise tid.inspect unless tid.kind_of?(Integer)
-      vars.each{|v|
+
+      vars.each { |v|
         register_var v, tid
       }
     end
@@ -738,6 +737,7 @@ module DEBUGGER__
 
   class NaiveString
     attr_reader :str
+
     def initialize str
       @str = str
     end
@@ -781,6 +781,7 @@ module DEBUGGER__
           path = frame.realpath || frame.path
           next if skip_path?(path) && !SESSION.stop_stepping?(path, frame.location.lineno)
           break if (levels -= 1) < 0
+
           source_name = path ? File.basename(path) : frame.location.to_s
 
           if (path && File.exist?(path)) && (local_path = UI_DAP.remote_to_local_path(path))
@@ -850,7 +851,7 @@ module DEBUGGER__
           when 'indexed'
             start = req.dig('arguments', 'start') || 0
             count = req.dig('arguments', 'count') || obj.size
-            vars = (start ... (start + count)).map{|i|
+            vars = (start...(start + count)).map { |i|
               variable(i.to_s, obj[i])
             }
           else
@@ -858,11 +859,11 @@ module DEBUGGER__
 
             case obj
             when Hash
-              vars = obj.map{|k, v|
+              vars = obj.map { |k, v|
                 variable(value_inspect(k), v,)
               }
             when Struct
-              vars = obj.members.map{|m|
+              vars = obj.members.map { |m|
                 variable(m, obj[m])
               }
             when String
@@ -882,7 +883,7 @@ module DEBUGGER__
             end
 
             unless NaiveString === obj
-              vars += M_INSTANCE_VARIABLES.bind_call(obj).sort.map{|iv|
+              vars += M_INSTANCE_VARIABLES.bind_call(obj).sort.map { |iv|
                 variable(iv, M_INSTANCE_VARIABLE_GET.bind_call(obj, iv))
               }
               vars.unshift variable('#class', M_CLASS.bind_call(obj))
@@ -913,7 +914,7 @@ module DEBUGGER__
                 message = "Error: Not defined instance variable: #{expr.inspect}"
               end
             when /\A\$\S/
-              safe_global_variables.each{|gvar|
+              safe_global_variables.each { |gvar|
                 if gvar.to_s == expr
                   result = eval(gvar.to_s)
                   break false
@@ -954,7 +955,7 @@ module DEBUGGER__
           words = IRB::InputCompletor::retrieve_completion_data(word, bind: b).compact
         end
 
-        event! :protocol_result, :completions, req, targets: (words || []).map{|phrase|
+        event! :protocol_result, :completions, req, targets: (words || []).map { |phrase|
           detail = nil
 
           if /\b([_a-zA-Z]\w*[!\?]?)\z/ =~ phrase
@@ -965,7 +966,7 @@ module DEBUGGER__
 
           begin
             v = b.local_variable_get(w)
-            detail ="(variable: #{value_inspect(v)})"
+            detail = "(variable: #{value_inspect(v)})"
           rescue NameError
           end
 
@@ -987,8 +988,8 @@ module DEBUGGER__
 
     def search_const b, expr
       cs = expr.delete_prefix('::').split('::')
-      [Object, *b.eval('::Module.nesting')].reverse_each{|mod|
-        if cs.all?{|c|
+      [Object, *b.eval('::Module.nesting')].reverse_each { |mod|
+        if cs.all? { |c|
              if mod.const_defined?(c)
                begin
                  mod = mod.const_get(c)
@@ -1043,15 +1044,13 @@ module DEBUGGER__
           type: type_name(obj),
           variablesReference: vid,
           indexedVariables: indexedVariables,
-          namedVariables: namedVariables,
-        }
+          namedVariables: namedVariables, }
       else
         { result: str,
           type: type_name(obj),
           variablesReference: vid,
           indexedVariables: indexedVariables,
-          namedVariables: namedVariables,
-        }
+          namedVariables: namedVariables, }
       end
     end
 

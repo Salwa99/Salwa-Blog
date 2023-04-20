@@ -55,14 +55,15 @@ module ActionMailbox
     end
 
     private
-      def mail
-        params.require(:email).tap do |raw_email|
-          envelope["to"].each { |to| raw_email.prepend("X-Original-To: ", to, "\n") } if params.key?(:envelope)
-        end
-      end
 
-      def envelope
-        JSON.parse(params.require(:envelope))
+    def mail
+      params.require(:email).tap do |raw_email|
+        envelope["to"].each { |to| raw_email.prepend("X-Original-To: ", to, "\n") } if params.key?(:envelope)
       end
+    end
+
+    def envelope
+      JSON.parse(params.require(:envelope))
+    end
   end
 end

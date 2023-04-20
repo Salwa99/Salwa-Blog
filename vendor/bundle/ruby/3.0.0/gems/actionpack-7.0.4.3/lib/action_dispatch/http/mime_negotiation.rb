@@ -23,10 +23,10 @@ module ActionDispatch
       def content_mime_type
         fetch_header("action_dispatch.request.content_type") do |k|
           v = if get_header("CONTENT_TYPE") =~ /^([^,;]*)/
-            Mime::Type.lookup($1.strip.downcase)
-          else
-            nil
-          end
+                Mime::Type.lookup($1.strip.downcase)
+              else
+                nil
+              end
           set_header k, v
         rescue ::Mime::Type::InvalidMimeType => e
           raise InvalidType, e.message
@@ -36,8 +36,8 @@ module ActionDispatch
       def content_type
         if self.class.return_only_media_type_on_content_type
           ActiveSupport::Deprecation.warn(
-            "Rails 7.1 will return Content-Type header without modification." \
-            " If you want just the MIME type, please use `#media_type` instead."
+            "Rails 7.1 will return Content-Type header without modification. " \
+            "If you want just the MIME type, please use `#media_type` instead."
           )
 
           content_mime_type&.to_s
@@ -56,10 +56,10 @@ module ActionDispatch
           header = get_header("HTTP_ACCEPT").to_s.strip
 
           v = if header.empty?
-            [content_mime_type]
-          else
-            Mime::Type.parse(header)
-          end
+                [content_mime_type]
+              else
+                Mime::Type.parse(header)
+              end
           set_header k, v
         rescue ::Mime::Type::InvalidMimeType => e
           raise InvalidType, e.message
@@ -79,16 +79,16 @@ module ActionDispatch
       def formats
         fetch_header("action_dispatch.request.formats") do |k|
           v = if params_readable?
-            Array(Mime[parameters[:format]])
-          elsif use_accept_header && valid_accept_header
-            accepts
-          elsif extension_format = format_from_path_extension
-            [extension_format]
-          elsif xhr?
-            [Mime[:js]]
-          else
-            [Mime[:html]]
-          end
+                Array(Mime[parameters[:format]])
+              elsif use_accept_header && valid_accept_header
+                accepts
+              elsif extension_format = format_from_path_extension
+                [extension_format]
+              elsif xhr?
+                [Mime[:js]]
+              else
+                [Mime[:html]]
+              end
 
           v = v.select do |format|
             format.symbol || format.ref == "*/*"
@@ -168,31 +168,32 @@ module ActionDispatch
       end
 
       private
-        # We use normal content negotiation unless you include */* in your list,
-        # in which case we assume you're a browser and send HTML.
-        BROWSER_LIKE_ACCEPTS = /,\s*\*\/\*|\*\/\*\s*,/
 
-        def params_readable? # :doc:
-          parameters[:format]
-        rescue *RESCUABLE_MIME_FORMAT_ERRORS
-          false
-        end
+      # We use normal content negotiation unless you include */* in your list,
+      # in which case we assume you're a browser and send HTML.
+      BROWSER_LIKE_ACCEPTS = /,\s*\*\/\*|\*\/\*\s*,/
 
-        def valid_accept_header # :doc:
-          (xhr? && (accept.present? || content_mime_type)) ||
-            (accept.present? && !accept.match?(BROWSER_LIKE_ACCEPTS))
-        end
+      def params_readable? # :doc:
+        parameters[:format]
+      rescue *RESCUABLE_MIME_FORMAT_ERRORS
+        false
+      end
 
-        def use_accept_header # :doc:
-          !self.class.ignore_accept_header
-        end
+      def valid_accept_header # :doc:
+        (xhr? && (accept.present? || content_mime_type)) ||
+          (accept.present? && !accept.match?(BROWSER_LIKE_ACCEPTS))
+      end
 
-        def format_from_path_extension # :doc:
-          path = get_header("action_dispatch.original_path") || get_header("PATH_INFO")
-          if match = path && path.match(/\.(\w+)\z/)
-            Mime[match.captures.first]
-          end
+      def use_accept_header # :doc:
+        !self.class.ignore_accept_header
+      end
+
+      def format_from_path_extension # :doc:
+        path = get_header("action_dispatch.original_path") || get_header("PATH_INFO")
+        if match = path && path.match(/\.(\w+)\z/)
+          Mime[match.captures.first]
         end
+      end
     end
   end
 end

@@ -24,7 +24,7 @@ when :start
   else
     # `$:.resolve_feature_path` is not defined in 2.6 or earlier.
     so = "debug/debug.#{RbConfig::CONFIG['DLEXT']}"
-    sopath = $:.find {|dir| File.exist?(File.join(dir, so))}
+    sopath = $:.find { |dir| File.exist?(File.join(dir, so)) }
   end
   added = "-r #{libpath}/#{start_mode}"
   added = "-I #{sopath} #{added}" if sopath

@@ -18,7 +18,7 @@ module Capybara
           @filter_block = filter_block
         end
 
-      private
+        private
 
         def session_query_args
           # if @args.last.is_a? Hash
@@ -63,15 +63,15 @@ module Capybara
           false
         end
 
-      private
+        private
 
         def wrap(actual)
           actual = actual.to_capybara_node if actual.respond_to?(:to_capybara_node)
           @context_el = if actual.respond_to?(:has_selector?)
-            actual
-          else
-            Capybara.string(actual.to_s)
-          end
+                          actual
+                        else
+                          Capybara.string(actual.to_s)
+                        end
         end
       end
 

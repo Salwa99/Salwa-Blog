@@ -33,7 +33,8 @@ module ActiveStorage::Blob::Representable
   # ActiveStorage::Blob#variable?.
   def variant(transformations)
     if variable?
-      variant_class.new(self, ActiveStorage::Variation.wrap(transformations).default_to(default_variant_transformations))
+      variant_class.new(self,
+                        ActiveStorage::Variation.wrap(transformations).default_to(default_variant_transformations))
     else
       raise ActiveStorage::InvariableError
     end
@@ -44,7 +45,6 @@ module ActiveStorage::Blob::Representable
   def variable?
     ActiveStorage.variable_content_types.include?(content_type)
   end
-
 
   # Returns an ActiveStorage::Preview instance with the set of +transformations+ provided. A preview is an image generated
   # from a non-image blob. Active Storage comes with built-in previewers for videos and PDF documents. The video previewer
@@ -73,7 +73,6 @@ module ActiveStorage::Blob::Representable
     ActiveStorage.previewers.any? { |klass| klass.accept?(self) }
   end
 
-
   # Returns an ActiveStorage::Preview for a previewable blob or an ActiveStorage::Variant for a variable image blob.
   #
   #   blob.representation(resize_to_limit: [100, 100]).processed.url
@@ -99,27 +98,28 @@ module ActiveStorage::Blob::Representable
   end
 
   private
-    def default_variant_transformations
-      { format: default_variant_format }
-    end
 
-    def default_variant_format
-      if web_image?
-        format || :png
-      else
-        :png
-      end
-    end
+  def default_variant_transformations
+    { format: default_variant_format }
+  end
 
-    def format
-      if filename.extension.present? && MiniMime.lookup_by_extension(filename.extension)&.content_type == content_type
-        filename.extension
-      else
-        MiniMime.lookup_by_content_type(content_type)&.extension
-      end
+  def default_variant_format
+    if web_image?
+      format || :png
+    else
+      :png
     end
+  end
 
-    def variant_class
-      ActiveStorage.track_variants ? ActiveStorage::VariantWithRecord : ActiveStorage::Variant
+  def format
+    if filename.extension.present? && MiniMime.lookup_by_extension(filename.extension)&.content_type == content_type
+      filename.extension
+    else
+      MiniMime.lookup_by_content_type(content_type)&.extension
     end
+  end
+
+  def variant_class
+    ActiveStorage.track_variants ? ActiveStorage::VariantWithRecord : ActiveStorage::Variant
+  end
 end

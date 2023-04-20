@@ -125,7 +125,7 @@ module Capybara
       "#<Window @handle=#{@handle.inspect}>"
     end
 
-  private
+    private
 
     def wait_for_stable_size(seconds = session.config.default_max_wait_time)
       res = yield if block_given?

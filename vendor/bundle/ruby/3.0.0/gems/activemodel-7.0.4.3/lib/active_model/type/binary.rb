@@ -21,6 +21,7 @@ module ActiveModel
 
       def serialize(value)
         return if value.nil?
+
         Data.new(super)
       end
 

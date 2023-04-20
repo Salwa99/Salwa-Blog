@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   save-history.rb -
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -9,8 +10,8 @@ module IRB
   end
 
   class Context
-    def init_save_history# :nodoc:
-      unless (class<<@io;self;end).include?(HistorySavingAbility)
+    def init_save_history # :nodoc:
+      unless (class << @io; self; end).include?(HistorySavingAbility)
         @io.extend(HistorySavingAbility)
       end
     end
@@ -52,13 +53,14 @@ module IRB
 
   module HistorySavingAbility # :nodoc:
     def HistorySavingAbility.extended(obj)
-      IRB.conf[:AT_EXIT].push proc{obj.save_history}
+      IRB.conf[:AT_EXIT].push proc { obj.save_history }
       obj.load_history
       obj
     end
 
     def load_history
       return unless self.class.const_defined?(:HISTORY)
+
       history = self.class::HISTORY
       if history_file = IRB.conf[:HISTORY_FILE]
         history_file = File.expand_path(history_file)
@@ -83,6 +85,7 @@ module IRB
 
     def save_history
       return unless self.class.const_defined?(:HISTORY)
+
       history = self.class::HISTORY
       if num = IRB.conf[:SAVE_HISTORY] and (num = num.to_i) != 0
         if history_file = IRB.conf[:HISTORY_FILE]
@@ -109,7 +112,7 @@ module IRB
         end
 
         File.open(history_file, (append_history ? 'a' : 'w'), 0o600, encoding: IRB.conf[:LC_MESSAGES]&.encoding) do |f|
-          hist = history.map{ |l| l.split("\n").join("\\\n") }
+          hist = history.map { |l| l.split("\n").join("\\\n") }
           unless append_history
             begin
               hist = hist.last(num) if hist.size > num and num > 0

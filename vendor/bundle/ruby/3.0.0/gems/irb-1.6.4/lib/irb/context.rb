@@ -1,4 +1,5 @@
 # frozen_string_literal: false
+
 #
 #   irb/context.rb - irb context
 #   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
@@ -75,7 +76,7 @@ module IRB
       if IRB.conf[:SINGLE_IRB] or !defined?(IRB::JobManager)
         @irb_name = IRB.conf[:IRB_NAME]
       else
-        @irb_name = IRB.conf[:IRB_NAME]+"#"+IRB.JobManager.n_jobs.to_s
+        @irb_name = IRB.conf[:IRB_NAME] + "#" + IRB.JobManager.n_jobs.to_s
       end
       @irb_path = "(" + @irb_name + ")"
 
@@ -431,7 +432,6 @@ module IRB
     #
     # See IRB@Command+line+options for more command line options.
     def inspect_mode=(opt)
-
       if i = Inspector::INSPECTORS[opt]
         @inspect_mode = opt
         @inspect_method = i
@@ -469,7 +469,7 @@ module IRB
           return
         end
       end
-      print "Switch to#{unless @inspect_mode; ' non';end} inspect mode.\n" if verbose?
+      print "Switch to#{unless @inspect_mode; ' non'; end} inspect mode.\n" if verbose?
       @inspect_mode
     end
 
@@ -516,7 +516,7 @@ module IRB
     alias __inspect__ inspect
     def inspect # :nodoc:
       array = []
-      for ivar in instance_variables.sort{|e1, e2| e1 <=> e2}
+      for ivar in instance_variables.sort { |e1, e2| e1 <=> e2 }
         ivar = ivar.to_s
         name = ivar.sub(/^@(.*)$/, '\1')
         val = instance_eval(ivar)
@@ -543,6 +543,7 @@ module IRB
     # Return true if it's aliased from the argument and it's not an identifier.
     def symbol_alias?(command)
       return nil if command.match?(/\A\w+\z/)
+
       command_aliases.key?(command.to_sym)
     end
 

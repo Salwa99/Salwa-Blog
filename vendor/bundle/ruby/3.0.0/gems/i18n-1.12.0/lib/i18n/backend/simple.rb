@@ -32,10 +32,11 @@ module I18n
         # level of the hash.
         def store_translations(locale, data, options = EMPTY_HASH)
           if I18n.enforce_available_locales &&
-            I18n.available_locales_initialized? &&
-            !I18n.locale_available?(locale)
+             I18n.available_locales_initialized? &&
+             !I18n.locale_available?(locale)
             return data
           end
+
           locale = locale.to_sym
           translations[locale] ||= Concurrent::Hash.new
           data = Utils.deep_symbolize_keys(data) unless options.fetch(:skip_symbolize_keys, false)
@@ -71,7 +72,7 @@ module I18n
           @translations ||= Concurrent::Hash.new { |h, k| h[k] = Concurrent::Hash.new }
         end
 
-      protected
+        protected
 
         def init_translations
           load_translations
@@ -89,6 +90,7 @@ module I18n
 
           keys.inject(translations) do |result, _key|
             return nil unless result.is_a?(Hash)
+
             unless result.has_key?(_key)
               _key = _key.to_s.to_sym
               return nil unless result.has_key?(_key)

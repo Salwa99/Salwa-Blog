@@ -15,29 +15,29 @@ module ActiveSupport
     end
 
     private
-      def html_safe_translation_key?(key)
-        /(?:_|\b)html\z/.match?(key)
-      end
 
-      def html_escape_translation_options(options)
-        options.each do |name, value|
-          unless i18n_option?(name) || (name == :count && value.is_a?(Numeric))
-            options[name] = ERB::Util.html_escape(value.to_s)
-          end
+    def html_safe_translation_key?(key)
+      /(?:_|\b)html\z/.match?(key)
+    end
+
+    def html_escape_translation_options(options)
+      options.each do |name, value|
+        unless i18n_option?(name) || (name == :count && value.is_a?(Numeric))
+          options[name] = ERB::Util.html_escape(value.to_s)
         end
       end
+    end
 
-      def i18n_option?(name)
-        (@i18n_option_names ||= I18n::RESERVED_KEYS.to_set).include?(name)
+    def i18n_option?(name)
+      (@i18n_option_names ||= I18n::RESERVED_KEYS.to_set).include?(name)
+    end
+
+    def html_safe_translation(translation)
+      if translation.respond_to?(:map)
+        translation.map { |element| element.respond_to?(:html_safe) ? element.html_safe : element }
+      else
+        translation.respond_to?(:html_safe) ? translation.html_safe : translation
       end
-
-
-      def html_safe_translation(translation)
-        if translation.respond_to?(:map)
-          translation.map { |element| element.respond_to?(:html_safe) ? element.html_safe : element }
-        else
-          translation.respond_to?(:html_safe) ? translation.html_safe : translation
-        end
-      end
+    end
   end
 end

@@ -13,7 +13,8 @@ module ActiveRecord
       end
 
       private
-        attr_reader :predicate_builder
+
+      attr_reader :predicate_builder
     end
   end
 end

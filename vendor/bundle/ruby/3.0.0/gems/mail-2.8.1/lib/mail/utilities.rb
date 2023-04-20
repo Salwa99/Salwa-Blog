@@ -1,5 +1,6 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/constants'
 require 'socket'
 
@@ -8,19 +9,19 @@ module Mail
     extend self
 
     # Returns true if the string supplied is free from characters not allowed as an ATOM
-    def atom_safe?( str )
+    def atom_safe?(str)
       not Constants::ATOM_UNSAFE === str
     end
 
     # If the string supplied has ATOM unsafe characters in it, will return the string quoted
     # in double quotes, otherwise returns the string unmodified
-    def quote_atom( str )
-      atom_safe?( str ) ? str : dquote(str)
+    def quote_atom(str)
+      atom_safe?(str) ? str : dquote(str)
     end
 
     # If the string supplied has PHRASE unsafe characters in it, will return the string quoted
     # in double quotes, otherwise returns the string unmodified
-    def quote_phrase( str )
+    def quote_phrase(str)
       if str.respond_to?(:force_encoding)
         original_encoding = str.encoding
         ascii_str = str.to_s.dup.force_encoding('ASCII-8BIT')
@@ -35,23 +36,23 @@ module Mail
     end
 
     # Returns true if the string supplied is free from characters not allowed as a TOKEN
-    def token_safe?( str )
+    def token_safe?(str)
       not Constants::TOKEN_UNSAFE === str
     end
 
     # If the string supplied has TOKEN unsafe characters in it, will return the string quoted
     # in double quotes, otherwise returns the string unmodified
-    def quote_token( str )
+    def quote_token(str)
       if str.respond_to?(:force_encoding)
         original_encoding = str.encoding
         ascii_str = str.to_s.dup.force_encoding('ASCII-8BIT')
-        if token_safe?( ascii_str )
+        if token_safe?(ascii_str)
           str
         else
           dquote(ascii_str).force_encoding(original_encoding)
         end
       else
-        token_safe?( str ) ? str : dquote(str)
+        token_safe?(str) ? str : dquote(str)
       end
     end
 
@@ -65,8 +66,8 @@ module Mail
     #
     #  string = 'This is "a string"'
     #  dquote(string #=> '"This is \"a string\"'
-    def dquote( str )
-      '"' + unquote(str).gsub(/[\\"]/n) {|s| '\\' + s } + '"'
+    def dquote(str)
+      '"' + unquote(str).gsub(/[\\"]/n) { |s| '\\' + s } + '"'
     end
 
     # Unwraps supplied string from inside double quotes and
@@ -79,7 +80,7 @@ module Mail
     #
     #  string = '"This is \"a string\""'
     #  unqoute(string) #=> 'This is "a string"'
-    def unquote( str )
+    def unquote(str)
       if str =~ /^"(.*?)"$/
         unescape($1)
       else
@@ -96,7 +97,7 @@ module Mail
     #
     #  string = '"This is \"a string\""'
     #  unescape(string) #=> '"This is "a string""'
-    def unescape( str )
+    def unescape(str)
       str.gsub(/\\(.)/, '\1')
     end
 
@@ -105,8 +106,8 @@ module Mail
     # Example:
     #
     #  paren( 'This is a string' ) #=> '(This is a string)'
-    def paren( str )
-      Utilities.paren( str )
+    def paren(str)
+      Utilities.paren(str)
     end
 
     # Unwraps a string from being wrapped in parenthesis
@@ -115,7 +116,7 @@ module Mail
     #
     #  str = '(This is a string)'
     #  unparen( str ) #=> 'This is a string'
-    def unparen( str )
+    def unparen(str)
       if str.start_with?('(') && str.end_with?(')')
         str.slice(1..-2)
       else
@@ -128,8 +129,8 @@ module Mail
     # Example:
     #
     #  bracket( 'This is a string' ) #=> '<This is a string>'
-    def bracket( str )
-      Utilities.bracket( str )
+    def bracket(str)
+      Utilities.bracket(str)
     end
 
     # Unwraps a string from being wrapped in parenthesis
@@ -138,7 +139,7 @@ module Mail
     #
     #  str = '<This is a string>'
     #  unbracket( str ) #=> 'This is a string'
-    def unbracket( str )
+    def unbracket(str)
       if str.start_with?('<') && str.end_with?('>')
         str.slice(1..-2)
       else
@@ -152,15 +153,15 @@ module Mail
     #
     #  str = 'This is (a) string'
     #  escape_paren( str ) #=> 'This is \(a\) string'
-    def escape_paren( str )
-      Utilities.escape_paren( str )
+    def escape_paren(str)
+      Utilities.escape_paren(str)
     end
 
-    def uri_escape( str )
+    def uri_escape(str)
       uri_parser.escape(str)
     end
 
-    def uri_unescape( str )
+    def uri_unescape(str)
       uri_parser.unescape(str)
     end
 
@@ -175,7 +176,7 @@ module Mail
     #  obj2 = "This_is_An_object"
     #  obj1 = :this_IS_an_object
     #  match_to_s( obj1, obj2 ) #=> true
-    def match_to_s( obj1, obj2 )
+    def match_to_s(obj1, obj2)
       obj1.to_s.casecmp(obj2.to_s) == 0
     end
 
@@ -185,7 +186,7 @@ module Mail
     #
     #  string = 'resent-from-field'
     #  capitalize_field( string ) #=> 'Resent-From-Field'
-    def capitalize_field( str )
+    def capitalize_field(str)
       str.to_s.split("-").map { |v| v.capitalize }.join("-")
     end
 
@@ -196,7 +197,7 @@ module Mail
     #  constantize("hello") #=> "Hello"
     #  constantize("hello-there") #=> "HelloThere"
     #  constantize("hello-there-mate") #=> "HelloThereMate"
-    def constantize( str )
+    def constantize(str)
       str.to_s.split(/[-_]/).map { |v| v.capitalize }.to_s
     end
 
@@ -207,7 +208,7 @@ module Mail
     #
     #  string = :resent_from_field
     #  dasherize( string ) #=> 'resent-from-field'
-    def dasherize( str )
+    def dasherize(str)
       str.to_s.tr(Constants::UNDERSCORE, Constants::HYPHEN)
     end
 
@@ -218,19 +219,19 @@ module Mail
     #
     #  string = :resent_from_field
     #  underscoreize ( string ) #=> 'resent_from_field'
-    def underscoreize( str )
+    def underscoreize(str)
       str.to_s.downcase.tr(Constants::HYPHEN, Constants::UNDERSCORE)
     end
 
-    def map_lines( str, &block )
+    def map_lines(str, &block)
       str.each_line.map(&block)
     end
 
-    def map_with_index( enum, &block )
+    def map_with_index(enum, &block)
       enum.each_with_index.map(&block)
     end
 
-    def self.binary_unsafe_to_lf(string) #:nodoc:
+    def self.binary_unsafe_to_lf(string) # :nodoc:
       string.gsub(/\r\n|\r/, Constants::LF)
     end
 
@@ -240,11 +241,11 @@ module Mail
       # the common case.
       Regexp.new("(?<!\r)\n|\r(?!\n)")
 
-    def self.binary_unsafe_to_crlf(string) #:nodoc:
+    def self.binary_unsafe_to_crlf(string) # :nodoc:
       string.gsub(TO_CRLF_REGEX, Constants::CRLF)
     end
 
-    def self.safe_for_line_ending_conversion?(string) #:nodoc:
+    def self.safe_for_line_ending_conversion?(string) # :nodoc:
       if string.encoding == Encoding::BINARY
         string.ascii_only?
       else
@@ -319,13 +320,13 @@ module Mail
 
       def pick_encoding(charset)
         charset = case charset
-        when /ansi_x3.110-1983/
-          'ISO-8859-1'
-        when /Windows-?1258/i # Windows-1258 is similar to 1252
-          "Windows-1252"
-        else
-          charset
-        end
+                  when /ansi_x3.110-1983/
+                    'ISO-8859-1'
+                  when /Windows-?1258/i # Windows-1258 is similar to 1252
+                    "Windows-1252"
+                  else
+                    charset
+                  end
         Mail::Utilities.pick_encoding(charset)
       end
     end
@@ -337,25 +338,25 @@ module Mail
 
     # Escapes any parenthesis in a string that are unescaped this uses
     # a Ruby 1.9.1 regexp feature of negative look behind
-    def Utilities.escape_paren( str )
-      re = /(?<!\\)([\(\)])/          # Only match unescaped parens
+    def Utilities.escape_paren(str)
+      re = /(?<!\\)([\(\)])/ # Only match unescaped parens
       str.gsub(re) { |s| '\\' + s }
     end
 
-    def Utilities.paren( str )
-      str = ::Mail::Utilities.unparen( str )
-      str = escape_paren( str )
+    def Utilities.paren(str)
+      str = ::Mail::Utilities.unparen(str)
+      str = escape_paren(str)
       '(' + str + ')'
     end
 
-    def Utilities.escape_bracket( str )
-      re = /(?<!\\)([\<\>])/          # Only match unescaped brackets
+    def Utilities.escape_bracket(str)
+      re = /(?<!\\)([\<\>])/ # Only match unescaped brackets
       str.gsub(re) { |s| '\\' + s }
     end
 
-    def Utilities.bracket( str )
-      str = ::Mail::Utilities.unbracket( str )
-      str = escape_bracket( str )
+    def Utilities.bracket(str)
+      str = ::Mail::Utilities.unbracket(str)
+      str = escape_bracket(str)
       '<' + str + '>'
     end
 
@@ -363,25 +364,26 @@ module Mail
       if !str.end_with?("=") && str.length % 4 != 0
         str = str.ljust((str.length + 3) & ~3, "=")
       end
-      str.unpack( 'm' ).first
+      str.unpack('m').first
     end
 
     def Utilities.encode_base64(str)
-      [str].pack( 'm' )
+      [str].pack('m')
     end
 
     def Utilities.has_constant?(klass, string)
-      klass.const_defined?( string, false )
+      klass.const_defined?(string, false)
     end
 
     def Utilities.get_constant(klass, string)
-      klass.const_get( string )
+      klass.const_get(string)
     end
 
     def Utilities.transcode_charset(str, from_encoding, to_encoding = Encoding::UTF_8)
       to_encoding = Encoding.find(to_encoding)
       replacement_char = to_encoding == Encoding::UTF_8 ? '�' : '?'
-      charset_encoder.encode(str.dup, from_encoding).encode(to_encoding, :undef => :replace, :invalid => :replace, :replace => replacement_char)
+      charset_encoder.encode(str.dup, from_encoding).encode(to_encoding, :undef => :replace, :invalid => :replace,
+                                                                         :replace => replacement_char)
     end
 
     # From Ruby stdlib Net::IMAP
@@ -419,7 +421,8 @@ module Mail
         str = charset_encoder.encode(str, charset)
       end
       transcode_to_scrubbed_utf8(str)
-    rescue Encoding::UndefinedConversionError, ArgumentError, Encoding::ConverterNotFoundError, Encoding::InvalidByteSequenceError
+    rescue Encoding::UndefinedConversionError, ArgumentError, Encoding::ConverterNotFoundError,
+           Encoding::InvalidByteSequenceError
       warn "Encoding conversion failed #{$!}"
       str.dup.force_encoding(Encoding::UTF_8)
     end
@@ -477,58 +480,58 @@ module Mail
       charset = charset.to_s
       encoding = case charset.downcase
 
-      # ISO-8859-8-I etc. http://en.wikipedia.org/wiki/ISO-8859-8-I
-      when /^iso[-_]?8859-(\d+)(-i)?$/
-        "ISO-8859-#{$1}"
+                 # ISO-8859-8-I etc. http://en.wikipedia.org/wiki/ISO-8859-8-I
+                 when /^iso[-_]?8859-(\d+)(-i)?$/
+                   "ISO-8859-#{$1}"
 
-      # ISO-8859-15, ISO-2022-JP and alike
-      when /^iso[-_]?(\d{4})-?(\w{1,2})$/
-        "ISO-#{$1}-#{$2}"
+                 # ISO-8859-15, ISO-2022-JP and alike
+                 when /^iso[-_]?(\d{4})-?(\w{1,2})$/
+                   "ISO-#{$1}-#{$2}"
 
-      # "ISO-2022-JP-KDDI"  and alike
-      when /^iso[-_]?(\d{4})-?(\w{1,2})-?(\w*)$/
-        "ISO-#{$1}-#{$2}-#{$3}"
+                 # "ISO-2022-JP-KDDI"  and alike
+                 when /^iso[-_]?(\d{4})-?(\w{1,2})-?(\w*)$/
+                   "ISO-#{$1}-#{$2}-#{$3}"
 
-      # UTF-8, UTF-32BE and alike
-      when /^utf[\-_]?(\d{1,2})?(\w{1,2})$/
-        "UTF-#{$1}#{$2}".gsub(/\A(UTF-(?:16|32))\z/, '\\1BE')
+                 # UTF-8, UTF-32BE and alike
+                 when /^utf[\-_]?(\d{1,2})?(\w{1,2})$/
+                   "UTF-#{$1}#{$2}".gsub(/\A(UTF-(?:16|32))\z/, '\\1BE')
 
-      # Windows-1252 and alike
-      when /^windows-?(.*)$/
-        "Windows-#{$1}"
+                 # Windows-1252 and alike
+                 when /^windows-?(.*)$/
+                   "Windows-#{$1}"
 
-      when '8bit'
-        Encoding::ASCII_8BIT
+                 when '8bit'
+                   Encoding::ASCII_8BIT
 
-      # alternatives/misspellings of us-ascii seen in the wild
-      when /^iso[-_]?646(-us)?$/, 'us=ascii'
-        Encoding::ASCII
+                 # alternatives/misspellings of us-ascii seen in the wild
+                 when /^iso[-_]?646(-us)?$/, 'us=ascii'
+                   Encoding::ASCII
 
-      # Microsoft-specific alias for MACROMAN
-      when 'macintosh'
-        Encoding::MACROMAN
+                 # Microsoft-specific alias for MACROMAN
+                 when 'macintosh'
+                   Encoding::MACROMAN
 
-      # Microsoft-specific alias for CP949 (Korean)
-      when 'ks_c_5601-1987'
-        Encoding::CP949
+                 # Microsoft-specific alias for CP949 (Korean)
+                 when 'ks_c_5601-1987'
+                   Encoding::CP949
 
-      # Wrongly written Shift_JIS (Japanese)
-      when 'shift-jis'
-        Encoding::Shift_JIS
+                 # Wrongly written Shift_JIS (Japanese)
+                 when 'shift-jis'
+                   Encoding::Shift_JIS
 
-      # GB2312 (Chinese charset) is a subset of GB18030 (its replacement)
-      when 'gb2312'
-        Encoding::GB18030
+                 # GB2312 (Chinese charset) is a subset of GB18030 (its replacement)
+                 when 'gb2312'
+                   Encoding::GB18030
 
-      when 'cp-850'
-        Encoding::CP850
+                 when 'cp-850'
+                   Encoding::CP850
 
-      when 'latin2'
-        Encoding::ISO_8859_2
+                 when 'latin2'
+                   Encoding::ISO_8859_2
 
-      else
-        charset
-      end
+                 else
+                   charset
+                 end
 
       convert_to_encoding(encoding)
     end
@@ -555,7 +558,8 @@ module Mail
 
       def transcode_to_scrubbed_utf8(str)
         decoded = str.encode(Encoding::UTF_8, :undef => :replace, :invalid => :replace, :replace => "�")
-        decoded.valid_encoding? ? decoded : decoded.encode(Encoding::UTF_16LE, :invalid => :replace, :replace => "�").encode(Encoding::UTF_8)
+        decoded.valid_encoding? ? decoded : decoded.encode(Encoding::UTF_16LE, :invalid => :replace,
+                                                                               :replace => "�").encode(Encoding::UTF_8)
       end
     end
   end

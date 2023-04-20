@@ -6,7 +6,6 @@ require 'concurrent/atomic/atomic_reference'
 
 module Concurrent
   module Synchronization
-
     # Abstract object providing final, volatile, ans CAS extensions to build other concurrent abstractions.
     # - final instance variables see {Object.safe_initialization!}
     # - volatile instance variables see {Object.attr_volatile}
@@ -145,7 +144,6 @@ module Concurrent
 
       def __initialize_atomic_fields__
       end
-
     end
   end
 end

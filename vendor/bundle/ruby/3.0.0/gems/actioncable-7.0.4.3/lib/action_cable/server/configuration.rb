@@ -39,12 +39,14 @@ module ActionCable
           if e.path == path_to_adapter
             # We can assume that a non-builtin adapter was specified, so it's
             # either misspelled or missing from Gemfile.
-            raise e.class, "Could not load the '#{adapter}' Action Cable pubsub adapter. Ensure that the adapter is spelled correctly in config/cable.yml and that you've added the necessary adapter gem to your Gemfile.", e.backtrace
+            raise e.class,
+                  "Could not load the '#{adapter}' Action Cable pubsub adapter. Ensure that the adapter is spelled correctly in config/cable.yml and that you've added the necessary adapter gem to your Gemfile.", e.backtrace
 
           # Bubbled up from the adapter require. Prefix the exception message
           # with some guidance about how to address it and reraise.
           else
-            raise e.class, "Error loading the '#{adapter}' Action Cable pubsub adapter. Missing a gem it depends on? #{e.message}", e.backtrace
+            raise e.class,
+                  "Error loading the '#{adapter}' Action Cable pubsub adapter. Missing a gem it depends on? #{e.message}", e.backtrace
           end
         end
 

@@ -5,7 +5,7 @@ module ActionDispatch
     module Cache
       module Request
         HTTP_IF_MODIFIED_SINCE = "HTTP_IF_MODIFIED_SINCE"
-        HTTP_IF_NONE_MATCH     = "HTTP_IF_NONE_MATCH"
+        HTTP_IF_NONE_MATCH = "HTTP_IF_NONE_MATCH"
 
         def if_modified_since
           if since = get_header(HTTP_IF_MODIFIED_SINCE)
@@ -37,7 +37,7 @@ module ActionDispatch
         # supplied, both must match, or the request is not considered fresh.
         def fresh?(response)
           last_modified = if_modified_since
-          etag          = if_none_match
+          etag = if_none_match
 
           return false unless last_modified || etag
 
@@ -122,10 +122,11 @@ module ActionDispatch
           etag? && !weak_etag?
         end
 
-      private
-        DATE          = "Date"
+        private
+
+        DATE = "Date"
         LAST_MODIFIED = "Last-Modified"
-        SPECIAL_KEYS  = Set.new(%w[extras no-store no-cache max-age public private must-revalidate])
+        SPECIAL_KEYS = Set.new(%w[extras no-store no-cache max-age public private must-revalidate])
 
         def generate_weak_etag(validators)
           "W/#{generate_strong_etag(validators)}"
@@ -166,11 +167,11 @@ module ActionDispatch
         end
 
         DEFAULT_CACHE_CONTROL = "max-age=0, private, must-revalidate"
-        NO_STORE              = "no-store"
-        NO_CACHE              = "no-cache"
-        PUBLIC                = "public"
-        PRIVATE               = "private"
-        MUST_REVALIDATE       = "must-revalidate"
+        NO_STORE = "no-store"
+        NO_CACHE = "no-cache"
+        PUBLIC = "public"
+        PRIVATE = "private"
+        MUST_REVALIDATE = "must-revalidate"
 
         def handle_conditional_get!
           # Normally default cache control setting is handled by ETag
@@ -185,7 +186,7 @@ module ActionDispatch
         def merge_and_normalize_cache_control!(cache_control)
           control = cache_control_headers
 
-          return if control.empty? && cache_control.empty?  # Let middleware handle default behavior
+          return if control.empty? && cache_control.empty? # Let middleware handle default behavior
 
           if cache_control.any?
             # Any caching directive coming from a controller overrides

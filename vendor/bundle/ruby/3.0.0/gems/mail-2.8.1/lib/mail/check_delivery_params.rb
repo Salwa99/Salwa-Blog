@@ -1,17 +1,17 @@
 # frozen_string_literal: true
+
 #
 # This whole class and associated specs is deprecated and will go away in the version 3 release of mail.
 module Mail
-  module CheckDeliveryParams #:nodoc:
+  module CheckDeliveryParams # :nodoc:
     class << self
-
       extend Gem::Deprecate
 
       def check(mail)
         envelope = Mail::SmtpEnvelope.new(mail)
-        [ envelope.from,
-          envelope.to,
-          envelope.message ]
+        [envelope.from,
+         envelope.to,
+         envelope.message]
       end
       deprecate :check, 'Mail::SmtpEnvelope.new created in commit c106bebea066782a72e4f24dd37b532d95773df7', 2023, 6
 

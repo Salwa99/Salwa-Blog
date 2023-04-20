@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Mail
   module Matchers
     def any_attachment
@@ -21,6 +22,7 @@ module Mail
 
     class AttachmentFilenameMatcher
       attr_reader :filename
+
       def initialize(filename)
         @filename = filename
       end
@@ -32,6 +34,7 @@ module Mail
 
     class AttachmentMimeTypeMatcher
       attr_reader :mime_type
+
       def initialize(mime_type)
         @mime_type = mime_type
       end

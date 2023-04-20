@@ -1,5 +1,6 @@
 # encoding: utf-8
 # frozen_string_literal: true
+
 require 'mail/fields/common_address_field'
 
 module Mail
@@ -28,7 +29,7 @@ module Mail
   #  mail[:resent_from].decoded   #=> 'Mikel Lindsaar <mikel@test.lindsaar.net>, ada@test.lindsaar.net'
   #  mail[:resent_from].addresses #=> ['mikel@test.lindsaar.net', 'ada@test.lindsaar.net']
   #  mail[:resent_from].formatted #=> ['Mikel Lindsaar <mikel@test.lindsaar.net>', 'ada@test.lindsaar.net']
-  class ResentFromField < CommonAddressField #:nodoc:
+  class ResentFromField < CommonAddressField # :nodoc:
     NAME = 'Resent-From'
   end
 end

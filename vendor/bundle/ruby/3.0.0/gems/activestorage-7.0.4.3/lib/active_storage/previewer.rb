@@ -25,70 +25,71 @@ module ActiveStorage
     end
 
     private
-      # Downloads the blob to a tempfile on disk. Yields the tempfile.
-      def download_blob_to_tempfile(&block) # :doc:
-        blob.open tmpdir: tmpdir, &block
+
+    # Downloads the blob to a tempfile on disk. Yields the tempfile.
+    def download_blob_to_tempfile(&block) # :doc:
+      blob.open tmpdir: tmpdir, &block
+    end
+
+    # Executes a system command, capturing its binary output in a tempfile. Yields the tempfile.
+    #
+    # Use this method to shell out to a system library (e.g. muPDF or FFmpeg) for preview image
+    # generation. The resulting tempfile can be used as the +:io+ value in an attachable Hash:
+    #
+    #   def preview
+    #     download_blob_to_tempfile do |input|
+    #       draw "my-drawing-command", input.path, "--format", "png", "-" do |output|
+    #         yield io: output, filename: "#{blob.filename.base}.png", content_type: "image/png"
+    #       end
+    #     end
+    #   end
+    #
+    # The output tempfile is opened in the directory returned by #tmpdir.
+    def draw(*argv) # :doc:
+      open_tempfile do |file|
+        instrument :preview, key: blob.key do
+          capture(*argv, to: file)
+        end
+
+        yield file
       end
+    end
 
-      # Executes a system command, capturing its binary output in a tempfile. Yields the tempfile.
-      #
-      # Use this method to shell out to a system library (e.g. muPDF or FFmpeg) for preview image
-      # generation. The resulting tempfile can be used as the +:io+ value in an attachable Hash:
-      #
-      #   def preview
-      #     download_blob_to_tempfile do |input|
-      #       draw "my-drawing-command", input.path, "--format", "png", "-" do |output|
-      #         yield io: output, filename: "#{blob.filename.base}.png", content_type: "image/png"
-      #       end
-      #     end
-      #   end
-      #
-      # The output tempfile is opened in the directory returned by #tmpdir.
-      def draw(*argv) # :doc:
-        open_tempfile do |file|
-          instrument :preview, key: blob.key do
-            capture(*argv, to: file)
-          end
+    def open_tempfile
+      tempfile = Tempfile.open("ActiveStorage-", tmpdir)
 
-          yield file
+      begin
+        yield tempfile
+      ensure
+        tempfile.close!
+      end
+    end
+
+    def instrument(operation, payload = {}, &block)
+      ActiveSupport::Notifications.instrument "#{operation}.active_storage", payload, &block
+    end
+
+    def capture(*argv, to:)
+      to.binmode
+
+      open_tempfile do |err|
+        IO.popen(argv, err: err) { |out| IO.copy_stream(out, to) }
+        err.rewind
+
+        unless $?.success?
+          raise PreviewError, "#{argv.first} failed (status #{$?.exitstatus}): #{err.read.to_s.chomp}"
         end
       end
 
-      def open_tempfile
-        tempfile = Tempfile.open("ActiveStorage-", tmpdir)
+      to.rewind
+    end
 
-        begin
-          yield tempfile
-        ensure
-          tempfile.close!
-        end
-      end
+    def logger # :doc:
+      ActiveStorage.logger
+    end
 
-      def instrument(operation, payload = {}, &block)
-        ActiveSupport::Notifications.instrument "#{operation}.active_storage", payload, &block
-      end
-
-      def capture(*argv, to:)
-        to.binmode
-
-        open_tempfile do |err|
-          IO.popen(argv, err: err) { |out| IO.copy_stream(out, to) }
-          err.rewind
-
-          unless $?.success?
-            raise PreviewError, "#{argv.first} failed (status #{$?.exitstatus}): #{err.read.to_s.chomp}"
-          end
-        end
-
-        to.rewind
-      end
-
-      def logger # :doc:
-        ActiveStorage.logger
-      end
-
-      def tmpdir # :doc:
-        Dir.tmpdir
-      end
+    def tmpdir # :doc:
+      Dir.tmpdir
+    end
   end
 end

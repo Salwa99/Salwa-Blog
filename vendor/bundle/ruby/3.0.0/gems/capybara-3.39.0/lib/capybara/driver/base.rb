@@ -170,7 +170,7 @@ class Capybara::Driver::Base
     session&.config || Capybara.session_options
   end
 
-private
+  private
 
   def session
     @session ||= nil

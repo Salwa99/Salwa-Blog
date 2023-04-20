@@ -1,8 +1,8 @@
 # encoding: utf-8
+
 require 'strscan'
 
 module Crass
-
   # Similar to a StringScanner, but with extra functionality needed to tokenize
   # CSS while preserving the original text.
   class Scanner
@@ -23,7 +23,7 @@ module Crass
 
     # Creates a Scanner instance for the given _input_ string or IO instance.
     def initialize(input)
-      @string  = input.is_a?(IO) ? input.read : input.to_s
+      @string = input.is_a?(IO) ? input.read : input.to_s
       @scanner = StringScanner.new(@string)
 
       reset
@@ -33,7 +33,7 @@ module Crass
     # an empty string if the end of the string has been reached.
     def consume
       if @pos < @len
-        @pos    += 1
+        @pos += 1
         @current = @scanner.getch
       else
         ''
@@ -47,7 +47,7 @@ module Crass
       result = @scanner.rest
 
       @current = result[-1]
-      @pos     = @len
+      @pos = @len
 
       result
     end
@@ -92,9 +92,9 @@ module Crass
     # Resets the pointer to the beginning of the string.
     def reset
       @current = nil
-      @len     = @string.size
-      @marker  = 0
-      @pos     = 0
+      @len = @string.size
+      @marker = 0
+      @pos = 0
     end
 
     # Tries to match _pattern_ at the current position. If it matches, the
@@ -102,8 +102,8 @@ module Crass
     # Otherwise, `nil` will be returned.
     def scan(pattern)
       if match = @scanner.scan(pattern)
-        @pos     += match.size
-        @current  = match[-1]
+        @pos += match.size
+        @current = match[-1]
       end
 
       match
@@ -114,12 +114,11 @@ module Crass
     # is no match, `nil` is returned and the pointer is not advanced.
     def scan_until(pattern)
       if match = @scanner.scan_until(pattern)
-        @pos     += match.size
-        @current  = match[-1]
+        @pos += match.size
+        @current = match[-1]
       end
 
       match
     end
   end
-
 end
