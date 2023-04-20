@@ -7,6 +7,12 @@ AllCops:
     - "Guardfile"
     - "Rakefile"
     - "node_modules/**/*"
+    - 'vendor/**/*'
+    - 'spec/**/*'
+    - 'test/**/*'
+    - 'features/**/*'
+    - 'lib/actionmailbox/**/*'
+    - app/mailers/application_mailer.rb
 
   DisplayCopNames: true
 
