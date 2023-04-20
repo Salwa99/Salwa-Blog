@@ -12,4 +12,6 @@ class Post < ApplicationRecord
   def recent_comments
     comments.order(created_at: :desc).limit(5)
   end
+
+  after_create :update_user_posts_counter
 end
