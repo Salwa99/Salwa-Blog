@@ -13,6 +13,8 @@ AllCops:
     - 'features/**/*'
     - 'lib/actionmailbox/**/*'
     - app/mailers/application_mailer.rb
+    - Gemfile
+    - config.ru
 
   DisplayCopNames: true
 
