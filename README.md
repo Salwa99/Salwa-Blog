@@ -111,8 +111,15 @@ To run the project, execute the following command:
 To run tests, run the following command:
 
 ```sh
-  cd spec
-  rspec classname_spec.rb
+  rails db:create RAILS_ENV=test
+```
+
+```sh
+  rails db:schema:load RAILS_ENV=test
+```
+
+```sh
+  bundle exec rspec
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

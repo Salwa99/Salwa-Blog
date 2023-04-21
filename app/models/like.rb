@@ -1,12 +1,8 @@
 class Like < ApplicationRecord
-  belongs_to :author, class_name: 'User'
+  belongs_to :author, class_name: 'User', foreign_key: 'author_id'
   belongs_to :post
 
-  after_save :update_like_counter
-
-  private
-
-  def update_like_counter
-    author.increment!(:likes_counter)
+  def post_likes_counter=(count)
+    post.update_attribute 'likes_counter', count
   end
 end
