@@ -6,13 +6,15 @@ class PostsController < ApplicationController
   end
 
   def show
-    @post = @author.posts.find(params[:post_id])
+    @post = @author.posts.find(params[:id])
   end
 
   private
 
   def fetch_author
-    @author = User.find(params[:user_id])
+    @user = User.find_by(id: params[:user_id])
+    if @user.nil?
+      redirect_to root_path, alert: "User not found"
+    end
   end
-
 end
