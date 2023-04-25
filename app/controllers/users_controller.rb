@@ -1,17 +1,7 @@
-class PostsController < ApplicationController
-  before_action :fetch_author
+class UsersController < ApplicationController
+    def index
+    end
 
-  def index
-    @posts = @author.posts
-  end
-
-  def show
-    @post = @author.posts.find(params[:id])
-  end
-
-  private
-
-  def fetch_author
-    @author = User.find(params[:user_id])
-  end
+    def show_user
+    end
 end
