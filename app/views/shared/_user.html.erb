@@ -1,0 +1,9 @@
+<%= content_tag :div, class: "user-wrap" do %>
+  <%= content_tag :div, class: "user-photo" do %>
+    <%= image_tag(user.photo, alt: "profile-pic") %>
+  <% end %>
+  <%= content_tag :div, class: "user-info" do %>
+    <%= content_tag :h2, link_to(user.name, user_path(user)) %>
+    <%= content_tag :p, "Number of Posts: #{user.posts_counter || 0}".html_safe %>
+  <% end %>
+<% end %>
