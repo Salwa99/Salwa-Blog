@@ -14,6 +14,10 @@ RSpec.describe 'Posts', type: :request do
       get user_posts_path(user_id: user.id)
       expect(response).to render_template(:index)
     end
+
+    it "includes 'Welcome to the Blog App!' in the response body" do
+      expect(response.body).to include('Welcome to the Blog App!')
+    end
   end
 
   describe 'GET /users/:user_id/posts/:id' do

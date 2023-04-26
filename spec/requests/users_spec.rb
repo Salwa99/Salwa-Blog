@@ -11,6 +11,10 @@ RSpec.describe 'Users', type: :request do
     it "renders 'users' template" do
       expect(response).to render_template('users/index')
     end
+
+    it "includes 'Welcome to the Blog App!' in the response body" do
+      expect(response.body).to include('Welcome to the Blog App!')
+    end
   end
 
   describe 'GET /:id' do
@@ -23,6 +27,10 @@ RSpec.describe 'Users', type: :request do
 
     it "renders 'user' template" do
       expect(response).to render_template('users/show')
+    end
+
+    it "includes the user's name in the response body" do
+      expect(response.body).to include(user.name)
     end
   end
 end
