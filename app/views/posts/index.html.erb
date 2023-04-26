@@ -1,15 +1,2 @@
-<section>
-  <%= render "shared/user", user: @user %>
-    
-  <% if @user.posts.empty? %>
-    <%= content_tag :p, "No post available!" %>
-  <% else %>
-    <% @user.posts.each do |post| %>
-      <%= render "shared/post", post: post %>
-      <%= render "shared/comment", comments: post.recent_comments %>
-    <% end %>
-  <% end %>
-
-  <%= button_tag "Pagination", class: "link-btn", type: "button" %>
-</section>
-
+<h1>Welcome to the post section!</h1>
+<h2>User posts: <%= @posts.count %> </h2>
