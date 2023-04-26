@@ -15,8 +15,9 @@ RSpec.describe 'Posts', type: :request do
       expect(response).to render_template(:index)
     end
 
-    it "includes 'Welcome to the Blog App!' in the response body" do
-      expect(response.body).to include('Welcome to the Blog App!')
+    it "includes the correct placeholder text in the response body 'Welcome to the post section!'" do
+      get user_posts_path(user_id: user.id)
+      expect(response.body).to include('Welcome to the post section!')
     end
   end
 
@@ -29,6 +30,11 @@ RSpec.describe 'Posts', type: :request do
     it 'Render the show template' do
       get user_post_path(user_id: user.id, id: post.id)
       expect(response).to render_template(:show)
+    end
+
+    it 'includes the correct placeholder text in the response body' do
+      get user_post_path(user_id: user.id, id: post.id)
+      expect(response.body).to include(post.title)
     end
   end
 end
