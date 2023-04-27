@@ -1,7 +1,7 @@
   <%= render "shared/user", user: @user %>
     
     <% if @user.posts.empty? %>
-        <p>No post available</p>
+        <p class="not-available">No post available</p>
     <% end %>
     <% @user.posts.each do |post| %>
         <%= render "shared/post", post: post %>

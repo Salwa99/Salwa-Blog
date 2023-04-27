@@ -51,6 +51,10 @@ section {
   gap: 0.5rem;
 }
 
+.not-available{
+  color: rgb(116, 28, 28)
+}
+
 .main-container {
   width: 100%;
   border: solid 1px;

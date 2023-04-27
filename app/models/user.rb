@@ -9,4 +9,8 @@ class User < ApplicationRecord
   def last_three_posts
     posts.last(3)
   end
+
+  def user_posts_counter
+    posts.count
+  end
 end
