@@ -1,7 +1,18 @@
-<h1>User: <%= @user.name %></h1>
-<h1>Posts for User <%= @user.name %></h1>
-<ul>
-  <% @user.posts.each do |post| %>
-    <li><%= link_to post.title, user_post_path(@user, post) %></li>
-  <% end %>
-</ul>
+<section>
+  <div class="user-detail">
+    <%= render "shared/user", user: @user %>
+
+    <div class="user-bio">
+      <h3>Bio</h3>
+      <p><%= @user.bio %></p>
+    </div>
+  </div>
+
+  <div class="recent-posts">
+    <% @user.last_three_posts.each do |post| %>
+      <%= render "shared/post", post: post %>
+    <% end %>
+  </div>
+
+  <%= link_to "See All Posts", user_posts_path(@user), class: "link-btn" %>
+</section>
