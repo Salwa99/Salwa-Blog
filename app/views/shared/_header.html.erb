@@ -1,0 +1,7 @@
+<%= content_tag :header, class: "main-header" do %>
+  <%= content_tag :div, class: "brand" do %>
+    <%= link_to "SalwaBlog", root_path %>
+  <% end %>
+
+  <%= link_to "New Post", new_user_post_path(current_user), class: "new-post-btn" %>
+<% end %>
