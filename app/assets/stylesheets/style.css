@@ -23,7 +23,7 @@ section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin : 0 auto;
+  margin: 0 auto;
   gap: 1rem;
   padding: 1rem;
   width: 75%;
@@ -41,7 +41,7 @@ section {
 
 .user-bio h3 {
   color: rgb(39, 92, 92);
-  padding: .2rem;
+  padding: 0.2rem;
 }
 
 .recent-posts {
@@ -51,8 +51,8 @@ section {
   gap: 0.5rem;
 }
 
-.not-available{
-  color: rgb(116, 28, 28)
+.not-available {
+  color: rgb(116, 28, 28);
 }
 
 .main-container {
@@ -142,13 +142,13 @@ section {
 .link-btn {
   text-decoration: none;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: .3rem;
+  border-radius: 0.3rem;
   box-shadow: rgba(0, 0, 0, 0.02) 0 2px 5px 0;
   background-color: #fff;
   color: #2b2929;
   cursor: pointer;
   transition: all 300ms;
-  padding: .9rem;
+  padding: 0.9rem;
 }
 
 .link-btn:hover,
