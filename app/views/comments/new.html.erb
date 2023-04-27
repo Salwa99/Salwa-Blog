@@ -1,0 +1,17 @@
+<section>
+  <%= content_tag :div, class: "post-wrap" do %>
+    <%= render "shared/post", post: @post %>
+  <% end %>
+
+  <%= form_with model: [@user, @post, @comment], class: "comment-form" do |f| %>
+    <%= content_tag :div, class: "input-container" do %>
+      <%= f.label :text, "Add Your Comment" %>
+      <%= f.text_area :text, rows: 2, required: true %>
+    <% end %>
+    <%= f.submit "Submit", class: "submit-btn" %>
+  <% end %>
+
+  <% if flash[:error] %>
+    <%= content_tag :div, flash[:error], class: "alert alert-error" %>
+  <% end %>
+</section>
