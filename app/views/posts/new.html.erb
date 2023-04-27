@@ -1,0 +1,11 @@
+<section>
+  <%= content_tag :h1, "Create a new post" %>
+
+  <%= render "form", post: @post, user: @user %>
+
+  <% if flash[:error] %>
+    <%= content_tag :div, class: "alert alert-error" do %>
+      <%= flash[:error] %>
+    <% end %>
+  <% end %>
+</section>
