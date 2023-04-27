@@ -1,3 +1,14 @@
-<h1>Post <%= params[:id] %> for User <%= params[:user_id] %></h1>
-<h2>post title: <%= @post.title %>
-</h2> 
+<%= content_tag :section do %>
+  <%= content_tag :div, class: "main-container" do %>
+    <%= content_tag :header do %>
+      <%= content_tag :h2, @post.title, class: "post-title" %>
+      <%= content_tag :div, class: "post-info" do %>
+        <%= content_tag :h3, "Author: #{link_to @post.author.name, user_path(@post.author)}".html_safe, class: "post-author" %>
+        <%= content_tag :span, "Comments: #{@post.comments_counter || 0}" %>
+        <%= content_tag :span, "Likes: #{@post.likes_counter || 0}" %>
+      <% end %>
+    <% end %>
+    <%= content_tag :p, @post.text, class: "post-content" %>
+  <% end %>
+  <%= render "shared/comment", comments: @post.comments %>
+<% end %>

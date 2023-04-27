@@ -6,11 +6,19 @@ class Post < ApplicationRecord
   validates :comments_counter, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :likes_counter, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
+  before_save :update_comments_counter
+
   def user_posts_counter=(count)
     author.update_attribute 'posts_counter', count
   end
 
   def last_five_comments
     comments.last(5)
+  end
+
+  private
+
+  def update_comments_counter
+    self.comments_counter = comments.count
   end
 end
