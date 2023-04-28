@@ -16,6 +16,10 @@ class Post < ApplicationRecord
     comments.last(5)
   end
 
+  def like_count
+    likes.count
+  end
+
   private
 
   def update_comments_counter
