@@ -11,9 +11,9 @@
     <%= content_tag :p, @post.text, class: "post-content" %>
   <% end %>
   <div class="post-btn-bar">
-  <%= form_with model: [@current, @post, Like.new] do |f| %>
-    <%= content_tag :button, "Give Like", type: "submit", class: "post-btn" %>
-  <% end %>
+ <%= form_with model: [@current, @post, Like.new], url: user_post_likes_path(@post.author, @post), method: :post do |f| %>
+  <%= content_tag :button, "Give Like", type: "submit", class: "post-btn" %>
+<% end %>
   <%= content_tag :a, "Add Comment", href: new_user_post_comment_path(@post.author, @post), class: "post-btn" %>
 </div>
 
