@@ -34,10 +34,12 @@ class PostsController < ApplicationController
   end
 
   def fetch_author
-    @user = User.find_by(id: params[:user_id])
-
-    redirect_to root_path, alert: 'User not found' if @user.nil?
-
-    @post = @user.posts.find(params[:id]) if params[:id].present?
+    if action_name == 'new'
+      @user = current_user
+    else
+      @user = User.find_by(id: params[:user_id])
+      redirect_to root_path, alert: 'User not found' if @user.nil?
+      @post = @user.posts.find(params[:id]) if params[:id].present?
+    end
   end
 end
