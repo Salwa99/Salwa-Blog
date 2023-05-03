@@ -2,7 +2,7 @@ class PostsController < ApplicationController
   before_action :fetch_author
 
   def index
-    @posts = @user.posts
+    @posts = Post.all
   end
 
   def show
