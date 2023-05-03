@@ -19,6 +19,10 @@ RSpec.describe 'Post index page', type: :feature do
       expect(page).to have_content(user.name)
     end
 
+    it "Display user's photo" do
+      expect(page).to have_css("img[src*='#{user.photo}']")
+    end
+
     it 'Display number of posts' do
       expect(page).to have_content("Posts: #{user.posts.count}")
     end
