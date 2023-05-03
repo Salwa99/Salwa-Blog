@@ -26,6 +26,10 @@ RSpec.describe 'User show page', type: :feature do
       expect(page).to have_content(user.bio)
     end
 
+    it "displays user's profile picture" do
+      expect(page).to have_css("img[src='#{user.photo}']")
+    end
+
     it "displays user's recent 3 posts" do
       expect(page).to have_content(post2.title)
       expect(page).to have_content(post3.title)
