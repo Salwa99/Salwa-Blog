@@ -1,5 +1,6 @@
 class PostsController < ApplicationController
   before_action :fetch_author
+  load_and_authorize_resource
 
   def index
     @user = User.find(params[:user_id])
