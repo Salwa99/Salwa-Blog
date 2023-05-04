@@ -1,6 +1,10 @@
 <div class="user-wrap">
   <div class="user-photo">
-    <img src="<%= user.photo %>" class="img" alt="pic">
+    <% if user.photo %>
+            <img src="<%= user.photo %>" alt="profile-pic">
+        <% else %>
+            <p>Unknown picture</p>
+        <% end %>
   </div>
 
   <div class="user-info">

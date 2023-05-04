@@ -15,6 +15,7 @@
   - [✍️ Authors ](#️-authors-)
     - [👤 **Salwa Ballouti**:](#-salwa-ballouti)
     - [👤 **Billal Chami**:](#-billal-chami)
+    - [👤 **Sabi Mantock**](#-sabi-mantock)
   - [🔭 Future Features ](#-future-features-)
   - [🤝 Contributing ](#-contributing-)
   - [💖 Show your support ](#-show-your-support-)
@@ -137,7 +138,13 @@ To run tests, run the following command:
 - GitHub: [@githubhandle](https://github.com/bill7pearl)
 - Twitter: [@twitterhandle](https://twitter.com/BillChami)
 - LinkedIn: [LinkedIn](https://www.linkedin.com/in/billal-chami-263497194/)
+- 
 
+### 👤 **Sabi Mantock**
+
+- GitHub: [@SabiMantock](https://github.com/SabiMantock)
+- Twitter: [@IamSabiMantock](https://twitter.com/IamSabiMantock)
+- LinkedIn: [Sabi Mantock](https://linkedin.com/in/sabi-mantock)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
