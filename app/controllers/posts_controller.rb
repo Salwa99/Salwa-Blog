@@ -2,29 +2,39 @@ class PostsController < ApplicationController
   before_action :fetch_author
 
   def index
+    @user = User.find(params[:user_id])
     @posts = Post.includes(:comments).all
+    @current_user = current_user
   end
 
   def show
     @post = @user.posts.find(params[:id])
-    @current = current_user
+    @current_user = current_user
   end
 
   def new
     @user = current_user
     @post = Post.new
+    @current_user = current_user
   end
 
   def create
-    @post = Post.new(post_params)
-    @post.author = current_user
+    @user = User.find(params[:user_id])
+    @post = @user.posts.new(post_params)
     if @post.save
       flash[:success] = 'The post created successfully!'
-      redirect_to user_post_url(current_user, @post)
+      redirect_to user_post_url(@user, @post)
     else
       flash[:error] = 'Opps! Something went wrong, please try again'
-      redirect_to new_user_post_url(current_user)
+      redirect_to new_user_post_url(@user)
     end
+  end
+
+  def destroy
+    @post = Post.find(params[:id])
+    @post.destroy
+
+    redirect_to user_path(current_user)
   end
 
   private
