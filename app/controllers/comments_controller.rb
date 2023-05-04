@@ -19,12 +19,6 @@ class CommentsController < ApplicationController
     end
   end
 
-  def destroy
-    @comment = Comment.find(params[:id])
-    @comment.destroy
-
-    redirect_back_or_to root_path
-  end
 
   private
 
