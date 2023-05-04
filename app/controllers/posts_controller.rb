@@ -3,7 +3,7 @@ class PostsController < ApplicationController
 
   def index
     @user = User.find(params[:user_id])
-    @posts = Post.includes(:comments).all
+    @posts = @user.posts.includes(:comments)
     @current_user = current_user
   end
 
@@ -19,7 +19,6 @@ class PostsController < ApplicationController
   end
 
   def create
-    @user = User.find(params[:user_id])
     @post = @user.posts.new(post_params)
     if @post.save
       flash[:success] = 'The post created successfully!'

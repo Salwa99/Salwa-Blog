@@ -198,6 +198,10 @@ a {
   margin: 0;
 }
 
+.field select {
+  text-transform: capitalize;
+}
+
 .field input::placeholder {
   font-family: inherit;
   text-transform: capitalize;

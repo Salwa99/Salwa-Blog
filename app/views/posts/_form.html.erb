@@ -1,5 +1,4 @@
 <%= form_with url: user_posts_path(@user), model: @post, class: "post-form" do |f| %>
-
   <%= content_tag :div, class: "input-container" do %>
     <%= f.label :title %>
     <%= f.text_field :title, required: true %>
