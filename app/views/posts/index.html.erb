@@ -1,3 +1,6 @@
+  <section>
+  <%= render "shared/header", current_user: @current_user %>
+
   <%= render "shared/user", user: @user %>
     
     <% if @posts.empty? %>
@@ -5,7 +8,7 @@
     <% end %>
     <% @posts.each do |post| %>
         <%= render "shared/post", post: post %>
-        <%= render "shared/comment", comments: post.last_five_comments%>
+        <%= render "shared/comment", comments: post.last_five_comments, current_user: @current_user%>
     <% end %>
 
     <button class="link-btn" type="button">Pagination</button>

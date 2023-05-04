@@ -1,4 +1,6 @@
 <section>
+<%= render "shared/header", current_user: @current_user %>
+
   <%= content_tag :h1, "Create a new post" %>
 
   <%= render "form", post: @post, user: @user %>

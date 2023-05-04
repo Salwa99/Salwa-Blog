@@ -10,6 +10,7 @@
   <div class="user-info">
     <h2><%= link_to user.name, user_path(user), id: "user-#{user.id}" %>
 </h2>
+  <span class="role-badge"><%= user.role || "member" %></span>
     <p>Number of Posts: <%= user.posts.count %></p>
   </div>
 </div>
