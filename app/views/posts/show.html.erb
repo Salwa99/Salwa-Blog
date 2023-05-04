@@ -1,3 +1,5 @@
+<%= render "shared/header", current_user: @current_user %>
+
 <%= content_tag :section do %>
   <%= content_tag :div, class: "main-container" do %>
     <%= content_tag :header do %>
@@ -6,6 +8,13 @@
         <%= content_tag :h3, "Author: #{link_to @post.author.name, user_path(@post.author)}".html_safe, class: "post-author" %>
         <%= content_tag :span, "Comments: #{@post.comments_counter || 0}" %>
         <%= content_tag :span, "Likes: #{@post.likes_counter || 0}" %>
+        <% if can? :destroy, @post %>
+  <%= content_tag :div, class: "post-btn-bar" do %>
+    <%= form_with model: [@current_user, @post], method: :delete do |f| %>
+      <%= f.submit "Delete", class: "btn warn-btn" %>
+    <% end %>
+  <% end %>
+<% end %>
       <% end %>
     <% end %>
     <%= content_tag :p, @post.text, class: "post-content" %>
