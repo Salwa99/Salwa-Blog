@@ -12,7 +12,8 @@ class Api::V1::PostsController < ApplicationController
     @post = @user.posts.find(params[:id])
     render json: @post
   end
-def create
+
+  def create
     @post = @user.posts.new(post_params)
     if @post.save
       render json: @post, status: :created
@@ -20,6 +21,7 @@ def create
       render json: { error: 'Failed to create post' }, status: :unprocessable_entity
     end
   end
+
   private
 
   def post_params
