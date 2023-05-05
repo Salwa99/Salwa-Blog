@@ -5,15 +5,19 @@ class CommentsController < ApplicationController
     @comment = Comment.new
   end
 
-def create
-  @comment = @post.comments.build(comment_params)
-  @comment.user = current_user
-  if @comment.save
-    render json: @comment, status: :created
-  else
-    render json: { error: 'Failed to create comment' }, status: :unprocessable_entity
+  def create
+    @post = Post.find(params[:post_id])
+    @comment = current_user.comments.build(comment_params)
+    @comment.post = @post
+
+    if @comment.save
+      flash[:success] = 'Comment created!'
+      redirect_to user_post_path(@post.author, @post)
+    else
+      flash[:error] = 'Comment not created'
+      render 'posts/show'
+    end
   end
-end
 
   def destroy
     @comment = Comment.find(params[:id])
