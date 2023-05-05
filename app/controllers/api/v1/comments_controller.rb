@@ -5,7 +5,15 @@ class Api::V1::CommentsController < ApplicationController
     @comments = @post.comments
     render json: @comments
   end
-
+ def create
+    @comment = current_user.comments.build(comment_params)
+    @comment.post = @post
+    if @comment.save
+      render json: @comment, status: :created
+    else
+      render json: { error: 'Failed to create comment' }, status: :unprocessable_entity
+    end
+  end
   private
 
   def comment_params
