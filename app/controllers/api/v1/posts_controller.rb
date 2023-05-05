@@ -13,14 +13,14 @@ class Api::V1::PostsController < ApplicationController
     render json: @post
   end
 
-def create
-  @post = @user.posts.build(post_params)
-  if @post.save
-    render json: @post, status: :created
-  else
-    render json: { error: @post.errors.full_messages.to_sentence }, status: :unprocessable_entity
+  def create
+    @post = @user.posts.build(post_params)
+    if @post.save
+      render json: @post, status: :created
+    else
+      render json: { error: @post.errors.full_messages.to_sentence }, status: :unprocessable_entity
+    end
   end
-end
 
   private
 
